@@ -79,7 +79,12 @@ const CourseBlock = ({ course }) => {
 
         <Programs>
           {course.huvudomrade.map((area) => (
-            <Program background={getBackgroundColor(area)}>{area}</Program>
+            <Program
+              key={area}
+              style={{ backgroundColor: getBackgroundColor(area) }}
+            >
+              {area}
+            </Program>
           ))}
         </Programs>
       </div>

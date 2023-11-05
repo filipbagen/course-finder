@@ -1,31 +1,66 @@
-// import
-import React from 'react';
+import { useState } from 'react';
+import DB from '../data/courses';
 import CourseBlock from './components/CourseBlock';
-import styled from 'styled-components';
+import Filter from './components/Filter';
 
-// data
-import courses from '../data/courses';
+const App = () => {
+  // Define all your filter types and their possible values
+  const filterOptions = {
+    termin: ['7', '8', '9'],
+    period: ['1', '2'],
+    block: ['1', '2', '3', '4'],
+    utbildningsniva: ['Grundnivå', 'Avancerad nivå'],
+    huvudomrade: ['Industriell ekonomi', 'Datavetenskap'],
+    studietakt: ['Halvfart', 'Helfart'],
+    ort: ['Norrköping', 'Linköping'],
+    // ... add new filter types here
+  };
 
-// styled components
-const CourseContainer = styled.div`
-  display: flex;
-  max-width: 1080px;
-  align-items: flex-start;
-  align-content: flex-start;
-  gap: 18px;
-  flex-wrap: wrap;
-`;
+  // Create a state object that will hold the selected values for each filter type
+  const [selectedFilters, setSelectedFilters] = useState(
+    Object.keys(filterOptions).reduce((acc, filterType) => {
+      acc[filterType] = [];
+      return acc;
+    }, {})
+  );
 
-function App() {
+  const handleFilterChange = (filterType) => (event) => {
+    const value = event.target.value;
+    setSelectedFilters((currentFilters) => {
+      const updatedFilters = currentFilters[filterType].includes(value)
+        ? currentFilters[filterType].filter((item) => item !== value)
+        : [...currentFilters[filterType], value];
+
+      return { ...currentFilters, [filterType]: updatedFilters };
+    });
+  };
+
+  // Filter logic that applies "OR" within the same category and "AND" across different categories
+  const filteredDB = DB.filter((course) =>
+    Object.entries(selectedFilters).every(
+      ([filterType, filterValues]) =>
+        filterValues.length === 0 ||
+        filterValues.some((value) => course[filterType]?.includes(value))
+    )
+  );
+
   return (
     <>
-      <CourseContainer>
-        {courses.map((course) => (
-          <CourseBlock course={course} key={course.kurskod} />
+      {Object.entries(filterOptions).map(([filterType, options]) => (
+        <Filter
+          key={filterType}
+          filterType={filterType}
+          filterValues={options}
+          handleFilterChange={handleFilterChange(filterType)}
+        />
+      ))}
+      <ul>
+        {filteredDB.map((course) => (
+          <CourseBlock key={course.kurskod} course={course} />
         ))}
-      </CourseContainer>
+      </ul>
     </>
   );
-}
+};
 
 export default App;
