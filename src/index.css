@@ -7,8 +7,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* color: rgba(0, 0, 0, 0.87); */
+  /* background-color: #242424; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -35,6 +35,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: white;
+  color: #1a1a1a;
 }
 
 h1 {
@@ -64,6 +66,36 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input[type='checkbox'] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #b3b3b3;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-appearance: none; /* Required for custom styles in some browsers */
+  -moz-appearance: none; /* Required for custom styles in some browsers */
+  appearance: none; /* Disable default styling */
+}
+
+input:checked {
+  background-color: #5ea3f3;
+  border: none;
+}
+
+input:checked::after {
+  content: '';
+  display: block;
+  position: relative;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 @media (prefers-color-scheme: light) {
