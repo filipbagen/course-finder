@@ -25,6 +25,12 @@ const SearchCourseSection = styled.div`
   width: 100%;
 `;
 
+const Test = styled.div`
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+`;
+
 /**
 
 const App = () => {
@@ -231,11 +237,14 @@ const App = () => {
   return (
     <>
       <Container>
-        <FilterPanelComponent
-          filterOptions={filterOptions}
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-        />
+        <Test>
+          <FilterPanelComponent
+            filterOptions={filterOptions}
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+          />
+        </Test>
+
         <SearchCourseSection>
           <SearchComponent onSearchChange={handleSearchChange} />
           <CourseList courses={filteredCourses} />
