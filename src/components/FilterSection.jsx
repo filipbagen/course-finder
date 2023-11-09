@@ -18,7 +18,7 @@ const Label = styled.label`
   gap: 8px;
 `;
 
-const Filter = ({ title, filterValues, handleFilterChange }) => {
+const FilterSection = ({ title, filterValues, handleFilterChange }) => {
   return (
     <Section>
       {title && <Title>{title}</Title>}
@@ -38,4 +38,4 @@ const Filter = ({ title, filterValues, handleFilterChange }) => {
   );
 };
 
-export default Filter;
+export default FilterSection;
