@@ -1,5 +1,3 @@
-import React from 'react';
-
 const filterCourses = (courses, searchString, selectedFilters) => {
   const searchLower = searchString.toLowerCase();
 
