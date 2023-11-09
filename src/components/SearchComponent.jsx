@@ -10,7 +10,7 @@ const Input = styled.input`
   border: none;
   outline: none;
   height: 26pt;
-  width: 240pt;
+  width: 100%;
   border-radius: 10pt;
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
 
@@ -22,7 +22,7 @@ const Input = styled.input`
 const SearchComponent = ({ onSearchChange }) => {
   return (
     <InputDiv>
-      <Input onChange={onSearchChange} placeholder="Search course..." />
+      <Input onChange={onSearchChange} placeholder="Search course" />
     </InputDiv>
   );
 };

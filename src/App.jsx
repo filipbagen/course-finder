@@ -14,6 +14,15 @@ import FilterPanelComponent from './components/FilterPanelComponent';
 const Container = styled.div`
   display: flex;
   align-items: flex-start;
+  gap: 38px;
+  width: 100vw;
+`;
+
+const SearchCourseSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+  width: 100%;
 `;
 
 /**
@@ -216,8 +225,6 @@ const App = () => {
     });
   };
 
-  // console.log(selectedFilters);
-
   // Assume this method filters the DB based on searchString and selectedFilters
   const filteredCourses = filterCourses(DB, searchString, selectedFilters);
 
@@ -229,8 +236,10 @@ const App = () => {
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
         />
-        <SearchComponent onSearchChange={handleSearchChange} />
-        <CourseList courses={filteredCourses} />
+        <SearchCourseSection>
+          <SearchComponent onSearchChange={handleSearchChange} />
+          <CourseList courses={filteredCourses} />
+        </SearchCourseSection>
       </Container>
     </>
   );

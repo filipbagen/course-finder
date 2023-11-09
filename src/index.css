@@ -37,6 +37,7 @@ body {
   min-height: 100vh;
   background-color: white;
   color: #1a1a1a;
+  margin: 0;
 }
 
 h1 {

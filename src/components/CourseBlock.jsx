@@ -5,17 +5,15 @@ import styled from 'styled-components';
 // styled components
 const Container = styled.div`
   display: flex;
-  /* flex-direction: column; */
-  width: 350px;
-  /* height: 165px; */
-  padding: 20px 28px;
+  height: 188px;
+  min-width: 320px;
+  max-width: 100%;
+  padding: 21px 29px;
   justify-content: space-between;
   align-items: flex-start;
-
+  flex: 1 0 0;
   border-radius: 8px;
   background: var(--White, #fff);
-
-  /* Box shadow */
   box-shadow: var(--box-shadow);
 `;
 

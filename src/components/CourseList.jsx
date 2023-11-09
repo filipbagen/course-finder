@@ -1,27 +1,37 @@
 import React from 'react';
 import styled from 'styled-components';
+
+// components
 import CourseBlock from './CourseBlock';
 
 const Courses = styled.div`
   display: flex;
+  width: 100%;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 18px;
   flex-wrap: wrap;
-  gap: 24px;
-  justify-content: center;
-  align-items: center;
-  max-width: 1200px;
+`;
+
+const SearchResults = styled.div`
+  margin: 0;
 `;
 
 const CourseList = ({ courses }) => {
-  // courses.forEach((course) => {
-  //   console.log(course.termin); // Do this for each property
-  // });
+  console.log(typeof courses);
 
   return (
-    <Courses>
-      {courses.map((course) => (
-        <CourseBlock key={course.kurskod} course={course} />
-      ))}
-    </Courses>
+    <>
+      <SearchResults>
+        Showing: <strong>{Object.keys(courses).length}</strong> search results
+      </SearchResults>
+
+      <Courses>
+        {courses.map((course) => (
+          <CourseBlock key={course.kurskod} course={course} />
+        ))}
+      </Courses>
+    </>
   );
 };
 
