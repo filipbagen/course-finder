@@ -27,6 +27,7 @@ const CourseView = styled.div`
 
 const SortContainer = styled.div`
   display: flex;
+  justify-content: center;
   gap: 10px;
 `;
 
@@ -45,10 +46,9 @@ const CourseList = ({ courses, setSortCriteria }) => {
         </p>
 
         <SortContainer>
-          <SortSection>
-            <p>Sort by:</p>
-            <SortingOptions onSortCriteriaChange={setSortCriteria} />
-          </SortSection>
+          {/* <SortSection> */}
+          <SortingOptions onSortCriteriaChange={setSortCriteria} />
+          {/* </SortSection> */}
 
           <CourseView>
             <img src="public/img/list_view.svg" alt="" />
