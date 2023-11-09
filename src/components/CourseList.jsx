@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 // components
@@ -18,8 +18,6 @@ const SearchResults = styled.div`
   display: flex;
   justify-content: space-between;
   margin: 0;
-
-  background-color: red;
 `;
 
 const CourseView = styled.div`
@@ -32,9 +30,13 @@ const SortContainer = styled.div`
   gap: 10px;
 `;
 
-const CourseList = ({ courses }) => {
-  const [sortCriteria, setSortCriteria] = useState('Alphabetical'); // default sorting criteria
+const SortSection = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
 
+const CourseList = ({ courses, setSortCriteria }) => {
   return (
     <>
       <SearchResults>
@@ -43,10 +45,10 @@ const CourseList = ({ courses }) => {
         </p>
 
         <SortContainer>
-          <div>
+          <SortSection>
             <p>Sort by:</p>
-            {/* <SortingOptions onSortCriteriaChange={setSortCriteria} /> */}
-          </div>
+            <SortingOptions onSortCriteriaChange={setSortCriteria} />
+          </SortSection>
 
           <CourseView>
             <img src="public/img/list_view.svg" alt="" />

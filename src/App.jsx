@@ -4,12 +4,14 @@ import styled from 'styled-components';
 // data
 import DB from '../data/courses';
 
+// function
+import sortCourses from './functions/sortCourses';
+
 // components
 import CourseList from './components/CourseList';
 import filterCourses from './components/filterCourses';
 import SearchComponent from './components/SearchComponent';
 import FilterPanelComponent from './components/FilterPanelComponent';
-import SortingOptions from './components/SortingOptions';
 
 // styled
 const Container = styled.div`
@@ -33,35 +35,7 @@ const Test = styled.div`
 `;
 
 const App = () => {
-  // functions
-  const sortCourses = (courses, sortCriteria) => {
-    // Make a shallow copy of the courses array to sort
-    let sortedCourses = [...courses];
-
-    switch (sortCriteria) {
-      case 'Alphabetical':
-        sortedCourses.sort((a, b) => a.kursnamn.localeCompare(b.kursnamn));
-        break;
-
-      case 'ReverseAlphabetical':
-        sortedCourses.sort((a, b) => b.kursnamn.localeCompare(a.kursnamn));
-        break;
-
-      case 'Course Coode':
-        sortedCourses.sort((a, b) => a.kurskod.localeCompare(b.kurskod));
-        break;
-
-      case 'Course Code Reverse':
-        sortedCourses.sort((a, b) => b.kurskod.localeCompare(a.kurskod));
-        break;
-
-      default:
-        break;
-    }
-
-    return sortedCourses;
-  };
-
+  // state
   const [searchString, setSearchString] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({}); // assume initial state is set
   const [sortCriteria, setSortCriteria] = useState('Alphabetical'); // default sorting criteria
@@ -126,8 +100,11 @@ const App = () => {
 
         <SearchCourseSection>
           <SearchComponent onSearchChange={handleSearchChange} />
-          <SortingOptions onSortCriteriaChange={setSortCriteria} />
-          <CourseList courses={filteredCourses && sortedCourses} />
+          <CourseList
+            courses={filteredCourses && sortedCourses}
+            sortCriteria={sortCriteria}
+            setSortCriteria={setSortCriteria}
+          />
         </SearchCourseSection>
       </Container>
     </>

@@ -5,6 +5,7 @@ const SortingOptions = ({ onSortCriteriaChange }) => {
     <select
       onChange={(e) => onSortCriteriaChange(e.target.value)}
       defaultValue="Alphabetical"
+      value={'Alphabetical'}
     >
       <option value="Alphabetical">Alphabetical</option>
       <option value="ReverseAlphabetical">Reverse Alphabetical</option>
