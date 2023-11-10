@@ -12,18 +12,27 @@ import CourseList from './components/CourseList';
 import filterCourses from './components/filterCourses';
 import SearchComponent from './components/SearchComponent';
 import FilterPanelComponent from './components/FilterPanelComponent';
+import Navigation from './components/Navigation';
 
 // styled
 const Container = styled.div`
   width: 100vw;
 `;
 
+const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: auto 52px;
+  gap: 52px;
+`;
+
 const Data = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 38px;
-  margin: auto 52px;
 `;
+
+const NavBar = styled.div``;
 
 const SearchCourseSection = styled.div`
   display: flex;
@@ -88,26 +97,33 @@ const App = () => {
   return (
     <>
       <Container>
-        <Data>
-          {/* Filter panel */}
-          <FilterPanelComponent
-            filterOptions={filterOptions}
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-          />
+        <Info>
+          {/* Nav bar */}
+          <NavBar>
+            <Navigation />
+          </NavBar>
 
-          <SearchCourseSection>
-            {/* Search bar and sorting */}
-            <SearchComponent onSearchChange={handleSearchChange} />
-
-            {/* Courses */}
-            <CourseList
-              courses={filteredCourses && sortedCourses}
-              sortCriteria={sortCriteria}
-              setSortCriteria={setSortCriteria}
+          <Data>
+            {/* Filter panel */}
+            <FilterPanelComponent
+              filterOptions={filterOptions}
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
             />
-          </SearchCourseSection>
-        </Data>
+
+            <SearchCourseSection>
+              {/* Search bar and sorting */}
+              <SearchComponent onSearchChange={handleSearchChange} />
+
+              {/* Courses */}
+              <CourseList
+                courses={filteredCourses && sortedCourses}
+                sortCriteria={sortCriteria}
+                setSortCriteria={setSortCriteria}
+              />
+            </SearchCourseSection>
+          </Data>
+        </Info>
       </Container>
     </>
   );
