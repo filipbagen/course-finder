@@ -7,11 +7,10 @@ import SortingOptions from './SortingOptions';
 
 const Courses = styled.div`
   display: flex;
-  width: 100%;
-  align-items: flex-start;
-  align-content: flex-start;
   gap: 18px;
-  flex-wrap: wrap;
+  width: 100%;
+
+  background-color: blue;
 `;
 
 const SearchResults = styled.div`
@@ -20,9 +19,13 @@ const SearchResults = styled.div`
   margin: 0;
 `;
 
-const CourseView = styled.div`
+const ViewOptions = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 16px;
+
+  img {
+    transition: 0.2s;
+  }
 `;
 
 const SortContainer = styled.div`
@@ -31,13 +34,19 @@ const SortContainer = styled.div`
   gap: 10px;
 `;
 
-const SortSection = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-`;
+import { useState } from 'react';
 
 const CourseList = ({ courses, setSortCriteria }) => {
+  const [isListView, setIsListView] = useState(false);
+
+  const handleListViewClick = () => {
+    setIsListView(true);
+  };
+
+  const handleGridViewClick = () => {
+    setIsListView(false);
+  };
+
   return (
     <>
       <SearchResults>
@@ -46,20 +55,43 @@ const CourseList = ({ courses, setSortCriteria }) => {
         </p>
 
         <SortContainer>
-          {/* <SortSection> */}
           <SortingOptions onSortCriteriaChange={setSortCriteria} />
-          {/* </SortSection> */}
 
-          <CourseView>
-            <img src="public/img/list_view.svg" alt="" />
-            <img src="public/img/grid_view.svg" alt="" />
-          </CourseView>
+          <ViewOptions>
+            <img
+              src="img/list_view.svg"
+              alt=""
+              onClick={handleListViewClick}
+              style={{
+                filter: isListView ? 'brightness(0.5)' : 'brightness(1)',
+                cursor: 'pointer',
+              }}
+            />
+            <img
+              src="img/grid_view.svg"
+              alt=""
+              onClick={handleGridViewClick}
+              style={{
+                filter: !isListView ? 'brightness(0.5)' : 'brightness(1)',
+                cursor: 'pointer',
+              }}
+            />
+          </ViewOptions>
         </SortContainer>
       </SearchResults>
 
-      <Courses>
+      <Courses
+        style={{
+          flexDirection: isListView ? 'column' : 'row',
+          flexWrap: isListView ? 'nowrap' : 'wrap',
+        }}
+      >
         {courses.map((course) => (
-          <CourseBlock key={course.kurskod} course={course} />
+          <CourseBlock
+            isListView={isListView}
+            key={course.kurskod}
+            course={course}
+          />
         ))}
       </Courses>
     </>

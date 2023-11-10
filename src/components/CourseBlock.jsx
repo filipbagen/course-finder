@@ -4,17 +4,24 @@ import styled from 'styled-components';
 
 // styled components
 const Container = styled.div`
-  display: flex;
-  height: 188px;
-  min-width: 320px;
-  max-width: 100%;
-  padding: 21px 29px;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex: 1 0 0;
   border-radius: 8px;
   background: var(--White, #fff);
   box-shadow: var(--box-shadow);
+
+  min-width: 320px;
+  flex: 1;
+`;
+
+const Content = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 21px 29px;
+
+  height: 188px;
+  width: 100%;
+  min-width: 320px;
+  /* max-width: 100%; */
 `;
 
 const Pin = styled.img`
@@ -43,7 +50,7 @@ const Programs = styled.div`
   gap: 10px;
 `;
 
-const CourseBlock = ({ course }) => {
+const CourseBlock = ({ course, isListView }) => {
   const areaColors = {
     Medieteknik: '#E99870',
     Datateknik: '#A6C9E1',
@@ -58,36 +65,38 @@ const CourseBlock = ({ course }) => {
   const getBackgroundColor = (area) => areaColors[area] || '#e99870'; // default color if area not found
 
   return (
-    <Container>
-      <div>
+    <Container style={{ width: isListView ? '100%' : 'auto' }}>
+      <Content>
         <div>
-          <h1>{course.kursnamn}</h1>
-          <div>{course.kurskod}</div>
+          <div>
+            <h1>{course.kursnamn}</h1>
+            <div>{course.kurskod}</div>
+          </div>
+
+          <Location>
+            <Pin src="img/pin.svg" alt="Pin" />
+            <div>{course.ort}</div>
+          </Location>
+
+          <div>
+            <div>Block {course.block}</div>
+            <div>{course.utbildningsniva}</div>
+          </div>
+
+          <Programs>
+            {course.huvudomrade.map((area) => (
+              <Program
+                key={area}
+                style={{ backgroundColor: getBackgroundColor(area) }}
+              >
+                {area}
+              </Program>
+            ))}
+          </Programs>
         </div>
 
-        <Location>
-          <Pin src="img/pin.svg" alt="Pin" />
-          <div>{course.ort}</div>
-        </Location>
-
-        <div>
-          <div>Block {course.block}</div>
-          <div>{course.utbildningsniva}</div>
-        </div>
-
-        <Programs>
-          {course.huvudomrade.map((area) => (
-            <Program
-              key={area}
-              style={{ backgroundColor: getBackgroundColor(area) }}
-            >
-              {area}
-            </Program>
-          ))}
-        </Programs>
-      </div>
-
-      <img src="img/add.svg" alt="" />
+        <img src="img/add.svg" alt="" />
+      </Content>
     </Container>
   );
 };
