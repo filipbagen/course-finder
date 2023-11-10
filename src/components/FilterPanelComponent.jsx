@@ -15,6 +15,10 @@ const FilterPanel = styled.div`
 
   /* Box shadow */
   box-shadow: var(--box-shadow);
+
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
 `;
 
 // components

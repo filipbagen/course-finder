@@ -15,23 +15,21 @@ import FilterPanelComponent from './components/FilterPanelComponent';
 
 // styled
 const Container = styled.div`
+  width: 100vw;
+`;
+
+const Data = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 38px;
-  width: 100vw;
+  margin: auto 52px;
 `;
 
 const SearchCourseSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 38px;
+  gap: 12px;
   width: 100%;
-`;
-
-const Test = styled.div`
-  position: -webkit-sticky; /* Safari */
-  position: sticky;
-  top: 0;
 `;
 
 const App = () => {
@@ -90,22 +88,26 @@ const App = () => {
   return (
     <>
       <Container>
-        <Test>
+        <Data>
+          {/* Filter panel */}
           <FilterPanelComponent
             filterOptions={filterOptions}
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
           />
-        </Test>
 
-        <SearchCourseSection>
-          <SearchComponent onSearchChange={handleSearchChange} />
-          <CourseList
-            courses={filteredCourses && sortedCourses}
-            sortCriteria={sortCriteria}
-            setSortCriteria={setSortCriteria}
-          />
-        </SearchCourseSection>
+          <SearchCourseSection>
+            {/* Search bar and sorting */}
+            <SearchComponent onSearchChange={handleSearchChange} />
+
+            {/* Courses */}
+            <CourseList
+              courses={filteredCourses && sortedCourses}
+              sortCriteria={sortCriteria}
+              setSortCriteria={setSortCriteria}
+            />
+          </SearchCourseSection>
+        </Data>
       </Container>
     </>
   );

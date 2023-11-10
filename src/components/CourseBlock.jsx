@@ -66,7 +66,7 @@ const CourseBlock = ({ course }) => {
         </div>
 
         <Location>
-          <Pin src="public/img/pin.svg" alt="Pin" />
+          <Pin src="img/pin.svg" alt="Pin" />
           <div>{course.ort}</div>
         </Location>
 
@@ -87,7 +87,7 @@ const CourseBlock = ({ course }) => {
         </Programs>
       </div>
 
-      <img src="public/img/add.svg" alt="" />
+      <img src="img/add.svg" alt="" />
     </Container>
   );
 };

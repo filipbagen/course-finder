@@ -40,6 +40,14 @@ body {
   margin: 0;
 }
 
+/* Dark mode */
+/* @media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1f2023;
+    color: #dadada;
+  }
+} */
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

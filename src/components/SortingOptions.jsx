@@ -11,7 +11,7 @@ const Test = styled.div`
 const customStyles = {
   control: (provided) => ({
     ...provided,
-    width: 220, // You can set the width to any value you like
+    width: '100%', // You can set the width to any value you like
   }),
   // You can add more custom styles if needed for other parts of the Select
 };
