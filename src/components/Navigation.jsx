@@ -6,6 +6,10 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   margin-top: 68px;
+
+  /* position: -webkit-sticky;
+  position: sticky;
+  top: 0; */
 `;
 
 const Logo = styled.img`

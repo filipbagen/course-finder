@@ -4,8 +4,8 @@ import styled from 'styled-components';
 // style
 const FilterPanel = styled.div`
   display: flex;
-  width: 220px;
-  padding: 18px 28px;
+  /* width: 220px; */
+  padding: 18px 48px;
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;

@@ -17,11 +17,7 @@ const Content = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   padding: 21px 29px;
-
   height: 188px;
-  width: 100%;
-  min-width: 320px;
-  /* max-width: 100%; */
 `;
 
 const Pin = styled.img`

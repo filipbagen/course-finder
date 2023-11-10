@@ -9,13 +9,12 @@ const Courses = styled.div`
   display: flex;
   gap: 18px;
   width: 100%;
-
-  background-color: blue;
 `;
 
 const SearchResults = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0;
 `;
 
