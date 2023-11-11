@@ -14,6 +14,10 @@ import SearchComponent from './components/SearchComponent';
 import FilterPanelComponent from './components/FilterPanelComponent';
 import Navigation from './components/Navigation';
 
+import Login from './login';
+
+import { AuthProvider } from './contexts/AuthContext';
+
 // styled
 const Container = styled.div`
   width: 100vw;
@@ -96,15 +100,14 @@ const App = () => {
 
   return (
     <>
+      <Login />
       <Container>
         <Info>
-          {/* Nav bar */}
           <NavBar>
             <Navigation />
           </NavBar>
 
           <Data>
-            {/* Filter panel */}
             <FilterPanelComponent
               filterOptions={filterOptions}
               selectedFilters={selectedFilters}
@@ -112,10 +115,8 @@ const App = () => {
             />
 
             <SearchCourseSection>
-              {/* Search bar and sorting */}
               <SearchComponent onSearchChange={handleSearchChange} />
 
-              {/* Courses */}
               <CourseList
                 courses={filteredCourses && sortedCourses}
                 sortCriteria={sortCriteria}
