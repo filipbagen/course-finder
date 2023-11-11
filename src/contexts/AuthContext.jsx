@@ -15,30 +15,30 @@ export function AuthProvider({ children }) {
     return auth.createUserWithEmailAndPassword(email, password); // Talk with firebase
   }
 
-  function login(email, password) {
-    return auth.signInWithEmailAndPassword(email, password); // Talk with firebase
-  }
+  //   function login(email, password) {
+  //     return auth.signInWithEmailAndPassword(email, password); // Talk with firebase
+  //   }
 
-  function logout() {
-    return auth.signOut(); // Talk with firebase
-  }
+  //   function logout() {
+  //     return auth.signOut(); // Talk with firebase
+  //   }
 
-  function resetPassword(email) {
-    return auth.sendPasswordResetEmail(email);
-  }
+  //   function resetPassword(email) {
+  //     return auth.sendPasswordResetEmail(email);
+  //   }
 
-  function updateEmail(email) {
-    return currentUser.updateEmail(email);
-  }
+  //   function updateEmail(email) {
+  //     return currentUser.updateEmail(email);
+  //   }
 
-  function updatePassword(password) {
-    return currentUser.updatePassword(password);
-  }
+  //   function updatePassword(password) {
+  //     return currentUser.updatePassword(password);
+  //   }
 
-  // Testing
-  function displayName(company) {
-    return currentUser.displayName(company);
-  }
+  //   // Testing
+  //   function displayName(company) {
+  //     return currentUser.displayName(company);
+  //   }
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -51,14 +51,14 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    login,
-    logout,
+    // login,
+    // logout,
     signup,
-    resetPassword,
-    updateEmail,
-    updatePassword,
+    // resetPassword,
+    // updateEmail,
+    // updatePassword,
 
-    displayName,
+    // displayName,
   };
 
   return (
