@@ -4,9 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-
 import { db } from '../firebase';
 
 export default function Signup() {
@@ -17,8 +14,6 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  //   const db = firebase.firestore();
 
   async function handleSubmit(e) {
     e.preventDefault();
