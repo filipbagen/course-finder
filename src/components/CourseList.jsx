@@ -1,39 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 // components
 import CourseBlock from './CourseBlock';
 import SortingOptions from './SortingOptions';
-
-const Courses = styled.div`
-  display: flex;
-  gap: 18px;
-  width: 100%;
-`;
-
-const SearchResults = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0;
-`;
-
-const ViewOptions = styled.div`
-  display: flex;
-  gap: 16px;
-
-  img {
-    transition: 0.2s;
-  }
-`;
-
-const SortContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-`;
-
-import { useState } from 'react';
 
 const CourseList = ({ courses, setSortCriteria }) => {
   const [isListView, setIsListView] = useState(false);
@@ -98,3 +68,32 @@ const CourseList = ({ courses, setSortCriteria }) => {
 };
 
 export default CourseList;
+
+// style
+const Courses = styled.div`
+  display: flex;
+  gap: 18px;
+  width: 100%;
+`;
+
+const SearchResults = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+`;
+
+const ViewOptions = styled.div`
+  display: flex;
+  gap: 16px;
+
+  img {
+    transition: 0.2s;
+  }
+`;
+
+const SortContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+`;

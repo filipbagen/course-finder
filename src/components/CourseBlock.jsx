@@ -3,7 +3,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
 
 const CourseBlock = ({ course, isListView }) => {
@@ -28,8 +27,6 @@ const CourseBlock = ({ course, isListView }) => {
       console.error('No user is signed in.');
       return;
     }
-
-    console.log('Current user ID: ', currentUser.uid);
 
     try {
       // Reference to the user's document

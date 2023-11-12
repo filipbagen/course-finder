@@ -6,36 +6,13 @@ import DB from '../../data/courses';
 
 // function
 import sortCourses from '../functions/sortCourses';
-import filterCourses from './filterCourses';
+import filterCourses from '../functions/filterCourses';
 
 // components
 import CourseList from '../components/CourseList';
 import SearchComponent from '../components/SearchComponent';
 import FilterPanelComponent from '../components/FilterPanelComponent';
 import Navigation from '../components/Navigation';
-
-// styled
-const Info = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: auto 52px;
-  gap: 52px;
-`;
-
-const Data = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 38px;
-`;
-
-const NavBar = styled.div``;
-
-const SearchCourseSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-`;
 
 const CourseBrowser = () => {
   // state
@@ -92,9 +69,7 @@ const CourseBrowser = () => {
 
   return (
     <Info>
-      <NavBar>
-        <Navigation />
-      </NavBar>
+      <Navigation />
 
       <Data>
         <FilterPanelComponent
@@ -118,3 +93,26 @@ const CourseBrowser = () => {
 };
 
 export default CourseBrowser;
+
+// styled
+const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 52px;
+  gap: 52px;
+  max-width: 1440px;
+  width: calc(100% - 100px);
+`;
+
+const Data = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 38px;
+`;
+
+const SearchCourseSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+`;

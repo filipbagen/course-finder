@@ -1,6 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
 
+const SearchComponent = ({ onSearchChange }) => {
+  return (
+    <InputDiv>
+      <Input onChange={onSearchChange} placeholder="Search course" />
+    </InputDiv>
+  );
+};
+
+export default SearchComponent;
+
 // style
 const InputDiv = styled.div`
   text-align: center;
@@ -18,13 +28,3 @@ const Input = styled.input`
     margin-left: 10pt;
   }
 `;
-
-const SearchComponent = ({ onSearchChange }) => {
-  return (
-    <InputDiv>
-      <Input onChange={onSearchChange} placeholder="Search course" />
-    </InputDiv>
-  );
-};
-
-export default SearchComponent;

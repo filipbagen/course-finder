@@ -5,12 +5,37 @@ const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 68px;
+  /* margin-top: 68px; */
 
   /* position: -webkit-sticky;
   position: sticky;
   top: 0; */
 `;
+
+const Navigation = () => {
+  return (
+    <Nav>
+      <Logo src="img/logo.png" alt="Logo" />
+
+      <NavLinks>
+        <NavLink>Courses</NavLink>
+        <NavLink>Schedule</NavLink>
+      </NavLinks>
+
+      <div>
+        <ProfileButton>My Profile</ProfileButton>
+
+        <LanguageSelector>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </LanguageSelector>
+      </div>
+    </Nav>
+  );
+};
+
+export default Navigation;
 
 const Logo = styled.img`
   height: 100%;
@@ -56,28 +81,3 @@ const LanguageSelector = styled.select`
   border-radius: 5px;
   cursor: pointer;
 `;
-
-const Navigation = () => {
-  return (
-    <Nav>
-      <Logo src="img/logo.png" alt="Logo" />
-
-      <NavLinks>
-        <NavLink>Courses</NavLink>
-        <NavLink>Schedule</NavLink>
-      </NavLinks>
-
-      <div>
-        <ProfileButton>My Profile</ProfileButton>
-
-        <LanguageSelector>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-        </LanguageSelector>
-      </div>
-    </Nav>
-  );
-};
-
-export default Navigation;

@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import firebase from 'firebase/compat/app';
 
 import { db } from '../firebase';
 
