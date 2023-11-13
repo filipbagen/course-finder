@@ -32,11 +32,12 @@ export default FilterPanelComponent;
 // style
 const FilterPanel = styled.div`
   display: flex;
-  /* width: 220px; */
-  padding: 18px 48px;
   flex-direction: column;
+  padding: 18px 34px;
   align-items: flex-start;
-  gap: 24px;
+  gap: 18px;
+
+  width: 220px;
 
   border-radius: 8px;
   background: var(--White, #fff);

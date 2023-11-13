@@ -9,11 +9,13 @@ import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
 import Signup from './components/SignUp';
 import { AuthProvider } from './contexts/AuthContext';
+import Schedule from './components/Schedule';
 
 const App = () => {
   return (
     <>
       {/* <Login /> */}
+      {/* TODO: add mainLayout */}
       <Container>
         <Router>
           <AuthProvider>
@@ -23,6 +25,15 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <CourseBrowser />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/schedule"
+                element={
+                  <PrivateRoute>
+                    <Schedule />
                   </PrivateRoute>
                 }
               />

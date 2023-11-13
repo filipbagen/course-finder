@@ -50,6 +50,7 @@ const CourseList = ({ courses, setSortCriteria }) => {
       </SearchResults>
 
       <Courses
+        className="courses"
         style={{
           flexDirection: isListView ? 'column' : 'row',
           flexWrap: isListView ? 'nowrap' : 'wrap',
@@ -73,7 +74,6 @@ export default CourseList;
 const Courses = styled.div`
   display: flex;
   gap: 18px;
-  width: 100%;
 `;
 
 const SearchResults = styled.div`
