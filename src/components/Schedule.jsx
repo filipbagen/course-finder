@@ -3,6 +3,9 @@ import firebase from 'firebase/compat/app';
 import { useAuth } from '../contexts/AuthContext';
 import styled from 'styled-components';
 
+// Components
+import MainLayout from './MainLayout';
+
 const Schedule = () => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
@@ -25,7 +28,14 @@ const Schedule = () => {
       console.log('Error getting courses array: ', error);
     });
 
-  return <div>Schedule</div>;
+  return (
+    <MainLayout>
+      <div>
+        <h1>Schedule</h1>
+        <p>Here you can see your schedule</p>
+      </div>
+    </MainLayout>
+  );
 };
 
 export default Schedule;

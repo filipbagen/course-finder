@@ -1,16 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
-const Nav = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  /* margin-top: 68px; */
-
-  /* position: -webkit-sticky;
-  position: sticky;
-  top: 0; */
-`;
+import { Link } from 'react-router-dom';
 
 const Navigation = () => {
   return (
@@ -18,8 +8,12 @@ const Navigation = () => {
       <Logo src="img/logo.png" alt="Logo" />
 
       <NavLinks>
-        <NavLink>Courses</NavLink>
-        <NavLink>Schedule</NavLink>
+        <NavLink as={Link} to="/">
+          Home
+        </NavLink>
+        <NavLink as={Link} to="/schedule">
+          Schedule
+        </NavLink>
       </NavLinks>
 
       <div>
@@ -36,6 +30,21 @@ const Navigation = () => {
 };
 
 export default Navigation;
+
+const Nav = styled.nav`
+  box-sizing: border-box;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 58px;
+
+  /* position: -webkit-sticky;
+  position: sticky;
+  top: 0; */
+`;
 
 const Logo = styled.img`
   height: 100%;

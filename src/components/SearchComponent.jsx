@@ -20,6 +20,7 @@ const Input = styled.input`
   border: none;
   outline: none;
   height: 26pt;
+  box-sizing: border-box;
   width: 100%;
   border-radius: 10pt;
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);

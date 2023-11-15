@@ -12,7 +12,7 @@ import filterCourses from '../functions/filterCourses';
 import CourseList from '../components/CourseList';
 import SearchComponent from '../components/SearchComponent';
 import FilterPanelComponent from '../components/FilterPanelComponent';
-import Navigation from '../components/Navigation';
+import MainLayout from '../components/MainLayout';
 
 const CourseBrowser = () => {
   // state
@@ -68,9 +68,7 @@ const CourseBrowser = () => {
   const sortedCourses = sortCourses(filteredCourses, sortCriteria);
 
   return (
-    <Info>
-      <Navigation />
-
+    <MainLayout>
       <Data>
         <FilterPanelComponent
           filterOptions={filterOptions}
@@ -88,22 +86,13 @@ const CourseBrowser = () => {
           />
         </SearchCourseSection>
       </Data>
-    </Info>
+    </MainLayout>
   );
 };
 
 export default CourseBrowser;
 
 // styled
-const Info = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: 52px;
-  gap: 52px;
-  max-width: 1440px;
-  width: calc(100% - 100px);
-`;
-
 const Data = styled.div`
   display: flex;
   align-items: flex-start;
@@ -111,8 +100,8 @@ const Data = styled.div`
 `;
 
 const SearchCourseSection = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 100%;
 `;
