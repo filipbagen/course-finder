@@ -97,6 +97,7 @@ const Data = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 38px;
+  width: 100%;
 `;
 
 const SearchCourseSection = styled.div`

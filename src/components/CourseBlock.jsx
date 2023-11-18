@@ -91,6 +91,7 @@ const Container = styled.div`
   box-shadow: var(--box-shadow);
 
   min-width: 320px;
+  width: 100%;
   flex: 1;
 `;
 

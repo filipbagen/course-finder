@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 // components
@@ -6,7 +6,21 @@ import CourseBlock from './CourseBlock';
 import SortingOptions from './SortingOptions';
 
 const CourseList = ({ courses, setSortCriteria }) => {
-  const [isListView, setIsListView] = useState(false);
+  const [isListView, setIsListView] = useState(window.innerWidth <= 960);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsListView(window.innerWidth <= 960); // Update based on window width
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Automatically switch to list view if 1 or fewer courses
+    setIsListView(courses.length <= 1);
+  }, [courses]);
 
   const handleListViewClick = () => {
     setIsListView(true);
@@ -56,13 +70,17 @@ const CourseList = ({ courses, setSortCriteria }) => {
           flexWrap: isListView ? 'nowrap' : 'wrap',
         }}
       >
-        {courses.map((course) => (
-          <CourseBlock
-            isListView={isListView}
-            key={course.kurskod}
-            course={course}
-          />
-        ))}
+        {courses.length > 0 ? (
+          courses.map((course) => (
+            <CourseBlock
+              isListView={isListView}
+              key={course.kurskod}
+              course={course}
+            />
+          ))
+        ) : (
+          <div>No courses found.</div>
+        )}
       </Courses>
     </>
   );

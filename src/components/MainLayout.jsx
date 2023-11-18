@@ -21,13 +21,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 52px;
-
-  /* width: 100%; */
-  /* max-width: 1440px; */
-  /* min-width: 780px; */
-  /* width: calc(100% - 100px); */
-
-  width: min(100% - 2rem, 1440px);
+  width: min(100% - 120px, 1440px);
   margin-inline: auto;
 `;
 
@@ -35,4 +29,5 @@ const MainContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 `;
