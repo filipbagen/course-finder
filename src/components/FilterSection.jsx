@@ -1,23 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// styled components
-const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const Title = styled.h3`
-  margin: 0;
-`;
-
-const Label = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
 const FilterSection = ({ title, filterValues, handleFilterChange }) => {
   return (
     <Section>
@@ -39,3 +22,21 @@ const FilterSection = ({ title, filterValues, handleFilterChange }) => {
 };
 
 export default FilterSection;
+
+// styled components
+const Section = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+`;
+
+const Title = styled.h3`
+  margin: 0;
+`;
+
+const Label = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;

@@ -1,11 +1,45 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+
+const Navigation = () => {
+  return (
+    <Nav>
+      <Logo src="img/logo.png" alt="Logo" />
+
+      <NavLinks>
+        <NavLink as={Link} to="/">
+          Home
+        </NavLink>
+        <NavLink as={Link} to="/schedule">
+          Schedule
+        </NavLink>
+      </NavLinks>
+
+      <div>
+        <ProfileButton>My Profile</ProfileButton>
+
+        <LanguageSelector>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </LanguageSelector>
+      </div>
+    </Nav>
+  );
+};
+
+export default Navigation;
 
 const Nav = styled.nav`
+  box-sizing: border-box;
+  width: 100%;
+
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
-  margin-top: 68px;
+  justify-content: space-between;
+  margin-top: 58px;
 
   /* position: -webkit-sticky;
   position: sticky;
@@ -56,28 +90,3 @@ const LanguageSelector = styled.select`
   border-radius: 5px;
   cursor: pointer;
 `;
-
-const Navigation = () => {
-  return (
-    <Nav>
-      <Logo src="img/logo.png" alt="Logo" />
-
-      <NavLinks>
-        <NavLink>Courses</NavLink>
-        <NavLink>Schedule</NavLink>
-      </NavLinks>
-
-      <div>
-        <ProfileButton>My Profile</ProfileButton>
-
-        <LanguageSelector>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-        </LanguageSelector>
-      </div>
-    </Nav>
-  );
-};
-
-export default Navigation;

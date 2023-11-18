@@ -1,26 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// style
-const FilterPanel = styled.div`
-  display: flex;
-  /* width: 220px; */
-  padding: 18px 48px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 24px;
-
-  border-radius: 8px;
-  background: var(--White, #fff);
-
-  /* Box shadow */
-  box-shadow: var(--box-shadow);
-
-  position: -webkit-sticky; /* Safari */
-  position: sticky;
-  top: 0;
-`;
-
 // components
 import FilterSection from './FilterSection';
 
@@ -48,3 +28,24 @@ const FilterPanelComponent = ({
 };
 
 export default FilterPanelComponent;
+
+// style
+const FilterPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 18px 34px;
+  align-items: flex-start;
+  gap: 18px;
+
+  width: 220px;
+
+  border-radius: 8px;
+  background: var(--White, #fff);
+
+  /* Box shadow */
+  box-shadow: var(--box-shadow);
+
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+`;
