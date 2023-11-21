@@ -20,6 +20,12 @@ const Schedule = () => {
     return data.find((course) => course.kurskod === code);
   };
 
+  const handleCourseDelete = (deletedCourseCode) => {
+    setCoursesArray((prevCourses) =>
+      prevCourses.filter((course) => course !== deletedCourseCode)
+    );
+  };
+
   const [coursesArray, setCoursesArray] = useState([]);
 
   useEffect(() => {
@@ -76,22 +82,22 @@ const Schedule = () => {
           <Column>
             <h2>Semester 1</h2>
             <p>Period 1</p>
-            {coursesArray.map((course) => (
+            {/* {coursesArray.map((course) => (
               <CourseBlock
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
               />
-            ))}
+            ))} */}
 
             <p>Period 2</p>
-            {coursesArray.map((course) => (
+            {/* {coursesArray.map((course) => (
               <CourseBlock
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
               />
-            ))}
+            ))} */}
           </Column>
 
           <Column>
@@ -102,38 +108,39 @@ const Schedule = () => {
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
+                onDeleteCourse={handleCourseDelete}
               />
             ))}
 
             <p>Period 2</p>
-            {coursesArray.map((course) => (
+            {/* {coursesArray.map((course) => (
               <CourseBlock
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
               />
-            ))}
+            ))} */}
           </Column>
 
           <Column>
             <h2>Semester 3</h2>
             <p>Period 1</p>
-            {coursesArray.map((course) => (
+            {/* {coursesArray.map((course) => (
               <CourseBlock
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
               />
-            ))}
+            ))} */}
 
             <p>Period 2</p>
-            {coursesArray.map((course) => (
+            {/* {coursesArray.map((course) => (
               <CourseBlock
                 key={course}
                 course={getCourseDetails(course)}
                 isListView={false}
               />
-            ))}
+            ))} */}
           </Column>
         </Container>
       </div>

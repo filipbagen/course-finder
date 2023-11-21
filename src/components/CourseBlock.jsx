@@ -3,9 +3,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
+import { arrayUnion, doc, updateDoc, arrayRemove } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
 
-const CourseBlock = ({ course, isListView }) => {
+const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
 
@@ -21,8 +21,6 @@ const CourseBlock = ({ course, isListView }) => {
   };
 
   const addCourseToSchedule = async () => {
-    console.log('Button clicked');
-
     if (!currentUser) {
       console.error('No user is signed in.');
       return;
@@ -40,6 +38,29 @@ const CourseBlock = ({ course, isListView }) => {
       console.log('Course added to schedule!');
     } catch (error) {
       console.error('Error adding course to schedule: ', error);
+    }
+  };
+
+  const deleteCourse = async (courseCode) => {
+    if (!currentUser) {
+      console.error('No user is signed in.');
+      return;
+    }
+
+    try {
+      // Reference to the user's document
+      const userDocRef = doc(db, 'users', currentUser.uid);
+
+      // Update the 'courses' array field in the user's document
+      await updateDoc(userDocRef, {
+        courses: arrayRemove(courseCode),
+      });
+
+      onDeleteCourse(courseCode);
+
+      console.log('Course removed from schedule!');
+    } catch (error) {
+      console.error('Error removing course from schedule: ', error);
     }
   };
 
@@ -77,6 +98,7 @@ const CourseBlock = ({ course, isListView }) => {
         </div>
 
         <Add onClick={addCourseToSchedule} src="img/add.svg" alt="Add Course" />
+        <Delete onClick={() => deleteCourse(course.kurskod)}>X</Delete>
       </Content>
     </Container>
   );
@@ -131,4 +153,18 @@ const Programs = styled.div`
 
 const Add = styled.img`
   cursor: pointer;
+`;
+
+const Delete = styled.div`
+  cursor: pointer;
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  background-color: red;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: white;
 `;
