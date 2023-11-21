@@ -12,6 +12,7 @@ const FilterSection = ({ title, filterValues, handleFilterChange }) => {
             type="checkbox"
             onChange={(event) => handleFilterChange(event)} // Pass the event to the handler
             value={value}
+            // TODO: Period and block has same id
             id={value}
           />
           <span>{value}</span>

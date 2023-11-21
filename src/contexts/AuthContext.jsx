@@ -12,33 +12,38 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   function signup(email, password) {
-    return auth.createUserWithEmailAndPassword(email, password); // Talk with firebase
+    return auth.createUserWithEmailAndPassword(email, password);
   }
 
-  //   function login(email, password) {
-  //     return auth.signInWithEmailAndPassword(email, password); // Talk with firebase
-  //   }
+  function login(email, password) {
+    return auth.signInWithEmailAndPassword(email, password);
+  }
 
-  //   function logout() {
-  //     return auth.signOut(); // Talk with firebase
-  //   }
+  function logout() {
+    return auth.signOut();
+  }
 
-  //   function resetPassword(email) {
-  //     return auth.sendPasswordResetEmail(email);
-  //   }
+  function resetPassword(email) {
+    return auth.sendPasswordResetEmail(email);
+  }
 
-  //   function updateEmail(email) {
-  //     return currentUser.updateEmail(email);
-  //   }
+  function updateEmail(email) {
+    return currentUser
+      .updateEmail(email)
+      .then(() => {
+        // Send verification email
+        return currentUser.sendEmailVerification();
+      })
+      .catch((error) => {
+        // Handle or log error here
+        console.error('Error updating email: ', error);
+        throw error; // Re-throw the error if you want calling function to handle it
+      });
+  }
 
-  //   function updatePassword(password) {
-  //     return currentUser.updatePassword(password);
-  //   }
-
-  //   // Testing
-  //   function displayName(company) {
-  //     return currentUser.displayName(company);
-  //   }
+  function updatePassword(password) {
+    return currentUser.updatePassword(password);
+  }
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -51,14 +56,12 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    // login,
-    // logout,
+    login,
+    logout,
     signup,
-    // resetPassword,
-    // updateEmail,
-    // updatePassword,
-
-    // displayName,
+    resetPassword,
+    updateEmail,
+    updatePassword,
   };
 
   return (

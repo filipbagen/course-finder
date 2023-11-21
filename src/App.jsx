@@ -10,6 +10,8 @@ import ForgotPassword from './components/ForgotPassword';
 import Signup from './components/SignUp';
 import { AuthProvider } from './contexts/AuthContext';
 import Schedule from './components/Schedule';
+import Profile from './components/Profile';
+import UpdateProfile from './components/UpdateProfile';
 
 const App = () => {
   return (
@@ -33,6 +35,24 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <Schedule />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/update-profile"
+                element={
+                  <PrivateRoute>
+                    <UpdateProfile />
                   </PrivateRoute>
                 }
               />

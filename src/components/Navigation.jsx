@@ -17,7 +17,9 @@ const Navigation = () => {
       </NavLinks>
 
       <div>
-        <ProfileButton>My Profile</ProfileButton>
+        <ProfileButton as={Link} to="/profile">
+          My Profile
+        </ProfileButton>
 
         <LanguageSelector>
           <option value="en">English</option>
