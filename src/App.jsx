@@ -14,8 +14,7 @@ import Schedule from './components/Schedule';
 const App = () => {
   return (
     <>
-      {/* <Login /> */}
-      {/* TODO: add mainLayout */}
+      {/* TODO: Send uid from here to components */}
       <Container>
         <Router>
           <AuthProvider>

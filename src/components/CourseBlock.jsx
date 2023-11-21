@@ -76,7 +76,7 @@ const CourseBlock = ({ course, isListView }) => {
           </Programs>
         </div>
 
-        <img onClick={addCourseToSchedule} src="img/add.svg" alt="Add Course" />
+        <Add onClick={addCourseToSchedule} src="img/add.svg" alt="Add Course" />
       </Content>
     </Container>
   );
@@ -127,4 +127,8 @@ const Programs = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+`;
+
+const Add = styled.img`
+  cursor: pointer;
 `;

@@ -1,3 +1,5 @@
+// TODO: Migrate to Firebase instead of local time
+
 const courses = [
   {
     kursnamn: 'Projektledning',
