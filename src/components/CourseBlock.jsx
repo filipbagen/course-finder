@@ -3,7 +3,13 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
-import { arrayUnion, doc, updateDoc, arrayRemove } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  updateDoc,
+  arrayRemove,
+} from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
 
 const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
@@ -51,7 +57,7 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
     }
   };
 
-  const deleteCourse = async (courseCode) => {
+  const deleteCourse = async (courseCodeToDelete) => {
     if (!currentUser) {
       console.error('No user is signed in.');
       return;
@@ -61,14 +67,26 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
       // Reference to the user's document
       const userDocRef = doc(db, 'users', currentUser.uid);
 
-      // Update the 'courses' array field in the user's document
-      await updateDoc(userDocRef, {
-        courses: arrayRemove(courseCode),
-      });
+      // Fetch the current document to get the latest courses array
+      const docSnap = await getDoc(userDocRef);
 
-      onDeleteCourse(courseCode);
+      if (docSnap.exists()) {
+        // Get the current courses array from the document
+        let courses = docSnap.data().courses;
 
-      console.log('Course removed from schedule!');
+        // Filter out the course with the matching courseCode
+        courses = courses.filter(
+          (course) => course.courseCode !== courseCodeToDelete
+        );
+
+        // Update the 'courses' array field in the user's document
+        await updateDoc(userDocRef, { courses });
+
+        // Call any local state updates or other cleanup here
+        console.log('Course removed from schedule!');
+      } else {
+        console.error('User document does not exist!');
+      }
     } catch (error) {
       console.error('Error removing course from schedule: ', error);
     }

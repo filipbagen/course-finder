@@ -12,6 +12,7 @@ import data from '../../data/courses';
 
 const Schedule = () => {
   const { currentUser } = useAuth();
+  const [coursesArray, setCoursesArray] = useState([]);
   const db = firebase.firestore();
   const userID = currentUser.uid;
 
@@ -22,37 +23,30 @@ const Schedule = () => {
 
   const handleCourseDelete = (deletedCourseCode) => {
     setCoursesArray((prevCourses) =>
-      prevCourses.filter((course) => course !== deletedCourseCode)
+      prevCourses.filter((course) => course.courseCode !== deletedCourseCode)
     );
   };
 
-  const [coursesArray, setCoursesArray] = useState([]);
-
   useEffect(() => {
-    // Define an async function to fetch data
-    const fetchData = async () => {
-      try {
-        // Get the user document
-        const userDoc = await db.collection('users').doc(userID).get();
-
-        // Check if the document exists
-        if (userDoc.exists) {
-          // Extract the courses array from the document data
-          const userData = userDoc.data();
-          const courses = userData.courses || []; // Default to empty array if courses is not present
-
-          // Update the state with the courses data
-          setCoursesArray(courses);
-        } else {
-          console.log('No such document!');
+    const unsubscribe = db
+      .collection('users')
+      .doc(userID)
+      .onSnapshot(
+        (docSnapshot) => {
+          if (docSnapshot.exists) {
+            const userData = docSnapshot.data();
+            setCoursesArray(userData.courses || []);
+          } else {
+            console.log('No such document!');
+          }
+        },
+        (error) => {
+          console.error('Error listening to the document: ', error);
         }
-      } catch (error) {
-        console.error('Error fetching document: ', error);
-      }
-    };
+      );
 
-    // Call the fetchData function
-    fetchData();
+    // Detach the listener when the component is unmounted
+    return unsubscribe;
   }, [userID, db]);
 
   return (
@@ -108,7 +102,7 @@ const Schedule = () => {
                 key={course.courseCode}
                 course={getCourseDetails(course.courseCode)}
                 isListView={false}
-                onDeleteCourse={handleCourseDelete}
+                onDeleteCourse={() => handleCourseDelete(course.courseCode)}
               />
             ))}
 
