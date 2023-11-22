@@ -105,8 +105,8 @@ const Schedule = () => {
             <p>Period 1</p>
             {coursesArray.map((course) => (
               <CourseBlock
-                key={course}
-                course={getCourseDetails(course)}
+                key={course.courseCode}
+                course={getCourseDetails(course.courseCode)}
                 isListView={false}
                 onDeleteCourse={handleCourseDelete}
               />

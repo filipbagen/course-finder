@@ -1,5 +1,5 @@
 // imports
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
@@ -8,6 +8,9 @@ import { arrayUnion, doc, updateDoc, arrayRemove } from 'firebase/firestore'; //
 const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
+
+  // State to hold the selected semester
+  const [selectedSemester, setSelectedSemester] = useState('7');
 
   const areaColors = {
     Medieteknik: '#E99870',
@@ -20,6 +23,7 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
     Matematik: '#b5ff14',
   };
 
+  // functions
   const addCourseToSchedule = async () => {
     if (!currentUser) {
       console.error('No user is signed in.');
@@ -30,9 +34,15 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
       // Reference to the user's document
       const userDocRef = doc(db, 'users', currentUser.uid);
 
+      // Create an object with courseCode and semester
+      const courseToAdd = {
+        courseCode: course.kurskod,
+        semester: selectedSemester,
+      };
+
       // Update the 'courses' array field in the user's document
       await updateDoc(userDocRef, {
-        courses: arrayUnion(course.kurskod),
+        courses: arrayUnion(courseToAdd),
       });
 
       console.log('Course added to schedule!');
@@ -62,6 +72,11 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
     } catch (error) {
       console.error('Error removing course from schedule: ', error);
     }
+  };
+
+  // // Function to handle semester selection change
+  const handleSemesterChange = (event) => {
+    setSelectedSemester(event.target.value);
   };
 
   const getBackgroundColor = (area) => areaColors[area] || '#e99870'; // default color if area not found
@@ -95,6 +110,30 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
               </Program>
             ))}
           </Programs>
+
+          {/* Radio buttons for semester selection */}
+          {course.termin.includes('7') || course.termin.includes('9') ? (
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="7"
+                  checked={selectedSemester === '7'}
+                  onChange={handleSemesterChange}
+                />
+                Semester 7
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="9"
+                  checked={selectedSemester === '9'}
+                  onChange={handleSemesterChange}
+                />
+                Semester 9
+              </label>
+            </div>
+          ) : null}
         </div>
 
         <Add onClick={addCourseToSchedule} src="img/add.svg" alt="Add Course" />
