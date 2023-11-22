@@ -1,22 +1,23 @@
 // imports
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  updateDoc,
-  arrayRemove,
-} from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
+import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
 
 const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
 
   // State to hold the selected semester
-  const [selectedSemester, setSelectedSemester] = useState('7');
+  const [selectedSemester, setSelectedSemester] = useState(
+    course.termin.toString()
+  );
+
+  // Update selectedSemester when course.termin changes
+  useEffect(() => {
+    setSelectedSemester(course.termin);
+  }, [course.termin]);
 
   const areaColors = {
     Medieteknik: '#E99870',
@@ -40,10 +41,17 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
       // Reference to the user's document
       const userDocRef = doc(db, 'users', currentUser.uid);
 
+      // Ensure selectedSemester is a string
+      let semester = selectedSemester;
+      if (Array.isArray(semester)) {
+        // If for some reason it's an array, take the first element or default to a string
+        semester = semester[0] || 'Unknown semester';
+      }
+
       // Create an object with courseCode and semester
       const courseToAdd = {
         courseCode: course.kurskod,
-        semester: selectedSemester,
+        semester: semester, // Ensure this is a string
       };
 
       // Update the 'courses' array field in the user's document
