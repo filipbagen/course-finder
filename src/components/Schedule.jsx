@@ -49,6 +49,34 @@ const Schedule = () => {
     return unsubscribe;
   }, [userID, db]);
 
+  // A function to render the course blocks for a given semester and period
+  const renderCourseBlocks = (semester, period) => {
+    return coursesArray
+      .map((course) => {
+        const fullCourseDetails = getCourseDetails(course.courseCode);
+        if (!fullCourseDetails) return null; // Early return if details are not found
+
+        fullCourseDetails.termin = course.semester; // Set the correct semester
+
+        // Check if the course matches the semester and period
+        if (
+          fullCourseDetails.termin === semester &&
+          fullCourseDetails.period.includes(period)
+        ) {
+          return (
+            <CourseBlock
+              key={course.courseCode}
+              course={fullCourseDetails}
+              isListView={false}
+              onDeleteCourse={() => handleCourseDelete(course.courseCode)}
+            />
+          );
+        }
+        return null;
+      })
+      .filter(Boolean); // Filter out null values
+  };
+
   return (
     <MainLayout>
       <div>
@@ -56,158 +84,17 @@ const Schedule = () => {
         <p>Here you can see your schedule</p>
 
         <Container>
-          <Column>
-            <h2>Semester 7</h2>
-            <p>Period 1</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '7' &&
-                fullCourseDetails.period.includes('1')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-
-            <p>Period 2</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '7' &&
-                fullCourseDetails.period.includes('2')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-          </Column>
-
-          <Column>
-            <h2>Semester 8</h2>
-            <p>Period 1</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '8' &&
-                fullCourseDetails.period.includes('1')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-
-            <p>Period 2</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '8' &&
-                fullCourseDetails.period.includes('2')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-          </Column>
-
-          <Column>
-            <h2>Semester 9</h2>
-            <p>Period 1</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '9' &&
-                fullCourseDetails.period.includes('1')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-
-            <p>Period 2</p>
-            {coursesArray.map((course) => {
-              // Get the full course details from your local database
-              const fullCourseDetails = getCourseDetails(course.courseCode);
-              fullCourseDetails.termin = course.semester;
-
-              // Check if the course details exist and the conditions are met
-              if (
-                fullCourseDetails &&
-                fullCourseDetails.termin === '9' &&
-                fullCourseDetails.period.includes('2')
-              ) {
-                return (
-                  <CourseBlock
-                    key={course.courseCode}
-                    course={fullCourseDetails}
-                    isListView={false}
-                    onDeleteCourse={() => handleCourseDelete(course.courseCode)}
-                  />
-                );
-              }
-              return null; // If details are not found or conditions are not met, render nothing
-            })}
-          </Column>
+          {['7', '8', '9'].map((semester) => (
+            <Column key={semester}>
+              <h2>Semester {semester}</h2>
+              {['1', '2'].map((period) => (
+                <React.Fragment key={period}>
+                  <p>Period {period}</p>
+                  {renderCourseBlocks(semester, period)}
+                </React.Fragment>
+              ))}
+            </Column>
+          ))}
         </Container>
       </div>
     </MainLayout>
