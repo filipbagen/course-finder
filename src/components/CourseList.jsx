@@ -76,6 +76,7 @@ const CourseList = ({ courses, setSortCriteria }) => {
               isListView={isListView}
               key={course.kurskod}
               course={course}
+              homeView={true}
             />
           ))
         ) : (

@@ -1,23 +1,29 @@
 // imports
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
 import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'; // Make sure to import arrayUnion and updateDoc
 
-const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
+// components
+import CustomDropdownMenu from './CustomDropdownMenu';
+
+const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
 
-  // State to hold the selected semester
-  const [selectedSemester, setSelectedSemester] = useState(
-    course.termin.toString()
-  );
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const triggerRef = useRef(null);
 
-  // Update selectedSemester when course.termin changes
-  useEffect(() => {
-    setSelectedSemester(course.termin);
-  }, [course.termin]);
+  // Updated handleAddClick function
+  const handleAddClick = async () => {
+    const selectedSemester = '7'; // Replace with your logic to get the semester
+    await addCourseToSchedule(selectedSemester);
+  };
+
+  const handleAddToSemester = async (semester) => {
+    await addCourseToSchedule(semester);
+  };
 
   const areaColors = {
     Medieteknik: '#E99870',
@@ -31,27 +37,27 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
   };
 
   // functions
-  const addCourseToSchedule = async () => {
+  // The addCourseToSchedule function takes a semester parameter
+  const addCourseToSchedule = async (selectedSemester) => {
     if (!currentUser) {
       console.error('No user is signed in.');
       return;
     }
 
+    // Ensure that selectedSemester is a string
+    // If selectedSemester is an array, take the first element
+    const semesterString = Array.isArray(selectedSemester)
+      ? selectedSemester[0]
+      : selectedSemester;
+
     try {
       // Reference to the user's document
       const userDocRef = doc(db, 'users', currentUser.uid);
 
-      // Ensure selectedSemester is a string
-      let semester = selectedSemester;
-      if (Array.isArray(semester)) {
-        // If for some reason it's an array, take the first element or default to a string
-        semester = semester[0] || 'Unknown semester';
-      }
-
-      // Create an object with courseCode and semester
+      // Create an object with courseCode and semesterString
       const courseToAdd = {
         courseCode: course.kurskod,
-        semester: semester, // Ensure this is a string
+        semester: semesterString, // Now it's guaranteed to be a string
       };
 
       // Update the 'courses' array field in the user's document
@@ -59,7 +65,7 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
         courses: arrayUnion(courseToAdd),
       });
 
-      console.log('Course added to schedule!');
+      console.log(`Course added to schedule for semester ${semesterString}!`);
     } catch (error) {
       console.error('Error adding course to schedule: ', error);
     }
@@ -100,70 +106,65 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
     }
   };
 
-  // // Function to handle semester selection change
-  const handleSemesterChange = (event) => {
-    setSelectedSemester(event.target.value);
-  };
-
   const getBackgroundColor = (area) => areaColors[area] || '#e99870'; // default color if area not found
 
   return (
     <Container style={{ width: isListView ? '100%' : 'auto' }}>
       <Content>
-        <div>
+        <Test>
           <div>
             <h1>{course.kursnamn}</h1>
-            <div>{course.kurskod}</div>
+            <p>{course.kurskod}</p>
           </div>
 
           <Location>
             <Pin src="img/pin.svg" alt="Pin" />
-            <div>{course.ort}</div>
+            <p>{course.ort}</p>
           </Location>
 
           <div>
-            <div>Block {course.block}</div>
-            <div>{course.utbildningsniva}</div>
+            <p>Block {course.block}</p>
+            <p>{course.utbildningsniva}</p>
           </div>
 
           <Programs>
-            {course.huvudomrade.map((area) => (
-              <Program
-                key={area}
-                style={{ backgroundColor: getBackgroundColor(area) }}
-              >
-                {area}
-              </Program>
-            ))}
+            {course.huvudomrade.length > 0 ? (
+              course.huvudomrade.map((area) => (
+                <Program
+                  key={area}
+                  style={{ backgroundColor: getBackgroundColor(area) }}
+                >
+                  {area}
+                </Program>
+              ))
+            ) : (
+              <Program>No program area</Program>
+            )}
           </Programs>
+        </Test>
 
-          {/* Radio buttons for semester selection */}
-          {course.termin.includes('7') || course.termin.includes('9') ? (
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="7"
-                  checked={selectedSemester === '7'}
-                  onChange={handleSemesterChange}
-                />
-                Semester 7
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="9"
-                  checked={selectedSemester === '9'}
-                  onChange={handleSemesterChange}
-                />
-                Semester 9
-              </label>
+        {homeView ? (
+          course.termin.includes('7') || course.termin.includes('9') ? (
+            <CustomDropdownMenu
+              triggerButton={<Add src="img/add.svg" alt="Add Course" />}
+              onAddToSemester={handleAddToSemester}
+            />
+          ) : (
+            <Add
+              onClick={() => handleAddToSemester(course.termin)}
+              src="img/add.svg"
+              alt="Add Course"
+            />
+          )
+        ) : (
+          <>
+            <div className="options">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
             </div>
-          ) : null}
-        </div>
-
-        <Add onClick={addCourseToSchedule} src="img/add.svg" alt="Add Course" />
-        <Delete onClick={() => deleteCourse(course.kurskod)}>X</Delete>
+          </>
+        )}
       </Content>
     </Container>
   );
@@ -172,6 +173,13 @@ const CourseBlock = ({ course, isListView, onDeleteCourse }) => {
 export default CourseBlock;
 
 // styled components
+const Test = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+`;
+
 const Container = styled.div`
   border-radius: 8px;
   background: var(--White, #fff);
@@ -186,8 +194,9 @@ const Content = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 21px 29px;
-  height: 188px;
+  gap: 50px;
+  padding: 20px 30px;
+  height: 172px;
 `;
 
 const Pin = styled.img`
@@ -199,7 +208,7 @@ const Location = styled.div`
   gap: 6px;
 `;
 
-const Program = styled.div`
+const Program = styled.p`
   display: inline-flex;
   padding: 3px 8px;
   align-items: flex-start;
@@ -218,18 +227,4 @@ const Programs = styled.div`
 
 const Add = styled.img`
   cursor: pointer;
-`;
-
-const Delete = styled.div`
-  cursor: pointer;
-  height: 20px;
-  width: 20px;
-  border-radius: 100%;
-  background-color: red;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px;
-  color: white;
 `;

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const FilterSection = ({ title, filterValues, handleFilterChange }) => {
   return (
     <Section>
-      {title && <Title>{title}</Title>}
+      {title && <h3>{title}</h3>}
 
       {filterValues.map((value) => (
         <Label key={value} htmlFor={value}>
@@ -15,7 +15,7 @@ const FilterSection = ({ title, filterValues, handleFilterChange }) => {
             // TODO: Period and block has same id
             id={value}
           />
-          <span>{value}</span>
+          <p>{value}</p>
         </Label>
       ))}
     </Section>
@@ -28,12 +28,7 @@ export default FilterSection;
 const Section = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
   width: 100%;
-`;
-
-const Title = styled.h3`
-  margin: 0;
 `;
 
 const Label = styled.label`

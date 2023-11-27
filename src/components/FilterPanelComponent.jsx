@@ -35,7 +35,7 @@ const FilterPanel = styled.div`
   flex-direction: column;
   padding: 18px 34px;
   align-items: flex-start;
-  gap: 18px;
+  gap: 14px;
 
   width: 220px;
 

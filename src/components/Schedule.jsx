@@ -69,6 +69,7 @@ const Schedule = () => {
               course={fullCourseDetails}
               isListView={false}
               onDeleteCourse={() => handleCourseDelete(course.courseCode)}
+              homeView={false}
             />
           );
         }
