@@ -8,8 +8,15 @@ const SortingOptions = ({ onSortCriteriaChange }) => {
     control: (provided) => ({
       ...provided,
       width: '100%', // You can set the width to any value you like
+      height: '12px',
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      border: 'none',
+      backgroundColor: 'var(--mainColor)',
     }),
     // You can add more custom styles if needed for other parts of the Select
+    color: 'white',
   };
 
   const options = [
@@ -20,7 +27,10 @@ const SortingOptions = ({ onSortCriteriaChange }) => {
   ];
 
   return (
-    <Test>
+    <Container>
+      <p style={{ marginRight: '8px', fontWeight: 'bold' }}>Sort by:</p>
+
+      {/* The Select component from react-select */}
       <Select
         isSearchable={false}
         options={options}
@@ -30,14 +40,14 @@ const SortingOptions = ({ onSortCriteriaChange }) => {
         defaultValue={options[0]} // Set default value to "Alphabetical"
         styles={customStyles} // Apply the custom styles
       />
-    </Test>
+    </Container>
   );
 };
 
 export default SortingOptions;
 
 // style
-const Test = styled.div`
+const Container = styled.div`
   display: flex;
   align-items: center;
 `;
