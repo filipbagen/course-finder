@@ -215,6 +215,24 @@ const Container = styled.div`
   min-width: 320px;
   width: 100%;
   flex: 1;
+
+  /* position: relative;  */
+  border-radius: 8px;
+  background: var(--White, #fff);
+  transition: background-color 0.2s; /* Smooth transition for background color */
+
+  &:hover {
+    background-color: #f0f0f0; /* Slightly darker color on hover */
+
+    .options {
+      display: flex; /* Show the three-dot menu on hover */
+    }
+  }
+`;
+
+const OptionsMenu = styled.div`
+  display: none; /* Hide by default */
+  cursor: pointer;
 `;
 
 const Content = styled.div`

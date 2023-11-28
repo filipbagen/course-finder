@@ -61,7 +61,7 @@ const Schedule = () => {
             <CourseBlock
               key={course.courseCode}
               course={fullCourseDetails}
-              isListView={false}
+              isListView={true}
               homeView={false}
             />
           );

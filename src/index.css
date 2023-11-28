@@ -175,6 +175,9 @@ hr {
   border-radius: 8px;
   padding: 5px;
   box-shadow: var(--box-shadow);
+  position: absolute;
+  right: 0;
+  top: 100%;
 }
 
 .DropdownMenuItem {
