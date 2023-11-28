@@ -21,12 +21,6 @@ const Schedule = () => {
     return data.find((course) => course.kurskod === code);
   };
 
-  const handleCourseDelete = (deletedCourseCode) => {
-    setCoursesArray((prevCourses) =>
-      prevCourses.filter((course) => course.courseCode !== deletedCourseCode)
-    );
-  };
-
   useEffect(() => {
     const unsubscribe = db
       .collection('users')
@@ -68,7 +62,6 @@ const Schedule = () => {
               key={course.courseCode}
               course={fullCourseDetails}
               isListView={false}
-              onDeleteCourse={() => handleCourseDelete(course.courseCode)}
               homeView={false}
             />
           );
@@ -80,7 +73,7 @@ const Schedule = () => {
 
   return (
     <MainLayout>
-      <div>
+      <Test>
         <h1>Schedule</h1>
         <p>Here you can see your schedule</p>
 
@@ -97,7 +90,7 @@ const Schedule = () => {
             </Column>
           ))}
         </Container>
-      </div>
+      </Test>
     </MainLayout>
   );
 };
@@ -105,19 +98,28 @@ const Schedule = () => {
 export default Schedule;
 
 // style
+const Container = styled.div`
+  /* display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 28px; */
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 20px;
+`;
+
+const Test = styled.div`
+  width: 100%;
+`;
+
 const Column = styled.div`
   display: flex;
   padding: 25px 30px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 46px;
+  gap: 12px;
   background-color: #fff3f3;
   border-radius: 8px;
-`;
-
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 28px;
+  /* width: 300px; */
 `;

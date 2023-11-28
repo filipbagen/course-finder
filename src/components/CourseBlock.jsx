@@ -8,9 +8,10 @@ import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'; // Make
 // components
 import CustomDropdownMenu from './CustomDropdownMenu';
 
-const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
+const CourseBlock = ({ course, isListView, homeView }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
+  const [dropdownItems, setDropdownItems] = useState([]);
 
   // functions
   // Use useMemo to memoize the menu items
@@ -26,13 +27,11 @@ const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
   const scheduleDropdownItems = useMemo(
     () => [
       { label: 'Open in Web', action: () => window.open(course.url) },
-      { label: 'Delete Course', action: () => onDeleteCourse(course.kurskod) },
+      { label: 'Delete Course', action: () => deleteCourse(course.kurskod) },
       // ... other items for the options div
     ],
     []
   ); // Empty dependency array means this only runs once
-
-  const [dropdownItems, setDropdownItems] = useState([]);
 
   const handleAddToSemester = async (semester) => {
     await addCourseToSchedule(semester);

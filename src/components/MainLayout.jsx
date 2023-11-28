@@ -21,7 +21,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 52px;
-  width: min(100% - 120px, 1440px);
+  width: min(100% - 120px, 1320px);
   margin-inline: auto;
 `;
 
