@@ -1,5 +1,5 @@
 // imports
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/compat/app';
@@ -12,14 +12,27 @@ const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
   const { currentUser } = useAuth();
   const db = firebase.firestore();
 
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const triggerRef = useRef(null);
+  // functions
+  // Use useMemo to memoize the menu items
+  const homeDropdownItems = useMemo(
+    () => [
+      { label: 'Semester 7', action: () => handleAddToSemester('7') },
+      { label: 'Semester 9', action: () => handleAddToSemester('9') },
+      // ... other default items
+    ],
+    []
+  ); // Empty dependency array means this only runs once
 
-  // Updated handleAddClick function
-  const handleAddClick = async () => {
-    const selectedSemester = '7'; // Replace with your logic to get the semester
-    await addCourseToSchedule(selectedSemester);
-  };
+  const scheduleDropdownItems = useMemo(
+    () => [
+      { label: 'Open in Web', action: () => window.open(course.url) },
+      { label: 'Delete Course', action: () => onDeleteCourse(course.kurskod) },
+      // ... other items for the options div
+    ],
+    []
+  ); // Empty dependency array means this only runs once
+
+  const [dropdownItems, setDropdownItems] = useState([]);
 
   const handleAddToSemester = async (semester) => {
     await addCourseToSchedule(semester);
@@ -35,6 +48,18 @@ const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
     Elektroteknik: '#3c1b2f',
     Matematik: '#b5ff14',
   };
+
+  useEffect(() => {
+    if (homeView) {
+      if (course.termin.includes('7') || course.termin.includes('9')) {
+        setDropdownItems(homeDropdownItems);
+      } else {
+        setDropdownItems([]); // Or whatever the default should be when not 7 or 9
+      }
+    } else {
+      setDropdownItems(scheduleDropdownItems); // Items for the 'options' trigger
+    }
+  }, [homeView, course.termin, homeDropdownItems, scheduleDropdownItems]);
 
   // functions
   // The addCourseToSchedule function takes a semester parameter
@@ -146,8 +171,8 @@ const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
         {homeView ? (
           course.termin.includes('7') || course.termin.includes('9') ? (
             <CustomDropdownMenu
-              triggerButton={<Add src="img/add.svg" alt="Add Course" />}
-              onAddToSemester={handleAddToSemester}
+              trigger={<Add src="img/add.svg" alt="Add Course" />}
+              items={dropdownItems}
             />
           ) : (
             <Add
@@ -157,13 +182,16 @@ const CourseBlock = ({ course, isListView, homeView, onDeleteCourse }) => {
             />
           )
         ) : (
-          <>
-            <div className="options">
-              <div className="dot"></div>
-              <div className="dot"></div>
-              <div className="dot"></div>
-            </div>
-          </>
+          <CustomDropdownMenu
+            trigger={
+              <div className="options">
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
+              </div>
+            }
+            items={dropdownItems}
+          />
         )}
       </Content>
     </Container>

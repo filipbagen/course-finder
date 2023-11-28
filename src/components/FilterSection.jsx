@@ -5,7 +5,7 @@ const FilterSection = ({ title, filterValues, handleFilterChange }) => {
   return (
     <Section>
       {title && <h3>{title}</h3>}
-
+      {/* TODO, remember filter on refresh, local storage */}
       {filterValues.map((value) => (
         <Label key={value} htmlFor={value}>
           <input

@@ -18,6 +18,7 @@
 
   --box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
   --mainColor: #5ea3f3;
+  --black: #1a1a1a;
 }
 
 a {
@@ -35,7 +36,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: white;
-  color: #1a1a1a;
+  color: var(--black);
   margin: 0;
 }
 
@@ -137,6 +138,7 @@ input:checked::after {
   justify-content: center;
   align-items: center;
   gap: 2px;
+  cursor: pointer;
 }
 
 .options .dot {
@@ -165,4 +167,33 @@ hr {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.DropdownMenuContent {
+  min-width: 140px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 5px;
+  box-shadow: var(--box-shadow);
+}
+
+.DropdownMenuItem {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--black);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 2px 5px;
+  position: relative;
+  padding-left: 18px;
+  user-select: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.DropdownMenuItem[data-highlighted] {
+  background-color: var(--mainColor);
+  color: #fff;
 }
