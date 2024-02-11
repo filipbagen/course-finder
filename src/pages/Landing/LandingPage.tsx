@@ -2,7 +2,6 @@ import { ArrowRight } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Image from '@/utils/Image';
-import '../../globals.css';
 
 export default function Home() {
   return (
