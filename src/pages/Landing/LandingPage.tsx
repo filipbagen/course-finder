@@ -15,7 +15,7 @@ export default function Home() {
         Choose your <span className="text-blue-600">next course</span> with
         confidence 🚀
       </h1>
-      <p className="mt-5 max-w-prose text-zinc-700 sm:text-lg">
+      <p className="mt-5 max-w-prose text-zinc-700 dark:text-white sm:text-lg">
         Find the best courses to learn the latest technologies and skills. We
         have a wide range of courses from top universities and institutions
         around the world. Start learning today!
@@ -79,10 +79,10 @@ export default function Home() {
       <div className="mx-auto mb-32 mt-32 max-w-5xl sm:mt-56">
         <div className="mb-12 px-6 lg:px-8">
           <div className="mx-auto max-w-2xl sm:text-center">
-            <h2 className="mt-2 font-bold text-4xl text-gray-900 sm:text-5xl">
+            <h2 className="mt-2 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
               Find your courses in minutes
             </h2>
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="mt-4 text-lg text-gray-600 dark:text-white">
               We have a wide range of courses from top universities and
               institutions around the world. Start learning today!
             </p>
