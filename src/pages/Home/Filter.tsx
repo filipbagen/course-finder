@@ -39,6 +39,24 @@ interface FilterProps {
   ) => (checked: boolean) => void;
 }
 
+// CheckboxItem component
+const CheckboxItem = ({
+  filterType,
+  value,
+  displayValue,
+  handleFilterChange,
+}: {
+  filterType: string | number;
+  value: string | number;
+  displayValue: string;
+  handleFilterChange: Function;
+}) => (
+  <div className="items-top flex space-x-2">
+    <Checkbox onCheckedChange={handleFilterChange(filterType, value)} />
+    <div className="grid gap-1.5 leading-none">{displayValue}</div>
+  </div>
+);
+
 const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
   const [uniqueFields, setUniqueFields] = useState<string[]>([]);
 
@@ -58,161 +76,114 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
       style={{ maxHeight: 'calc(100vh - 74px)' }}
     >
       {/* Accordion */}
-      <Accordion
-        type="multiple"
-        defaultValue={[
-          'item1',
-          // 'item2',
-          // 'item3',
-          // 'item4',
-          // 'item5',
-          // 'item6',
-          // 'item7',
-        ]}
-        className="w-full"
-      >
-        <AccordionItem value="item1">
+      <Accordion type="multiple" defaultValue={['semester']} className="w-full">
+        <AccordionItem value="semester">
           <AccordionTrigger>
-            {/* Semester */}
             <CardHeader>
               <CardTitle>Termin</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('semester', 7)} />
-                <div className="grid gap-1.5 leading-none">Termin 7</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('semester', 8)} />
-                <div className="grid gap-1.5 leading-none">Termin 8</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('semester', 9)} />
-                <div className="grid gap-1.5 leading-none">Termin 9</div>
-              </div>
+              {[7, 8, 9].map((semester) => (
+                <CheckboxItem
+                  key={semester}
+                  filterType="semester"
+                  displayValue={`Termin ${semester}`}
+                  value={semester}
+                  handleFilterChange={handleFilterChange}
+                />
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item2">
+        <AccordionItem value="period">
           <AccordionTrigger>
-            {/* Period */}
             <CardHeader>
               <CardTitle>Period</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('period', 1)} />
-                <div className="grid gap-1.5 leading-none">Period 1</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('period', 2)} />
-                <div className="grid gap-1.5 leading-none">Period 2</div>
-              </div>
+              {[1, 2, 3, 4].map((period) => (
+                <CheckboxItem
+                  key={period}
+                  filterType="period"
+                  displayValue={`Period ${period}`}
+                  value={period}
+                  handleFilterChange={handleFilterChange}
+                />
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item3">
+        <AccordionItem value="block">
           <AccordionTrigger>
-            {/* Block */}
             <CardHeader>
               <CardTitle>Block</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('block', 1)} />
-                <div className="grid gap-1.5 leading-none">Block 1</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('block', 2)} />
-                <div className="grid gap-1.5 leading-none">Block 2</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('block', 2)} />
-                <div className="grid gap-1.5 leading-none">Block 3</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox onCheckedChange={handleFilterChange('block', 2)} />
-                <div className="grid gap-1.5 leading-none">Block 4</div>
-              </div>
+              {[1, 2, 3, 4].map((block) => (
+                <CheckboxItem
+                  key={block}
+                  filterType="block"
+                  displayValue={`Block ${block}`}
+                  value={block}
+                  handleFilterChange={handleFilterChange}
+                />
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item4">
+        <AccordionItem value="studyPace">
           <AccordionTrigger>
-            {/* Study pace */}
             <CardHeader>
               <CardTitle>Studietakt</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange('studyPace', 'Helfart')}
+              {['Helfart', 'Halvfart'].map((pace) => (
+                <CheckboxItem
+                  key={pace}
+                  filterType="studyPace"
+                  displayValue={pace}
+                  value={pace}
+                  handleFilterChange={handleFilterChange}
                 />
-                <div className="grid gap-1.5 leading-none">Helfart</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange('studyPace', 'Halvfart')}
-                />
-                <div className="grid gap-1.5 leading-none">Halvfart</div>
-              </div>
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item5">
+        <AccordionItem value="level">
           <AccordionTrigger>
-            {/* Level */}
             <CardHeader>
               <CardTitle>Utbildningsnivå</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange(
-                    'courseLevel',
-                    'Grundnivå'
-                  )}
+              {['Grundnivå', 'Avancerad nivå'].map((level) => (
+                <CheckboxItem
+                  key={level}
+                  filterType="courseLevel"
+                  displayValue={level}
+                  value={level}
+                  handleFilterChange={handleFilterChange}
                 />
-                <div className="grid gap-1.5 leading-none">Grundnivå</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange(
-                    'courseLevel',
-                    'Avancerad nivå'
-                  )}
-                />
-                <div className="grid gap-1.5 leading-none">Avancerad nivå</div>
-              </div>
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item6">
+        <AccordionItem value="fieldOfStudy">
           <AccordionTrigger>
-            {/* Field of study */}
             <CardHeader>
               <CardTitle>Huvudområde</CardTitle>
             </CardHeader>
@@ -234,54 +205,44 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Examination */}
-        <AccordionItem value="itemExaminations">
+        <AccordionItem value="examination">
           <AccordionTrigger>
             <CardHeader>
-              <CardTitle>Examination Type</CardTitle>
+              <CardTitle>Examination</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              {['Tentamen', 'Laboration', 'Projekt', 'Övrigt'].map(
-                (type, index) => (
-                  <div key={index} className="items-top flex space-x-2">
-                    <Checkbox
-                      onCheckedChange={handleFilterChange(
-                        'examination',
-                        type.toLowerCase()
-                      )}
-                    />
-                    <div className="grid gap-1.5 leading-none">{type}</div>
-                  </div>
-                )
-              )}
+              {['Tentamen', 'Laboration', 'Projekt', 'Övrigt'].map((type) => (
+                <CheckboxItem
+                  key={type}
+                  filterType="examination"
+                  displayValue={type}
+                  value={type.toLowerCase()}
+                  handleFilterChange={handleFilterChange}
+                />
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item8">
+        <AccordionItem value="campus">
           <AccordionTrigger>
-            {/* Campus */}
             <CardHeader>
               <CardTitle>Campus</CardTitle>
             </CardHeader>
           </AccordionTrigger>
           <AccordionContent>
             <CardContent className="flex flex-col gap-4">
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange('location', 'Norrköping')}
+              {['Norrköping', 'Linköping'].map((campus) => (
+                <CheckboxItem
+                  key={campus}
+                  filterType="location"
+                  displayValue={campus}
+                  value={campus}
+                  handleFilterChange={handleFilterChange}
                 />
-                <div className="grid gap-1.5 leading-none">Norrköping</div>
-              </div>
-
-              <div className="items-top flex space-x-2">
-                <Checkbox
-                  onCheckedChange={handleFilterChange('location', 'Linköping')}
-                />
-                <div className="grid gap-1.5 leading-none">Linköping</div>
-              </div>
+              ))}
             </CardContent>
           </AccordionContent>
         </AccordionItem>
