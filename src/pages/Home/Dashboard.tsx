@@ -22,31 +22,8 @@ import {
 } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-interface Course {
-  [x: string]: any;
-  courseName: string;
-  credits: number;
-  courseCode: string;
-  location: string;
-  semester: number[];
-  period: number[];
-  block: number[];
-  courseLevel: string;
-  mainFieldOfStudy: string[];
-  studyPace: string;
-  // Add other course properties as needed
-}
-
-interface SelectedFilters {
-  period: number[];
-  semester: number[];
-  block: number[];
-  courseLevel: string;
-  mainFieldOfStudy: string[];
-  location: string;
-  studyPace: string;
-  examination: string;
-}
+import { Course, SelectedFilters } from '../../types/types'; // Extract types into a separate file
+import { useFilterCourses } from '../../hooks/hooks'; // Extract course filtering into a custom hook
 
 const Dashboard = () => {
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
@@ -57,8 +34,7 @@ const Dashboard = () => {
     mainFieldOfStudy: [],
     location: '',
     studyPace: '',
-    examination: '',
-    // Initialize other filters as needed
+    examination: [],
   });
 
   const handleFilterChange =
@@ -83,67 +59,10 @@ const Dashboard = () => {
       });
     };
 
-  const filterCourses = (courses: Course[]) => {
-    return courses.filter((course) => {
-      return Object.entries(selectedFilters).every(
-        ([filterType, filterValues]) => {
-          if (filterValues.length === 0) {
-            return true; // If no filter values are selected, always include the course
-          }
-          // Special handling for examination type filters
-          if (filterType === 'examination') {
-            const examinationMapping = {
-              tentamen: 'tenta',
-              laboration: 'lab',
-              projekt: 'projekt',
-              // Note: "övrigt" is handled separately
-            };
-
-            // Filter logic for examination names
-            return course.examination.some((exam: { name: string }) => {
-              const examinationMapping: { [key: string]: string } = {
-                tentamen: 'tenta',
-                laboration: 'lab',
-                projekt: 'projekt',
-                // Note: "övrigt" is handled separately
-              };
-
-              const examNameLower = exam.name.toLowerCase();
-              const hasSpecificType = filterValues.some(
-                (filterValue: string) => {
-                  if (filterValue === 'övrigt') {
-                    // For "Övrigt", check if the examination name does not contain any specific keywords
-                    return !Object.values(examinationMapping).some((keyword) =>
-                      examNameLower.includes(keyword)
-                    );
-                  } else {
-                    // Check if the examination name contains the specific keyword
-                    const keyword = examinationMapping[filterValue];
-                    return keyword ? examNameLower.includes(keyword) : false;
-                  }
-                }
-              );
-              return hasSpecificType;
-            });
-          } else {
-            // Handling for other filter types
-            const courseValue = course[filterType as keyof Course];
-            if (Array.isArray(courseValue)) {
-              // If courseValue is an array, check if it includes any of the filterValues
-              return filterValues.some((filterValue: string | number) =>
-                (courseValue as (number | string)[]).includes(filterValue)
-              );
-            } else {
-              // If courseValue is not an array, check if it matches any of the filterValues
-              return filterValues.includes(courseValue as number | string);
-            }
-          }
-        }
-      );
-    });
-  };
-
-  const filteredCourses = filterCourses(courses as Course[]);
+  const filteredCourses = useFilterCourses(
+    courses as Course[],
+    selectedFilters
+  ); // Use custom hook for filtering
 
   const showSonner = (courseName: string) => {
     toast('Course added!', {
