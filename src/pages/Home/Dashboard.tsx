@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 
 import { Course, SelectedFilters } from '../../types/types'; // Extract types into a separate file
 import { useFilterCourses } from '../../hooks/hooks'; // Extract course filtering into a custom hook
@@ -36,6 +37,8 @@ const Dashboard = () => {
     studyPace: '',
     examination: [],
   });
+
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
 
   const handleFilterChange =
     (filterType: keyof SelectedFilters, value: number | string) =>
@@ -74,38 +77,56 @@ const Dashboard = () => {
     });
   };
 
+  // Filter courses based on search term
+  const displayedCourses = filteredCourses.filter(
+    (course) =>
+      course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
       <Filter handleFilterChange={handleFilterChange} />
 
-      <div className="flex h-full flex-wrap gap-4 justify-between">
-        {filteredCourses.map((course) => (
-          <Card key={course.courseCode} className="flex-grow">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>{course.courseName}</CardTitle>
-                <Button
-                  onClick={() => showSonner(course.courseName)}
-                  size={'icon'}
-                >
-                  +
-                </Button>
-              </div>
-              <CardDescription>{course.courseCode}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 items-center">
-                <MapPin size={16} />
-                <p>{course.location}</p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex gap-4">
-              <p>Termin {course.semester.join(', ')}</p>
-              <p>Period {course.period.join(', ')}</p>
-              <p>Block {course.block.join(', ')}</p>
-            </CardFooter>
-          </Card>
-        ))}
+      <div className="flex flex-col gap-4 w-full">
+        <Input
+          type="text"
+          placeholder="Search course"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
+        />
+
+        <div className="flex overflow-auto flex-wrap gap-4 justify-between">
+          {displayedCourses.map((course) => (
+            <Card key={course.courseCode} className="flex-grow">
+              <CardHeader>
+                <div className="flex justify-between">
+                  <CardTitle>{course.courseName}</CardTitle>
+                  <Button
+                    onClick={() => showSonner(course.courseName)}
+                    size={'icon'}
+                  >
+                    +
+                  </Button>
+                </div>
+                <CardDescription>{course.courseCode}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2 items-center">
+                  <MapPin size={16} />
+                  <p>{course.location}</p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex gap-4">
+                <p>Termin {course.semester.join(', ')}</p>
+                <p>Period {course.period.join(', ')}</p>
+                <p>Block {course.block.join(', ')}</p>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
