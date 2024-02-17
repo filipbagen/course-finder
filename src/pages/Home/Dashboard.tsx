@@ -1,3 +1,9 @@
+// react
+import React, { useState, ChangeEvent } from 'react';
+
+// components
+import Filter from './Filter';
+
 // icons
 import { MapPin } from 'lucide-react';
 
@@ -16,13 +22,69 @@ import {
 } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-// components
-import Filter from './Filter';
+interface Course {
+  courseCode: string;
+  courseName: string;
+  location: string;
+  semester: string[];
+  period: string[];
+  block: string[];
+  // Add other course properties as needed
+}
+
+interface SelectedFilters {
+  period: string[];
+  semester: string[];
+  // Add other filter types as needed, for example:
+  // block: string[];
+}
 
 const Dashboard = () => {
-  const showSonner = () => {
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
+    period: [],
+    semester: [],
+    // Initialize other filters as needed
+  });
+
+  const handleFilterChange =
+    (filterType: keyof SelectedFilters, value: string) =>
+    (checked: boolean) => {
+      setSelectedFilters((prevFilters) => {
+        const currentFilterValues = prevFilters[filterType] || [];
+        if (checked) {
+          return {
+            ...prevFilters,
+            [filterType]: [...currentFilterValues, value],
+          };
+        } else {
+          return {
+            ...prevFilters,
+            [filterType]: currentFilterValues.filter((item) => item !== value),
+          };
+        }
+      });
+    };
+
+  const filterCourses = (courses: Course[]) => {
+    return courses.filter((course) => {
+      return Object.entries(selectedFilters).every(
+        ([filterType, filterValues]) => {
+          if (filterValues.length === 0) {
+            return true;
+          }
+          return filterValues.some((value: string) =>
+            course[filterType as keyof Course]?.includes(value)
+          );
+        }
+      );
+    });
+  };
+
+  const filteredCourses = filterCourses(courses);
+
+  const showSonner = (courseName: string) => {
     toast('Course added!', {
-      description: 'You added [insert course name] to your schedule.',
+      description: `You added ${courseName} to your schedule.`,
       action: {
         label: 'Undo',
         onClick: () => console.log('Undo'),
@@ -32,14 +94,18 @@ const Dashboard = () => {
 
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
-      <Filter />
+      <Filter handleFilterChange={handleFilterChange} />
+
       <div className="flex flex-wrap gap-4 justify-between">
-        {courses.map((course) => (
+        {filteredCourses.map((course) => (
           <Card key={course.courseCode} className="flex-grow">
             <CardHeader>
               <div className="flex justify-between">
                 <CardTitle>{course.courseName}</CardTitle>
-                <Button onClick={() => showSonner()} size={'icon'}>
+                <Button
+                  onClick={() => showSonner(course.courseName)}
+                  size={'icon'}
+                >
                   +
                 </Button>
               </div>
@@ -52,9 +118,9 @@ const Dashboard = () => {
               </div>
             </CardContent>
             <CardFooter className="flex gap-4">
-              <p>Termin {course.semester.join(', ')}</p>
-              <p>Period {course.period}</p>
-              <p>Block {course.block}</p>
+              <p>semester {course.semester.join(', ')}</p>
+              <p>Period {course.period.join(', ')}</p>
+              <p>Block {course.block.join(', ')}</p>
             </CardFooter>
           </Card>
         ))}
