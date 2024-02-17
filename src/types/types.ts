@@ -17,7 +17,7 @@ export interface Course {
     name: string;
     credits: number;
     gradingScale: string;
-    type: string;
+    type?: string;
   }[];
 }
 

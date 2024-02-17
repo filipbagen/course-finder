@@ -1,5 +1,5 @@
 // react
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // components
 import Filter from './Filter';
@@ -22,9 +22,31 @@ import {
 } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import { Course, SelectedFilters } from '../../types/types'; // Extract types into a separate file
 import { useFilterCourses } from '../../hooks/hooks'; // Extract course filtering into a custom hook
+
+// hooks
+import useSortCourses from '../../hooks/useSortCourses'; // New custom hook for sorting
+
+const showSonner = (courseName: string) => {
+  toast('Course added!', {
+    description: `You added ${courseName} to your schedule.`,
+    action: {
+      label: 'Undo',
+      onClick: () => console.log('Undo'),
+    },
+  });
+};
 
 const Dashboard = () => {
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
@@ -39,50 +61,62 @@ const Dashboard = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+  const [selectedValue, setSelectedValue] = useState('courseCode');
+  const [displayedCourses, setDisplayedCourses] = useState<Course[]>(
+    courses.map((course) => ({
+      ...course,
+      block: course.block.map((block) =>
+        typeof block === 'string' ? parseInt(block) : block
+      ),
+    }))
+  ); // replace originalCourses with your initial courses array
+  // const [displayedCourses, setDisplayedCourses] = useState<Course[]>([]);
 
-  const handleFilterChange =
+  const sortedCourses = useSortCourses(displayedCourses, selectedValue); // Use custom hook for sorting
+
+  const handleFilterChange = useCallback(
     (filterType: keyof SelectedFilters, value: number | string) =>
-    (checked: boolean) => {
-      setSelectedFilters((prevFilters) => {
-        const currentFilterValues = prevFilters[filterType] as (
-          | number
-          | string
-        )[];
-        if (checked) {
-          return {
-            ...prevFilters,
-            [filterType]: [...currentFilterValues, value],
-          };
-        } else {
-          return {
-            ...prevFilters,
-            [filterType]: currentFilterValues.filter((item) => item !== value),
-          };
-        }
-      });
-    };
+      (checked: boolean) => {
+        setSelectedFilters((prevFilters) => {
+          const currentFilterValues = prevFilters[filterType] as (
+            | number
+            | string
+          )[];
+          if (checked) {
+            return {
+              ...prevFilters,
+              [filterType]: [...currentFilterValues, value],
+            };
+          } else {
+            return {
+              ...prevFilters,
+              [filterType]: currentFilterValues.filter(
+                (item) => item !== value
+              ),
+            };
+          }
+        });
+      },
+    []
+  );
+
+  // Convert searchTerm to lowercase only once
+  const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
   const filteredCourses = useFilterCourses(
     courses as Course[],
     selectedFilters
   ); // Use custom hook for filtering
 
-  const showSonner = (courseName: string) => {
-    toast('Course added!', {
-      description: `You added ${courseName} to your schedule.`,
-      action: {
-        label: 'Undo',
-        onClick: () => console.log('Undo'),
-      },
-    });
-  };
-
   // Filter courses based on search term
-  const displayedCourses = filteredCourses.filter(
-    (course) =>
-      course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const filtered = filteredCourses.filter(
+      (course) =>
+        course.courseName.toLowerCase().includes(lowerCaseSearchTerm) ||
+        course.courseCode.toLowerCase().includes(lowerCaseSearchTerm)
+    );
+    setDisplayedCourses(filtered);
+  }, [filteredCourses, lowerCaseSearchTerm]);
 
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
@@ -98,8 +132,32 @@ const Dashboard = () => {
           }}
         />
 
+        <div className="flex justify-between">
+          <p>
+            Showing <b>{displayedCourses.length}</b> search results
+          </p>
+
+          <Select onValueChange={setSelectedValue}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+                <SelectItem value="courseCodeReversed">
+                  Course Code (Z-A)
+                </SelectItem>
+                <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
+                <SelectItem value="courseNameReverse">
+                  Course Name (Z-A)
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex overflow-auto flex-wrap gap-4 justify-between">
-          {displayedCourses.map((course) => (
+          {sortedCourses.map((course) => (
             <Card key={course.courseCode} className="flex-grow">
               <CardHeader>
                 <div className="flex justify-between">
