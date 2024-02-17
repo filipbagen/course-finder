@@ -1,5 +1,5 @@
 // react
-import React, { useState, ChangeEvent } from 'react';
+import { useState } from 'react';
 
 // components
 import Filter from './Filter';
@@ -23,20 +23,21 @@ import {
 import { toast } from 'sonner';
 
 interface Course {
-  courseCode: string;
   courseName: string;
+  credits: number;
+  courseCode: string;
   location: string;
-  semester: string[];
-  period: string[];
-  block: string[];
+  semester: number[];
+  period: number[];
+  block: number[];
   // Add other course properties as needed
 }
 
 interface SelectedFilters {
-  period: string[];
-  semester: string[];
+  period: number[];
+  semester: number[];
   // Add other filter types as needed, for example:
-  // block: string[];
+  // block: number[];
 }
 
 const Dashboard = () => {
@@ -47,7 +48,7 @@ const Dashboard = () => {
   });
 
   const handleFilterChange =
-    (filterType: keyof SelectedFilters, value: string) =>
+    (filterType: keyof SelectedFilters, value: number | string) =>
     (checked: boolean) => {
       setSelectedFilters((prevFilters) => {
         const currentFilterValues = prevFilters[filterType] || [];
@@ -72,15 +73,22 @@ const Dashboard = () => {
           if (filterValues.length === 0) {
             return true;
           }
-          return filterValues.some((value: string) =>
-            course[filterType as keyof Course]?.includes(value)
-          );
+          const courseValue = course[filterType as keyof Course];
+          if (Array.isArray(courseValue)) {
+            // If courseValue is an array, check if it includes any of the filterValues
+            return filterValues.some((filterValue: number) =>
+              courseValue.includes(filterValue)
+            );
+          } else {
+            // If courseValue is not an array, check if it equals any of the filterValues
+            return filterValues.includes(courseValue);
+          }
         }
       );
     });
   };
 
-  const filteredCourses = filterCourses(courses);
+  const filteredCourses = filterCourses(courses as Course[]);
 
   const showSonner = (courseName: string) => {
     toast('Course added!', {

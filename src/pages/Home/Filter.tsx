@@ -10,8 +10,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface SelectedFilters {
-  period: string[];
-  semester: string[];
+  period: number[];
+  semester: number[];
   // Add other filter types as needed, for example:
   // block: string[];
 }
@@ -19,7 +19,7 @@ interface SelectedFilters {
 interface FilterProps {
   handleFilterChange: (
     filterType: keyof SelectedFilters,
-    value: string
+    value: number | string
   ) => (checked: boolean) => void;
 }
 
@@ -33,17 +33,17 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => (
 
     <CardContent className="flex flex-col gap-4">
       <div className="items-top flex space-x-2">
-        <Checkbox onCheckedChange={handleFilterChange('semester', '7')} />
+        <Checkbox onCheckedChange={handleFilterChange('semester', 7)} />
         <div className="grid gap-1.5 leading-none">Termin 7</div>
       </div>
 
       <div className="items-top flex space-x-2">
-        <Checkbox onCheckedChange={handleFilterChange('semester', '8')} />
+        <Checkbox onCheckedChange={handleFilterChange('semester', 8)} />
         <div className="grid gap-1.5 leading-none">Termin 8</div>
       </div>
 
       <div className="items-top flex space-x-2">
-        <Checkbox onCheckedChange={handleFilterChange('semester', '8')} />
+        <Checkbox onCheckedChange={handleFilterChange('semester', 9)} />
         <div className="grid gap-1.5 leading-none">Termin 9</div>
       </div>
     </CardContent>
@@ -55,12 +55,12 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => (
     </CardHeader>
     <CardContent className="flex flex-col gap-4">
       <div className="items-top flex space-x-2">
-        <Checkbox onCheckedChange={handleFilterChange('period', '1')} />
+        <Checkbox onCheckedChange={handleFilterChange('period', 1)} />
         <div className="grid gap-1.5 leading-none">Period 1</div>
       </div>
 
       <div className="items-top flex space-x-2">
-        <Checkbox onCheckedChange={handleFilterChange('period', '2')} />
+        <Checkbox onCheckedChange={handleFilterChange('period', 2)} />
         <div className="grid gap-1.5 leading-none">Period 2</div>
       </div>
     </CardContent>
