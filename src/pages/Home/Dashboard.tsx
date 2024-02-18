@@ -31,6 +31,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 import { Course, SelectedFilters } from '../../types/types'; // Extract types into a separate file
 import { useFilterCourses } from '../../hooks/hooks'; // Extract course filtering into a custom hook
@@ -165,6 +171,7 @@ const Dashboard = () => {
                   <Button
                     onClick={() => showSonner(course.courseName)}
                     size={'icon'}
+                    aria-label={`Add ${course.courseName} to your schedule`}
                   >
                     +
                   </Button>
@@ -177,11 +184,38 @@ const Dashboard = () => {
                   <p>{course.location}</p>
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-4">
-                <p>Termin {course.semester.join(', ')}</p>
-                <p>Period {course.period.join(', ')}</p>
-                <p>Block {course.block.join(', ')}</p>
-              </CardFooter>
+
+              <Accordion type="multiple" className="w-full">
+                <AccordionItem value="mainFieldOfStudy">
+                  <AccordionTrigger>
+                    <CardFooter className="flex gap-4">
+                      <p>Termin {course.semester.join(', ')}</p>
+                      <p>Period {course.period.join(', ')}</p>
+                      <p>Block {course.block.join(', ')}</p>
+                    </CardFooter>
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    <div>
+                      <h3>Förkunskaper</h3>
+                      <p>{course.prerequisites}</p>
+                    </div>
+
+                    <div>
+                      <h3>Huvudområde</h3>
+                      <p>{course.mainFieldOfStudy.join(', ')}</p>
+                    </div>
+
+                    <div>
+                      <h3>Examination</h3>
+                      <ul>
+                        {course.examination.map((ex) => (
+                          <li key={ex.name}>{ex.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </Card>
           ))}
         </div>
