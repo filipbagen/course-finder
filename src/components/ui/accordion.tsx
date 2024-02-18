@@ -6,13 +6,19 @@ import { cn } from '@/utils/utils';
 
 const Accordion = AccordionPrimitive.Root;
 
+type AccordionItemProps = {
+  className?: string;
+  border?: boolean;
+};
+
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> &
+    AccordionItemProps
+>(({ className, border = true, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn('border-b', className)}
+    className={cn(border ? 'border-b' : '', className)}
     {...props}
   />
 ));

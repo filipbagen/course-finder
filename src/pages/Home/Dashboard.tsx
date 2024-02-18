@@ -164,9 +164,9 @@ const Dashboard = () => {
 
         <div className="flex overflow-auto flex-wrap gap-4 justify-between">
           {sortedCourses.map((course) => (
-            <Card key={course.courseCode} className="flex-grow">
+            <Card key={course.courseCode} className="flex-grow h-min">
               <CardHeader>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <CardTitle>{course.courseName}</CardTitle>
                   <Button
                     onClick={() => showSonner(course.courseName)}
@@ -179,43 +179,45 @@ const Dashboard = () => {
                 <CardDescription>{course.courseCode}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center mb-4">
                   <MapPin size={16} />
                   <p>{course.location}</p>
                 </div>
+
+                <Accordion type="multiple" className="w-full">
+                  <AccordionItem value="mainFieldOfStudy" border={false}>
+                    <div className="flex justify-between">
+                      <CardFooter className="flex gap-4">
+                        <p>Termin {course.semester.join(', ')}</p>
+                        <p>Period {course.period.join(', ')}</p>
+                        <p>Block {course.block.join(', ')}</p>
+                      </CardFooter>
+                      <AccordionTrigger className="p-0" />
+                    </div>
+
+                    <AccordionContent className="flex flex-col gap-4 p-0  mt-6">
+                      <div>
+                        <h3>Förkunskaper</h3>
+                        <p>{course.prerequisites}</p>
+                      </div>
+
+                      <div>
+                        <h3>Huvudområde</h3>
+                        <p>{course.mainFieldOfStudy.join(', ')}</p>
+                      </div>
+
+                      <div>
+                        <h3>Examination</h3>
+                        <ul>
+                          {course.examination.map((ex) => (
+                            <li key={ex.name}>{ex.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </CardContent>
-
-              <Accordion type="multiple" className="w-full">
-                <AccordionItem value="mainFieldOfStudy">
-                  <AccordionTrigger>
-                    <CardFooter className="flex gap-4">
-                      <p>Termin {course.semester.join(', ')}</p>
-                      <p>Period {course.period.join(', ')}</p>
-                      <p>Block {course.block.join(', ')}</p>
-                    </CardFooter>
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4">
-                    <div>
-                      <h3>Förkunskaper</h3>
-                      <p>{course.prerequisites}</p>
-                    </div>
-
-                    <div>
-                      <h3>Huvudområde</h3>
-                      <p>{course.mainFieldOfStudy.join(', ')}</p>
-                    </div>
-
-                    <div>
-                      <h3>Examination</h3>
-                      <ul>
-                        {course.examination.map((ex) => (
-                          <li key={ex.name}>{ex.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
             </Card>
           ))}
         </div>
