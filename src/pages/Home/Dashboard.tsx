@@ -67,7 +67,7 @@ const Dashboard = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
-  const [selectedValue, setSelectedValue] = useState('courseCode');
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [displayedCourses, setDisplayedCourses] = useState<Course[]>(
     courses.map((course) => ({
       ...course,
@@ -78,7 +78,7 @@ const Dashboard = () => {
   ); // replace originalCourses with your initial courses array
   // const [displayedCourses, setDisplayedCourses] = useState<Course[]>([]);
 
-  const sortedCourses = useSortCourses(displayedCourses, selectedValue); // Use custom hook for sorting
+  const sortedCourses = useSortCourses(displayedCourses, selectedValue || ''); // Use custom hook for sorting
 
   const handleFilterChange = useCallback(
     (filterType: keyof SelectedFilters, value: number | string) =>
