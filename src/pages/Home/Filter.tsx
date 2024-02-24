@@ -67,8 +67,68 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
         fields.add(field);
       });
     });
-    setUniqueFields(Array.from(fields));
+    setUniqueFields(Array.from(fields).sort((a, b) => a.localeCompare(b)));
   }, []);
+
+  const accordionItems = [
+    {
+      value: 'semester',
+      title: 'Termin',
+      filterType: 'semester',
+      options: [7, 8, 9],
+      displayValue: (semester: number) => `Termin ${semester}`,
+    },
+    {
+      value: 'period',
+      title: 'Period',
+      filterType: 'period',
+      options: [1, 2],
+      displayValue: (period: number) => `Period ${period}`,
+    },
+    {
+      value: 'block',
+      title: 'Block',
+      filterType: 'block',
+      options: [1, 2, 3, 4],
+      displayValue: (block: number) => `Block ${block}`,
+    },
+    {
+      value: 'studyPace',
+      title: 'Studietakt',
+      filterType: 'studyPace',
+      options: ['Helfart', 'Halvfart'],
+      displayValue: (pace: string) => pace,
+    },
+    {
+      value: 'level',
+      title: 'Utbildningsnivå',
+      filterType: 'courseLevel',
+      options: ['Grundnivå', 'Avancerad nivå'],
+      displayValue: (level: string) => level,
+    },
+    {
+      value: 'fieldOfStudy',
+      title: 'Huvudområde',
+      filterType: 'mainFieldOfStudy',
+      options: uniqueFields,
+      displayValue: (field: string) => field,
+    },
+    {
+      value: 'examination',
+      title: 'Examination',
+      filterType: 'examination',
+      options: ['Tentamen', 'Laboration', 'Projekt', 'Övrigt'],
+      displayValue: (type: string) => type,
+    },
+    {
+      value: 'campus',
+      title: 'Campus',
+      filterType: 'location',
+      options: ['Norrköping', 'Linköping'],
+      displayValue: (campus: string) => campus,
+    },
+    // Add more items here...
+  ];
 
   return (
     <Card
@@ -77,175 +137,34 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
     >
       {/* Accordion */}
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
-        <AccordionItem value="semester">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Termin</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {[7, 8, 9].map((semester) => (
-                <CheckboxItem
-                  key={semester}
-                  filterType="semester"
-                  displayValue={`Termin ${semester}`}
-                  value={semester}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
+        {accordionItems.map((item) => (
+          <AccordionItem value={item.value} key={item.value}>
+            <AccordionTrigger>
+              <CardHeader>
+                <CardTitle>{item.title}</CardTitle>
+              </CardHeader>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="flex flex-col gap-4">
+                {item.options.map((option) => {
+                  // Directly use option without casting to any
+                  // Bypass TypeScript's type checks - not recommended without thorough consideration
+                  const displayValue = (item.displayValue as any)(option);
 
-        <AccordionItem value="period">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Period</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {[1, 2, 3, 4].map((period) => (
-                <CheckboxItem
-                  key={period}
-                  filterType="period"
-                  displayValue={`Period ${period}`}
-                  value={period}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="block">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Block</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {[1, 2, 3, 4].map((block) => (
-                <CheckboxItem
-                  key={block}
-                  filterType="block"
-                  displayValue={`Block ${block}`}
-                  value={block}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="studyPace">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Studietakt</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {['Helfart', 'Halvfart'].map((pace) => (
-                <CheckboxItem
-                  key={pace}
-                  filterType="studyPace"
-                  displayValue={pace}
-                  value={pace}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="level">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Utbildningsnivå</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {['Grundnivå', 'Avancerad nivå'].map((level) => (
-                <CheckboxItem
-                  key={level}
-                  filterType="courseLevel"
-                  displayValue={level}
-                  value={level}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="fieldOfStudy">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Huvudområde</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {uniqueFields.map((field, index) => (
-                <div key={index} className="items-top flex space-x-2">
-                  <Checkbox
-                    onCheckedChange={handleFilterChange(
-                      'mainFieldOfStudy',
-                      field
-                    )}
-                  />
-                  <div className="grid gap-1.5 leading-none">{field}</div>
-                </div>
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="examination">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Examination</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {['Tentamen', 'Laboration', 'Projekt', 'Övrigt'].map((type) => (
-                <CheckboxItem
-                  key={type}
-                  filterType="examination"
-                  displayValue={type}
-                  value={type.toLowerCase()}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="campus">
-          <AccordionTrigger>
-            <CardHeader>
-              <CardTitle>Campus</CardTitle>
-            </CardHeader>
-          </AccordionTrigger>
-          <AccordionContent>
-            <CardContent className="flex flex-col gap-4">
-              {['Norrköping', 'Linköping'].map((campus) => (
-                <CheckboxItem
-                  key={campus}
-                  filterType="location"
-                  displayValue={campus}
-                  value={campus}
-                  handleFilterChange={handleFilterChange}
-                />
-              ))}
-            </CardContent>
-          </AccordionContent>
-        </AccordionItem>
+                  return (
+                    <CheckboxItem
+                      key={String(option)}
+                      filterType={item.filterType}
+                      displayValue={displayValue}
+                      value={option}
+                      handleFilterChange={handleFilterChange}
+                    />
+                  );
+                })}
+              </CardContent>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
       </Accordion>
     </Card>
   );
