@@ -68,6 +68,7 @@ const Dashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
   const [displayedCourses, setDisplayedCourses] = useState<Course[]>(
     courses.map((course) => ({
       ...course,
@@ -138,7 +139,7 @@ const Dashboard = () => {
           }}
         />
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <p>
             Showing <b>{displayedCourses.length}</b> search results
           </p>
@@ -160,6 +161,19 @@ const Dashboard = () => {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <button
+            onClick={() =>
+              setView(() => {
+                if (view === 'grid') {
+                  return 'list';
+                } else {
+                  return 'grid';
+                }
+              })
+            }
+          >
+            Change view
+          </button>
         </div>
 
         <div className="flex overflow-auto flex-wrap gap-4 justify-between">
@@ -178,6 +192,7 @@ const Dashboard = () => {
                 </div>
                 <CardDescription>{course.courseCode}</CardDescription>
               </CardHeader>
+
               <CardContent>
                 <div className="flex gap-2 items-center mb-4">
                   <MapPin size={16} />
