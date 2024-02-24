@@ -66,6 +66,9 @@ const Dashboard = () => {
     examination: [],
   });
 
+  const [checkedStatus, setCheckedStatus] = useState<
+    Record<string, Record<string | number, boolean>>
+  >({});
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -84,6 +87,7 @@ const Dashboard = () => {
   const handleFilterChange = useCallback(
     (filterType: keyof SelectedFilters, value: number | string) =>
       (checked: boolean) => {
+        // Update the selectedFilters state
         setSelectedFilters((prevFilters) => {
           const currentFilterValues = prevFilters[filterType] as (
             | number
@@ -103,6 +107,15 @@ const Dashboard = () => {
             };
           }
         });
+
+        // Update the checkedStatus state
+        setCheckedStatus((prevStatus) => ({
+          ...prevStatus,
+          [filterType]: {
+            ...(prevStatus[filterType] || {}),
+            [value]: checked,
+          },
+        }));
       },
     []
   );
@@ -127,7 +140,10 @@ const Dashboard = () => {
 
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
-      <Filter handleFilterChange={handleFilterChange} />
+      <Filter
+        handleFilterChange={handleFilterChange}
+        checkedStatus={checkedStatus}
+      />
 
       <div className="flex flex-col gap-4 w-full">
         <Input

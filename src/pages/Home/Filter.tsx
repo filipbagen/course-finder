@@ -37,6 +37,7 @@ interface FilterProps {
     filterType: keyof SelectedFilters,
     value: number | string
   ) => (checked: boolean) => void;
+  checkedStatus: Record<string, Record<string | number, boolean>>;
 }
 
 // CheckboxItem component
@@ -45,19 +46,27 @@ const CheckboxItem = ({
   value,
   displayValue,
   handleFilterChange,
+  isChecked,
 }: {
   filterType: string | number;
   value: string | number;
   displayValue: string;
   handleFilterChange: Function;
+  isChecked: boolean;
 }) => (
   <div className="items-top flex space-x-2">
-    <Checkbox onCheckedChange={handleFilterChange(filterType, value)} />
+    <Checkbox
+      onCheckedChange={handleFilterChange(filterType, value)}
+      checked={isChecked}
+    />
     <div className="grid gap-1.5 leading-none">{displayValue}</div>
   </div>
 );
 
-const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
+const Filter: React.FC<FilterProps> = ({
+  handleFilterChange,
+  checkedStatus,
+}: FilterProps) => {
   const [uniqueFields, setUniqueFields] = useState<string[]>([]);
 
   useEffect(() => {
@@ -158,6 +167,9 @@ const Filter: React.FC<FilterProps> = ({ handleFilterChange }) => {
                       displayValue={displayValue}
                       value={option}
                       handleFilterChange={handleFilterChange}
+                      isChecked={
+                        checkedStatus[item.filterType]?.[option] || false
+                      }
                     />
                   );
                 })}

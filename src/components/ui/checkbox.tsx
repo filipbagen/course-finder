@@ -7,11 +7,13 @@ const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
     onCheckedChange?: (checked: boolean) => void;
+    checked?: boolean;
   }
->(({ className, onCheckedChange, ...props }, ref) => (
+>(({ className, onCheckedChange, checked, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
     onCheckedChange={onCheckedChange} // Pass the onCheckedChange prop to the Radix Checkbox
+    checked={checked} // Pass the checked
     className={cn(
       'peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
       className
