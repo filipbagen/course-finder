@@ -40,5 +40,10 @@ export function useFilters(initialFilters: SelectedFilters) {
     []
   );
 
-  return { selectedFilters, checkedStatus, handleFilterChange };
+  const resetFilters = () => {
+    setSelectedFilters(initialFilters);
+    setCheckedStatus({});
+  };
+
+  return { selectedFilters, checkedStatus, handleFilterChange, resetFilters };
 }

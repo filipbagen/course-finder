@@ -17,6 +17,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 // data
 import courses from '../../data/courses';
@@ -38,6 +39,7 @@ interface FilterProps {
     value: number | string
   ) => (checked: boolean) => void;
   checkedStatus: Record<string, Record<string | number, boolean>>;
+  resetSelectedFilters: () => void;
 }
 
 // CheckboxItem component
@@ -66,6 +68,7 @@ const CheckboxItem = ({
 const Filter: React.FC<FilterProps> = ({
   handleFilterChange,
   checkedStatus,
+  resetSelectedFilters,
 }: FilterProps) => {
   const [uniqueFields, setUniqueFields] = useState<string[]>([]);
 
@@ -139,6 +142,24 @@ const Filter: React.FC<FilterProps> = ({
     // Add more items here...
   ];
 
+  const isAnyCheckboxChecked = (filterType: keyof SelectedFilters) => {
+    return Object.values(checkedStatus[filterType] || {}).some(Boolean);
+  };
+
+  const resetFilters = () => {
+    // Iterate over each filter type
+    for (const filterType in checkedStatus) {
+      // Iterate over each value in the current filter type
+      for (const value in checkedStatus[filterType]) {
+        // Uncheck the current checkbox
+        handleFilterChange(filterType as keyof SelectedFilters, value)(false);
+      }
+    }
+
+    // Reset the selected filters
+    resetSelectedFilters(); // Update this line
+  };
+
   return (
     <Card
       className="sticky inset-x-0 top-16 overflow-y-auto h-full"
@@ -150,7 +171,14 @@ const Filter: React.FC<FilterProps> = ({
           <AccordionItem value={item.value} key={item.value}>
             <AccordionTrigger>
               <CardHeader>
-                <CardTitle>{item.title}</CardTitle>
+                <div className="flex items-center">
+                  <CardTitle>{item.title}</CardTitle>
+                  {isAnyCheckboxChecked(
+                    item.filterType as keyof SelectedFilters
+                  ) && (
+                    <span className="ml-4 h-2 w-2 rounded-full bg-primary"></span>
+                  )}
+                </div>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -178,6 +206,9 @@ const Filter: React.FC<FilterProps> = ({
           </AccordionItem>
         ))}
       </Accordion>
+      <CardFooter>
+        <Button onClick={resetFilters}>Reset Filter</Button>
+      </CardFooter>
     </Card>
   );
 };

@@ -71,7 +71,7 @@ const Dashboard = () => {
     examination: [],
   };
 
-  const { selectedFilters, checkedStatus, handleFilterChange } =
+  const { selectedFilters, checkedStatus, handleFilterChange, resetFilters } =
     useFilters(initialFilters);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,14 +108,17 @@ const Dashboard = () => {
   }, [sortedCourses]);
 
   const IconComponent = view === VIEW_LIST ? LayoutGrid : Rows3;
-  const colorClass =
-    view === VIEW_LIST ? 'text-primary' : 'text-muted-foreground';
+
+  const resetSelectedFilters = () => {
+    resetFilters();
+  };
 
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
       <Filter
         handleFilterChange={handleFilterChange}
         checkedStatus={checkedStatus}
+        resetSelectedFilters={resetSelectedFilters}
       />
 
       <div className="flex flex-col gap-4 w-full">
