@@ -1,5 +1,5 @@
 // react
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 // components
 import Filter from './Filter';
@@ -38,11 +38,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
+// types and hooks
 import { Course, SelectedFilters } from '../../types/types'; // Extract types into a separate file
 import { useFilterCourses } from '../../hooks/hooks'; // Extract course filtering into a custom hook
-
-// hooks
 import useSortCourses from '../../hooks/useSortCourses'; // New custom hook for sorting
+import { useFilters } from '../../hooks/useFilters'; // New custom hook for managing filters
 
 const showSonner = (courseName: string) => {
   toast('Course added!', {
@@ -54,8 +54,11 @@ const showSonner = (courseName: string) => {
   });
 };
 
+const VIEW_GRID = 'grid';
+const VIEW_LIST = 'list';
+
 const Dashboard = () => {
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
+  const initialFilters: SelectedFilters = {
     period: [],
     semester: [],
     block: [],
@@ -64,79 +67,43 @@ const Dashboard = () => {
     location: '',
     studyPace: '',
     examination: [],
-  });
+  };
 
-  const [checkedStatus, setCheckedStatus] = useState<
-    Record<string, Record<string | number, boolean>>
-  >({});
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+  const { selectedFilters, checkedStatus, handleFilterChange } =
+    useFilters(initialFilters);
+
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [displayedCourses, setDisplayedCourses] = useState<Course[]>(
-    courses.map((course) => ({
-      ...course,
-      block: course.block.map((block) =>
-        typeof block === 'string' ? parseInt(block) : block
-      ),
-    }))
-  ); // replace originalCourses with your initial courses array
-  // const [displayedCourses, setDisplayedCourses] = useState<Course[]>([]);
 
-  const sortedCourses = useSortCourses(displayedCourses, selectedValue || ''); // Use custom hook for sorting
-
-  const handleFilterChange = useCallback(
-    (filterType: keyof SelectedFilters, value: number | string) =>
-      (checked: boolean) => {
-        // Update the selectedFilters state
-        setSelectedFilters((prevFilters) => {
-          const currentFilterValues = prevFilters[filterType] as (
-            | number
-            | string
-          )[];
-          if (checked) {
-            return {
-              ...prevFilters,
-              [filterType]: [...currentFilterValues, value],
-            };
-          } else {
-            return {
-              ...prevFilters,
-              [filterType]: currentFilterValues.filter(
-                (item) => item !== value
-              ),
-            };
-          }
-        });
-
-        // Update the checkedStatus state
-        setCheckedStatus((prevStatus) => ({
-          ...prevStatus,
-          [filterType]: {
-            ...(prevStatus[filterType] || {}),
-            [value]: checked,
-          },
-        }));
-      },
-    []
+  const [view, setView] = useState<typeof VIEW_GRID | typeof VIEW_LIST>(
+    VIEW_GRID
   );
 
-  // Convert searchTerm to lowercase only once
-  const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  const toggleView = useCallback(() => {
+    setView((prevView) => (prevView === VIEW_GRID ? VIEW_LIST : VIEW_GRID));
+  }, []);
 
-  const filteredCourses = useFilterCourses(
-    courses as Course[],
-    selectedFilters
-  ); // Use custom hook for filtering
+  const processedCourses = useMemo(
+    () =>
+      courses.map((course) => ({
+        ...course,
+        block: course.block.map((block) =>
+          typeof block === 'string' ? parseInt(block) : block
+        ),
+      })),
+    [courses]
+  );
 
-  // Filter courses based on search term
+  const [displayedCourses, setDisplayedCourses] =
+    useState<Course[]>(processedCourses);
+
+  const filteredCourses = useFilterCourses(processedCourses, selectedFilters);
+
+  const sortedCourses = useSortCourses(filteredCourses, selectedValue || '');
+
   useEffect(() => {
-    const filtered = filteredCourses.filter(
-      (course) =>
-        course.courseName.toLowerCase().includes(lowerCaseSearchTerm) ||
-        course.courseCode.toLowerCase().includes(lowerCaseSearchTerm)
-    );
-    setDisplayedCourses(filtered);
-  }, [filteredCourses, lowerCaseSearchTerm]);
+    setDisplayedCourses(sortedCourses);
+  }, [sortedCourses]);
 
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
@@ -177,19 +144,7 @@ const Dashboard = () => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <button
-            onClick={() =>
-              setView(() => {
-                if (view === 'grid') {
-                  return 'list';
-                } else {
-                  return 'grid';
-                }
-              })
-            }
-          >
-            Change view
-          </button>
+          <button onClick={toggleView}>Change view</button>
         </div>
 
         <div className="flex overflow-auto flex-wrap gap-4 justify-between">
