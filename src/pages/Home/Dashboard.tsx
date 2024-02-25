@@ -6,6 +6,8 @@ import Filter from './Filter';
 
 // icons
 import { MapPin } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
+import { Rows3 } from 'lucide-react';
 
 // data
 import courses from '../../data/courses';
@@ -105,6 +107,10 @@ const Dashboard = () => {
     setDisplayedCourses(sortedCourses);
   }, [sortedCourses]);
 
+  const IconComponent = view === VIEW_LIST ? LayoutGrid : Rows3;
+  const colorClass =
+    view === VIEW_LIST ? 'text-primary' : 'text-muted-foreground';
+
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
       <Filter
@@ -122,32 +128,42 @@ const Dashboard = () => {
           }}
         />
 
-        <div className="flex justify-between items-center">
+        <div className="flex gap-4 items-center justify-between">
           <p>
             Showing <b>{displayedCourses.length}</b> search results
           </p>
 
-          <Select onValueChange={setSelectedValue}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
-                <SelectItem value="courseCodeReversed">
-                  Course Code (Z-A)
-                </SelectItem>
-                <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
-                <SelectItem value="courseNameReverse">
-                  Course Name (Z-A)
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <button onClick={toggleView}>Change view</button>
+          <div className="flex items-center gap-4">
+            <Select onValueChange={setSelectedValue}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+                  <SelectItem value="courseCodeReversed">
+                    Course Code (Z-A)
+                  </SelectItem>
+                  <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
+                  <SelectItem value="courseNameReverse">
+                    Course Name (Z-A)
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <IconComponent
+              className="cursor-pointer text-muted-foreground hover:text-primary transition-colors duration-200"
+              onClick={toggleView}
+            />
+          </div>
         </div>
 
-        <div className="flex overflow-auto flex-wrap gap-4 justify-between">
+        <div
+          className={`flex overflow-auto gap-4 justify-between ${
+            view == VIEW_GRID ? 'flex-wrap' : 'flex-col'
+          }`}
+        >
           {sortedCourses.map((course) => (
             <Card key={course.courseCode} className="flex-grow h-min">
               <CardHeader>
