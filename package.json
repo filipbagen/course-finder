@@ -19,6 +19,7 @@
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "firebase": "^10.8.0",
     "lucide-react": "^0.323.0",
     "next-themes": "^0.2.1",
     "postcss": "^8.4.35",
