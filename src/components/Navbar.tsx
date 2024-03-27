@@ -11,7 +11,7 @@ const Navbar = () => {
       <MaxWidthWrapper>
         <div className="flex h-14 items-center justify-between border-b border-zinc-200 dark:border-black">
           <Link to="/" className="flex z-40 font-semibold">
-            Course Finder
+            🧭 Course Finder
           </Link>
 
           {/* todo: add mobile navbar */}
@@ -25,9 +25,9 @@ const Navbar = () => {
                   size: 'sm',
                 })}
               >
-                Pricing
+                Browse courses
               </Link>
-              <Link
+              {/* <Link
                 to="/signin"
                 className={buttonVariants({
                   variant: 'ghost',
@@ -35,14 +35,14 @@ const Navbar = () => {
                 })}
               >
                 Login
-              </Link>
+              </Link> */}
               <Link
                 to="/signup"
                 className={buttonVariants({
                   size: 'sm',
                 })}
               >
-                Get started <ArrowRight className="ml-1.5 h-5 w-5" />
+                Sign in {/*<ArrowRight className="ml-1.5 h-5 w-5" /> */}
               </Link>
             </>
           </div>

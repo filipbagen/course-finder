@@ -75,24 +75,21 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-      },
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+        'skew-scroll': {
+          from: {
+            transform:
+              'rotateX(20deg) rotate(-20deg) skewX(20deg) translateZ(0) translateY(-20%)',
+          },
+          to: {
+            transform:
+              'rotateX(20deg) rotate(-20deg) skewX(20deg) translateZ(0) translateY(-120%)',
+          },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'skew-scroll': 'skew-scroll 20s linear infinite',
       },
     },
   },

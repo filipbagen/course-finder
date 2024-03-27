@@ -17,7 +17,8 @@ import { Toaster } from '@/components/ui/sonner';
 const App = () => {
   return (
     <Router>
-      <div className="min-h-screen antialiased dark:bg-gray-900 grainy dark:bg-none dark:text-white">
+      {/* grainy */}
+      <div className="min-h-screen antialiased dark:bg-gray-900 dark:bg-none dark:text-white">
         <Navbar />
         <MaxWidthWrapper>
           <AuthProvider>
