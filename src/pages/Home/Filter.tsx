@@ -56,13 +56,13 @@ const CheckboxItem = ({
   handleFilterChange: Function;
   isChecked: boolean;
 }) => (
-  <div className="items-top flex space-x-2">
+  <label className="items-top flex space-x-2 cursor-pointer">
     <Checkbox
       onCheckedChange={handleFilterChange(filterType, value)}
       checked={isChecked}
     />
     <div className="grid gap-1.5 leading-none">{displayValue}</div>
-  </div>
+  </label>
 );
 
 const Filter: React.FC<FilterProps> = ({
