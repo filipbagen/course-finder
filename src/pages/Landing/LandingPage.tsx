@@ -81,7 +81,7 @@ export default function Home() {
                 <Image
                   src="./src/assets/img/dashboard-preview.jpg"
                   alt="product preview"
-                  width={1364}
+                  width={3388}
                   className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10"
                 />
               </div>
@@ -107,7 +107,7 @@ export default function Home() {
       {/* <div className="mx-auto mb-32 mt-32 max-w-5xl"> */}
       <div className="mb-12 px-6 lg:px-8">
         <div className="mx-auto max-w-2xl sm:text-center">
-          <h2 className="mt-2 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+          <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
             Find your courses in minutes
           </h2>
           <p className="mt-4 text-lg text-gray-600 dark:text-white">
