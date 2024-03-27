@@ -113,6 +113,15 @@ const Dashboard = () => {
     resetFilters();
   };
 
+  const [showAnimation, setShowAnimation] = useState<boolean[]>([]);
+
+  const handleClick = (index: number, courseName: string) => {
+    showSonner(courseName);
+    const newShowAnimation = [...showAnimation];
+    newShowAnimation[index] = true;
+    setShowAnimation(newShowAnimation);
+  };
+
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
       <Filter
@@ -167,17 +176,42 @@ const Dashboard = () => {
             view == VIEW_GRID ? 'flex-wrap' : 'flex-col'
           }`}
         >
-          {sortedCourses.map((course) => (
+          {sortedCourses.map((course, index) => (
             <Card key={course.courseCode} className="flex-grow h-min">
               <CardHeader>
                 <div className="flex justify-between gap-2">
                   <CardTitle>{course.courseName}</CardTitle>
+
                   <Button
-                    onClick={() => showSonner(course.courseName)}
+                    onClick={() => handleClick(index, course.courseName)}
                     size={'icon'}
                     aria-label={`Add ${course.courseName} to your schedule`}
+                    className={
+                      showAnimation[index] ? 'button-with-animation' : ''
+                    }
                   >
-                    +
+                    {showAnimation[index] ? (
+                      <svg
+                        className="checkmark"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 52 52"
+                      >
+                        <circle
+                          className="checkmark__circle"
+                          cx="26"
+                          cy="26"
+                          r="25"
+                          fill="none"
+                        />
+                        <path
+                          className="checkmark__check"
+                          fill="none"
+                          d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                        />
+                      </svg>
+                    ) : (
+                      '+'
+                    )}
                   </Button>
                 </div>
                 <CardDescription>{course.courseCode}</CardDescription>
