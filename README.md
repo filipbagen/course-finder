@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🧭 Course Finder
 
-## Getting Started
+## Overview
 
-First, run the development server:
+This project aims to simplify the course selection process for graduate students at Linköping University. By leveraging a robust database and an intelligent recommendation system, it facilitates informed decision-making in course selection, tailored to individual preferences and academic trajectories.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Objective
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To provide a user-friendly platform that:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Offers comprehensive filtering and searching capabilities for exploring available courses.
+- Enables users to customize their academic schedules with ease.
+- Utilizes AI to offer personalized course recommendations, enhancing the educational experience.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Technologies and APIs
 
-## Learn More
+- **Frontend and Backend**: Next.js 14
+- **Programming Language**: TypeScript
+- **Database and Authentication**: Firebase
 
-To learn more about Next.js, take a look at the following resources:
+## Core Functionalities
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Course Exploration**: Users can browse through courses offered in the LiU programs MT and D, accessing detailed information about each course.
+- **Personal Schedule Management**: Enables the addition of courses to a personal schedule for effective planning.
+- **AI-Powered Recommendations**: Personalized course suggestions based on user preferences and historical data.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Subscription Plans
 
-## Deploy on Vercel
+- **Free Version**: Access to basic functionalities including course exploration and schedule management.
+- **Premium Membership**: Offers advanced features like AI recommendations, supporting a more tailored educational experience.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Future Enhancements
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **Course Rating System**: A feature allowing users to rate and review courses.
+- **Program Expansion**: Extending the course database to encompass a wider range of programs and voluntary courses offered at LiU.
+- **Social Connectivity**: A platform feature enabling users to search for and connect with peers, facilitating an exchange of course experiences and recommendations.
