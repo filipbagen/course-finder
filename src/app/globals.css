@@ -73,11 +73,19 @@
     @apply scroll-m-20 leading-3 text-xl font-semibold tracking-tight;
   }
 
+  h5 {
+    @apply scroll-m-20 leading-3 text-lg font-semibold tracking-tight;
+  }
+
+  h6 {
+    @apply scroll-m-20 leading-3 text-base font-semibold tracking-tight;
+  }
+
   p {
-    @apply leading-7 [&:not(:first-child)]:mt-6;
+    @apply leading-7 [&:not(:first-child)]:mt-4;
   }
 
   ul {
-    @apply my-6 ml-6 list-disc [&>li]:mt-2;
+    @apply my-4 ml-6 list-disc [&>li]:mt-2;
   }
 }

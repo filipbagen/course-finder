@@ -45,7 +45,9 @@ export default function Dashboard() {
               <div className="flex justify-between">
                 <div>
                   <CardTitle>{course.courseName}</CardTitle>
-                  <CardDescription>{course.courseCode}</CardDescription>
+                  <CardDescription className="mt-0">
+                    {course.courseCode}
+                  </CardDescription>
                 </div>
 
                 <DropdownMenu>
@@ -69,16 +71,22 @@ export default function Dashboard() {
             <CardContent>
               <div className="flex gap-2 items-center mb-4">
                 <MapPin size={16} />
-                <p>{course.location}</p>
+                <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
               </div>
 
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="mainFieldOfStudy" border={false}>
                   <div className="flex justify-between">
                     <CardFooter className="flex gap-4">
-                      <p>Termin {course.semester.join(', ')}</p>
-                      <p>Period {course.period.join(', ')}</p>
-                      <p>Block {course.block.join(', ')}</p>
+                      <div>
+                        <p>Termin {course.semester.join(', ')}</p>
+                      </div>
+                      <div>
+                        <p>Period {course.period.join(', ')}</p>
+                      </div>
+                      <div>
+                        <p>Block {course.block.join(', ')}</p>
+                      </div>
                     </CardFooter>
                     <AccordionTrigger className="p-0" />
                   </div>
@@ -87,7 +95,7 @@ export default function Dashboard() {
                     <div>
                       <div className="flex items-center gap-2">
                         <BookText size={16} />
-                        <h3>Förkunskaper</h3>
+                        <h6>Förkunskaper</h6>
                       </div>
                       <p>{course.prerequisites}</p>
                     </div>
@@ -95,15 +103,20 @@ export default function Dashboard() {
                     <div>
                       <div className="flex items-center gap-2">
                         <SignpostBig size={16} />
-                        <h3>Huvudområde</h3>
+                        <h6>Huvudområde</h6>
                       </div>
-                      <p>{course.mainFieldOfStudy.join(', ')}</p>
+
+                      {course.mainFieldOfStudy.length != 0 ? (
+                        <p>{course.mainFieldOfStudy.join(', ')}</p>
+                      ) : (
+                        <p>Inget huvudområde</p>
+                      )}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
                         <NotebookPen size={16} />
-                        <h3>Examination</h3>
+                        <h6>Examination</h6>
                       </div>
                       <ul>
                         {course.examination.map((ex) => (
