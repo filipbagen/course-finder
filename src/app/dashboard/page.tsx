@@ -35,9 +35,14 @@ import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
 // data
 import courses from '../data/courses';
 
+// components
+import Filter from './Filter';
+
 export default function Dashboard() {
   return (
     <div className="mt-28 sm:mt-40 flex gap-4">
+      <Filter />
+
       <div className="flex flex-wrap gap-4 justify-between">
         {courses.map((course) => (
           <Card className="flex-grow h-min">
