@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ThemeToggle } from './themeToggle';
 
 // kinde
 import {
@@ -13,8 +12,13 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { Button } from '@/components/ui/button';
 import { MaxWidthWrapper } from './MaxWidthWrapper';
 
+// components
+import { UserNav } from './UserNav';
+import { ThemeToggle } from './themeToggle';
+
 export async function Navbar() {
-  const { isAuthenticated } = getKindeServerSession();
+  const { isAuthenticated, getUser } = getKindeServerSession();
+  const user = await getUser();
 
   return (
     <nav className="flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-gray-200 dark:border-black bg-white/75 dark:bg-gray-950/75 backdrop-blur-lg transition-all">
@@ -33,9 +37,11 @@ export async function Navbar() {
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
 
-                <LogoutLink>
-                  <Button variant={'secondary'}>Log out</Button>
-                </LogoutLink>
+                <UserNav
+                  email={user?.email as string}
+                  image={user?.picture as string}
+                  name={user?.given_name as string}
+                />
               </div>
             ) : (
               <div className="flex items-center gap-x-5">
