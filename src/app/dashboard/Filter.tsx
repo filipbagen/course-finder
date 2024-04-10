@@ -136,7 +136,9 @@ export default function Filter() {
               <CardHeader>
                 <div className="flex gap-3 items-center">
                   {item.icon}
-                  <CardTitle className="mb-0">{item.title}</CardTitle>
+                  <CardTitle className="mb-0 text-base font-medium">
+                    {item.title}
+                  </CardTitle>
                 </div>
               </CardHeader>
             </AccordionTrigger>
