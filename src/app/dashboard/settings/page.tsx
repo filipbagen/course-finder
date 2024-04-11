@@ -1,3 +1,9 @@
+// next
+import { revalidatePath } from 'next/cache';
+
+// components
+import { SubmitButton } from '../../components/SubmitButtons';
+
 // shadcn
 import {
   Card,
@@ -18,15 +24,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
 // prisma
-import prisma from '../lib/db';
+import prisma from '../../lib/db';
 
 // kinde
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { get } from 'http';
-import { SubmitButton } from '../components/Submitbuttons';
 
 async function getData(userId: string) {
   const data = await prisma.user.findUnique({
@@ -43,7 +46,7 @@ async function getData(userId: string) {
   return data;
 }
 
-export default async function SettingsPage() {
+export default async function SettingPage() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
   const data = await getData(user?.id as string);
@@ -63,6 +66,8 @@ export default async function SettingsPage() {
         colorScheme: colorScheme ?? undefined,
       },
     });
+
+    revalidatePath('/', 'layout');
   }
 
   return (

@@ -56,7 +56,7 @@ export function UserNav({
           className="w-full flex justify-between items-center"
           asChild
         >
-          <Link href={'/settings'}>
+          <Link href={'/dashboard/settings'}>
             Settings{' '}
             <span>
               <Settings className="w-4 h-4" />
