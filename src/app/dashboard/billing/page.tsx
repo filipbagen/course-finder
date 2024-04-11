@@ -7,10 +7,24 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+// next
+import { redirect } from 'next/navigation';
 
 // icons
 import { CheckCircle2 } from 'lucide-react';
+
+// prisma
+import prisma from '@/app/lib/db';
+
+// kinde
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+
+// stripe
+import { getStripeSession } from '@/lib/stripe';
+
+// components
+import { StripeSubscriptionCreationButton } from '@/app/components/SubmitButtons';
 
 const featureItems = [
   {
@@ -39,7 +53,54 @@ const featureItems = [
   },
 ];
 
-export default function BillingPage() {
+async function getData(userId: string) {
+  const data = await prisma.subscription.findUnique({
+    where: {
+      userId: userId,
+    },
+    select: {
+      status: true,
+      user: {
+        select: {
+          stripeCustomerId: true,
+        },
+      },
+    },
+  });
+
+  return data;
+}
+
+export default async function BillingPage() {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  const data = await getData(user?.id as string);
+
+  async function createSubscription() {
+    'use server';
+
+    const dbUser = await prisma.user.findUnique({
+      where: {
+        id: user?.id,
+      },
+      select: {
+        stripeCustomerId: true,
+      },
+    });
+
+    if (!dbUser?.stripeCustomerId) {
+      throw new Error('No stripe customer id found');
+    }
+
+    const subscriptionUrl = await getStripeSession({
+      customerId: dbUser.stripeCustomerId,
+      domainUrl: 'http://localhost:3000',
+      priceId: process.env.STRIPE_PRICE_ID as string,
+    });
+
+    return redirect(subscriptionUrl);
+  }
+
   return (
     <div className="max-w-md mx-auto space-y-4">
       <Card className="flex flex-col">
@@ -51,7 +112,8 @@ export default function BillingPage() {
           </div>
 
           <div className="mt-4 flex items-baseline text-6xl font-extrabold">
-            $30 <span className="ml-1 text-2xl text-muted-foreground">/mo</span>
+            49kr{' '}
+            <span className="ml-1 text-2xl text-muted-foreground">/mo</span>
           </div>
           <p className="mt-5 text-lg text-muted-foreground">
             Let AI choose courses for you and get access to all premium features
@@ -69,8 +131,8 @@ export default function BillingPage() {
             ))}
           </ul>
 
-          <form className="w-full">
-            <Button className="w-full">Buy Today</Button>
+          <form action={createSubscription} className="w-full">
+            <StripeSubscriptionCreationButton />
           </form>
         </div>
       </Card>
