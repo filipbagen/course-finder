@@ -19,7 +19,7 @@ import {
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 
 // icons
-import { DoorClosed } from 'lucide-react';
+import { DoorClosed, CreditCard } from 'lucide-react';
 
 export function UserNav({
   name,
@@ -51,6 +51,18 @@ export function UserNav({
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
+
+        <DropdownMenuLabel
+          className="w-full flex justify-between items-center"
+          asChild
+        >
+          <Link href={'/dashboard/billing'}>
+            Billing{' '}
+            <span>
+              <CreditCard className="w-4 h-4" />
+            </span>
+          </Link>
+        </DropdownMenuLabel>
 
         <DropdownMenuLabel
           className="w-full flex justify-between items-center"
