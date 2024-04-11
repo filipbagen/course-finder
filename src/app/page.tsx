@@ -1,8 +1,17 @@
-import { ThemeToggle } from './components/themeToggle';
 import Link from 'next/link';
 import Image from 'next/image';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
+// kinde
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+
+export default async function Home() {
+  const { isAuthenticated } = getKindeServerSession();
+
+  if (await isAuthenticated()) {
+    return redirect('/dashboard');
+  }
+
   return (
     <div className="pt-20 sm:pt-22 pb-20 sm:pb-40 flex flex-col items-center gap-8 justify-center text-center">
       <div>
