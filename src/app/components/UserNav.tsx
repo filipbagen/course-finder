@@ -1,3 +1,9 @@
+// react
+import Link from 'next/link';
+
+// icons
+import { Settings } from 'lucide-react';
+
 // shadcn
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -42,6 +48,20 @@ export function UserNav({
               {email}
             </p>
           </div>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuLabel
+          className="w-full flex justify-between items-center"
+          asChild
+        >
+          <Link href={'/settings'}>
+            Settings{' '}
+            <span>
+              <Settings className="w-4 h-4" />
+            </span>
+          </Link>
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />

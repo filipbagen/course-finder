@@ -21,7 +21,7 @@ export async function Navbar() {
   const user = await getUser();
 
   return (
-    <nav className="flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-gray-200 dark:border-black bg-white/75 dark:bg-gray-950/75 backdrop-blur-lg transition-all">
+    <nav className="mb-8 flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-gray-200 dark:border-black bg-white/75 dark:bg-gray-950/75 backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
         <div className="flex items-center justify-between">
           <Link href="/">
