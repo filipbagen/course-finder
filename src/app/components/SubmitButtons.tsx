@@ -41,3 +41,22 @@ export function StripeSubscriptionCreationButton() {
     </>
   );
 }
+
+export function StripePortal() {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      {pending ? (
+        <Button disabled className="w-fit">
+          <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+          Please wait...
+        </Button>
+      ) : (
+        <Button type="submit" className="w-fit">
+          View payment details
+        </Button>
+      )}
+    </>
+  );
+}

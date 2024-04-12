@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 // next
 import { redirect } from 'next/navigation';
@@ -21,10 +22,13 @@ import prisma from '@/app/lib/db';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
 // stripe
-import { getStripeSession } from '@/app/lib/stripe';
+import { getStripeSession, stripe } from '@/app/lib/stripe';
 
 // components
-import { StripeSubscriptionCreationButton } from '@/app/components/SubmitButtons';
+import {
+  StripeSubscriptionCreationButton,
+  StripePortal,
+} from '@/app/components/SubmitButtons';
 
 const featureItems = [
   {
@@ -99,6 +103,47 @@ export default async function BillingPage() {
     });
 
     return redirect(subscriptionUrl);
+  }
+
+  async function createCustomerPortal() {
+    'use server';
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: data?.user.stripeCustomerId as string,
+      return_url: 'http://localhost:3000/dashboard/billing',
+    });
+
+    return redirect(session.url);
+  }
+
+  if (data?.status === 'active') {
+    return (
+      <div className="grid items-start gap-8">
+        <div className="flex items-center justify-between px-2">
+          <div className="grid gap-1">
+            <h1>Subscription</h1>
+            <p className="text-muted-foreground">
+              Settings regarding your subscription
+            </p>
+          </div>
+        </div>
+        <Card className="w-full lg:w-2/3">
+          <CardHeader>
+            <CardTitle>Edit subscription</CardTitle>
+            <CardDescription>
+              Click on the button below, this will give you the opportunity to
+              change your payment details and view your statement at the same
+              time.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={createCustomerPortal}>
+              <StripePortal />
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
