@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 
 // next
 import { redirect } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // icons
 import { CheckCircle2 } from 'lucide-react';
@@ -58,6 +59,7 @@ const featureItems = [
 ];
 
 async function getData(userId: string) {
+  noStore();
   const data = await prisma.subscription.findUnique({
     where: {
       userId: userId,

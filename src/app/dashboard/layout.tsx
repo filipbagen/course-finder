@@ -1,7 +1,10 @@
 import { ReactNode } from 'react';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { redirect } from 'next/navigation';
 import prisma from '../lib/db';
+
+// next
+import { redirect } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // stripe
 import { stripe } from '@/app/lib/stripe';
@@ -19,6 +22,7 @@ async function getData({
   lastName: string | undefined | null;
   profileImage: string | undefined | null;
 }) {
+  noStore();
   let user = await prisma.user.findUnique({
     where: {
       id: id,
