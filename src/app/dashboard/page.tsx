@@ -93,7 +93,7 @@ export default function Dashboard() {
 
         <div className="flex flex-wrap gap-4 justify-between">
           {courses.map((course) => (
-            <Card className="flex-grow h-min">
+            <Card key={course.courseCode} className="flex-grow h-min">
               <CardHeader>
                 <div className="flex justify-between">
                   <div>
