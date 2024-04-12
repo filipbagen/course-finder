@@ -34,7 +34,9 @@ export function StripeSubscriptionCreationButton() {
           Please wait...
         </Button>
       ) : (
-        <Button className="w-full">Create Subscription</Button>
+        <Button type="submit" className="w-full">
+          Create Subscription
+        </Button>
       )}
     </>
   );

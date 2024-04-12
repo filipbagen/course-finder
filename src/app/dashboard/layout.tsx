@@ -1,9 +1,10 @@
+import { ReactNode } from 'react';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { redirect } from 'next/navigation';
 import prisma from '../lib/db';
 
 // stripe
-import { stripe } from '@/lib/stripe';
+import { stripe } from '@/app/lib/stripe';
 
 async function getData({
   email,
@@ -18,7 +19,7 @@ async function getData({
   lastName: string | undefined | null;
   profileImage: string | undefined | null;
 }) {
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: {
       id: id,
     },
@@ -30,7 +31,7 @@ async function getData({
 
   if (!user) {
     const name = `${firstName ?? ''} ${lastName ?? ''}`;
-    await prisma.user.create({
+    user = await prisma.user.create({
       data: {
         id: id,
         email: email,
@@ -58,11 +59,11 @@ async function getData({
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { getUser } = getKindeServerSession();
-  const user = await getUser();
 
+  const user = await getUser();
   if (!user) {
     return redirect('/');
   }

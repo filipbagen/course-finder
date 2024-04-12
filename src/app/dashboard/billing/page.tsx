@@ -21,7 +21,7 @@ import prisma from '@/app/lib/db';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
 // stripe
-import { getStripeSession } from '@/lib/stripe';
+import { getStripeSession } from '@/app/lib/stripe';
 
 // components
 import { StripeSubscriptionCreationButton } from '@/app/components/SubmitButtons';

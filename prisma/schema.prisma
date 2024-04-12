@@ -25,7 +25,7 @@ model User {
 
 model Subscription {
   stripeSubscriptionId String   @id @unique
-  invterval            String
+  interval             String
   status               String
   planId               String
   currentPeriodStart   Int
