@@ -35,3 +35,31 @@ model Subscription {
   user                 User     @relation(fields: [userId], references: [id])
   userId               String   @unique
 }
+
+model Courses {
+  courseId             String @id @unique
+  courseCode           String @unique
+  courseName           String
+  credits              Int
+  mainFieldOfStudy     String
+  courseLevel          String
+  semester             String
+  period               String
+  block                String
+  location             String
+  url                  String
+  prerequisites        String
+  exclusions           String
+  studyPace            String
+  examinations         Examinations[]
+}
+
+model Examinations {
+  examId              String @id @unique
+  courseId            String
+  examCode            String
+  examName            String
+  examCredits         Int
+  examGradingScale    String
+  course              Courses @relation(fields: [courseId], references: [courseId])
+}

@@ -39,9 +39,6 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
-// next
-import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
-
 // icons
 import {
   MapPin,
@@ -51,13 +48,26 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 
-// data
-import courses from '../data/courses';
-
 // components
 import Filter from './Filter';
 
-export default function Dashboard() {
+// prisma
+import prisma from '../lib/db';
+
+// react
+import React, { useState, useEffect } from 'react';
+
+export default async function Dashboard() {
+  function fetchCourses() {
+    return prisma.courses.findMany({
+      include: {
+        examinations: true,
+      },
+    });
+  }
+
+  const courses = await fetchCourses();
+
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <Filter />
@@ -89,14 +99,13 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
 
-            {/* <IconComponent className="cursor-pointer text-muted-foreground hover:text-primary transition-colors duration-200" /> */}
             <LayoutGrid size={24} />
           </div>
         </div>
 
         <div className="flex flex-wrap gap-4 justify-between">
-          {courses.map((course) => (
-            <Card key={course.courseCode} className="flex-grow h-min">
+          {courses.map((course: any) => (
+            <Card key={course.courseId} className="flex-grow h-min">
               <CardHeader>
                 <div className="flex justify-between">
                   <div>
@@ -137,13 +146,13 @@ export default function Dashboard() {
                     <div className="flex justify-between">
                       <CardFooter className="flex gap-4">
                         <div>
-                          <p>Termin {course.semester.join(', ')}</p>
+                          <p>Termin {course.semester}</p>
                         </div>
                         <div>
-                          <p>Period {course.period.join(', ')}</p>
+                          <p>Period {course.period}</p>
                         </div>
                         <div>
-                          <p>Block {course.block.join(', ')}</p>
+                          <p>Block {course.block}</p>
                         </div>
                       </CardFooter>
                       <AccordionTrigger className="p-0" />
@@ -165,7 +174,7 @@ export default function Dashboard() {
                         </div>
 
                         {course.mainFieldOfStudy.length != 0 ? (
-                          <p>{course.mainFieldOfStudy.join(', ')}</p>
+                          <p>{course.mainFieldOfStudy}</p>
                         ) : (
                           <p>Inget huvudområde</p>
                         )}
@@ -177,9 +186,13 @@ export default function Dashboard() {
                           <h6>Examination</h6>
                         </div>
                         <ul>
-                          {course.examination.map((ex) => (
-                            <li key={ex.name}>{ex.name}</li>
-                          ))}
+                          {course.examinations &&
+                            course.examinations.map((ex: any) => (
+                              <li key={ex.examId}>
+                                {ex.examName}, {ex.examCode},{' '}
+                                {ex.examGradingScale}, {ex.examCredits}hp
+                              </li>
+                            ))}
                         </ul>
                       </div>
                     </AccordionContent>
