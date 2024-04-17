@@ -1,3 +1,5 @@
+'use client';
+
 // shadcn
 import {
   Card,
@@ -51,33 +53,44 @@ import {
 // components
 import Filter from './Filter';
 
-// prisma
-import prisma from '../lib/db';
-
 // react
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-export default async function Dashboard() {
-  function fetchCourses() {
-    return prisma.courses.findMany({
-      include: {
-        examinations: true,
-      },
-    });
+export default function Dashboard() {
+  const [courses, setCourses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
+
+  // Ref for the search input
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  function fetchCourses(query = '', sort = '') {
+    fetch('/api/search?q=' + encodeURIComponent(searchQuery))
+      .then((response) => response.json())
+      .then((data) => setCourses(data))
+      .catch((error) => console.error('Fetch error:', error));
   }
 
-  const courses = await fetchCourses();
+  useEffect(() => {
+    fetchCourses(searchQuery, sortOrder);
+  }, [searchQuery, sortOrder]);
 
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <Filter />
 
       <div className="flex flex-col gap-4 w-full">
-        <Input type="text" placeholder="Search course" />
+        <Input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search course"
+          className="input-class-here"
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
         <div className="flex gap-4 items-center justify-between">
           <p>
-            Showing <b>X</b> search results
+            Showing <b>{courses.length}</b> search results
           </p>
 
           <div className="flex items-center gap-4">
