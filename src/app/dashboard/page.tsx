@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // icons
 import {
@@ -56,32 +57,71 @@ import Filter from './Filter';
 // react
 import React, { useState, useEffect, useRef } from 'react';
 
+// icons
+import {
+  School,
+  Gauge,
+  Blocks,
+  BetweenHorizontalStart,
+  AlignVerticalJustifyCenter,
+  Network,
+} from 'lucide-react';
+
+type FilterState = {
+  location: string[];
+};
+
 export default function Dashboard() {
-  const [courses, setCourses] = useState<any>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
+  const [filters, setFilters] = useState<FilterState>({ location: [] });
+
+  const handleLocationChange = (location: string, isChecked: boolean) => {
+    setFilters((prev) => ({
+      ...prev,
+      location: isChecked
+        ? [...prev.location, location]
+        : prev.location.filter((l) => l !== location),
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(
-        `/api/search?q=${encodeURIComponent(
-          searchQuery
-        )}&sort=${encodeURIComponent(sortOrder)}`
-      );
+      const query = new URLSearchParams({
+        q: encodeURIComponent(searchQuery),
+        sort: encodeURIComponent(sortOrder),
+        location: filters.location.join(','),
+      }).toString();
+      const response = await fetch(`/api/search?${query}`);
       const data = await response.json();
       setCourses(data);
     };
 
     fetchData().catch(console.error);
-  }, [searchQuery, sortOrder]);
+  }, [searchQuery, sortOrder, filters]);
 
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
-      <Filter />
+      {/* Location filters */}
+      {['Norrköping', 'Linköping'].map((location) => (
+        <div key={location}>
+          <input
+            type="checkbox"
+            id={location}
+            onChange={(e) => handleLocationChange(location, e.target.checked)}
+          />
+          <label
+            htmlFor={location}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            {location}
+          </label>
+        </div>
+      ))}
 
       <div className="flex flex-col gap-4 w-full">
         <Input
-          // ref={searchInputRef}
           type="text"
           placeholder="Search course"
           onChange={(e) => setSearchQuery(e.target.value)}
