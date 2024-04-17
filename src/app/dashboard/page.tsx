@@ -57,22 +57,22 @@ import Filter from './Filter';
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function Dashboard() {
-  const [courses, setCourses] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOrder, setSortOrder] = useState('');
-
-  // Ref for the search input
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  function fetchCourses(query = '', sort = '') {
-    fetch('/api/search?q=' + encodeURIComponent(searchQuery))
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => console.error('Fetch error:', error));
-  }
+  const [courses, setCourses] = useState<any>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<string>('');
 
   useEffect(() => {
-    fetchCourses(searchQuery, sortOrder);
+    const fetchData = async () => {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(
+          searchQuery
+        )}&sort=${encodeURIComponent(sortOrder)}`
+      );
+      const data = await response.json();
+      setCourses(data);
+    };
+
+    fetchData().catch(console.error);
   }, [searchQuery, sortOrder]);
 
   return (
@@ -81,10 +81,9 @@ export default function Dashboard() {
 
       <div className="flex flex-col gap-4 w-full">
         <Input
-          ref={searchInputRef}
+          // ref={searchInputRef}
           type="text"
           placeholder="Search course"
-          className="input-class-here"
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
@@ -94,7 +93,7 @@ export default function Dashboard() {
           </p>
 
           <div className="flex items-center gap-4">
-            <Select>
+            <Select onValueChange={(value) => setSortOrder(value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
