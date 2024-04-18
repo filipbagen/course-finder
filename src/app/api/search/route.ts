@@ -82,6 +82,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const courses = await prisma.courses.findMany({
+      include: {
+        examinations: true,
+      },
       where: whereClause,
       orderBy: sortOptions,
     });
