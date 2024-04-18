@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // icons
 import {
@@ -79,8 +79,24 @@ interface FilterState {
   location: string[];
 }
 
+export function SkeletonCard() {
+  return (
+    <div className="rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between min-w-80 basis-1 flex-grow h-[218px]">
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-6 w-6" />
+      </div>
+
+      <Skeleton className="h-4 w-[72px]" />
+      <Skeleton className="h-4 w-[128px]" />
+      <Skeleton className="h-4 w-full" />
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
   const [filters, setFilters] = useState<FilterState>({
@@ -128,6 +144,7 @@ export default function Dashboard() {
     const response = await fetch(`/api/search?${query.toString()}`);
     const data = await response.json();
     setCourses(data); // This should trigger a re-render with the new, filtered courses
+    setLoading(false);
   };
 
   return (
@@ -170,6 +187,14 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-wrap gap-4 justify-between">
+          {loading && (
+            <>
+              {Array.from({ length: 12 }).map((_, index) => (
+                <SkeletonCard key={index} />
+              ))}
+            </>
+          )}
+
           {courses.map((course: any) => (
             <Card key={course.courseId} className="flex-grow h-min">
               <CardHeader>
