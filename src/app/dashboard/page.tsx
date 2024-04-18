@@ -105,7 +105,6 @@ export default function Dashboard() {
         : prev[filterType].filter((v) => v !== value);
 
       const newFilters = { ...prev, [filterType]: updatedValues };
-      console.log(newFilters); // Check the new filter state
       return newFilters;
     });
   };

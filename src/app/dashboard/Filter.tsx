@@ -1,5 +1,5 @@
 // react
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // shadcn
 import {
@@ -43,10 +43,12 @@ interface FilterProps {
 }
 
 const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
-  const [filters, setFilters] = useState<Record<string, any[]>>({});
-
   const resetFilters = () => {
-    setFilters({});
+    Object.keys(currentFilters).forEach((filterType) => {
+      currentFilters[filterType as keyof FilterState].forEach((value) => {
+        onFilterChange(filterType as keyof FilterState, value, false);
+      });
+    });
   };
 
   return (
@@ -78,8 +80,6 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
                   const isChecked =
                     currentFilters[item.filterType].includes(optionString);
 
-                  // console.log(currentFilters[item.filterType]);
-
                   return (
                     <CheckboxItem
                       key={optionString}
@@ -99,7 +99,13 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
         ))}
       </Accordion>
       <CardFooter>
-        <Button onClick={resetFilters}>Reset Filter</Button>
+        <Button
+          onClick={() => {
+            resetFilters();
+          }}
+        >
+          Reset Filter
+        </Button>
       </CardFooter>
     </Card>
   );
