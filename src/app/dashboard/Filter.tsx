@@ -1,3 +1,6 @@
+// react
+import React, { useState } from 'react';
+
 // shadcn
 import {
   Card,
@@ -11,131 +14,53 @@ import { Button } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
-  AccordionItem,
+  AccordionItem as AccordionItemComponent,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Checkbox } from '@/components/ui/checkbox';
-import React from 'react';
 
-const CheckboxItem = React.memo(
-  ({
-    filterType,
-    value,
-    displayValue,
-  }: {
-    filterType: string | number;
-    value: string | number;
-    displayValue: string;
-  }) => (
-    <label className="flex items-center gap-3 cursor-pointer">
-      <Checkbox />
-      <div className="leading-none text-base">{displayValue}</div>
-    </label>
-  )
-);
+import { AccordionItemProps } from '../components/filter/types';
+import CheckboxItem from '../components/filter/CheckboxItem';
+import { accordionItems } from '../components/filter/accordionItemsConfig';
 
-// icons
-import {
-  SignpostBig,
-  NotebookPen,
-  School,
-  Gauge,
-  Blocks,
-  BetweenHorizontalStart,
-  AlignVerticalJustifyCenter,
-  Network,
-} from 'lucide-react';
+interface FilterState {
+  semester: string[];
+  period: string[];
+  block: string[];
+  studyPace: string[];
+  courseLevel: string[];
+  mainFieldOfStudy: string[];
+  examinations: string[];
+  location: string[];
+}
 
-export default function Filter() {
-  interface AccordionItem {
-    value: string;
-    title: string;
-    filterType: string;
-    options: (string | number)[];
-    displayValue: (value: string | number) => string;
-    icon: JSX.Element;
-  }
+interface FilterProps {
+  onFilterChange: (
+    filterType: keyof FilterState,
+    value: string,
+    isChecked: boolean
+  ) => void;
+  currentFilters: FilterState;
+}
 
-  const accordionItems: AccordionItem[] = [
-    {
-      value: 'semester',
-      title: 'Termin',
-      filterType: 'semester',
-      options: [7, 8, 9],
-      displayValue: (semester: string | number) => `Termin ${semester}`,
-      icon: <BetweenHorizontalStart size={22} />,
-    },
-    {
-      value: 'period',
-      title: 'Period',
-      filterType: 'period',
-      options: [1, 2],
-      displayValue: (period: string | number) => `Period ${period}`,
-      icon: <AlignVerticalJustifyCenter size={22} />,
-    },
-    {
-      value: 'block',
-      title: 'Block',
-      filterType: 'block',
-      options: [1, 2, 3, 4],
-      displayValue: (block: string | number) => `Block ${block}`,
-      icon: <Blocks size={22} />,
-    },
-    {
-      value: 'studyPace',
-      title: 'Studietakt',
-      filterType: 'studyPace',
-      options: ['Helfart', 'Halvfart'],
-      displayValue: (pace: string | number) => pace.toString(),
-      icon: <Gauge size={22} />,
-    },
-    {
-      value: 'level',
-      title: 'Utbildningsnivå',
-      filterType: 'courseLevel',
-      options: ['Grundnivå', 'Avancerad nivå'],
-      displayValue: (level: string | number) => level.toString(),
-      icon: <Network size={22} />,
-    },
-    {
-      value: 'fieldOfStudy',
-      title: 'Huvudområde',
-      filterType: 'mainFieldOfStudy',
-      options: ['Medieteknik', 'Datateknik', 'Programvaruteknik', 'Övrigt'],
-      displayValue: (field: string | number) => field.toString(),
-      icon: <SignpostBig size={22} />,
-    },
-    {
-      value: 'examination',
-      title: 'Examination',
-      filterType: 'examination',
-      options: ['Tentamen', 'Laboration', 'Projekt', 'Övrigt'],
-      displayValue: (type: string | number) => type.toString(),
-      icon: <NotebookPen size={22} />,
-    },
-    {
-      value: 'campus',
-      title: 'Campus',
-      filterType: 'location',
-      options: ['Norrköping', 'Linköping'],
-      displayValue: (campus: string | number) => campus.toString(),
-      icon: <School size={22} />,
-    },
-  ];
+const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
+  const [filters, setFilters] = useState<Record<string, any[]>>({});
+
+  const resetFilters = () => {
+    setFilters({});
+  };
 
   return (
     <Card
       className="sticky inset-x-0 top-20 overflow-y-auto h-full"
       style={{ maxHeight: 'calc(100vh - 74px)' }}
     >
-      {/* Accordion */}
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
         {accordionItems.map((item) => (
-          <AccordionItem value={item.value} key={item.value}>
+          <AccordionItemComponent value={item.value} key={item.value}>
             <AccordionTrigger>
               <CardHeader>
-                <div className="flex gap-3 items-center">
-                  {item.icon}
+                <div className="flex gap-4 items-center">
+                  <item.icon size={20} />
                   <CardTitle className="mb-0 text-base font-medium">
                     {item.title}
                   </CardTitle>
@@ -144,26 +69,40 @@ export default function Filter() {
             </AccordionTrigger>
             <AccordionContent>
               <CardContent className="flex flex-col gap-4">
-                {item.options.map((option: string | number) => {
-                  const displayValue = item.displayValue(option);
+                {item.options.map((option) => {
+                  // Convert option to string since FilterState expects string values
+                  const optionString = option.toString();
+                  // Retrieve display value for the current option
+                  const displayValue = item.displayValue(optionString);
+                  // Check if the current option is selected
+                  const isChecked =
+                    currentFilters[item.filterType].includes(optionString);
+
+                  // console.log(currentFilters[item.filterType]);
 
                   return (
                     <CheckboxItem
-                      key={String(option)}
+                      key={optionString}
                       filterType={item.filterType}
                       displayValue={displayValue}
-                      value={option}
+                      value={optionString}
+                      onChange={(checked) =>
+                        onFilterChange(item.filterType, optionString, checked)
+                      }
+                      checked={isChecked}
                     />
                   );
                 })}
               </CardContent>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItemComponent>
         ))}
       </Accordion>
       <CardFooter>
-        <Button>Reset Filter</Button>
+        <Button onClick={resetFilters}>Reset Filter</Button>
       </CardFooter>
     </Card>
   );
-}
+};
+
+export default Filter;

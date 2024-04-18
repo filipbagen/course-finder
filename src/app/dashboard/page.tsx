@@ -67,58 +67,73 @@ import {
   Network,
 } from 'lucide-react';
 
-type FilterState = {
+// TODO: Move this to a shared location
+interface FilterState {
+  semester: string[];
+  period: string[];
+  block: string[];
+  studyPace: string[];
+  courseLevel: string[];
+  mainFieldOfStudy: string[];
+  examinations: string[];
   location: string[];
-};
+}
 
 export default function Dashboard() {
   const [courses, setCourses] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
-  const [filters, setFilters] = useState<FilterState>({ location: [] });
+  const [filters, setFilters] = useState<FilterState>({
+    semester: [],
+    period: [],
+    block: [],
+    studyPace: [],
+    courseLevel: [],
+    mainFieldOfStudy: [],
+    examinations: [],
+    location: [],
+  });
 
-  const handleLocationChange = (location: string, isChecked: boolean) => {
-    setFilters((prev) => ({
-      ...prev,
-      location: isChecked
-        ? [...prev.location, location]
-        : prev.location.filter((l) => l !== location),
-    }));
+  const handleFilterChange = (
+    filterType: keyof FilterState,
+    value: string,
+    isChecked: boolean
+  ) => {
+    setFilters((prev) => {
+      const updatedValues = isChecked
+        ? [...prev[filterType], value]
+        : prev[filterType].filter((v) => v !== value);
+
+      const newFilters = { ...prev, [filterType]: updatedValues };
+      console.log(newFilters); // Check the new filter state
+      return newFilters;
+    });
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const query = new URLSearchParams({
-        q: encodeURIComponent(searchQuery),
-        sort: encodeURIComponent(sortOrder),
-        location: filters.location.join(','),
-      }).toString();
-      const response = await fetch(`/api/search?${query}`);
-      const data = await response.json();
-      setCourses(data);
-    };
-
     fetchData().catch(console.error);
   }, [searchQuery, sortOrder, filters]);
 
+  const fetchData = async () => {
+    const query = new URLSearchParams({
+      q: encodeURIComponent(searchQuery),
+      sort: encodeURIComponent(sortOrder),
+    });
+
+    Object.entries(filters).forEach(([key, values]) => {
+      if (values.length) {
+        query.set(key, values.join(',')); // Make sure keys match your server's expected query params
+      }
+    });
+
+    const response = await fetch(`/api/search?${query.toString()}`);
+    const data = await response.json();
+    setCourses(data); // This should trigger a re-render with the new, filtered courses
+  };
+
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
-      {/* Location filters */}
-      {['Norrköping', 'Linköping'].map((location) => (
-        <div key={location}>
-          <input
-            type="checkbox"
-            id={location}
-            onChange={(e) => handleLocationChange(location, e.target.checked)}
-          />
-          <label
-            htmlFor={location}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            {location}
-          </label>
-        </div>
-      ))}
+      <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
 
       <div className="flex flex-col gap-4 w-full">
         <Input

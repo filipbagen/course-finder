@@ -1,4 +1,3 @@
-// pages/api/search.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/db';
 import { Prisma } from '@prisma/client';
@@ -7,11 +6,27 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const searchQuery = url.searchParams.get('q') || '';
   const sort = url.searchParams.get('sort') || '';
-  const locations =
-    url.searchParams
-      .get('location')
+
+  // Retrieve filters from query parameters
+  const filters = {
+    semester: url.searchParams.get('semester')?.split(',').filter(Boolean),
+    period: url.searchParams.get('period')?.split(',').filter(Boolean),
+    block: url.searchParams.get('block')?.split(',').filter(Boolean),
+    studyPace: url.searchParams.get('studyPace')?.split(',').filter(Boolean),
+    courseLevel: url.searchParams
+      .get('courseLevel')
       ?.split(',')
-      .filter((l) => l) || [];
+      .filter(Boolean),
+    mainFieldOfStudy: url.searchParams
+      .get('mainFieldOfStudy')
+      ?.split(',')
+      .filter(Boolean),
+    examinations: url.searchParams
+      .get('examinations')
+      ?.split(',')
+      .filter(Boolean),
+    location: url.searchParams.get('location')?.split(',').filter(Boolean),
+  };
 
   let sortOptions = {};
   switch (sort) {
@@ -29,6 +44,7 @@ export async function GET(request: NextRequest) {
       break;
   }
 
+  // Construct where clause based on provided filters
   let whereClause: Prisma.CoursesWhereInput = {
     OR: [
       { courseCode: { contains: searchQuery, mode: 'insensitive' } },
@@ -36,10 +52,24 @@ export async function GET(request: NextRequest) {
     ],
   };
 
-  // Only add the location filter if there are any locations specified
-  if (locations.length > 0) {
-    whereClause['location'] = { in: locations };
-  }
+  // Adjust whereClause construction for complex fields like 'semester'
+  Object.entries(filters).forEach(([key, values]) => {
+    if (
+      values &&
+      values.length > 0 &&
+      ['semester', 'period', 'block'].includes(key)
+    ) {
+      // Create a condition for each value to check if it's part of the comma-separated string
+      whereClause.OR = values.map((value) => ({
+        [key]: {
+          contains: value,
+          mode: 'insensitive',
+        },
+      }));
+    } else if (values && values.length > 0) {
+      (whereClause as any)[key] = { in: values };
+    }
+  });
 
   try {
     const courses = await prisma.courses.findMany({
