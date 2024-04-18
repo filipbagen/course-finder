@@ -44,11 +44,18 @@ export async function GET(request: NextRequest) {
       break;
   }
 
-  // Construct where clause based on provided filters
-  let whereClause: Prisma.CoursesWhereInput = {
-    OR: [
-      { courseCode: { contains: searchQuery, mode: 'insensitive' } },
-      { courseName: { contains: searchQuery, mode: 'insensitive' } },
+  type ExtendedCoursesWhereInput = Prisma.CoursesWhereInput & {
+    AND: Prisma.CoursesWhereInput[];
+  };
+
+  let whereClause: ExtendedCoursesWhereInput = {
+    AND: [
+      {
+        OR: [
+          { courseCode: { contains: searchQuery, mode: 'insensitive' } },
+          { courseName: { contains: searchQuery, mode: 'insensitive' } },
+        ],
+      },
     ],
   };
 
@@ -60,12 +67,14 @@ export async function GET(request: NextRequest) {
       ['semester', 'period', 'block'].includes(key)
     ) {
       // Create a condition for each value to check if it's part of the comma-separated string
-      whereClause.OR = values.map((value) => ({
-        [key]: {
-          contains: value,
-          mode: 'insensitive',
-        },
-      }));
+      whereClause.AND.push({
+        OR: values.map((value) => ({
+          [key]: {
+            contains: value,
+            mode: 'insensitive',
+          },
+        })),
+      });
     } else if (values && values.length > 0) {
       (whereClause as any)[key] = { in: values };
     }
