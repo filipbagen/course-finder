@@ -55,17 +55,10 @@ import {
 import Filter from './Filter';
 
 // react
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// icons
-import {
-  School,
-  Gauge,
-  Blocks,
-  BetweenHorizontalStart,
-  AlignVerticalJustifyCenter,
-  Network,
-} from 'lucide-react';
+// kinde
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
 // TODO: Move this to a shared location
 interface FilterState {
@@ -147,6 +140,24 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const addToEnrollment = async (courseId: string, semester: number) => {
+    const response = await fetch('/api/enrollment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        courseId: courseId,
+        semester: semester,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Error:', response.status);
+      throw new Error('Error creating enrollment');
+    }
+  };
+
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
@@ -216,9 +227,21 @@ export default function Dashboard() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
-                      <DropdownMenuItem>7</DropdownMenuItem>
-                      <DropdownMenuItem>8</DropdownMenuItem>
-                      <DropdownMenuItem>9</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => addToEnrollment(course.courseId, 7)}
+                      >
+                        Semester 7
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => addToEnrollment(course.courseId, 8)}
+                      >
+                        Semester 8
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => addToEnrollment(course.courseId, 9)}
+                      >
+                        Semester 9
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

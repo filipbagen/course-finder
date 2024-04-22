@@ -22,6 +22,7 @@ model User {
   stripeCustomerId String?       @unique
   colorScheme      String        @default("theme-blue")
   Subscription     Subscription?
+  Enrollment       Enrollment[]
 }
 
 model Subscription {
@@ -53,6 +54,7 @@ model Courses {
   exclusions           String
   studyPace            String
   examinations         Examinations[]
+  Enrollment           Enrollment[]
 }
 
 model Examinations {
@@ -63,4 +65,13 @@ model Examinations {
   examCredits         Int
   examGradingScale    String
   course              Courses @relation(fields: [courseId], references: [courseId])
+}
+
+model Enrollment {
+  enrollmentId        String  @id @unique
+  semester            String
+  user                User    @relation(fields: [userId], references: [id])
+  userId              String
+  course              Courses @relation(fields: [courseId], references: [courseId])
+  courseId            String
 }
