@@ -27,3 +27,20 @@ export async function POST(request: Request) {
   });
   return NextResponse.json({ enrollment });
 }
+
+export async function GET(request: Request) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
+  }
+
+  const courses = await prisma.enrollment.findMany({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  return NextResponse.json({ courses });
+}
