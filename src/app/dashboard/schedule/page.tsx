@@ -8,6 +8,7 @@ import {
   DroppableProvided,
 } from '@hello-pangea/dnd';
 import { reorder, remove, appendAt } from './utils';
+import CourseCard from '@/app/components/CourseCard';
 
 export default function Schedule() {
   const [userCourseId, setUserCoursId] = useState<any[]>([]);
@@ -79,27 +80,28 @@ export default function Schedule() {
                           <p>Loading...</p>
                         ) : (
                           userCourseId.map((course, index) => (
-                            <div key={course.courseId}>
-                              <p>{course.courseName}</p>
-                            </div>
-                            // <Draggable
-                            //   key={course.enrollmentId}
-                            //   draggableId={course.enrollmentId}
-                            //   index={index}
-                            // >
-                            //   {(provided) => (
-                            //     <div
-                            //       ref={provided.innerRef}
-                            //       {...provided.draggableProps}
-                            //       {...provided.dragHandleProps}
-                            //       className="w-48 bg-blue-500"
-                            //     >
-                            //       <p key={course.enrollmentId}>
-                            //         {course.courseId}
-                            //       </p>
-                            //     </div>
-                            //   )}
-                            // </Draggable>
+                            <Draggable
+                              key={course.courseId}
+                              draggableId={course.courseId}
+                              index={index}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="w-48 bg-blue-500"
+                                >
+                                  <CourseCard
+                                    key={course.courseId}
+                                    course={course}
+                                    addToEnrollment={() =>
+                                      console.log('hello there')
+                                    }
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
                           ))
                         )}
                         {provided.placeholder}
