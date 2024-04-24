@@ -104,24 +104,6 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const addToEnrollment = async (courseId: string, semester: number) => {
-    const response = await fetch('/api/enrollment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        courseId: courseId,
-        semester: semester,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('Error:', response.status);
-      throw new Error('Error creating enrollment');
-    }
-  };
-
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
@@ -171,13 +153,7 @@ export default function Dashboard() {
           )}
 
           {courses.map((course: any) => (
-            <CourseCard
-              key={course.courseId}
-              course={course}
-              addToEnrollment={() =>
-                addToEnrollment(course.courseId, course.semester)
-              }
-            />
+            <CourseCard key={course.courseId} course={course} />
           ))}
         </div>
       </div>

@@ -32,13 +32,25 @@ import {
 // icons
 import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
 
-export default function CourseCard({
-  course,
-  addToEnrollment,
-}: {
-  course: any;
-  addToEnrollment: any;
-}) {
+export default function CourseCard({ course }: { course: any }) {
+  const addToEnrollment = async (courseId: string, semester: number) => {
+    const response = await fetch('/api/enrollment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        courseId: courseId,
+        semester: semester,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Error:', response.status);
+      throw new Error('Error creating enrollment');
+    }
+  };
+
   return (
     <Card key={course.courseId} className="flex-grow h-min">
       <CardHeader>
