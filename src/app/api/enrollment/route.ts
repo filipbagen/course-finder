@@ -36,11 +36,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
   }
 
-  const courses = await prisma.enrollment.findMany({
+  // Fetch enrollments with nested course data included
+  const enrollments = await prisma.enrollment.findMany({
     where: {
       userId: user.id,
     },
+    include: {
+      course: true, // Include the course details directly in the query
+    },
   });
+
+  // As the course details are already included, just map them out
+  const courses = enrollments.map((enrollment) => enrollment.course);
 
   return NextResponse.json({ courses });
 }
