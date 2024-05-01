@@ -60,3 +60,23 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ courses: coursesWithEnrollmentSemester });
 }
+
+export async function PATCH(request: Request) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
+  }
+
+  const { enrollmentId, newSemester } = await request.json();
+
+  const updatedEnrollment = await prisma.enrollment.update({
+    where: { enrollmentId: enrollmentId },
+    data: {
+      semester: newSemester,
+    },
+  });
+
+  return NextResponse.json({ updatedEnrollment });
+}
