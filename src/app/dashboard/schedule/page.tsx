@@ -163,86 +163,76 @@ export default function Schedule() {
     }
   };
 
+  const SemesterBlock = ({
+    semester,
+    courses,
+    period,
+  }: {
+    semester: any;
+    courses: Course[];
+    period: string;
+  }) => (
+    <div key={`${semester}-${period}`} className="p-4 w-full">
+      <h5>Semester {semester}</h5>
+      <Droppable
+        droppableId={`${semester}-${period}`}
+        type={semester === '8' ? `unique-${period}` : `movable-${period}`}
+      >
+        {(provided) => (
+          <div
+            className="h-full p-4 bg-blue-50 dark:bg-gray-800 rounded-md flex flex-col gap-4"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {courses.map((course, index) => (
+              <Draggable
+                draggableId={`${course.courseId}-${period}`}
+                index={index}
+                key={`${course.courseId}-${period}`}
+              >
+                {(provided) => (
+                  <div
+                    {...provided.dragHandleProps}
+                    {...provided.draggableProps}
+                    ref={provided.innerRef}
+                  >
+                    <CourseCard course={course} />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </div>
+  );
+
   return (
     <DragDropContext onDragEnd={handleDragAndDrop}>
-      <div className="flex w-full justify-between gap-4 bg-red-500">
-        {Object.keys(semesters).map((semester) => (
-          <div key={`${semester}-P1`} className="bg-green-500 p-4 w-full">
-            <h2>Semester {semester}</h2>
-            <Droppable
-              droppableId={`${semester}-P1`}
-              type={semester === '8' ? `unique-P1` : 'movable-P1'}
-            >
-              {(provided) => (
-                <div
-                  className="h-full bg-yellow-400"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {semesters[semester as any].map((course, index) => (
-                    <Draggable
-                      draggableId={`${course.courseId}-P1`}
-                      index={index}
-                      key={`${course.courseId}-P1`}
-                    >
-                      {(provided) => (
-                        <div
-                          className="bg-blue-500"
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                          ref={provided.innerRef}
-                        >
-                          <p className="p-4">{course.courseName}</p>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex w-full justify-between gap-4 bg-red-500">
-        {Object.keys(semestersP2).map((semester) => (
-          <div key={`${semester}-P2`} className="bg-green-500 p-4 w-full">
-            <h2>Semester {semester}</h2>
-            <Droppable
-              droppableId={`${semester}-P2`}
-              type={semester === '8' ? `unique-P2` : 'movable-P2'}
-            >
-              {(provided) => (
-                <div
-                  className="h-full bg-yellow-400"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {semestersP2[semester as any].map((course, index) => (
-                    <Draggable
-                      draggableId={`${course.courseId}-P2`}
-                      index={index}
-                      key={`${course.courseId}-P2`}
-                    >
-                      {(provided) => (
-                        <div
-                          className="bg-blue-500"
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                          ref={provided.innerRef}
-                        >
-                          <p className="p-4">{course.courseName}</p>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-        ))}
+      <h5>Period 1</h5>
+      <div className="flex flex-col gap-4">
+        <div className="flex w-full justify-between gap-4">
+          {Object.keys(semesters).map((semester) => (
+            <SemesterBlock
+              key={semester}
+              semester={semester}
+              courses={semesters[semester as any]}
+              period="P1"
+            />
+          ))}
+        </div>
+        <h5>Period 1</h5>
+        <div className="flex w-full justify-between gap-4">
+          {Object.keys(semestersP2).map((semester) => (
+            <SemesterBlock
+              key={semester}
+              semester={semester}
+              courses={semestersP2[semester as any]}
+              period="P2"
+            />
+          ))}
+        </div>
       </div>
     </DragDropContext>
   );
