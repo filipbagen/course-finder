@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Course } from '@/app/utilities/types';
 
 // shadcn
 import {
@@ -117,7 +117,7 @@ export default async function Home() {
         <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-gray-900"></div>
 
         <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
-          {db.Courses.map((course: any) => (
+          {db.Courses.map((course: Course) => (
             <Card
               key={course.courseCode}
               className="

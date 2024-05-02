@@ -1,40 +1,23 @@
 'use client';
 
-// shadcn
+// React and Libraries
+import React, { useState, useEffect } from 'react';
+import { LayoutGrid } from 'lucide-react';
+import { Course, FilterState } from '@/app/utilities/types';
+
+// Components and Styles
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-
-// icons
-import { LayoutGrid } from 'lucide-react';
-
-// components
 import Filter from './Filter';
-
-// react
-import React, { useState, useEffect } from 'react';
-
 import CourseCard from '../components/CourseCard';
-
-// TODO: Move this to a shared location
-interface FilterState {
-  semester: string[];
-  period: string[];
-  block: string[];
-  studyPace: string[];
-  courseLevel: string[];
-  mainFieldOfStudy: string[];
-  examinations: string[];
-  location: string[];
-}
 
 export function SkeletonCard() {
   return (
@@ -52,7 +35,7 @@ export function SkeletonCard() {
 }
 
 export default function Dashboard() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
@@ -152,7 +135,7 @@ export default function Dashboard() {
             </>
           )}
 
-          {courses.map((course: any) => (
+          {courses.map((course: Course) => (
             <CourseCard key={course.courseId} course={course} />
           ))}
         </div>

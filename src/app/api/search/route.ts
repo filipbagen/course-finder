@@ -7,6 +7,13 @@ export async function GET(request: NextRequest) {
   const searchQuery = url.searchParams.get('q') || '';
   const sort = url.searchParams.get('sort') || '';
 
+  type FilterKeys = keyof Prisma.CoursesWhereInput;
+  type FilterValues = string[] | undefined;
+
+  interface Filters {
+    [key: string]: FilterValues;
+  }
+
   // Retrieve filters from query parameters
   const filters = {
     semester: url.searchParams.get('semester')?.split(',').filter(Boolean),

@@ -31,8 +31,9 @@ import {
 
 // icons
 import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
+import { Course, Examination } from '@/app/utilities/types';
 
-export default function CourseCard({ course }: { course: any }) {
+export default function CourseCard({ course }: { course: Course }) {
   const addToEnrollment = async (courseId: string, semester: number) => {
     const response = await fetch('/api/enrollment', {
       method: 'POST',
@@ -144,7 +145,7 @@ export default function CourseCard({ course }: { course: any }) {
                 </div>
                 <ul>
                   {course.examinations &&
-                    course.examinations.map((ex: any) => (
+                    course.examinations.map((ex: Examination) => (
                       <li key={ex.examId}>
                         {ex.examName}, {ex.examCode}, {ex.examGradingScale},{' '}
                         {ex.examCredits}hp

@@ -8,23 +8,7 @@ import {
   DropResult,
 } from '@hello-pangea/dnd';
 import CourseCard from '@/app/components/CourseCard';
-
-interface Course {
-  courseId: string;
-  courseCode: string;
-  courseName: string;
-  credits: number;
-  mainFieldOfStudy: string;
-  courseLevel: string;
-  semester: string;
-  period: string;
-  block: string;
-  location: string;
-  url: string;
-  prerequisites: string;
-  exclusions: string;
-  studyPace: string;
-}
+import { Course, SemesterGroupings } from '@/app/utilities/types';
 
 export default function Schedule() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -43,23 +27,30 @@ export default function Schedule() {
       }
       const data = await response.json();
       setCourses(data.courses);
-      const groupedP1 = data.courses.reduce((acc: any, course: Course) => {
-        const key = course.semester;
-        if (!acc[key]) acc[key] = [];
-        if (course.period.includes('1')) {
-          acc[key].push(course);
-        }
-        return acc;
-      }, {});
 
-      const groupedP2 = data.courses.reduce((acc: any, course: Course) => {
-        const key = course.semester;
-        if (!acc[key]) acc[key] = [];
-        if (course.period.includes('2')) {
-          acc[key].push(course);
-        }
-        return acc;
-      }, {});
+      const groupedP1 = data.courses.reduce(
+        (acc: SemesterGroupings, course: Course) => {
+          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+          if (!acc[key]) acc[key] = [];
+          if (course.period.includes('1')) {
+            acc[key].push(course);
+          }
+          return acc;
+        },
+        {}
+      );
+
+      const groupedP2 = data.courses.reduce(
+        (acc: SemesterGroupings, course: Course) => {
+          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+          if (!acc[key]) acc[key] = [];
+          if (course.period.includes('2')) {
+            acc[key].push(course);
+          }
+          return acc;
+        },
+        {}
+      );
 
       setSemesters(groupedP1);
       setSemestersP2(groupedP2);
@@ -144,7 +135,7 @@ export default function Schedule() {
 
         // Decide on a suitable index for the course in the new semester
         const appropriateIndex = newOtherDestinationCourses.findIndex(
-          (c: any) => c.semester === destinationSemesterId
+          (c: Course) => c.semester === destinationSemesterId.toString()
         );
         newOtherDestinationCourses.splice(
           appropriateIndex === -1
@@ -168,7 +159,7 @@ export default function Schedule() {
     courses,
     period,
   }: {
-    semester: any;
+    semester: string;
     courses: Course[];
     period: string;
   }) => (
@@ -184,7 +175,7 @@ export default function Schedule() {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {courses.map((course, index) => (
+            {courses.map((course: Course, index: number) => (
               <Draggable
                 draggableId={`${course.courseId}-${period}`}
                 index={index}
@@ -213,22 +204,22 @@ export default function Schedule() {
       <h5>Period 1</h5>
       <div className="flex flex-col gap-4">
         <div className="flex w-full justify-between gap-4">
-          {Object.keys(semesters).map((semester) => (
+          {Object.keys(semesters).map((semester: string) => (
             <SemesterBlock
               key={semester}
               semester={semester}
-              courses={semesters[semester as any]}
+              courses={semesters[parseInt(semester)]}
               period="P1"
             />
           ))}
         </div>
         <h5>Period 1</h5>
         <div className="flex w-full justify-between gap-4">
-          {Object.keys(semestersP2).map((semester) => (
+          {Object.keys(semestersP2).map((semester: string) => (
             <SemesterBlock
               key={semester}
               semester={semester}
-              courses={semestersP2[semester as any]}
+              courses={semestersP2[parseInt(semester)]}
               period="P2"
             />
           ))}
