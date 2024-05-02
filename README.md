@@ -2,35 +2,46 @@
 
 ## Overview
 
-This project aims to simplify the course selection process for graduate students at Linköping University. By leveraging a robust database and an intelligent recommendation system, it facilitates informed decision-making in course selection, tailored to individual preferences and academic trajectories.
-
-## Objective
-
-To provide a user-friendly platform that:
-
-- Offers comprehensive filtering and searching capabilities for exploring available courses.
-- Enables users to customize their academic schedules with ease.
-- Utilizes AI to offer personalized course recommendations, enhancing the educational experience.
-
-## Technologies and APIs
-
-- **Frontend and Backend**: Next.js 14
-- **Programming Language**: TypeScript
-- **Database and Authentication**: Firebase
+Course Finder simplifies the course selection process for graduate students at Linköping University (LiU). Utilizing a comprehensive database and an intelligent recommendation system (coming soon), this tool supports students in making informed decisions tailored to their individual academic needs.
 
 ## Core Functionalities
 
-- **Course Exploration**: Users can browse through courses offered in the LiU programs MT and D, accessing detailed information about each course.
-- **Personal Schedule Management**: Enables the addition of courses to a personal schedule for effective planning.
-- **AI-Powered Recommendations**: Personalized course suggestions based on user preferences and historical data.
+### Course Exploration
+
+- Browse through courses available in the LiU programs MT and D.
+- Access detailed information for each course.
+
+### Personal Schedule Management
+
+- Add courses to a personal schedule to organize your academic plan effectively.
+
+### Social Connectivity
+
+- Connect with peers, view each other's schedules, and see their reviews, enhancing the decision-making process.
+
+## Technologies and APIs
+
+### Frontend and Backend
+
+- **Next.js 14**: Framework for building user interfaces and handling server-side rendering.
+- **TypeScript**: Used for writing scalable and error-free code.
+
+### Database
+
+- **Supabase**: Open-source alternative to Firebase.
+- **Prisma**: ORM for efficient database management.
+
+### Authentication and Payment
+
+- **Kinde Authentication**: Secure user authentication.
+- **Stripe**: Manage subscriptions and process payments.
 
 ## Subscription Plans
 
 - **Free Version**: Access to basic functionalities including course exploration and schedule management.
-- **Premium Membership**: Offers advanced features like AI recommendations, supporting a more tailored educational experience.
+- **Premium Membership**: Offers advanced features like AI recommendations, supporting a more tailored educational experience (planned feature).
 
 ## Future Enhancements
 
-- **Course Rating System**: A feature allowing users to rate and review courses.
-- **Program Expansion**: Extending the course database to encompass a wider range of programs and voluntary courses offered at LiU.
-- **Social Connectivity**: A platform feature enabling users to search for and connect with peers, facilitating an exchange of course experiences and recommendations.
+- **Program Expansion**: Increase the number of programs and courses available in the database.
+- **AI-Powered Recommendations**: Offer personalized course suggestions based on user data and preferences.
