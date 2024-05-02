@@ -1,9 +1,27 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+// shadcn
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+// icons
+import { MapPin } from 'lucide-react';
 
 // kinde
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+
+// data
+import db from '../app/lib/courses.json';
 
 export default async function Home() {
   const { isAuthenticated } = getKindeServerSession();
@@ -88,6 +106,51 @@ export default async function Home() {
             We have a wide range of courses from top universities and
             institutions around the world. Start learning today!
           </p>
+        </div>
+      </div>
+
+      {/* Course animation */}
+      <div className="relative text-left mt-10 overflow-hidden">
+        <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-gray-900"></div>
+        <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-gray-900"></div>
+        <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-gray-900"></div>
+        <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-gray-900"></div>
+
+        <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
+          {db.Courses.map((course: any) => (
+            <Card
+              key={course.courseCode}
+              className="
+                flex-grow h-min bg-white rounded-md border border-gray-100
+                px-5 py-3 shadow-md transition-all hover:translate-x-1 hover:-translate-y-1
+                hover:scale-[1.025] hover:shadow-xl p-8"
+            >
+              <CardHeader>
+                <div className="flex justify-between gap-2 items-start">
+                  <CardTitle>{course.courseName}</CardTitle>
+                  <Button size={'icon'} className="hover:cursor-default">
+                    +
+                  </Button>
+                </div>
+                <CardDescription>{course.courseCode}</CardDescription>
+              </CardHeader>
+
+              <CardContent>
+                <div className="flex gap-2 items-center mb-4">
+                  <MapPin size={16} />
+                  <p>{course.location}</p>
+                </div>
+
+                <div className="flex justify-between">
+                  <CardFooter className="flex gap-4">
+                    <p>Termin {course.semester}</p>
+                    <p>Period {course.period}</p>
+                    <p>Block {course.block}</p>
+                  </CardFooter>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
 

@@ -582,3 +582,18 @@
     @apply my-4 ml-6 list-disc [&>li]:mt-2;
   }
 }
+
+@keyframes skewScroll {
+  from {
+    transform: rotateX(20deg) rotate(-20deg) skewX(20deg) translateZ(0)
+      translateY(-20%);
+  }
+  to {
+    transform: rotateX(20deg) rotate(-20deg) skewX(20deg) translateZ(0)
+      translateY(-120%);
+  }
+}
+
+.skewAnimation {
+  animation: skewScroll 20s linear infinite;
+}
