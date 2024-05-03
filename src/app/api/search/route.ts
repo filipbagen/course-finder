@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
     AND: [
       {
         OR: [
-          { courseCode: { contains: searchQuery, mode: 'insensitive' } },
-          { courseName: { contains: searchQuery, mode: 'insensitive' } },
+          { code: { contains: searchQuery, mode: 'insensitive' } },
+          { name: { contains: searchQuery, mode: 'insensitive' } },
         ],
       },
     ],

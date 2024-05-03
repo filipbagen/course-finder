@@ -1,16 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import React from 'react';
-
-interface FilterState {
-  semester: string[];
-  period: string[];
-  block: string[];
-  studyPace: string[];
-  courseLevel: string[];
-  mainFieldOfStudy: string[];
-  examinations: string[];
-  location: string[];
-}
+import { FilterState } from '@/app/utilities/types';
 
 interface CheckboxItemProps {
   filterType: keyof FilterState;

@@ -1,5 +1,5 @@
 // react
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 // shadcn
 import {
@@ -18,35 +18,15 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-import { AccordionItemProps } from '../components/filter/types';
 import CheckboxItem from '../components/filter/CheckboxItem';
 import { accordionItems } from '../components/filter/accordionItemsConfig';
-
-interface FilterState {
-  semester: string[];
-  period: string[];
-  block: string[];
-  studyPace: string[];
-  courseLevel: string[];
-  mainFieldOfStudy: string[];
-  examinations: string[];
-  location: string[];
-}
-
-interface FilterProps {
-  onFilterChange: (
-    filterType: keyof FilterState,
-    value: string,
-    isChecked: boolean
-  ) => void;
-  currentFilters: FilterState;
-}
+import { FilterState, FilterProps } from '../utilities/types';
 
 const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
   const resetFilters = () => {
     Object.keys(currentFilters).forEach((filterType) => {
       currentFilters[filterType as keyof FilterState].forEach((value) => {
-        onFilterChange(filterType as keyof FilterState, value, false);
+        onFilterChange(filterType as keyof FilterState, String(value), false);
       });
     });
   };
@@ -59,14 +39,15 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
         {accordionItems.map((item) => {
           // Check if any option in this item's filter type is selected
-          const isAnyOptionChecked = currentFilters[item.filterType].length > 0;
+          const isAnyOptionChecked =
+            currentFilters[item.filterType as keyof FilterState].length > 0;
 
           return (
             <AccordionItemComponent value={item.value} key={item.value}>
               <AccordionTrigger>
                 <CardHeader>
                   <div className="flex gap-4 items-center">
-                    <item.icon size={20} />
+                    {item.icon && <item.icon size={20} />}
                     <CardTitle className="mb-0 text-base font-medium">
                       {item.title}
                     </CardTitle>
@@ -82,16 +63,22 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
                     const optionString = option.toString();
                     const displayValue = item.displayValue(optionString);
                     const isChecked =
-                      currentFilters[item.filterType].includes(optionString);
+                      currentFilters[
+                        item.filterType as keyof FilterState
+                      ].includes(optionString);
 
                     return (
                       <CheckboxItem
                         key={optionString}
-                        filterType={item.filterType}
+                        filterType={item.filterType as keyof FilterState}
                         displayValue={displayValue}
                         value={optionString}
                         onChange={(checked) =>
-                          onFilterChange(item.filterType, optionString, checked)
+                          onFilterChange(
+                            item.filterType as keyof FilterState,
+                            String(optionString),
+                            checked
+                          )
                         }
                         checked={isChecked}
                       />

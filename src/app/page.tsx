@@ -119,7 +119,7 @@ export default async function Home() {
         <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
           {db.Courses.map((course: Course) => (
             <Card
-              key={course.courseCode}
+              key={course.code}
               className="
                 flex-grow h-min bg-white rounded-md border border-gray-100
                 px-5 py-3 shadow-md transition-all hover:translate-x-1 hover:-translate-y-1
@@ -127,12 +127,12 @@ export default async function Home() {
             >
               <CardHeader>
                 <div className="flex justify-between gap-2 items-start">
-                  <CardTitle>{course.courseName}</CardTitle>
+                  <CardTitle>{course.name}</CardTitle>
                   <Button size={'icon'} className="hover:cursor-default">
                     +
                   </Button>
                 </div>
-                <CardDescription>{course.courseCode}</CardDescription>
+                <CardDescription>{course.code}</CardDescription>
               </CardHeader>
 
               <CardContent>
@@ -211,4 +211,19 @@ export default async function Home() {
       </div>
     </div>
   );
+}
+
+{
+  /*
+
+Argument of type '(course: Course) => any' is not assignable to parameter of type '(value: { id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: number[]; location: string; url: string; prerequisites: string; exclusions: string[]; } | { ...; }, index: number, array: ({ ...; } | { ...; })[]) => any'.
+  Types of parameters 'course' and 'value' are incompatible.
+    
+  
+      Type '{ id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: number[]; location: string; url: string; prerequisites: string; exclusions: string[]; } | { ...; }' is not assignable to type 'Course'.
+      Type '{ id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: string; location: string; url: string; prerequisites: string; exclusions: string[]; }' is not assignable to type 'Course'.
+        Types of property 'block' are incompatible.
+          Type 'string' is not assignable to type 'number[]'.
+
+*/
 }

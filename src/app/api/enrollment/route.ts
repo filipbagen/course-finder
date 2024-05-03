@@ -19,10 +19,10 @@ export async function POST(request: Request) {
   // Your logic to create a new enrollment goes here
   const enrollment = await prisma.enrollment.create({
     data: {
-      enrollmentId: uuidv4(),
-      userId: user.id,
-      courseId: courseId,
-      semester: semester.toString(),
+      id: uuidv4() as string,
+      userId: user.id as string,
+      courseId: courseId as string,
+      semester: semester as number[],
     },
   });
   return NextResponse.json({ enrollment });
@@ -52,6 +52,8 @@ export async function GET(request: Request) {
     },
   });
 
+  console.log('Enrollments:', enrollments);
+
   // Transform the data to include the semester specified in the enrollment
   const coursesWithEnrollmentSemester = enrollments.map((enrollment) => ({
     ...enrollment.course,
@@ -72,7 +74,7 @@ export async function PATCH(request: Request) {
   const { enrollmentId, newSemester } = await request.json();
 
   const updatedEnrollment = await prisma.enrollment.update({
-    where: { enrollmentId: enrollmentId },
+    where: { id: enrollmentId },
     data: {
       semester: newSemester,
     },

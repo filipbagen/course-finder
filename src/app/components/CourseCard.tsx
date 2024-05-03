@@ -42,7 +42,7 @@ export default function CourseCard({ course }: { course: Course }) {
       },
       body: JSON.stringify({
         courseId: courseId,
-        semester: semester,
+        semester: [semester],
       }),
     });
 
@@ -53,39 +53,31 @@ export default function CourseCard({ course }: { course: Course }) {
   };
 
   return (
-    <Card key={course.courseId} className="flex-grow h-min">
+    <Card key={course.id} className="flex-grow h-min">
       <CardHeader>
         <div className="flex justify-between">
           <div>
-            <CardTitle>{course.courseName}</CardTitle>
-            <CardDescription className="mt-0">
-              {course.courseCode}
-            </CardDescription>
+            <CardTitle>{course.name}</CardTitle>
+            <CardDescription className="mt-0">{course.code}</CardDescription>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 size="icon"
-                aria-label={`Add ${course.courseName} to your schedule`}
+                aria-label={`Add ${course.name} to your schedule`}
               >
                 +
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-              <DropdownMenuItem
-                onClick={() => addToEnrollment(course.courseId, 7)}
-              >
+              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 7)}>
                 Semester 7
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => addToEnrollment(course.courseId, 8)}
-              >
+              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 8)}>
                 Semester 8
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => addToEnrollment(course.courseId, 9)}
-              >
+              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 9)}>
                 Semester 9
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -104,13 +96,13 @@ export default function CourseCard({ course }: { course: Course }) {
             <div className="flex justify-between">
               <CardFooter className="flex gap-4">
                 <div>
-                  <p>Termin {course.semester}</p>
+                  <p>Termin {course.semester.join(', ')}</p>
                 </div>
                 <div>
-                  <p>Period {course.period}</p>
+                  <p>Period {course.period.join(', ')}</p>
                 </div>
                 <div>
-                  <p>Block {course.block}</p>
+                  <p>Block {course.block.join(', ')}</p>
                 </div>
               </CardFooter>
               <AccordionTrigger className="p-0" />
@@ -146,9 +138,8 @@ export default function CourseCard({ course }: { course: Course }) {
                 <ul>
                   {course.examinations &&
                     course.examinations.map((ex: Examination) => (
-                      <li key={ex.examId}>
-                        {ex.examName}, {ex.examCode}, {ex.examGradingScale},{' '}
-                        {ex.examCredits}hp
+                      <li key={ex.id}>
+                        {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
                       </li>
                     ))}
                 </ul>

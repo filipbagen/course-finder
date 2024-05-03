@@ -83,6 +83,12 @@ export default function Dashboard() {
 
     const response = await fetch(`/api/search?${query.toString()}`);
     const data = await response.json();
+
+    console.log(data); // Check the actual structure of 'data'
+    if (!Array.isArray(data)) {
+      console.error('Expected an array but got:', data);
+    }
+
     setCourses(data); // This should trigger a re-render with the new, filtered courses
     setLoading(false);
   };
@@ -136,7 +142,7 @@ export default function Dashboard() {
           )}
 
           {courses.map((course: Course) => (
-            <CourseCard key={course.courseId} course={course} />
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       </div>

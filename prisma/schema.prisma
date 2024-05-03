@@ -39,39 +39,38 @@ model Subscription {
 }
 
 model Courses {
-  courseId             String @id @unique
-  courseCode           String @unique
-  courseName           String
+  id                   String @id @unique
+  code                 String @unique
+  name                 String
   credits              Int
-  mainFieldOfStudy     String
-  courseLevel          String
-  semester             String
-  period               String
-  block                String
+  mainFieldOfStudy     String[]
+  advanced             Boolean
+  semester             Int[]
+  period               Int[]
+  block                Int[]
   location             String
   url                  String
   prerequisites        String
-  exclusions           String
-  studyPace            String
+  exclusions           String[]
   examinations         Examinations[]
-  Enrollment           Enrollment[]
+  enrollment           Enrollment[]
 }
 
 model Examinations {
-  examId              String @id @unique
+  id                  String @id @unique
   courseId            String
-  examCode            String
-  examName            String
-  examCredits         Int
-  examGradingScale    String
-  course              Courses @relation(fields: [courseId], references: [courseId])
+  code                String
+  name                String
+  credits             Int
+  gradingScale        String
+  course              Courses @relation(fields: [courseId], references: [id])
 }
 
 model Enrollment {
-  enrollmentId        String  @id @unique
-  semester            String
+  id                  String  @id @unique
+  semester            Int[]
   user                User    @relation(fields: [userId], references: [id])
   userId              String
-  course              Courses @relation(fields: [courseId], references: [courseId])
+  course              Courses @relation(fields: [courseId], references: [id])
   courseId            String
 }

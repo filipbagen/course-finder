@@ -32,7 +32,7 @@ export default function Schedule() {
         (acc: SemesterGroupings, course: Course) => {
           const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
           if (!acc[key]) acc[key] = [];
-          if (course.period.includes('1')) {
+          if (course.period.includes(1)) {
             acc[key].push(course);
           }
           return acc;
@@ -44,7 +44,7 @@ export default function Schedule() {
         (acc: SemesterGroupings, course: Course) => {
           const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
           if (!acc[key]) acc[key] = [];
-          if (course.period.includes('2')) {
+          if (course.period.includes(2)) {
             acc[key].push(course);
           }
           return acc;
@@ -113,14 +113,14 @@ export default function Schedule() {
     }));
 
     // Synchronize the course across periods if it runs in both '1' and '2'
-    if (movedCourse.period.includes('1') && movedCourse.period.includes('2')) {
+    if (movedCourse.period.includes(1) && movedCourse.period.includes(2)) {
       const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
       const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
 
       // We need to find the same course in the other period array and move it to the same semester but not necessarily to the same index
       const otherPeriodCourses = otherPeriodKey[sourceSemesterId] || [];
       const otherCourseIndex = otherPeriodCourses.findIndex(
-        (course) => course.courseId === movedCourse.courseId
+        (course) => course.id === movedCourse.id
       );
       if (otherCourseIndex !== -1) {
         const newOtherSourceCourses = [...otherPeriodCourses];
@@ -135,7 +135,7 @@ export default function Schedule() {
 
         // Decide on a suitable index for the course in the new semester
         const appropriateIndex = newOtherDestinationCourses.findIndex(
-          (c: Course) => c.semester === destinationSemesterId.toString()
+          (c: Course) => c.semester.includes(destinationSemesterId)
         );
         newOtherDestinationCourses.splice(
           appropriateIndex === -1
@@ -159,7 +159,7 @@ export default function Schedule() {
     courses,
     period,
   }: {
-    semester: string;
+    semester: number[];
     courses: Course[];
     period: string;
   }) => (
@@ -167,7 +167,7 @@ export default function Schedule() {
       <h5>Semester {semester}</h5>
       <Droppable
         droppableId={`${semester}-${period}`}
-        type={semester === '8' ? `unique-${period}` : `movable-${period}`}
+        type={semester.includes(8) ? `unique-${period}` : `movable-${period}`}
       >
         {(provided) => (
           <div
@@ -177,9 +177,9 @@ export default function Schedule() {
           >
             {courses.map((course: Course, index: number) => (
               <Draggable
-                draggableId={`${course.courseId}-${period}`}
+                draggableId={`${course.id}-${period}`}
                 index={index}
-                key={`${course.courseId}-${period}`}
+                key={`${course.id}-${period}`}
               >
                 {(provided) => (
                   <div
