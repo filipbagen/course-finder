@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const searchQuery = url.searchParams.get('q') || '';
+  const searchQuery = (url.searchParams.get('q') || '').toLowerCase(); // Normalize the search query
   const sort = url.searchParams.get('sort') || '';
 
   type FilterKeys = keyof Prisma.CoursesWhereInput;
@@ -59,6 +59,15 @@ export async function GET(request: NextRequest) {
     orderBy: sortOptions,
   });
 
+  // Apply the search query filter if there is a search query
+  if (searchQuery) {
+    courses = courses.filter(
+      (course) =>
+        course.name.toLowerCase().includes(searchQuery) ||
+        course.code.toLowerCase().includes(searchQuery)
+    );
+  }
+
   // Apply the filters
   Object.entries(filters).forEach(([key, values]) => {
     if (values && values.length > 0) {
@@ -103,89 +112,3 @@ export async function GET(request: NextRequest) {
   // Return the filtered courses
   return NextResponse.json(courses);
 }
-
-// import { NextRequest, NextResponse } from 'next/server';
-// import prisma from '@/app/lib/db';
-
-// export async function GET(request: NextRequest) {
-//   const url = new URL(request.url);
-//   const searchQuery = url.searchParams.get('q') || '';
-//   const semester = url.searchParams.get('semester');
-//   const period = url.searchParams.get('period');
-//   const block = url.searchParams.get('block');
-//   const location = url.searchParams.get('location');
-
-//   // Prepare filters based on provided query parameters
-//   const filters: any = {
-//     OR: [
-//       { code: { contains: searchQuery, mode: 'insensitive' } },
-//       { name: { contains: searchQuery, mode: 'insensitive' } },
-//     ],
-//   };
-
-//   // Add filtering conditions dynamically based on the presence of query parameters
-//   if (semester) filters.semester = { in: semester.split(',').map(Number) };
-//   if (period) filters.period = { in: period.split(',').map(Number) };
-//   if (block) filters.block = { in: block.split(',').map(Number) };
-//   if (location) filters.location = { equals: location };
-
-//   try {
-//     const courses = await prisma.courses.findMany({
-//       where: filters,
-//     });
-//     return NextResponse.json(courses);
-//   } catch (error) {
-//     return new NextResponse(
-//       JSON.stringify({ error: 'Failed to fetch courses' }),
-//       {
-//         status: 500,
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     );
-//   }
-// }
-
-// BASIC
-// /api/search/route.ts
-// Assuming this is an Edge function based on your usage of `NextRequest` and `NextResponse`
-// import { NextRequest, NextResponse } from 'next/server';
-// import { Prisma, PrismaClient } from '@prisma/client';
-
-// const prisma = new PrismaClient();
-
-// export async function GET(request: NextRequest) {
-//   try {
-//     const courses = await prisma.courses.findMany({
-//       where: {
-//         semester: {
-//           has: 7 || 9,
-//         },
-//         period: {
-//           has: 1 && 2,
-//         },
-//         block: {
-//           has: 1,
-//         },
-//       },
-//     });
-//     return new NextResponse(JSON.stringify(courses), {
-//       status: 200,
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//   } catch (error) {
-//     console.error('Error fetching courses:', error);
-//     return new NextResponse(
-//       JSON.stringify({ error: 'Failed to fetch courses' }),
-//       {
-//         status: 500,
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     );
-//   }
-// }
