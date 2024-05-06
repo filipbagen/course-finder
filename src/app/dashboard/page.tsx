@@ -1,7 +1,7 @@
 'use client';
 
 // React and Libraries
-import React, { useState, useEffect } from 'react';
+// import React, { useState, useEffect } from 'react';
 import { LayoutGrid } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
 
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import Filter from './Filter';
 import CourseCard from '../components/CourseCard';
+import { useState, useEffect } from 'react';
 
 export function SkeletonCard() {
   return (
@@ -84,14 +85,30 @@ export default function Dashboard() {
     const response = await fetch(`/api/search?${query.toString()}`);
     const data = await response.json();
 
-    console.log(data); // Check the actual structure of 'data'
-    if (!Array.isArray(data)) {
-      console.error('Expected an array but got:', data);
-    }
-
     setCourses(data); // This should trigger a re-render with the new, filtered courses
     setLoading(false);
   };
+
+  const fetchFilteredCourses = async (filter: { semester: number[] }) => {
+    const query = filter.semester.length
+      ? `?semester=${filter.semester.join(',')}`
+      : '';
+    const url = `/api/search${query}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setCourses(data);
+    } catch (error) {
+      console.error('Failed to fetch courses:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredCourses({ semester: [] }); // Initial load with no filters
+  }, []);
 
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
@@ -110,7 +127,7 @@ export default function Dashboard() {
           </p>
 
           <div className="flex items-center gap-4">
-            <Select onValueChange={(value) => setSortOrder(value)}>
+            {/* <Select onValueChange={(value) => setSortOrder(value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
@@ -126,7 +143,7 @@ export default function Dashboard() {
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             <LayoutGrid size={24} />
           </div>
@@ -149,3 +166,48 @@ export default function Dashboard() {
     </div>
   );
 }
+
+// pages/index.tsx
+// import React, { useEffect, useState } from 'react';
+// function CourseList() {
+//   const [courses, setCourses] = useState<Course[]>([]);
+
+//   // Modify fetchCourses to accept filters and apply them in the API call
+//   async function fetchCourses(filters: Record<string, string[]>) {
+//     const query = new URLSearchParams();
+
+//     // Construct query parameters from filters
+//     for (const [key, values] of Object.entries(filters)) {
+//       values.forEach((value) => query.append(key, value));
+//     }
+
+//     try {
+//       const response = await fetch(`/api/search?${query.toString()}`);
+//       if (!response.ok) {
+//         throw new Error('Network response was not ok');
+//       }
+//       const data = await response.json();
+//       setCourses(data);
+//     } catch (error) {
+//       console.error('Failed to fetch courses:', error);
+//     }
+//   }
+
+//   useEffect(() => {
+//     // Assuming you might want to filter by semester initially, just as an example
+//     fetchCourses({ semester: ['7', '8', '9'] });
+//   }, []);
+
+//   return (
+//     <div>
+//       <h1>Courses</h1>
+//       <ul>
+//         {courses.map((course) => (
+//           <li key={course.id}>{course.name}</li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// }
+
+// export default CourseList;

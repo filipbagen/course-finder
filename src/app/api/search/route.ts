@@ -68,22 +68,22 @@ export async function GET(request: NextRequest) {
 
   // Adjust whereClause construction for complex fields like 'semester'
   Object.entries(filters).forEach(([key, values]) => {
-    if (
-      values &&
-      values.length > 0 &&
-      ['semester', 'period', 'block'].includes(key)
-    ) {
-      // Create a condition for each value to check if it's part of the comma-separated string
-      whereClause.AND.push({
-        OR: values.map((value) => ({
+    if (values && values.length > 0) {
+      if (['semester', 'period', 'block'].includes(key)) {
+        whereClause.AND.push({
           [key]: {
-            contains: value,
-            mode: 'insensitive',
+            hasSome: values.map(Number), // Assuming the values are numbers and need conversion from string
           },
-        })),
-      });
-    } else if (values && values.length > 0) {
-      (whereClause as any)[key] = { in: values };
+        });
+      } else if (key === 'examinations' || key === 'mainFieldOfStudy') {
+        whereClause.AND.push({
+          [key]: {
+            hasSome: values, // Assuming the values are strings
+          },
+        });
+      } else {
+        (whereClause as any)[key] = { in: values };
+      }
     }
   });
 
@@ -108,3 +108,89 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import prisma from '@/app/lib/db';
+
+// export async function GET(request: NextRequest) {
+//   const url = new URL(request.url);
+//   const searchQuery = url.searchParams.get('q') || '';
+//   const semester = url.searchParams.get('semester');
+//   const period = url.searchParams.get('period');
+//   const block = url.searchParams.get('block');
+//   const location = url.searchParams.get('location');
+
+//   // Prepare filters based on provided query parameters
+//   const filters: any = {
+//     OR: [
+//       { code: { contains: searchQuery, mode: 'insensitive' } },
+//       { name: { contains: searchQuery, mode: 'insensitive' } },
+//     ],
+//   };
+
+//   // Add filtering conditions dynamically based on the presence of query parameters
+//   if (semester) filters.semester = { in: semester.split(',').map(Number) };
+//   if (period) filters.period = { in: period.split(',').map(Number) };
+//   if (block) filters.block = { in: block.split(',').map(Number) };
+//   if (location) filters.location = { equals: location };
+
+//   try {
+//     const courses = await prisma.courses.findMany({
+//       where: filters,
+//     });
+//     return NextResponse.json(courses);
+//   } catch (error) {
+//     return new NextResponse(
+//       JSON.stringify({ error: 'Failed to fetch courses' }),
+//       {
+//         status: 500,
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
+//   }
+// }
+
+// BASIC
+// /api/search/route.ts
+// Assuming this is an Edge function based on your usage of `NextRequest` and `NextResponse`
+// import { NextRequest, NextResponse } from 'next/server';
+// import { Prisma, PrismaClient } from '@prisma/client';
+
+// const prisma = new PrismaClient();
+
+// export async function GET(request: NextRequest) {
+//   try {
+//     const courses = await prisma.courses.findMany({
+//       where: {
+//         semester: {
+//           has: 7 || 9,
+//         },
+//         period: {
+//           has: 1 && 2,
+//         },
+//         block: {
+//           has: 1,
+//         },
+//       },
+//     });
+//     return new NextResponse(JSON.stringify(courses), {
+//       status: 200,
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error fetching courses:', error);
+//     return new NextResponse(
+//       JSON.stringify({ error: 'Failed to fetch courses' }),
+//       {
+//         status: 500,
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
+//   }
+// }

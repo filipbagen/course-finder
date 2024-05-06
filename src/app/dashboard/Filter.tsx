@@ -1,5 +1,5 @@
 // react
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // shadcn
 import {
@@ -20,7 +20,8 @@ import {
 
 import CheckboxItem from '../components/filter/CheckboxItem';
 import { accordionItems } from '../components/filter/accordionItemsConfig';
-import { FilterState, FilterProps } from '../utilities/types';
+import { FilterState } from '../utilities/types';
+import { FilterProps } from '../utilities/types';
 
 const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
   const resetFilters = () => {
