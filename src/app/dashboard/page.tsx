@@ -73,20 +73,20 @@ export default function Dashboard() {
   const fetchData = async () => {
     const query = new URLSearchParams({
       q: encodeURIComponent(searchQuery),
-      sort: encodeURIComponent(sortOrder),
+      sort: encodeURIComponent(sortOrder), // Ensure this matches the backend expected keys
     });
 
     Object.entries(filters).forEach(([key, values]) => {
       if (values.length) {
-        query.set(key, values.join(',')); // Make sure keys match your server's expected query params
+        query.set(key, values.join(',')); // Append filter settings
       }
     });
 
     const response = await fetch(`/api/search?${query.toString()}`);
     const data = await response.json();
 
-    setCourses(data); // This should trigger a re-render with the new, filtered courses
-    setLoading(false);
+    setCourses(data); // Set the fetched data to state
+    setLoading(false); // Set loading to false after data is fetched
   };
 
   const fetchFilteredCourses = async (filter: { semester: number[] }) => {
@@ -127,7 +127,7 @@ export default function Dashboard() {
           </p>
 
           <div className="flex items-center gap-4">
-            {/* <Select onValueChange={(value) => setSortOrder(value)}>
+            <Select onValueChange={(value) => setSortOrder(value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
@@ -143,7 +143,7 @@ export default function Dashboard() {
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>
-            </Select> */}
+            </Select>
 
             <LayoutGrid size={24} />
           </div>

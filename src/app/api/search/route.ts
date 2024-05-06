@@ -35,20 +35,23 @@ export async function GET(request: NextRequest) {
     location: url.searchParams.get('location')?.split(',').filter(Boolean),
   };
 
+  // Set sorting options based on the query parameter
   let sortOptions = {};
   switch (sort) {
     case 'courseCode':
-      sortOptions = { courseCode: 'asc' };
+      sortOptions = { code: 'asc' };
       break;
     case 'courseCodeReversed':
-      sortOptions = { courseCode: 'desc' };
+      sortOptions = { code: 'desc' };
       break;
     case 'courseName':
-      sortOptions = { courseName: 'asc' };
+      sortOptions = { name: 'asc' };
       break;
     case 'courseNameReverse':
-      sortOptions = { courseName: 'desc' };
+      sortOptions = { name: 'desc' };
       break;
+    default:
+      sortOptions = {}; // Default case can be handled as no sorting or some default sorting
   }
 
   // Fetch all courses from the database
