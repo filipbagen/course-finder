@@ -51,62 +51,57 @@ export async function GET(request: NextRequest) {
       break;
   }
 
-  type ExtendedCoursesWhereInput = Prisma.CoursesWhereInput & {
-    AND: Prisma.CoursesWhereInput[];
-  };
+  // Fetch all courses from the database
+  let courses = await prisma.courses.findMany({
+    include: {
+      examinations: true,
+    },
+    orderBy: sortOptions,
+  });
 
-  let whereClause: ExtendedCoursesWhereInput = {
-    AND: [
-      {
-        OR: [
-          { code: { contains: searchQuery, mode: 'insensitive' } },
-          { name: { contains: searchQuery, mode: 'insensitive' } },
-        ],
-      },
-    ],
-  };
-
-  // Adjust whereClause construction for complex fields like 'semester'
+  // Apply the filters
   Object.entries(filters).forEach(([key, values]) => {
     if (values && values.length > 0) {
       if (['semester', 'period', 'block'].includes(key)) {
-        whereClause.AND.push({
-          [key]: {
-            hasSome: values.map(Number), // Assuming the values are numbers and need conversion from string
-          },
+        courses = courses.filter((course) => {
+          const courseValues = course[key as keyof typeof course] as number[];
+          return courseValues.some((courseValue) =>
+            values.map(Number).includes(courseValue)
+          );
         });
       } else if (key === 'examinations' || key === 'mainFieldOfStudy') {
-        whereClause.AND.push({
-          [key]: {
-            hasSome: values, // Assuming the values are strings
-          },
-        });
+        courses = courses.filter(
+          (course) =>
+            Array.isArray(course[key]) &&
+            course[key].some((value) => values.includes(String(value)))
+        );
+      } else if (key === 'courseLevel') {
+        const advancedOptions = values.map(
+          (value) => value === 'Avancerad nivå'
+        );
+        // Filter courses that match any of the selected advanced levels
+        courses = courses.filter((course) =>
+          advancedOptions.includes(course.advanced)
+        );
+      } else if (key === 'location') {
+        courses = courses.filter((course) => String(course[key]) === values[0]);
+      } else if (key === 'studyPace') {
+        courses = courses.filter((course) =>
+          values[0] === 'Helfart'
+            ? course.period.length === 1
+            : course.period.length >= 2
+        );
       } else {
-        (whereClause as any)[key] = { in: values };
+        courses = courses.filter((course) => {
+          const courseValue = String(course[key as keyof typeof course]);
+          return values.includes(courseValue);
+        });
       }
     }
   });
 
-  try {
-    const courses = await prisma.courses.findMany({
-      include: {
-        examinations: true,
-      },
-      where: whereClause,
-      orderBy: sortOptions,
-    });
-    return NextResponse.json(courses);
-  } catch (error) {
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to fetch courses' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }
+  // Return the filtered courses
+  return NextResponse.json(courses);
 }
 
 // import { NextRequest, NextResponse } from 'next/server';
