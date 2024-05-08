@@ -14,7 +14,6 @@ import { MaxWidthWrapper } from './MaxWidthWrapper';
 
 // components
 import { UserNav } from './UserNav';
-import { ThemeToggle } from './themeToggle';
 
 export async function Navbar() {
   const { isAuthenticated, getUser } = getKindeServerSession();
@@ -29,12 +28,14 @@ export async function Navbar() {
           </Link>
 
           <div className="flex items-center gap-x-5">
-            <ThemeToggle />
-
             {(await isAuthenticated()) ? (
               <div className="flex items-center gap-x-5">
                 <Button>
                   <Link href="/dashboard">Dashboard</Link>
+                </Button>
+
+                <Button variant={'secondary'}>
+                  <Link href="/dashboard/schedule">Schedule</Link>
                 </Button>
 
                 <UserNav

@@ -52,8 +52,6 @@ export async function GET(request: Request) {
     },
   });
 
-  console.log('Enrollments:', enrollments);
-
   // Transform the data to include the semester specified in the enrollment
   const coursesWithEnrollmentSemester = enrollments.map((enrollment) => ({
     ...enrollment.course,

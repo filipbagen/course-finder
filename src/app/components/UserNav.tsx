@@ -14,6 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { ThemeToggle } from './themeToggle';
 
 // kinde
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
@@ -49,6 +50,10 @@ export function UserNav({
             </p>
           </div>
         </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <ThemeToggle />
 
         <DropdownMenuSeparator />
 
