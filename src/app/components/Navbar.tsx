@@ -38,6 +38,10 @@ export async function Navbar() {
                   <Link href="/dashboard/schedule">Schedule</Link>
                 </Button>
 
+                <Button variant={'secondary'}>
+                  <Link href="/dashboard/social">Social</Link>
+                </Button>
+
                 <UserNav
                   email={user?.email as string}
                   image={user?.picture as string}

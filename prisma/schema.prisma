@@ -21,6 +21,7 @@ model User {
   email            String        @unique
   stripeCustomerId String?       @unique
   colorScheme      String        @default("theme-blue")
+  isPublic         Boolean       @default(false)
   Subscription     Subscription?
   Enrollment       Enrollment[]
 }
@@ -73,5 +74,4 @@ model Enrollment {
   userId              String
   course              Courses @relation(fields: [courseId], references: [id])
   courseId            String
-  isPublic            Boolean  @default(false)
 }

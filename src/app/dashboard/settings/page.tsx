@@ -40,6 +40,7 @@ async function getData(userId: string) {
       name: true,
       email: true,
       colorScheme: true,
+      isPublic: true,
     },
   });
 
@@ -56,6 +57,7 @@ export default async function SettingPage() {
 
     const name = formData.get('name') as string;
     const colorScheme = formData.get('color') as string;
+    const isPublic = formData.get('isPublic') === 'on'; // Assumes checkbox sending 'on' when checked
 
     await prisma.user.update({
       where: {
@@ -64,6 +66,7 @@ export default async function SettingPage() {
       data: {
         name: name ?? undefined,
         colorScheme: colorScheme ?? undefined,
+        isPublic: isPublic, // Updating the isPublic status
       },
     });
 
@@ -132,6 +135,17 @@ export default async function SettingPage() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="isPublic">Make Schedule Public</Label>
+                <input
+                  type="checkbox"
+                  id="isPublic"
+                  name="isPublic"
+                  defaultChecked={data?.isPublic ?? false}
+                  className="toggle toggle-accent" // Assume you have a toggle CSS
+                />
               </div>
             </div>
           </CardContent>
