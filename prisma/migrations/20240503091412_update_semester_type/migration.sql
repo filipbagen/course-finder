@@ -5,5 +5,6 @@
 
 */
 -- AlterTable
-ALTER TABLE "Enrollment" DROP COLUMN "semester",
-ADD COLUMN     "semester" INTEGER[];
+ALTER TABLE "Enrollment" ALTER COLUMN "semester" DROP NOT NULL;
+ALTER TABLE "Enrollment" ALTER COLUMN "semester" TYPE Int USING "semester"::integer;
+ALTER TABLE "Enrollment" ALTER COLUMN "semester" SET NOT NULL;

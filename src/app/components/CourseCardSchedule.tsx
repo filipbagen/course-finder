@@ -30,31 +30,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // icons
-import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
+import {
+  MapPin,
+  BookText,
+  SignpostBig,
+  NotebookPen,
+  GripVertical,
+} from 'lucide-react';
 import { Course, Examination } from '@/app/utilities/types';
 
 export default function CourseCard({ course }: { course: Course }) {
-  const addToEnrollment = async (courseId: string, semester: number) => {
-    const response = await fetch('/api/enrollment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        courseId: courseId,
-        semester: semester,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('Error:', response.status);
-      throw new Error('Error creating enrollment');
-    }
-  };
-
   return (
     <Card key={course.id} className="flex-grow h-min">
-      <CardHeader>
+      <CardHeader className="flex flex-row gap-4 items-center">
+        <GripVertical size={18} />
+        <h6>{course.name}</h6>
+      </CardHeader>
+      {/* <CardHeader>
         <div className="flex justify-between">
           <div>
             <CardTitle>{course.name}</CardTitle>
@@ -147,7 +139,7 @@ export default function CourseCard({ course }: { course: Course }) {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-      </CardContent>
+      </CardContent> */}
     </Card>
   );
 }

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       id: uuidv4() as string,
       userId: user.id as string,
       courseId: courseId as string,
-      semester: semester as number[],
+      semester: semester as number,
     },
   });
   return NextResponse.json({ enrollment });

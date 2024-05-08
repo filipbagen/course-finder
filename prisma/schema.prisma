@@ -68,9 +68,10 @@ model Examinations {
 
 model Enrollment {
   id                  String  @id @unique
-  semester            Int[]
+  semester            Int
   user                User    @relation(fields: [userId], references: [id])
   userId              String
   course              Courses @relation(fields: [courseId], references: [id])
   courseId            String
+  isPublic            Boolean  @default(false)
 }

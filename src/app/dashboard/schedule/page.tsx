@@ -7,7 +7,7 @@ import {
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd';
-import CourseCard from '@/app/components/CourseCard';
+import CourseCardSchedule from '@/app/components/CourseCardSchedule';
 import { Course, SemesterGroupings } from '@/app/utilities/types';
 
 export default function Schedule() {
@@ -159,7 +159,7 @@ export default function Schedule() {
     courses,
     period,
   }: {
-    semester: number[];
+    semester: number;
     courses: Course[];
     period: string;
   }) => (
@@ -167,7 +167,11 @@ export default function Schedule() {
       <h5>Semester {semester}</h5>
       <Droppable
         droppableId={`${semester}-${period}`}
-        type={semester.includes(8) ? `unique-${period}` : `movable-${period}`}
+        type={
+          Array.isArray(semester) && semester.includes(8)
+            ? `unique-${period}`
+            : `movable-${period}`
+        }
       >
         {(provided) => (
           <div
@@ -187,7 +191,7 @@ export default function Schedule() {
                     {...provided.draggableProps}
                     ref={provided.innerRef}
                   >
-                    <CourseCard course={course} />
+                    <CourseCardSchedule course={course} />
                   </div>
                 )}
               </Draggable>
@@ -207,7 +211,7 @@ export default function Schedule() {
           {Object.keys(semesters).map((semester: string) => (
             <SemesterBlock
               key={semester}
-              semester={semester}
+              semester={parseInt(semester)}
               courses={semesters[parseInt(semester)]}
               period="P1"
             />
@@ -218,7 +222,7 @@ export default function Schedule() {
           {Object.keys(semestersP2).map((semester: string) => (
             <SemesterBlock
               key={semester}
-              semester={semester}
+              semester={parseInt(semester)} // Convert semester from string to number
               courses={semestersP2[parseInt(semester)]}
               period="P2"
             />
