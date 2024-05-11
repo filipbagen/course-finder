@@ -16,7 +16,23 @@ export async function POST(request: Request) {
 
   const { courseId, semester } = await request.json();
 
-  // Your logic to create a new enrollment goes here
+  // Check if the enrollment already exists
+  const existingEnrollment = await prisma.enrollment.findFirst({
+    where: {
+      userId: user.id,
+      courseId: courseId,
+      semester: semester,
+    },
+  });
+
+  if (existingEnrollment) {
+    return NextResponse.json(
+      { error: 'Enrollment already exists for this course and semester' },
+      { status: 409 }
+    );
+  }
+
+  // Create a new enrollment if it doesn't exist
   const enrollment = await prisma.enrollment.create({
     data: {
       id: uuidv4() as string,
@@ -25,6 +41,7 @@ export async function POST(request: Request) {
       semester: semester as number,
     },
   });
+
   return NextResponse.json({ enrollment });
 }
 

@@ -34,21 +34,21 @@ import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
 import { Course, Examination } from '@/app/utilities/types';
 
 export default function CourseCard({ course }: { course: Course }) {
+  // Function to add course to enrollment
   const addToEnrollment = async (courseId: string, semester: number) => {
-    const response = await fetch('/api/enrollment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        courseId: courseId,
-        semester: semester,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('Error:', response.status);
-      throw new Error('Error creating enrollment');
+    try {
+      const response = await fetch('/api/enrollment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ courseId, semester }),
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -71,15 +71,14 @@ export default function CourseCard({ course }: { course: Course }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 7)}>
-                Semester 7
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 8)}>
-                Semester 8
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addToEnrollment(course.id, 9)}>
-                Semester 9
-              </DropdownMenuItem>
+              {[7, 8, 9].map((semester) => (
+                <DropdownMenuItem
+                  key={semester}
+                  onClick={() => addToEnrollment(course.id, semester)}
+                >
+                  Semester {semester}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -108,7 +107,7 @@ export default function CourseCard({ course }: { course: Course }) {
               <AccordionTrigger className="p-0" />
             </div>
 
-            <AccordionContent className="flex flex-col gap-4 p-0  mt-6">
+            <AccordionContent className="flex flex-col gap-4 p-0 mt-6">
               <div>
                 <div className="flex items-center gap-2">
                   <BookText size={16} />
@@ -116,32 +115,24 @@ export default function CourseCard({ course }: { course: Course }) {
                 </div>
                 <p>{course.prerequisites}</p>
               </div>
-
               <div>
                 <div className="flex items-center gap-2">
                   <SignpostBig size={16} />
                   <h6>Huvudområde</h6>
                 </div>
-
-                {course.mainFieldOfStudy.length != 0 ? (
-                  <p>{course.mainFieldOfStudy}</p>
-                ) : (
-                  <p>Inget huvudområde</p>
-                )}
+                <p>{course.mainFieldOfStudy || 'Inget huvudområde'}</p>
               </div>
-
               <div>
                 <div className="flex items-center gap-2">
                   <NotebookPen size={16} />
                   <h6>Examination</h6>
                 </div>
                 <ul>
-                  {course.examinations &&
-                    course.examinations.map((ex: Examination) => (
-                      <li key={ex.id}>
-                        {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
-                      </li>
-                    ))}
+                  {course.examinations?.map((ex: Examination) => (
+                    <li key={ex.id}>
+                      {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
+                    </li>
+                  ))}
                 </ul>
               </div>
             </AccordionContent>
