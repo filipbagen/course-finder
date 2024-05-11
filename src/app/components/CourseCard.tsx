@@ -28,6 +28,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 // icons
 import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
@@ -47,6 +48,12 @@ export default function CourseCard({ course }: { course: Course }) {
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
+      toast.success(`Added ${course.name} to schedule 🎉`, {
+        action: {
+          label: 'Undo',
+          onClick: () => console.log('Undo'),
+        },
+      });
     } catch (error) {
       console.error(error);
     }
@@ -74,7 +81,9 @@ export default function CourseCard({ course }: { course: Course }) {
               {[7, 8, 9].map((semester) => (
                 <DropdownMenuItem
                   key={semester}
-                  onClick={() => addToEnrollment(course.id, semester)}
+                  onClick={() => {
+                    addToEnrollment(course.id, semester);
+                  }}
                 >
                   Semester {semester}
                 </DropdownMenuItem>
