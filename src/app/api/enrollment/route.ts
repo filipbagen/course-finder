@@ -64,18 +64,20 @@ export async function GET(request: Request) {
       userId: user.id,
     },
     select: {
+      id: true, // Include enrollment ID
       semester: true, // select the semester from the enrollment
       course: true, // Include the full course details
     },
   });
 
-  // Transform the data to include the semester specified in the enrollment
-  const coursesWithEnrollmentSemester = enrollments.map((enrollment) => ({
+  // Transform the data to include the semester and enrollment ID specified in the enrollment
+  const coursesWithEnrollmentData = enrollments.map((enrollment) => ({
     ...enrollment.course,
     semester: enrollment.semester, // Override the semester to the one in the enrollment
+    enrollmentId: enrollment.id, // Add the enrollment ID
   }));
 
-  return NextResponse.json({ courses: coursesWithEnrollmentSemester });
+  return NextResponse.json({ courses: coursesWithEnrollmentData });
 }
 
 export async function PATCH(request: Request) {
@@ -96,4 +98,51 @@ export async function PATCH(request: Request) {
   });
 
   return NextResponse.json({ updatedEnrollment });
+}
+
+export async function DELETE(request: Request) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
+  }
+
+  try {
+    const requestBody = await request.json();
+    const { enrollmentId } = requestBody; // Already expecting enrollmentId
+
+    if (!enrollmentId) {
+      console.error('Received undefined enrollmentId', requestBody);
+      return NextResponse.json(
+        { error: 'Invalid enrollmentId' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Deleting enrollment with ID:', enrollmentId);
+
+    const existingEnrollment = await prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+    });
+
+    if (!existingEnrollment || existingEnrollment.userId !== user.id) {
+      return NextResponse.json(
+        { error: 'Enrollment not found or access denied' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.enrollment.delete({
+      where: { id: enrollmentId },
+    });
+
+    return NextResponse.json({ message: 'Enrollment deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete enrollment:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
 }

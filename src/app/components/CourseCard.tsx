@@ -48,12 +48,33 @@ export default function CourseCard({ course }: { course: Course }) {
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
+      const enrollment = await response.json();
+
       toast.success(`Added ${course.name} to schedule 🎉`, {
         action: {
           label: 'Undo',
-          onClick: () => console.log('Undo'),
+          onClick: () => deleteEnrollment(enrollment.enrollment.id),
         },
       });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Function to delete course from enrollment
+  const deleteEnrollment = async (enrollmentId: string) => {
+    try {
+      const response = await fetch('/api/enrollment', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enrollmentId }),
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      toast.success(`Removed ${course.name} from schedule`);
     } catch (error) {
       console.error(error);
     }
@@ -67,7 +88,6 @@ export default function CourseCard({ course }: { course: Course }) {
             <CardTitle>{course.name}</CardTitle>
             <CardDescription className="mt-0">{course.code}</CardDescription>
           </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -81,9 +101,7 @@ export default function CourseCard({ course }: { course: Course }) {
               {[7, 8, 9].map((semester) => (
                 <DropdownMenuItem
                   key={semester}
-                  onClick={() => {
-                    addToEnrollment(course.id, semester);
-                  }}
+                  onClick={() => addToEnrollment(course.id, semester)}
                 >
                   Semester {semester}
                 </DropdownMenuItem>

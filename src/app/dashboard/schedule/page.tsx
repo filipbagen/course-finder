@@ -160,7 +160,7 @@ export default function Schedule() {
     period,
   }: {
     semester: number;
-    courses: Course[];
+    courses: any[];
     period: string;
   }) => (
     <div key={`${semester}-${period}`} className="p-4 w-full">
@@ -179,7 +179,7 @@ export default function Schedule() {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {courses.map((course: Course, index: number) => (
+            {courses.map((course: any, index: number) => (
               <Draggable
                 draggableId={`${course.id}-${period}`}
                 index={index}
