@@ -160,18 +160,14 @@ export default function Schedule() {
     period,
   }: {
     semester: number;
-    courses: any[];
+    courses: Course[];
     period: string;
   }) => (
     <div key={`${semester}-${period}`} className="p-4 w-full">
       <h5>Semester {semester}</h5>
       <Droppable
         droppableId={`${semester}-${period}`}
-        type={
-          Array.isArray(semester) && semester.includes(8)
-            ? `unique-${period}`
-            : `movable-${period}`
-        }
+        type={semester === 8 ? `unique-${period}` : `movable-${period}`}
       >
         {(provided) => (
           <div
@@ -217,7 +213,7 @@ export default function Schedule() {
             />
           ))}
         </div>
-        <h5>Period 1</h5>
+        <h5>Period 2</h5>
         <div className="flex w-full justify-between gap-4">
           {Object.keys(semestersP2).map((semester: string) => (
             <SemesterBlock
