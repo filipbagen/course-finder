@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 // icons
 import {
@@ -56,7 +57,7 @@ export default function CourseCardSchedule({
       <CardHeader className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-4 items-center">
           <GripVertical size={18} />
-          <h6>{course.name}</h6>
+          <h6 className="leading-5">{course.name}</h6>
         </div>
         <Trash2
           onClick={() => {
@@ -64,9 +65,25 @@ export default function CourseCardSchedule({
           }}
           color="red"
           size={18}
-          style={{ cursor: 'pointer' }}
+          className="cursor-pointe"
         />
       </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-2">
+          {course.advanced ? (
+            <Badge className="w-min whitespace-nowrap">Avancerad nivå</Badge>
+          ) : (
+            <Badge className="bg-primary/50 w-min">Grundnivå</Badge>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {course.mainFieldOfStudy.map((field) => (
+              <Badge key={field} variant="secondary">
+                {field}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }

@@ -168,9 +168,6 @@ export default function Schedule() {
       if (!response.ok) {
         throw new Error(`Failed to update course semester: ${response.status}`);
       }
-      console.log(
-        `Updated course ${movedCourse.id} to semester ${destinationSemesterId}`
-      );
     } catch (error) {
       console.error('Error updating course semester:', error);
     }
@@ -185,15 +182,15 @@ export default function Schedule() {
     courses: Course[];
     period: string;
   }) => (
-    <div key={`${semester}-${period}`} className="p-4 w-full">
-      <h5>Semester {semester}</h5>
+    <div key={`${semester}-${period}`} className="w-full">
+      <h5 className="mb-4">Semester {semester}</h5>
       <Droppable
         droppableId={`${semester}-${period}`}
         type={semester === 8 ? `unique-${period}` : `movable-${period}`}
       >
         {(provided) => (
           <div
-            className="h-full p-4 bg-blue-50 dark:bg-gray-800 rounded-md flex flex-col gap-4"
+            className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4"
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
@@ -223,28 +220,33 @@ export default function Schedule() {
 
   return (
     <DragDropContext onDragEnd={handleDragAndDrop}>
-      <h5>Period 1</h5>
-      <div className="flex flex-col gap-4">
-        <div className="flex w-full justify-between gap-4">
-          {Object.keys(semesters).map((semester: string) => (
-            <SemesterBlock
-              key={semester}
-              semester={parseInt(semester)}
-              courses={semesters[parseInt(semester)]}
-              period="P1"
-            />
-          ))}
+      <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-8">
+          <h5>Period 1</h5>
+          <div className="flex w-full justify-between gap-4">
+            {Object.keys(semesters).map((semester: string) => (
+              <SemesterBlock
+                key={semester}
+                semester={parseInt(semester)}
+                courses={semesters[parseInt(semester)]}
+                period="P1"
+              />
+            ))}
+          </div>
         </div>
-        <h5>Period 2</h5>
-        <div className="flex w-full justify-between gap-4">
-          {Object.keys(semestersP2).map((semester: string) => (
-            <SemesterBlock
-              key={semester}
-              semester={parseInt(semester)} // Convert semester from string to number
-              courses={semestersP2[parseInt(semester)]}
-              period="P2"
-            />
-          ))}
+
+        <div className="flex flex-col gap-8">
+          <h5>Period 2</h5>
+          <div className="flex w-full justify-between gap-4">
+            {Object.keys(semestersP2).map((semester: string) => (
+              <SemesterBlock
+                key={semester}
+                semester={parseInt(semester)} // Convert semester from string to number
+                courses={semestersP2[parseInt(semester)]}
+                period="P2"
+              />
+            ))}
+          </div>
         </div>
       </div>
     </DragDropContext>
