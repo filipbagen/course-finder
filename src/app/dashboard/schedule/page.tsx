@@ -65,7 +65,7 @@ export default function Schedule() {
     getCourses();
   }, []);
 
-  const handleDragAndDrop = (results: DropResult) => {
+  const handleDragAndDrop = async (results: DropResult) => {
     const { source, destination, type } = results;
 
     if (!destination) return; // No valid drop location
@@ -151,6 +151,28 @@ export default function Schedule() {
           [destinationSemesterId]: newOtherDestinationCourses,
         }));
       }
+    }
+
+    // Update the database with the new semester
+    try {
+      const response = await fetch('/api/enrollment/update', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courseId: movedCourse.id,
+          newSemester: destinationSemesterId,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update course semester: ${response.status}`);
+      }
+      console.log(
+        `Updated course ${movedCourse.id} to semester ${destinationSemesterId}`
+      );
+    } catch (error) {
+      console.error('Error updating course semester:', error);
     }
   };
 
