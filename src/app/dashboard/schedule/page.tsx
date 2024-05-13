@@ -9,6 +9,7 @@ import {
 } from '@hello-pangea/dnd';
 import CourseCardSchedule from '@/app/components/CourseCardSchedule';
 import { Course, SemesterGroupings } from '@/app/utilities/types';
+import Statistics from '@/app/dashboard/schedule/Statistics';
 
 export default function Schedule() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -219,36 +220,39 @@ export default function Schedule() {
   );
 
   return (
-    <DragDropContext onDragEnd={handleDragAndDrop}>
-      <div className="flex flex-col gap-12">
-        <div className="flex flex-col gap-8">
-          <h5>Period 1</h5>
-          <div className="flex w-full justify-between gap-4">
-            {Object.keys(semesters).map((semester: string) => (
-              <SemesterBlock
-                key={semester}
-                semester={parseInt(semester)}
-                courses={semesters[parseInt(semester)]}
-                period="P1"
-              />
-            ))}
+    <div className="flex flex-col gap-12">
+      <Statistics courses={courses} />
+      <DragDropContext onDragEnd={handleDragAndDrop}>
+        <div className="flex flex-col gap-12">
+          <div className="flex flex-col gap-8">
+            <h5>Period 1</h5>
+            <div className="flex w-full justify-between gap-4">
+              {Object.keys(semesters).map((semester: string) => (
+                <SemesterBlock
+                  key={semester}
+                  semester={parseInt(semester)}
+                  courses={semesters[parseInt(semester)]}
+                  period="P1"
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-8">
-          <h5>Period 2</h5>
-          <div className="flex w-full justify-between gap-4">
-            {Object.keys(semestersP2).map((semester: string) => (
-              <SemesterBlock
-                key={semester}
-                semester={parseInt(semester)} // Convert semester from string to number
-                courses={semestersP2[parseInt(semester)]}
-                period="P2"
-              />
-            ))}
+          <div className="flex flex-col gap-8">
+            <h5>Period 2</h5>
+            <div className="flex w-full justify-between gap-4">
+              {Object.keys(semestersP2).map((semester: string) => (
+                <SemesterBlock
+                  key={semester}
+                  semester={parseInt(semester)} // Convert semester from string to number
+                  courses={semestersP2[parseInt(semester)]}
+                  period="P2"
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </DragDropContext>
+      </DragDropContext>
+    </div>
   );
 }
