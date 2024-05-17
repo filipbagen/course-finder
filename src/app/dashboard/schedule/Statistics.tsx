@@ -17,9 +17,7 @@ export default function Statistics({ courses }: { courses: Course[] }) {
           <CardTitle>Number of Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            <h4>{courses.length}</h4>
-          </CardDescription>
+          <CardDescription>{courses.length}</CardDescription>
         </CardContent>
       </Card>
 
@@ -29,12 +27,10 @@ export default function Statistics({ courses }: { courses: Course[] }) {
         </CardHeader>
         <CardContent>
           <CardDescription>
-            <h4>
-              {courses.reduce(
-                (acc, course) => (course.advanced ? acc + course.credits : acc),
-                0
-              )}
-            </h4>
+            {courses.reduce(
+              (acc, course) => (course.advanced ? acc + course.credits : acc),
+              0
+            )}
           </CardDescription>
         </CardContent>
       </Card>

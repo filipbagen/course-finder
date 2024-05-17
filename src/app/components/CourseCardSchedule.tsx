@@ -27,8 +27,10 @@ interface CourseWithEnrollment extends Course {
 
 export default function CourseCardSchedule({
   course,
+  handleUpdateAfterDeletion, // New prop to handle state updates
 }: {
   course: CourseWithEnrollment;
+  handleUpdateAfterDeletion: (enrollmentId: string) => void; // Type this appropriately
 }) {
   const deleteEnrollment = async (enrollmentId: string) => {
     try {
@@ -40,10 +42,16 @@ export default function CourseCardSchedule({
         },
         body: JSON.stringify({ enrollmentId }), // Pass enrollmentId
       });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
+
+      // Notify user of success
       toast.success(`Removed enrollment ID ${enrollmentId} from schedule`);
+
+      // Call the new update function passed from the parent component
+      handleUpdateAfterDeletion(enrollmentId);
     } catch (error) {
       console.error('Failed to delete enrollment:', error);
       toast.error(

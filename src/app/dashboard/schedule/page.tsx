@@ -11,8 +11,12 @@ import CourseCardSchedule from '@/app/components/CourseCardSchedule';
 import { Course, SemesterGroupings } from '@/app/utilities/types';
 import Statistics from '@/app/dashboard/schedule/Statistics';
 
+interface CourseWithEnrollment extends Course {
+  enrollmentId: string;
+}
+
 export default function Schedule() {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<CourseWithEnrollment[]>([]);
   const [semesters, setSemesters] = useState<{ [key: number]: Course[] }>({});
   const [semestersP2, setSemestersP2] = useState<{ [key: number]: Course[] }>(
     {}
@@ -207,7 +211,10 @@ export default function Schedule() {
                     {...provided.draggableProps}
                     ref={provided.innerRef}
                   >
-                    <CourseCardSchedule course={course} />
+                    <CourseCardSchedule
+                      course={course}
+                      handleUpdateAfterDeletion={updateAfterDeletion}
+                    />
                   </div>
                 )}
               </Draggable>
@@ -218,6 +225,32 @@ export default function Schedule() {
       </Droppable>
     </div>
   );
+
+  const updateAfterDeletion = (enrollmentId: string) => {
+    setCourses((prevCourses) =>
+      prevCourses.filter((c) => c.enrollmentId !== enrollmentId)
+    );
+    setSemesters((prevSemesters) => {
+      // Go through all semesters and filter out the deleted course
+      const newSemesters: any = {};
+      Object.keys(prevSemesters).forEach((semester) => {
+        newSemesters[semester] = prevSemesters[semester as any].filter(
+          (c: any) => c.enrollmentId !== enrollmentId
+        );
+      });
+      return newSemesters;
+    });
+    setSemestersP2((prevSemestersP2) => {
+      // Similar logic for Period 2
+      const newSemestersP2: any = {};
+      Object.keys(prevSemestersP2).forEach((semester) => {
+        newSemestersP2[semester] = prevSemestersP2[semester as any].filter(
+          (c: any) => c.enrollmentId !== enrollmentId
+        );
+      });
+      return newSemestersP2;
+    });
+  };
 
   return (
     <div className="flex flex-col gap-12">
