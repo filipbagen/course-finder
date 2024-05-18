@@ -25,26 +25,32 @@ export const SemesterBlock = ({
           {...provided.droppableProps}
           ref={provided.innerRef}
         >
-          {courses.map((course: any, index: number) => (
-            <Draggable
-              draggableId={`${course.id}-${period}`}
-              index={index}
-              key={`${course.id}-${period}`}
-            >
-              {(provided) => (
-                <div
-                  {...provided.dragHandleProps}
-                  {...provided.draggableProps}
-                  ref={provided.innerRef}
-                >
-                  <CourseCardSchedule
-                    course={course}
-                    handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-                  />
-                </div>
-              )}
-            </Draggable>
-          ))}
+          {courses.length > 0 ? (
+            courses.map((course: any, index: number) => (
+              <Draggable
+                draggableId={`${course.id}-${period}`}
+                index={index}
+                key={`${course.id}-${period}`}
+              >
+                {(provided) => (
+                  <div
+                    {...provided.dragHandleProps}
+                    {...provided.draggableProps}
+                    ref={provided.innerRef}
+                  >
+                    <CourseCardSchedule
+                      course={course}
+                      handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))
+          ) : (
+            <div className="text-center text-gray-500">
+              No courses this semester
+            </div>
+          )}
           {provided.placeholder}
         </div>
       )}

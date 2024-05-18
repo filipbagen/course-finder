@@ -16,11 +16,8 @@ import { CourseWithEnrollment } from '@/app/utilities/types';
 
 export default function CourseCardSchedule({
   course,
-  handleUpdateAfterDeletion, // New prop to handle state updates
-}: // setCourses={setCourses} // Update state via props
-// setSemesters={setSemesters}
-// setSemestersP2={setSemestersP2}
-{
+  handleUpdateAfterDeletion,
+}: {
   course: CourseWithEnrollment;
   handleUpdateAfterDeletion: (enrollmentId: string) => void; // Type this appropriately
 }) {
