@@ -11,24 +11,16 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
 // icons
-import {
-  MapPin,
-  BookText,
-  SignpostBig,
-  NotebookPen,
-  GripVertical,
-  Trash2,
-} from 'lucide-react';
-import { Course } from '@/app/utilities/types';
-
-interface CourseWithEnrollment extends Course {
-  enrollmentId: string;
-}
+import { GripVertical, Trash2 } from 'lucide-react';
+import { CourseWithEnrollment } from '@/app/utilities/types';
 
 export default function CourseCardSchedule({
   course,
   handleUpdateAfterDeletion, // New prop to handle state updates
-}: {
+}: // setCourses={setCourses} // Update state via props
+// setSemesters={setSemesters}
+// setSemestersP2={setSemestersP2}
+{
   course: CourseWithEnrollment;
   handleUpdateAfterDeletion: (enrollmentId: string) => void; // Type this appropriately
 }) {

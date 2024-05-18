@@ -15,6 +15,10 @@ export interface Course {
   examinations?: Examination[];
 }
 
+export interface CourseWithEnrollment extends Course {
+  enrollmentId: string;
+}
+
 export interface Examination {
   id: string;
   courseId: string;
@@ -47,4 +51,8 @@ export interface FilterProps {
 
 export interface SemesterGroupings {
   [key: string]: Course[];
+}
+
+export interface SemesterCourses {
+  [key: number]: CourseWithEnrollment[];
 }

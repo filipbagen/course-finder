@@ -1,256 +1,259 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from '@hello-pangea/dnd';
-import CourseCardSchedule from '@/app/components/CourseCardSchedule';
-import { Course, SemesterGroupings } from '@/app/utilities/types';
-import Statistics from '@/app/dashboard/schedule/Statistics';
+// const getCourses = async () => {
+//   setLoading(true);
+//   try {
+//     const response = await fetch('/api/enrollment');
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//     const data = await response.json();
+//     setCourses(data.courses);
 
-interface CourseWithEnrollment extends Course {
-  enrollmentId: string;
-}
+//     const groupedP1 = data.courses.reduce(
+//       (acc: SemesterGroupings, course: Course) => {
+//         const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+//         if (!acc[key]) acc[key] = [];
+//         if (course.period.includes(1)) {
+//           acc[key].push(course);
+//         }
+//         return acc;
+//       },
+//       {}
+//     );
+
+//     const groupedP2 = data.courses.reduce(
+//       (acc: SemesterGroupings, course: Course) => {
+//         const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+//         if (!acc[key]) acc[key] = [];
+//         if (course.period.includes(2)) {
+//           acc[key].push(course);
+//         }
+//         return acc;
+//       },
+//       {}
+//     );
+
+//     setSemesters(groupedP1);
+//     setSemestersP2(groupedP2);
+//   } catch (error) {
+//     console.error('Failed to load courses:', error);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+// useEffect(() => {
+//   getCourses();
+// }, []);
+
+// const handleDragAndDrop = async (results: DropResult) => {
+//   const { source, destination, type } = results;
+
+//   if (!destination) return; // No valid drop location
+//   if (
+//     source.droppableId === destination.droppableId &&
+//     source.index === destination.index
+//   ) {
+//     return; // Dropped in the same place, no action needed
+//   }
+
+//   const sourceSemesterId = parseInt(source.droppableId.split('-')[0], 10);
+//   const destinationSemesterId = parseInt(
+//     destination.droppableId.split('-')[0],
+//     10
+//   );
+//   const period = type.endsWith('P1') ? 'P1' : 'P2';
+
+//   // Choose the correct state and setter based on the period
+//   const semesterKey = period === 'P1' ? semesters : semestersP2;
+//   const setSemesterKey = period === 'P1' ? setSemesters : setSemestersP2;
+
+//   // Only allow same-semester movement for 'unique' types
+//   if (
+//     type.startsWith('unique') &&
+//     sourceSemesterId !== destinationSemesterId
+//   ) {
+//     return;
+//   }
+
+//   // Clone the source and destination course arrays
+//   const newSourceCourses = [...semesterKey[sourceSemesterId]];
+//   const newDestinationCourses =
+//     sourceSemesterId === destinationSemesterId
+//       ? newSourceCourses
+//       : [...(semesterKey[destinationSemesterId] || [])];
+//   const movedCourse = newSourceCourses[source.index];
+//   newSourceCourses.splice(source.index, 1);
+//   newDestinationCourses.splice(destination.index, 0, movedCourse);
+
+//   // Update the state for the current period
+//   setSemesterKey((prev) => ({
+//     ...prev,
+//     [sourceSemesterId]: newSourceCourses,
+//     [destinationSemesterId]: newDestinationCourses,
+//   }));
+
+//   // Synchronize the course across periods if it runs in both '1' and '2'
+//   if (movedCourse.period.includes(1) && movedCourse.period.includes(2)) {
+//     const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
+//     const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
+
+//     // We need to find the same course in the other period array and move it to the same semester but not necessarily to the same index
+//     const otherPeriodCourses = otherPeriodKey[sourceSemesterId] || [];
+//     const otherCourseIndex = otherPeriodCourses.findIndex(
+//       (course) => course.id === movedCourse.id
+//     );
+//     if (otherCourseIndex !== -1) {
+//       const newOtherSourceCourses = [...otherPeriodCourses];
+//       const newOtherDestinationCourses =
+//         sourceSemesterId === destinationSemesterId
+//           ? newOtherSourceCourses
+//           : [...(otherPeriodKey[destinationSemesterId] || [])];
+//       const otherMovedCourse = newOtherSourceCourses.splice(
+//         otherCourseIndex,
+//         1
+//       )[0];
+
+//       // Decide on a suitable index for the course in the new semester
+//       const appropriateIndex = newOtherDestinationCourses.findIndex(
+//         (c: Course) => c.semester.includes(destinationSemesterId)
+//       );
+//       newOtherDestinationCourses.splice(
+//         appropriateIndex === -1
+//           ? newOtherDestinationCourses.length
+//           : appropriateIndex,
+//         0,
+//         otherMovedCourse
+//       );
+
+//       setOtherPeriodKey((prev) => ({
+//         ...prev,
+//         [sourceSemesterId]: newOtherSourceCourses,
+//         [destinationSemesterId]: newOtherDestinationCourses,
+//       }));
+//     }
+//   }
+
+//   // Update the database with the new semester
+//   try {
+//     const response = await fetch('/api/enrollment/update', {
+//       method: 'PATCH',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         courseId: movedCourse.id,
+//         newSemester: destinationSemesterId,
+//       }),
+//     });
+//     if (!response.ok) {
+//       throw new Error(`Failed to update course semester: ${response.status}`);
+//     }
+//   } catch (error) {
+//     console.error('Error updating course semester:', error);
+//   }
+// };
+
+// const SemesterBlock = ({
+//   semester,
+//   courses,
+//   period,
+// }: {
+//   semester: number;
+//   courses: Course[];
+//   period: string;
+// }) => (
+//   <div key={`${semester}-${period}`} className="w-full">
+//     <h5 className="mb-4">Semester {semester}</h5>
+//     <Droppable
+//       droppableId={`${semester}-${period}`}
+//       type={semester === 8 ? `unique-${period}` : `movable-${period}`}
+//     >
+//       {(provided) => (
+//         <div
+//           className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4"
+//           {...provided.droppableProps}
+//           ref={provided.innerRef}
+//         >
+//           {courses.map((course: any, index: number) => (
+//             <Draggable
+//               draggableId={`${course.id}-${period}`}
+//               index={index}
+//               key={`${course.id}-${period}`}
+//             >
+//               {(provided) => (
+//                 <div
+//                   {...provided.dragHandleProps}
+//                   {...provided.draggableProps}
+//                   ref={provided.innerRef}
+//                 >
+//                   <CourseCardSchedule
+//                     course={course}
+//                     handleUpdateAfterDeletion={updateAfterDeletion}
+//                   />
+//                 </div>
+//               )}
+//             </Draggable>
+//           ))}
+//           {provided.placeholder}
+//         </div>
+//       )}
+//     </Droppable>
+//   </div>
+// );
+
+import { DragDropContext } from '@hello-pangea/dnd';
+import Statistics from '@/app/dashboard/schedule/Statistics';
+import { SemesterBlock } from './components/SemesterBlock';
+import { SemesterCourses } from '@/app/utilities/types';
+import useDragAndDrop from './hooks/useDragAndDrop';
+import useCourseData from './hooks/useCourseData';
 
 export default function Schedule() {
-  const [courses, setCourses] = useState<CourseWithEnrollment[]>([]);
-  const [semesters, setSemesters] = useState<{ [key: number]: Course[] }>({});
-  const [semestersP2, setSemestersP2] = useState<{ [key: number]: Course[] }>(
-    {}
-  );
-  const [loading, setLoading] = useState(true);
-
-  const getCourses = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/enrollment');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCourses(data.courses);
-
-      const groupedP1 = data.courses.reduce(
-        (acc: SemesterGroupings, course: Course) => {
-          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
-          if (!acc[key]) acc[key] = [];
-          if (course.period.includes(1)) {
-            acc[key].push(course);
-          }
-          return acc;
-        },
-        {}
-      );
-
-      const groupedP2 = data.courses.reduce(
-        (acc: SemesterGroupings, course: Course) => {
-          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
-          if (!acc[key]) acc[key] = [];
-          if (course.period.includes(2)) {
-            acc[key].push(course);
-          }
-          return acc;
-        },
-        {}
-      );
-
-      setSemesters(groupedP1);
-      setSemestersP2(groupedP2);
-    } catch (error) {
-      console.error('Failed to load courses:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getCourses();
-  }, []);
-
-  const handleDragAndDrop = async (results: DropResult) => {
-    const { source, destination, type } = results;
-
-    if (!destination) return; // No valid drop location
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return; // Dropped in the same place, no action needed
-    }
-
-    const sourceSemesterId = parseInt(source.droppableId.split('-')[0], 10);
-    const destinationSemesterId = parseInt(
-      destination.droppableId.split('-')[0],
-      10
-    );
-    const period = type.endsWith('P1') ? 'P1' : 'P2';
-
-    // Choose the correct state and setter based on the period
-    const semesterKey = period === 'P1' ? semesters : semestersP2;
-    const setSemesterKey = period === 'P1' ? setSemesters : setSemestersP2;
-
-    // Only allow same-semester movement for 'unique' types
-    if (
-      type.startsWith('unique') &&
-      sourceSemesterId !== destinationSemesterId
-    ) {
-      return;
-    }
-
-    // Clone the source and destination course arrays
-    const newSourceCourses = [...semesterKey[sourceSemesterId]];
-    const newDestinationCourses =
-      sourceSemesterId === destinationSemesterId
-        ? newSourceCourses
-        : [...(semesterKey[destinationSemesterId] || [])];
-    const movedCourse = newSourceCourses[source.index];
-    newSourceCourses.splice(source.index, 1);
-    newDestinationCourses.splice(destination.index, 0, movedCourse);
-
-    // Update the state for the current period
-    setSemesterKey((prev) => ({
-      ...prev,
-      [sourceSemesterId]: newSourceCourses,
-      [destinationSemesterId]: newDestinationCourses,
-    }));
-
-    // Synchronize the course across periods if it runs in both '1' and '2'
-    if (movedCourse.period.includes(1) && movedCourse.period.includes(2)) {
-      const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
-      const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
-
-      // We need to find the same course in the other period array and move it to the same semester but not necessarily to the same index
-      const otherPeriodCourses = otherPeriodKey[sourceSemesterId] || [];
-      const otherCourseIndex = otherPeriodCourses.findIndex(
-        (course) => course.id === movedCourse.id
-      );
-      if (otherCourseIndex !== -1) {
-        const newOtherSourceCourses = [...otherPeriodCourses];
-        const newOtherDestinationCourses =
-          sourceSemesterId === destinationSemesterId
-            ? newOtherSourceCourses
-            : [...(otherPeriodKey[destinationSemesterId] || [])];
-        const otherMovedCourse = newOtherSourceCourses.splice(
-          otherCourseIndex,
-          1
-        )[0];
-
-        // Decide on a suitable index for the course in the new semester
-        const appropriateIndex = newOtherDestinationCourses.findIndex(
-          (c: Course) => c.semester.includes(destinationSemesterId)
-        );
-        newOtherDestinationCourses.splice(
-          appropriateIndex === -1
-            ? newOtherDestinationCourses.length
-            : appropriateIndex,
-          0,
-          otherMovedCourse
-        );
-
-        setOtherPeriodKey((prev) => ({
-          ...prev,
-          [sourceSemesterId]: newOtherSourceCourses,
-          [destinationSemesterId]: newOtherDestinationCourses,
-        }));
-      }
-    }
-
-    // Update the database with the new semester
-    try {
-      const response = await fetch('/api/enrollment/update', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          courseId: movedCourse.id,
-          newSemester: destinationSemesterId,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to update course semester: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error updating course semester:', error);
-    }
-  };
-
-  const SemesterBlock = ({
-    semester,
+  const {
     courses,
-    period,
-  }: {
-    semester: number;
-    courses: Course[];
-    period: string;
-  }) => (
-    <div key={`${semester}-${period}`} className="w-full">
-      <h5 className="mb-4">Semester {semester}</h5>
-      <Droppable
-        droppableId={`${semester}-${period}`}
-        type={semester === 8 ? `unique-${period}` : `movable-${period}`}
-      >
-        {(provided) => (
-          <div
-            className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4"
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            {courses.map((course: any, index: number) => (
-              <Draggable
-                draggableId={`${course.id}-${period}`}
-                index={index}
-                key={`${course.id}-${period}`}
-              >
-                {(provided) => (
-                  <div
-                    {...provided.dragHandleProps}
-                    {...provided.draggableProps}
-                    ref={provided.innerRef}
-                  >
-                    <CourseCardSchedule
-                      course={course}
-                      handleUpdateAfterDeletion={updateAfterDeletion}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </div>
-  );
+    semesters,
+    semestersP2,
+    loading,
+    setCourses,
+    setSemesters,
+    setSemestersP2,
+  } = useCourseData();
 
-  const updateAfterDeletion = (enrollmentId: string) => {
+  // Get the drag-and-drop handler from the useDragAndDrop hook
+  const handleDragAndDrop = useDragAndDrop({
+    semesters,
+    setSemesters,
+    semestersP2,
+    setSemestersP2,
+  });
+
+  const handleUpdateAfterDeletion = (enrollmentId: string) => {
     setCourses((prevCourses) =>
-      prevCourses.filter((c) => c.enrollmentId !== enrollmentId)
+      prevCourses.filter((course) => course.enrollmentId !== enrollmentId)
     );
-    setSemesters((prevSemesters) => {
-      // Go through all semesters and filter out the deleted course
-      const newSemesters: any = {};
-      Object.keys(prevSemesters).forEach((semester) => {
-        newSemesters[semester] = prevSemesters[semester as any].filter(
-          (c: any) => c.enrollmentId !== enrollmentId
+
+    const updateSemesterCourses = (
+      semesterCourses: SemesterCourses
+    ): SemesterCourses => {
+      const newSemesters: SemesterCourses = {};
+      Object.keys(semesterCourses).forEach((key) => {
+        const filteredCourses = semesterCourses[parseInt(key)].filter(
+          (course) => course.enrollmentId !== enrollmentId
         );
+        newSemesters[parseInt(key)] = filteredCourses;
       });
       return newSemesters;
-    });
-    setSemestersP2((prevSemestersP2) => {
-      // Similar logic for Period 2
-      const newSemestersP2: any = {};
-      Object.keys(prevSemestersP2).forEach((semester) => {
-        newSemestersP2[semester] = prevSemestersP2[semester as any].filter(
-          (c: any) => c.enrollmentId !== enrollmentId
-        );
-      });
-      return newSemestersP2;
-    });
+    };
+
+    setSemesters((prevSemesters) => updateSemesterCourses(prevSemesters));
+    setSemestersP2((prevSemestersP2) => updateSemesterCourses(prevSemestersP2));
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Render loading state
+  }
 
   return (
     <div className="flex flex-col gap-12">
@@ -266,6 +269,7 @@ export default function Schedule() {
                   semester={parseInt(semester)}
                   courses={semesters[parseInt(semester)]}
                   period="P1"
+                  handleUpdateAfterDeletion={handleUpdateAfterDeletion}
                 />
               ))}
             </div>
@@ -280,6 +284,7 @@ export default function Schedule() {
                   semester={parseInt(semester)} // Convert semester from string to number
                   courses={semestersP2[parseInt(semester)]}
                   period="P2"
+                  handleUpdateAfterDeletion={handleUpdateAfterDeletion}
                 />
               ))}
             </div>
