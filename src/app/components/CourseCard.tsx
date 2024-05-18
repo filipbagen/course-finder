@@ -80,6 +80,13 @@ export default function CourseCard({ course }: { course: Course }) {
     }
   };
 
+  const handleEnrollment = () => {
+    const semesters = course.semester;
+    if (semesters.length === 1) {
+      addToEnrollment(course.id, semesters[0]);
+    }
+  };
+
   return (
     <Card key={course.id} className="flex-grow h-min">
       <CardHeader>
@@ -93,20 +100,25 @@ export default function CourseCard({ course }: { course: Course }) {
               <Button
                 size="icon"
                 aria-label={`Add ${course.name} to your schedule`}
+                onClick={
+                  course.semester.length === 1 ? handleEnrollment : undefined
+                }
               >
                 +
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              {[7, 8, 9].map((semester) => (
-                <DropdownMenuItem
-                  key={semester}
-                  onClick={() => addToEnrollment(course.id, semester)}
-                >
-                  Semester {semester}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
+            {course.semester.length > 1 && (
+              <DropdownMenuContent className="w-56">
+                {course.semester.map((semester) => (
+                  <DropdownMenuItem
+                    key={semester}
+                    onClick={() => addToEnrollment(course.id, semester)}
+                  >
+                    Semester {semester}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            )}
           </DropdownMenu>
         </div>
       </CardHeader>
