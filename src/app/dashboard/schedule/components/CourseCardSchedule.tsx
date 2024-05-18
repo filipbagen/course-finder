@@ -23,7 +23,6 @@ export default function CourseCardSchedule({
 }) {
   const deleteEnrollment = async (enrollmentId: string) => {
     try {
-      console.log('Attempting to delete enrollment with ID:', enrollmentId);
       const response = await fetch('/api/enrollment', {
         method: 'DELETE',
         headers: {
@@ -37,7 +36,7 @@ export default function CourseCardSchedule({
       }
 
       // Notify user of success
-      toast.success(`Removed enrollment ID ${enrollmentId} from schedule`);
+      toast.success(`Removed ${course.name} from schedule`);
 
       // Call the new update function passed from the parent component
       handleUpdateAfterDeletion(enrollmentId);
