@@ -1,6 +1,6 @@
 import { Course } from '@/app/utilities/types';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import CourseCardSchedule from './CourseCardSchedule';
+import CourseCard from '@/app/components/CourseCard';
 
 export const SemesterBlock = ({
   semester,
@@ -34,16 +34,36 @@ export const SemesterBlock = ({
               >
                 {(provided) => (
                   <div
-                    {...provided.dragHandleProps}
-                    {...provided.draggableProps}
                     ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    // {...provided.dragHandleProps}
+                    style={{
+                      minHeight: 40,
+                      ...provided.draggableProps.style,
+                    }}
                   >
-                    <CourseCardSchedule
+                    <CourseCard
+                      variant="schedule"
                       course={course}
                       handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+                      dragHandleProps={provided.dragHandleProps}
                     />
                   </div>
                 )}
+
+                {/* {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    style={{
+                      minHeight: 40,
+                      ...provided.draggableProps.style,
+                    }}
+                  >
+                    <div {...provided.dragHandleProps}>handle</div>
+                    item
+                  </div>
+                )} */}
               </Draggable>
             ))
           ) : (

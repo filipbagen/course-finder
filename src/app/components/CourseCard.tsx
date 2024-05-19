@@ -15,15 +15,18 @@ import { EnrollmentButton } from '@/app/dashboard/schedule/components/Enrollment
 import { CustomDrawerContent } from '@/app/dashboard/schedule/components/DrawerContent';
 import { Badge } from '@/components/ui/badge';
 import { CourseWithEnrollment } from '@/app/utilities/types';
+import { Grip, GripVertical, Trash2 } from 'lucide-react';
 
 const CourseCard = ({
   course,
   variant,
   handleUpdateAfterDeletion,
+  dragHandleProps,
 }: {
   course: CourseWithEnrollment;
   variant?: 'default' | 'schedule';
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
+  dragHandleProps?: any;
 }) => {
   const addToEnrollment = async (courseId: string, semester: number) => {
     try {
@@ -81,24 +84,33 @@ const CourseCard = ({
       <Card key={course.id} className="flex-grow h-min">
         <CardHeader className="flex flex-row justify-between items-center">
           <div className="flex flex-row gap-4 items-center">
-            <h6 className="leading-5">{course.name}</h6>
+            <div {...dragHandleProps}>
+              <GripVertical size={18} />
+            </div>
+            <div className="flex flex-col">
+              <h6 className="leading-5">{course.name}</h6>
+              <span className="text-slate-400 text-sm">{course.code}</span>
+            </div>
           </div>
-          <Button onClick={() => deleteEnrollment(course.enrollmentId)}>
-            Remove
-          </Button>
+          <Trash2
+            onClick={() => {
+              deleteEnrollment(course.enrollmentId);
+            }}
+            color="red"
+            size={18}
+            className="w-min h-min cursor-pointer hover:bg-red-100 ease-out duration-200 rounded-md p-2"
+          />
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
-            {course.advanced ? (
+            {/* {course.advanced ? (
               <Badge className="w-min whitespace-nowrap">Avancerad nivå</Badge>
             ) : (
               <Badge className="bg-primary/50 w-min">Grundnivå</Badge>
-            )}
+            )} */}
             <div className="flex flex-wrap gap-2">
               {course.mainFieldOfStudy.map((field) => (
-                <Badge key={field} variant="secondary">
-                  {field}
-                </Badge>
+                <Badge key={field}>{field}</Badge>
               ))}
             </div>
           </div>
