@@ -1,7 +1,8 @@
-// File: src/app/dashboard/social/[id]/page.tsx
+'use client';
 
-import prisma from '@/app/lib/db';
-import { Course } from '@/app/utilities/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ScheduleView from '@/app/dashboard/schedule/components/ScheduleView';
+import useCourseData from '../../schedule/hooks/useCourseData';
 
 type Props = {
   params: {
@@ -9,38 +10,48 @@ type Props = {
   };
 };
 
-export default async function DynamicRoute({ params }: Props) {
+export default function OtherUserSchedule({ params }: Props) {
   const { id } = params;
 
-  // Fetch enrollments with nested course data included and also include the enrollment details
-  const enrollments = await prisma.enrollment.findMany({
-    where: {
-      userId: id,
-    },
-    select: {
-      semester: true, // select the semester from the enrollment
-      course: true, // Include the full course details
-    },
-  });
-
-  // Transform the data to include the semester specified in the enrollment
-  const coursesWithEnrollmentSemester = enrollments.map((enrollment) => ({
-    id: enrollment.course.id,
-    name: enrollment.course.name,
-    semester: enrollment.semester, // Override the semester to the one in the enrollment
-  }));
+  const { courses, semesters, semestersP2, loading } = useCourseData(id);
 
   return (
-    <div>
-      <p>Hello from dynamic route with id: {id}</p>
-      <h2>Courses:</h2>
-      <ul>
-        {coursesWithEnrollmentSemester.map((course) => (
-          <li key={course.id}>
-            {course.name} (Semester: {course.semester})
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col gap-4">
+      <Tabs defaultValue="schedule" className="flex flex-col gap-4">
+        <TabsList className="flex gap-2 w-min">
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews (12)</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="schedule">
+          <div className="flex flex-col gap-6">
+            <ScheduleView
+              courses={courses}
+              semesters={semesters}
+              semestersP2={semestersP2}
+              loading={loading}
+              draggable={false} // Disable drag-and-drop
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <div>
+            <h5>Reviews</h5>
+            <p>Reviews coming soon...</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
+}
+
+{
+  /* <ul>
+  {coursesWithEnrollmentSemester.map((course) => (
+    <li key={course.id}>
+      {course.name} (Semester: {course.semester})
+    </li>
+  ))}
+</ul> */
 }

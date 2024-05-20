@@ -2,21 +2,21 @@ import { useState, useEffect } from 'react';
 import {
   CourseWithEnrollment,
   SemesterCourses,
-  Course,
   SemesterGroupings,
 } from '@/app/utilities/types';
 
-export default function useCourseData() {
+export default function useCourseData(userId?: string) {
   const [courses, setCourses] = useState<CourseWithEnrollment[]>([]);
   const [semesters, setSemesters] = useState<SemesterCourses>({});
   const [semestersP2, setSemestersP2] = useState<SemesterCourses>({});
   const [loading, setLoading] = useState(true);
 
-  // Same getCourses function goes here
   const getCourses = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/enrollment');
+      const response = await fetch(
+        userId ? `/api/enrollment?userId=${userId}` : '/api/enrollment'
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -24,8 +24,8 @@ export default function useCourseData() {
       setCourses(data.courses);
 
       const groupedP1 = data.courses.reduce(
-        (acc: SemesterGroupings, course: Course) => {
-          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+        (acc: SemesterGroupings, course: CourseWithEnrollment) => {
+          const key = course.semester.toString();
           if (!acc[key]) acc[key] = [];
           if (course.period.includes(1)) {
             acc[key].push(course);
@@ -36,8 +36,8 @@ export default function useCourseData() {
       );
 
       const groupedP2 = data.courses.reduce(
-        (acc: SemesterGroupings, course: Course) => {
-          const key = course.semester.toString(); // Ensure the key is a string, adjust as necessary
+        (acc: SemesterGroupings, course: CourseWithEnrollment) => {
+          const key = course.semester.toString();
           if (!acc[key]) acc[key] = [];
           if (course.period.includes(2)) {
             acc[key].push(course);
@@ -58,7 +58,7 @@ export default function useCourseData() {
 
   useEffect(() => {
     getCourses();
-  }, []);
+  }, [userId]);
 
   return {
     courses,

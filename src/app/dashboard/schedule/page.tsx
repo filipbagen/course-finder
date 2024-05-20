@@ -1,11 +1,9 @@
 'use client';
 
-import { DragDropContext } from '@hello-pangea/dnd';
-import Statistics from '@/app/dashboard/schedule/Statistics';
-import { SemesterBlock } from './components/SemesterBlock';
 import { SemesterCourses } from '@/app/utilities/types';
 import useDragAndDrop from './hooks/useDragAndDrop';
 import useCourseData from './hooks/useCourseData';
+import ScheduleView from './components/ScheduleView';
 
 export default function Schedule() {
   const {
@@ -47,49 +45,15 @@ export default function Schedule() {
     setSemestersP2((prevSemestersP2) => updateSemesterCourses(prevSemestersP2));
   };
 
-  if (loading) {
-    return <div>Loading...</div>; // Render loading state
-  }
-
-  // Ensure at least 3 columns for each period
-  const fixedSemesters = [7, 8, 9];
-
   return (
-    <div className="flex flex-col gap-12">
-      <Statistics courses={courses} />
-      <DragDropContext onDragEnd={handleDragAndDrop}>
-        <div className="flex flex-col gap-12">
-          <div className="flex flex-col gap-8">
-            <h5>Period 1</h5>
-            <div className="flex w-full justify-between gap-4">
-              {fixedSemesters.map((semester) => (
-                <SemesterBlock
-                  key={semester}
-                  semester={semester}
-                  courses={semesters[semester] || []}
-                  period="P1"
-                  handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-8">
-            <h5>Period 2</h5>
-            <div className="flex w-full justify-between gap-4">
-              {fixedSemesters.map((semester) => (
-                <SemesterBlock
-                  key={semester}
-                  semester={semester}
-                  courses={semestersP2[semester] || []}
-                  period="P2"
-                  handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </DragDropContext>
-    </div>
+    <ScheduleView
+      courses={courses}
+      semesters={semesters}
+      semestersP2={semestersP2}
+      loading={loading}
+      handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+      handleDragAndDrop={handleDragAndDrop}
+      draggable={true} // Enable drag-and-drop
+    />
   );
 }
