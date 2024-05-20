@@ -45,13 +45,3 @@ export default function OtherUserSchedule({ params }: Props) {
     </div>
   );
 }
-
-{
-  /* <ul>
-  {coursesWithEnrollmentSemester.map((course) => (
-    <li key={course.id}>
-      {course.name} (Semester: {course.semester})
-    </li>
-  ))}
-</ul> */
-}

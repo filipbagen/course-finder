@@ -51,20 +51,22 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-12">
+    <>
       <h2>Schedule</h2>
-      {draggable ? (
-        <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
-          {renderSemesterBlock('1', semesters)}
-          {renderSemesterBlock('2', semestersP2)}
-        </DragDropContext>
-      ) : (
-        <>
-          {renderSemesterBlock('1', semesters)}
-          {renderSemesterBlock('2', semestersP2)}
-        </>
-      )}
-    </div>
+      <div className="flex flex-col gap-12">
+        {draggable ? (
+          <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
+            {renderSemesterBlock('1', semesters)}
+            {renderSemesterBlock('2', semestersP2)}
+          </DragDropContext>
+        ) : (
+          <>
+            {renderSemesterBlock('1', semesters)}
+            {renderSemesterBlock('2', semestersP2)}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

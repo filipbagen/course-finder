@@ -31,10 +31,6 @@ export default function useDragAndDrop({
     );
     const period = source.droppableId.endsWith('1') ? 'P1' : 'P2';
 
-    console.log('Source:', source);
-    console.log('Destination:', destination);
-    console.log('Period:', period);
-
     // Choose the correct state and setter based on the period
     const semesterKey = period === 'P1' ? semesters : semestersP2;
     const setSemesterKey = period === 'P1' ? setSemesters : setSemestersP2;
@@ -54,7 +50,6 @@ export default function useDragAndDrop({
         ? newSourceCourses
         : [...(semesterKey[destinationSemesterId] || [])];
     const movedCourse = newSourceCourses[source.index];
-    console.log('Moved course:', movedCourse);
 
     if (!movedCourse) {
       return; // No course found, exit
@@ -62,9 +57,6 @@ export default function useDragAndDrop({
 
     newSourceCourses.splice(source.index, 1);
     newDestinationCourses.splice(destination.index, 0, movedCourse);
-
-    console.log('Updated source courses:', newSourceCourses);
-    console.log('Updated destination courses:', newDestinationCourses);
 
     // Update the state for the current period
     setSemesterKey((prev) => ({
@@ -91,12 +83,6 @@ export default function useDragAndDrop({
         const otherMovedCourse = otherSourceCourses[otherCourseIndex];
         otherSourceCourses.splice(otherCourseIndex, 1);
         otherDestinationCourses.push(otherMovedCourse); // Just push to the end
-
-        console.log('Updated other source courses:', otherSourceCourses);
-        console.log(
-          'Updated other destination courses:',
-          otherDestinationCourses
-        );
 
         setOtherPeriodKey((prev) => ({
           ...prev,
