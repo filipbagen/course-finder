@@ -14,8 +14,12 @@ import { CourseDetails } from '@/app/dashboard/schedule/components/CourseDetails
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
 import { CustomDrawerContent } from '@/app/dashboard/schedule/components/DrawerContent';
 import { Badge } from '@/components/ui/badge';
-import { CourseWithEnrollment } from '@/app/utilities/types';
 import { Grip, GripVertical, Trash2 } from 'lucide-react';
+import {
+  Course,
+  CourseWithEnrollment,
+  isCourseWithEnrollment,
+} from '@/app/utilities/types';
 
 const CourseCard = ({
   course,
@@ -23,7 +27,7 @@ const CourseCard = ({
   handleUpdateAfterDeletion,
   dragHandleProps,
 }: {
-  course: CourseWithEnrollment;
+  course: Course | CourseWithEnrollment;
   variant?: 'default' | 'schedule';
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
   dragHandleProps?: any;
@@ -79,7 +83,7 @@ const CourseCard = ({
     [course]
   );
 
-  if (variant === 'schedule') {
+  if (variant === 'schedule' && isCourseWithEnrollment(course)) {
     return (
       <Card key={course.id} className="flex-grow h-min">
         <CardHeader className="flex flex-row justify-between items-center">

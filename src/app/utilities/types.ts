@@ -19,6 +19,12 @@ export interface CourseWithEnrollment extends Course {
   enrollmentId: string;
 }
 
+export const isCourseWithEnrollment = (
+  course: Course | CourseWithEnrollment
+): course is CourseWithEnrollment => {
+  return 'enrollmentId' in course;
+};
+
 export interface Examination {
   id: string;
   courseId: string;

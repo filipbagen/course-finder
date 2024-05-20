@@ -212,18 +212,3 @@ export default async function Home() {
     </div>
   );
 }
-
-{
-  /*
-
-Argument of type '(course: Course) => any' is not assignable to parameter of type '(value: { id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: number[]; location: string; url: string; prerequisites: string; exclusions: string[]; } | { ...; }, index: number, array: ({ ...; } | { ...; })[]) => any'.
-  Types of parameters 'course' and 'value' are incompatible.
-    
-  
-      Type '{ id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: number[]; location: string; url: string; prerequisites: string; exclusions: string[]; } | { ...; }' is not assignable to type 'Course'.
-      Type '{ id: string; code: string; name: string; credits: number; mainFieldOfStudy: string[]; advanced: boolean; semester: number[]; period: number[]; block: string; location: string; url: string; prerequisites: string; exclusions: string[]; }' is not assignable to type 'Course'.
-        Types of property 'block' are incompatible.
-          Type 'string' is not assignable to type 'number[]'.
-
-*/
-}
