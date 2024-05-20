@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -14,12 +13,13 @@ import { CourseDetails } from '@/app/dashboard/schedule/components/CourseDetails
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
 import { CustomDrawerContent } from '@/app/dashboard/schedule/components/DrawerContent';
 import { Badge } from '@/components/ui/badge';
-import { Grip, GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
 import {
   Course,
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/app/utilities/types';
+import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 const CourseCard = ({
   course,
@@ -28,9 +28,9 @@ const CourseCard = ({
   dragHandleProps,
 }: {
   course: Course | CourseWithEnrollment;
-  variant?: 'default' | 'schedule';
+  variant?: 'default' | 'schedule' | 'user-visit';
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  dragHandleProps?: any;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
 }) => {
   const addToEnrollment = async (courseId: string, semester: number) => {
     try {
@@ -83,42 +83,54 @@ const CourseCard = ({
     [course]
   );
 
+  const renderCardHeader = () => (
+    <CardHeader className="flex flex-row justify-between items-center">
+      <div className="flex flex-row gap-4 items-center">
+        {variant === 'schedule' && dragHandleProps && (
+          <div {...dragHandleProps}>
+            <GripVertical size={18} />
+          </div>
+        )}
+        <div className="flex flex-col">
+          <h6 className="leading-5">{course.name}</h6>
+          <span className="text-slate-400 text-sm">{course.code}</span>
+        </div>
+      </div>
+      {variant === 'schedule' && isCourseWithEnrollment(course) && (
+        <Trash2
+          onClick={() => deleteEnrollment(course.enrollmentId)}
+          color="red"
+          size={18}
+          className="w-min h-min cursor-pointer hover:bg-red-100 ease-out duration-200 rounded-md p-2"
+        />
+      )}
+    </CardHeader>
+  );
+
+  const renderCardContent = () => (
+    <CardContent>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-2">
+          {course.mainFieldOfStudy.map((field) => (
+            <Badge key={field}>{field}</Badge>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  );
+
   if (variant === 'schedule' && isCourseWithEnrollment(course)) {
     return (
       <Card className="flex-grow h-min">
-        <CardHeader className="flex flex-row justify-between items-center">
-          <div className="flex flex-row gap-4 items-center">
-            <div {...dragHandleProps}>
-              <GripVertical size={18} />
-            </div>
-            <div className="flex flex-col">
-              <h6 className="leading-5">{course.name}</h6>
-              <span className="text-slate-400 text-sm">{course.code}</span>
-            </div>
-          </div>
-          <Trash2
-            onClick={() => {
-              deleteEnrollment(course.enrollmentId);
-            }}
-            color="red"
-            size={18}
-            className="w-min h-min cursor-pointer hover:bg-red-100 ease-out duration-200 rounded-md p-2"
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            {/* {course.advanced ? (
-              <Badge className="w-min whitespace-nowrap">Avancerad nivå</Badge>
-            ) : (
-              <Badge className="bg-primary/50 w-min">Grundnivå</Badge>
-            )} */}
-            <div className="flex flex-wrap gap-2">
-              {course.mainFieldOfStudy.map((field) => (
-                <Badge key={field}>{field}</Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
+        {renderCardHeader()}
+        {renderCardContent()}
+      </Card>
+    );
+  } else if (variant === 'user-visit') {
+    return (
+      <Card className="flex-grow h-min">
+        {renderCardHeader()}
+        {renderCardContent()}
       </Card>
     );
   }

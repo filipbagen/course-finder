@@ -70,7 +70,7 @@ export const SemesterBlock = ({
           courses.map((course: Course) => (
             <div key={`${course.id}-${period}`} style={{ minHeight: 40 }}>
               <CourseCard
-                variant="schedule"
+                variant="user-visit"
                 course={course}
                 handleUpdateAfterDeletion={handleUpdateAfterDeletion}
               />

@@ -35,7 +35,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
     semestersData: SemesterCourses
   ) => (
     <div className="flex flex-col gap-8">
-      <h5>Period {period}</h5>
+      <p>Period {period}</p>
       <div className="flex w-full justify-between gap-4">
         {fixedSemesters.map((semester) => (
           <SemesterBlock
@@ -53,16 +53,15 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
 
   return (
     <div className="flex flex-col gap-12">
-      <Statistics courses={courses} />
       {draggable ? (
         <DragDropContext onDragEnd={handleDragAndDrop}>
-          {renderSemesterBlock('P1', semesters)}
-          {renderSemesterBlock('P2', semestersP2)}
+          {renderSemesterBlock('1', semesters)}
+          {renderSemesterBlock('2', semestersP2)}
         </DragDropContext>
       ) : (
         <>
-          {renderSemesterBlock('P1', semesters)}
-          {renderSemesterBlock('P2', semestersP2)}
+          {renderSemesterBlock('1', semesters)}
+          {renderSemesterBlock('2', semestersP2)}
         </>
       )}
     </div>
