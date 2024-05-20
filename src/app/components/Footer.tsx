@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
         Designed and developed by{' '}
         <a href="https://filipbagen.com" target="_blank">
           <u>
-            <b>Filip</b>
+            <b>me</b>
           </u>
         </a>
       </p>

@@ -61,11 +61,6 @@ export default function useCourseData(userId?: string) {
     getCourses();
   }, []);
 
-  useEffect(() => {
-    console.log('Semesters:', semesters);
-    console.log('SemestersP2:', semestersP2);
-  }, [semesters, semestersP2]);
-
   return {
     courses,
     semesters,
