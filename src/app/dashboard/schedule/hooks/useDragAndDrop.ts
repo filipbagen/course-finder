@@ -29,7 +29,11 @@ export default function useDragAndDrop({
       destination.droppableId.split('-')[0],
       10
     );
-    const period = type.endsWith('P1') ? 'P1' : 'P2';
+    const period = source.droppableId.endsWith('1') ? 'P1' : 'P2';
+
+    console.log('Source:', source);
+    console.log('Destination:', destination);
+    console.log('Period:', period);
 
     // Choose the correct state and setter based on the period
     const semesterKey = period === 'P1' ? semesters : semestersP2;
@@ -44,14 +48,23 @@ export default function useDragAndDrop({
     }
 
     // Clone the source and destination course arrays
-    const newSourceCourses = [...semesterKey[sourceSemesterId]];
+    const newSourceCourses = [...(semesterKey[sourceSemesterId] || [])];
     const newDestinationCourses =
       sourceSemesterId === destinationSemesterId
         ? newSourceCourses
         : [...(semesterKey[destinationSemesterId] || [])];
     const movedCourse = newSourceCourses[source.index];
+    console.log('Moved course:', movedCourse);
+
+    if (!movedCourse) {
+      return; // No course found, exit
+    }
+
     newSourceCourses.splice(source.index, 1);
     newDestinationCourses.splice(destination.index, 0, movedCourse);
+
+    console.log('Updated source courses:', newSourceCourses);
+    console.log('Updated destination courses:', newDestinationCourses);
 
     // Update the state for the current period
     setSemesterKey((prev) => ({
@@ -65,38 +78,30 @@ export default function useDragAndDrop({
       const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
       const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
 
-      // We need to find the same course in the other period array and move it to the same semester but not necessarily to the same index
-      const otherPeriodCourses = otherPeriodKey[sourceSemesterId] || [];
-      const otherCourseIndex = otherPeriodCourses.findIndex(
+      // Find the same course in the other period array and move it to the same semester but not necessarily to the same index
+      const otherSourceCourses = [...(otherPeriodKey[sourceSemesterId] || [])];
+      const otherDestinationCourses = [
+        ...(otherPeriodKey[destinationSemesterId] || []),
+      ];
+      const otherCourseIndex = otherSourceCourses.findIndex(
         (course: Course) => course.id === movedCourse.id
       );
-      if (otherCourseIndex !== -1) {
-        const newOtherSourceCourses = [...otherPeriodCourses];
-        const newOtherDestinationCourses =
-          sourceSemesterId === destinationSemesterId
-            ? newOtherSourceCourses
-            : [...(otherPeriodKey[destinationSemesterId] || [])];
-        const otherMovedCourse = newOtherSourceCourses.splice(
-          otherCourseIndex,
-          1
-        )[0];
 
-        // Decide on a suitable index for the course in the new semester
-        const appropriateIndex = newOtherDestinationCourses.findIndex(
-          (c: Course) => c.semester.includes(destinationSemesterId)
-        );
-        newOtherDestinationCourses.splice(
-          appropriateIndex === -1
-            ? newOtherDestinationCourses.length
-            : appropriateIndex,
-          0,
-          otherMovedCourse
+      if (otherCourseIndex !== -1) {
+        const otherMovedCourse = otherSourceCourses[otherCourseIndex];
+        otherSourceCourses.splice(otherCourseIndex, 1);
+        otherDestinationCourses.push(otherMovedCourse); // Just push to the end
+
+        console.log('Updated other source courses:', otherSourceCourses);
+        console.log(
+          'Updated other destination courses:',
+          otherDestinationCourses
         );
 
         setOtherPeriodKey((prev) => ({
           ...prev,
-          [sourceSemesterId]: newOtherSourceCourses,
-          [destinationSemesterId]: newOtherDestinationCourses,
+          [sourceSemesterId]: otherSourceCourses,
+          [destinationSemesterId]: otherDestinationCourses,
         }));
       }
     }

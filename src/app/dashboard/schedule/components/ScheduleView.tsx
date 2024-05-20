@@ -1,7 +1,6 @@
 import React from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, OnDragEndResponder } from '@hello-pangea/dnd';
 import { Course, SemesterCourses } from '@/app/utilities/types';
-import Statistics from '../Statistics';
 import { SemesterBlock } from './SemesterBlock';
 
 interface ScheduleViewProps {
@@ -10,7 +9,7 @@ interface ScheduleViewProps {
   semestersP2: SemesterCourses;
   loading: boolean;
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  handleDragAndDrop?: any;
+  handleDragAndDrop?: OnDragEndResponder;
   draggable?: boolean;
 }
 
@@ -53,8 +52,9 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
 
   return (
     <div className="flex flex-col gap-12">
+      <h2>Schedule</h2>
       {draggable ? (
-        <DragDropContext onDragEnd={handleDragAndDrop}>
+        <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
           {renderSemesterBlock('1', semesters)}
           {renderSemesterBlock('2', semestersP2)}
         </DragDropContext>

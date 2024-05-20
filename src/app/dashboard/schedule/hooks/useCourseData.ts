@@ -21,6 +21,7 @@ export default function useCourseData(userId?: string) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+
       setCourses(data.courses);
 
       const groupedP1 = data.courses.reduce(
@@ -58,7 +59,12 @@ export default function useCourseData(userId?: string) {
 
   useEffect(() => {
     getCourses();
-  }, [userId]);
+  }, []);
+
+  useEffect(() => {
+    console.log('Semesters:', semesters);
+    console.log('SemestersP2:', semestersP2);
+  }, [semesters, semestersP2]);
 
   return {
     courses,
