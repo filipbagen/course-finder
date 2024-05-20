@@ -1,3 +1,12 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  colorScheme: string;
+  isPublic: boolean;
+  image: string;
+}
+
 export interface Course {
   id: string;
   code: string;

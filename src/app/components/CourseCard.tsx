@@ -85,7 +85,7 @@ const CourseCard = ({
 
   if (variant === 'schedule' && isCourseWithEnrollment(course)) {
     return (
-      <Card key={course.id} className="flex-grow h-min">
+      <Card className="flex-grow h-min">
         <CardHeader className="flex flex-row justify-between items-center">
           <div className="flex flex-row gap-4 items-center">
             <div {...dragHandleProps}>

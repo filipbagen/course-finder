@@ -3,21 +3,22 @@
 // pages/users.tsx
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  stripeCustomerId: string;
-  colorScheme: string;
-  isPublic: boolean;
-}
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from '@/components/ui/select';
+import UserCard from './UserCard';
+import { User } from '@/app/utilities/types';
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<string>('');
 
   useEffect(() => {
     fetchData().catch(console.error);
@@ -38,37 +39,105 @@ const UsersPage = () => {
   );
 
   return (
-    <div>
+    <div className="flex flex-col gap-4 w-full">
       <Input
         type="text"
         placeholder="Search users..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ marginBottom: '20px', padding: '10px', width: '300px' }}
       />
+
+      <div className="flex gap-4 items-center justify-between">
+        <p>
+          Showing <b>{searchQuery ? filteredUsers.length : 0}</b> search results
+        </p>
+
+        <Select onValueChange={(value) => setSortOrder(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+              <SelectItem value="courseCodeReversed">
+                Course Code (Z-A)
+              </SelectItem>
+              <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
+              <SelectItem value="courseNameReverse">
+                Course Name (Z-A)
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
       {isLoading ? (
         <p>Loading...</p>
       ) : searchQuery ? (
         filteredUsers.length ? (
           <div className="bg-white shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
             {filteredUsers.map((user) => (
-              <Link
-                href={`/dashboard/social/${user.id}`}
-                key={user.id}
-                className="hover:bg-slate-300 transition"
-              >
-                {user.name} - {user.email}
-              </Link>
+              <UserCard key={user.id} user={user} />
             ))}
           </div>
         ) : (
-          <p>No users found.</p>
+          <p>No users found with that name.</p>
         )
       ) : (
-        <p>No users to display. Please enter a search query.</p>
+        <p>Please enter a search query.</p>
       )}
     </div>
   );
 };
 
 export default UsersPage;
+
+{
+  /* <div className="flex flex-col gap-4 w-full">
+  <Input
+    type="text"
+    placeholder="Search course"
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+
+  <div className="flex gap-4 items-center justify-between">
+    <p>
+      Showing <b>{courses.length}</b> search results
+    </p>
+
+    <div className="flex items-center gap-4">
+      <Select onValueChange={(value) => setSortOrder(value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Sort" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+            <SelectItem value="courseCodeReversed">
+              Course Code (Z-A)
+            </SelectItem>
+            <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
+            <SelectItem value="courseNameReverse">Course Name (Z-A)</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+
+      <LayoutGrid size={24} />
+    </div>
+  </div>
+
+  <div className="flex flex-wrap gap-4 justify-between">
+    {loading && (
+      <>
+        {Array.from({ length: 12 }).map((_, index) => (
+          <SkeletonCard key={index} />
+        ))}
+      </>
+    )}
+
+    {courses.map((course: Course) => (
+      <CourseCard key={course.id} course={course} />
+    ))}
+  </div>
+</div>; */
+}
