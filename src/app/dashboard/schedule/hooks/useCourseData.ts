@@ -1,3 +1,5 @@
+// useCourseData.ts
+
 import { useState, useEffect } from 'react';
 import {
   CourseWithEnrollment,
@@ -59,7 +61,7 @@ export default function useCourseData(userId?: string) {
 
   useEffect(() => {
     getCourses();
-  }, []);
+  }, [userId]);
 
   return {
     courses,

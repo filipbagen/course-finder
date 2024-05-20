@@ -1,10 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-
-const prisma = new PrismaClient();
-
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   const { getUser } = getKindeServerSession();
@@ -16,7 +15,6 @@ export async function POST(request: Request) {
 
   const { courseId, semester } = await request.json();
 
-  // Check if the enrollment already exists
   const existingEnrollment = await prisma.enrollment.findFirst({
     where: {
       userId: user.id,
@@ -32,7 +30,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Create a new enrollment if it doesn't exist
   const enrollment = await prisma.enrollment.create({
     data: {
       id: uuidv4() as string,
@@ -58,23 +55,24 @@ export async function GET(request: Request) {
     );
   }
 
-  // Fetch enrollments with nested course data included and also include the enrollment details
+  const url = new URL(request.url);
+  const userId = url.searchParams.get('userId') || user.id;
+
   const enrollments = await prisma.enrollment.findMany({
     where: {
-      userId: user.id,
+      userId: userId,
     },
     select: {
-      id: true, // Include enrollment ID
-      semester: true, // select the semester from the enrollment
-      course: true, // Include the full course details
+      id: true,
+      semester: true,
+      course: true,
     },
   });
 
-  // Transform the data to include the semester and enrollment ID specified in the enrollment
   const coursesWithEnrollmentData = enrollments.map((enrollment) => ({
     ...enrollment.course,
-    semester: enrollment.semester, // Override the semester to the one in the enrollment
-    enrollmentId: enrollment.id, // Add the enrollment ID
+    semester: enrollment.semester,
+    enrollmentId: enrollment.id,
   }));
 
   return NextResponse.json({ courses: coursesWithEnrollmentData });
@@ -110,7 +108,7 @@ export async function DELETE(request: Request) {
 
   try {
     const requestBody = await request.json();
-    const { enrollmentId } = requestBody; // Already expecting enrollmentId
+    const { enrollmentId } = requestBody;
 
     if (!enrollmentId) {
       console.error('Received undefined enrollmentId', requestBody);

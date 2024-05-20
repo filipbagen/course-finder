@@ -12,7 +12,6 @@ type Props = {
 
 export default function OtherUserSchedule({ params }: Props) {
   const { id } = params;
-
   const { courses, semesters, semestersP2, loading } = useCourseData(id);
 
   return (
@@ -30,7 +29,7 @@ export default function OtherUserSchedule({ params }: Props) {
               semesters={semesters}
               semestersP2={semestersP2}
               loading={loading}
-              draggable={false} // Disable drag-and-drop
+              draggable={false}
             />
           </div>
         </TabsContent>
