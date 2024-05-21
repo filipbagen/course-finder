@@ -47,7 +47,6 @@ export default function Schedule() {
 
   return (
     <ScheduleView
-      courses={courses}
       semesters={semesters}
       semestersP2={semestersP2}
       loading={loading}
