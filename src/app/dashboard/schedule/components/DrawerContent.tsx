@@ -13,7 +13,7 @@ import { Star, MessageSquare, MapPin } from 'lucide-react';
 import { Examination, Course } from '@/app/utilities/types';
 import { Button } from '@/components/ui/button';
 
-export const CustomDrawerContent = ({ course }: { course: Course }) => (
+const CustomDrawerContent = ({ course }: { course: Course }) => (
   <ScrollArea className="h-screen p-12">
     <div className="flex flex-col gap-8 ">
       <Card key={course.id} className="flex-grow h-min">
@@ -197,3 +197,5 @@ export const CustomDrawerContent = ({ course }: { course: Course }) => (
     </div>
   </ScrollArea>
 );
+
+export default CustomDrawerContent;

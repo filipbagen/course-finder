@@ -29,6 +29,7 @@ export const CourseDetails = ({ course }: { course: Course }) => (
               <p>Block {course.block.join(', ')}</p>
             </div>
           </CardFooter>
+
           <AccordionTrigger className="p-0" />
         </div>
         <AccordionContent className="flex flex-col gap-4 p-0 mt-6">

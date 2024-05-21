@@ -5,13 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import React, { useMemo } from 'react';
+import React, { useMemo, Suspense } from 'react';
 import { toast } from 'sonner';
 import { CourseDetails } from '@/app/dashboard/schedule/components/CourseDetails';
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
-import { CustomDrawerContent } from '@/app/dashboard/schedule/components/DrawerContent';
 import { Badge } from '@/components/ui/badge';
 import { GripVertical, Trash2 } from 'lucide-react';
 import {
@@ -20,6 +18,11 @@ import {
   isCourseWithEnrollment,
 } from '@/app/utilities/types';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+
+// Lazy load the drawer content component
+const LazyCustomDrawerContent = React.lazy(
+  () => import('@/app/dashboard/schedule/components/DrawerContent')
+);
 
 const CourseCard = ({
   course,
@@ -137,29 +140,35 @@ const CourseCard = ({
 
   return (
     <Drawer direction="right">
-      <Card key={course.id} className="flex-grow h-min">
-        <DrawerTrigger asChild>
-          <Button>Open Drawer</Button>
-        </DrawerTrigger>
+      <Card
+        key={course.id}
+        className="flex-grow h-min hover:shadow transition-shadow ease-out duration-200"
+      >
         <CardHeader>
-          <div className="flex justify-between">
-            <div>
-              <CardTitle>{course.name}</CardTitle>
-              <CardDescription className="mt-0">{course.code}</CardDescription>
+          <DrawerTrigger asChild className="cursor-pointer">
+            <div className="flex justify-between">
+              <div>
+                <CardTitle>{course.name}</CardTitle>
+                <CardDescription className="mt-0">
+                  {course.code}
+                </CardDescription>
+              </div>
+              <EnrollmentButton
+                course={course}
+                addToEnrollment={addToEnrollment}
+              />
             </div>
-            <EnrollmentButton
-              course={course}
-              addToEnrollment={addToEnrollment}
-            />
-          </div>
+          </DrawerTrigger>
         </CardHeader>
         {memoizedCourseContent}
       </Card>
       <DrawerContent
         showBar={false}
-        className="h-screen top-0 right-0 left-auto mt-0 w-[800px] rounded-l-xl"
+        className="h-screen top-0 right-0 left-auto mt-0 w-[800px] rounded-l-xl bg-white dark:bg-gray-800"
       >
-        <CustomDrawerContent course={course} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <LazyCustomDrawerContent course={course} />
+        </Suspense>
       </DrawerContent>
     </Drawer>
   );
