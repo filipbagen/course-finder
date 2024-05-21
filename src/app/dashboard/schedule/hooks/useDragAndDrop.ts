@@ -70,7 +70,7 @@ export default function useDragAndDrop({
       const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
       const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
 
-      // Find the same course in the other period array and move it to the same semester but not necessarily to the same index
+      // Find the same course in the other period array
       const otherSourceCourses = [...(otherPeriodKey[sourceSemesterId] || [])];
       const otherDestinationCourses = [
         ...(otherPeriodKey[destinationSemesterId] || []),
@@ -82,7 +82,14 @@ export default function useDragAndDrop({
       if (otherCourseIndex !== -1) {
         const otherMovedCourse = otherSourceCourses[otherCourseIndex];
         otherSourceCourses.splice(otherCourseIndex, 1);
-        otherDestinationCourses.push(otherMovedCourse); // Just push to the end
+        // Ensure the course is not added to the same destination index to avoid duplicates
+        if (
+          !otherDestinationCourses.some(
+            (course) => course.id === otherMovedCourse.id
+          )
+        ) {
+          otherDestinationCourses.push(otherMovedCourse); // Just push to the end
+        }
 
         setOtherPeriodKey((prev) => ({
           ...prev,
