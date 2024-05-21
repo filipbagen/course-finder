@@ -23,8 +23,8 @@ export default function OtherUserSchedule({ params }: Props) {
   } = useCourseData(id);
   const { user, loading: userLoading, error: userError } = useOtherUserData(id);
 
-  if (coursesLoading || userLoading) return <div>Loading...</div>;
-  if (userError) return <div>Error loading user data</div>;
+  // if (coursesLoading || userLoading) return <div>Loading...</div>;
+  // if (userError) return <div>Error loading user data</div>;
 
   return (
     <div className="flex flex-col gap-8">

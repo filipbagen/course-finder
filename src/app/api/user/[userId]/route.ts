@@ -12,8 +12,6 @@ interface Params {
 export async function GET(request: Request, { params }: { params: Params }) {
   const { userId } = params;
 
-  console.log('User ID:', userId); // Debugging line
-
   if (!userId) {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }

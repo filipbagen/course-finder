@@ -50,8 +50,8 @@ export default function Schedule() {
     setSemestersP2((prevSemestersP2) => updateSemesterCourses(prevSemestersP2));
   };
 
-  if (coursesLoading || userLoading) return <div>Loading...</div>;
-  if (userError) return <div>Error loading user data</div>;
+  // if (coursesLoading || userLoading) return <div>Loading...</div>;
+  // if (userError) return <div>Error loading user data</div>;
 
   return (
     <div className="flex flex-col gap-8">
