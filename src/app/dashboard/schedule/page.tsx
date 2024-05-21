@@ -3,18 +3,23 @@
 import { SemesterCourses } from '@/app/utilities/types';
 import useDragAndDrop from './hooks/useDragAndDrop';
 import useCourseData from './hooks/useCourseData';
+import useUserData from './hooks/useUserData';
 import ScheduleView from './components/ScheduleView';
+import Statistics from './Statistics';
+import { Separator } from '@/components/ui/separator';
 
 export default function Schedule() {
   const {
     courses,
     semesters,
     semestersP2,
-    loading,
+    loading: coursesLoading,
     setCourses,
     setSemesters,
     setSemestersP2,
   } = useCourseData();
+
+  const { user, loading: userLoading, error: userError } = useUserData();
 
   const handleDragAndDrop = useDragAndDrop({
     semesters,
@@ -45,14 +50,23 @@ export default function Schedule() {
     setSemestersP2((prevSemestersP2) => updateSemesterCourses(prevSemestersP2));
   };
 
+  if (coursesLoading || userLoading) return <div>Loading...</div>;
+  if (userError) return <div>Error loading user data</div>;
+
   return (
-    <ScheduleView
-      semesters={semesters}
-      semestersP2={semestersP2}
-      loading={loading}
-      handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-      handleDragAndDrop={handleDragAndDrop}
-      draggable={true} // Enable drag-and-drop
-    />
+    <div className="flex flex-col gap-8">
+      {user && <Statistics courses={courses} user={user} />}
+
+      <Separator />
+
+      <ScheduleView
+        semesters={semesters}
+        semestersP2={semestersP2}
+        loading={coursesLoading}
+        handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+        handleDragAndDrop={handleDragAndDrop}
+        draggable={true} // Enable drag-and-drop
+      />
+    </div>
   );
 }

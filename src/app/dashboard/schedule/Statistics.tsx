@@ -28,6 +28,25 @@ export default function Statistics({ courses, user }: StatisticsProps) {
     (acc, course) => (!course.advanced ? acc + course.credits : acc),
     0
   );
+
+  const creditCount = courses.reduce(
+    (acc: { [key: string]: number }, course) => {
+      course.mainFieldOfStudy.forEach((field) => {
+        acc[field] = (acc[field] || 0) + course.credits;
+      });
+      return acc;
+    },
+    {}
+  );
+
+  // Step 2: Find the maximum credits
+  const maxCredits = Math.max(...Object.values(creditCount));
+
+  // Step 3: Find all fields of study with the maximum credits
+  const topFieldsOfStudy = Object.keys(creditCount).filter(
+    (field) => creditCount[field] === maxCredits
+  );
+
   const progress = (totalPassedCredits / 90) * 100;
 
   return (
@@ -38,10 +57,13 @@ export default function Statistics({ courses, user }: StatisticsProps) {
           <Card className="flex gap-8 justify-normal h-full">
             <CardHeader className="flex flex-row gap-4">
               <Avatar className="h-[58px] w-[58px] rounded-full">
-                <AvatarImage src={user.image} alt={user.name} />
-                <AvatarFallback>
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
+                {user.image ? (
+                  <AvatarImage src={user.image} alt={user.name} />
+                ) : (
+                  <AvatarFallback>
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div className="flex flex-col">
                 <CardTitle>{user.name}</CardTitle>
@@ -79,13 +101,14 @@ export default function Statistics({ courses, user }: StatisticsProps) {
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardDescription>Added courses</CardDescription>
+              <CardDescription>Main Field of Study</CardDescription>
             </CardHeader>
-            <CardContent>
-              <h3>{courses.length}</h3>
+            <CardContent className="flex gap-2">
+              {topFieldsOfStudy.map((field) => {
+                return <Badge key={field}>{field}</Badge>;
+              })}
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardDescription>Basic credits</CardDescription>
