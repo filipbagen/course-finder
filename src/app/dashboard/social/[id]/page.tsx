@@ -3,6 +3,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ScheduleView from '@/app/dashboard/schedule/components/ScheduleView';
 import useCourseData from '../../schedule/hooks/useCourseData';
+import useOtherUserData from '../../schedule/hooks/useOtherUserData';
+import Statistics from '../../schedule/Statistics';
+import { Separator } from '@/components/ui/separator';
 
 type Props = {
   params: {
@@ -12,10 +15,22 @@ type Props = {
 
 export default function OtherUserSchedule({ params }: Props) {
   const { id } = params;
-  const { courses, semesters, semestersP2, loading } = useCourseData(id);
+  const {
+    courses,
+    semesters,
+    semestersP2,
+    loading: coursesLoading,
+  } = useCourseData(id);
+  const { user, loading: userLoading, error: userError } = useOtherUserData(id);
+
+  if (coursesLoading || userLoading) return <div>Loading...</div>;
+  if (userError) return <div>Error loading user data</div>;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8">
+      {user && <Statistics courses={courses} user={user} />}
+      <Separator />
+
       <Tabs defaultValue="schedule" className="flex flex-col gap-4">
         <TabsList className="flex gap-2 w-min">
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
@@ -23,14 +38,12 @@ export default function OtherUserSchedule({ params }: Props) {
         </TabsList>
 
         <TabsContent value="schedule">
-          <div className="flex flex-col gap-6">
-            <ScheduleView
-              semesters={semesters}
-              semestersP2={semestersP2}
-              loading={loading}
-              draggable={false}
-            />
-          </div>
+          <ScheduleView
+            semesters={semesters}
+            semestersP2={semestersP2}
+            loading={coursesLoading}
+            draggable={false}
+          />
         </TabsContent>
 
         <TabsContent value="reviews">
