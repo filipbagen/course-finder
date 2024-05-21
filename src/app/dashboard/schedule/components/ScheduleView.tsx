@@ -1,10 +1,9 @@
 import React from 'react';
 import { DragDropContext, OnDragEndResponder } from '@hello-pangea/dnd';
-import { Course, SemesterCourses } from '@/app/utilities/types';
+import { SemesterCourses } from '@/app/utilities/types';
 import { SemesterBlock } from './SemesterBlock';
 
 interface ScheduleViewProps {
-  courses: Course[];
   semesters: SemesterCourses;
   semestersP2: SemesterCourses;
   loading: boolean;
@@ -14,7 +13,6 @@ interface ScheduleViewProps {
 }
 
 const ScheduleView: React.FC<ScheduleViewProps> = ({
-  courses,
   semesters,
   semestersP2,
   loading,
@@ -22,10 +20,6 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
   handleDragAndDrop,
   draggable = true,
 }) => {
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   // Ensure at least 3 columns for each period
   const fixedSemesters = [7, 8, 9];
 
@@ -44,6 +38,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
             period={period}
             handleUpdateAfterDeletion={handleUpdateAfterDeletion}
             draggable={draggable}
+            loading={loading}
           />
         ))}
       </div>

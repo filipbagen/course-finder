@@ -25,7 +25,6 @@ export default function OtherUserSchedule({ params }: Props) {
         <TabsContent value="schedule">
           <div className="flex flex-col gap-6">
             <ScheduleView
-              courses={courses}
               semesters={semesters}
               semestersP2={semestersP2}
               loading={loading}

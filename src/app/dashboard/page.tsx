@@ -1,7 +1,6 @@
 'use client';
 
 // React and Libraries
-// import React, { useState, useEffect } from 'react';
 import { LayoutGrid } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
 
@@ -15,25 +14,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import Filter from './Filter';
 import CourseCard from '../components/CourseCard';
 import { useState, useEffect } from 'react';
-
-export function SkeletonCard() {
-  return (
-    <div className="rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between min-w-80 basis-1 flex-grow h-[218px]">
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-6 w-6" />
-      </div>
-
-      <Skeleton className="h-4 w-[72px]" />
-      <Skeleton className="h-4 w-[128px]" />
-      <Skeleton className="h-4 w-full" />
-    </div>
-  );
-}
+import { SkeletonCard } from '../components/SkeletonComponent';
 
 export default function Dashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -153,7 +137,7 @@ export default function Dashboard() {
           {loading && (
             <>
               {Array.from({ length: 12 }).map((_, index) => (
-                <SkeletonCard key={index} />
+                <SkeletonCard variant="default" key={index} />
               ))}
             </>
           )}

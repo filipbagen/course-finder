@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Course } from '@/app/utilities/types';
 import CourseCard from '@/app/components/CourseCard';
+import { SkeletonCard } from '@/app/components/SkeletonComponent';
 
 export const SemesterBlock = ({
   semester,
@@ -9,12 +10,14 @@ export const SemesterBlock = ({
   period,
   handleUpdateAfterDeletion,
   draggable,
+  loading,
 }: {
   semester: number;
   courses: Course[];
   period: string;
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
   draggable?: boolean;
+  loading?: boolean; // Add loading prop
 }) => (
   <div key={`${semester}-${period}`} className="w-full">
     <h5 className="mb-4">Semester {semester}</h5>
@@ -29,7 +32,9 @@ export const SemesterBlock = ({
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {courses.length > 0 ? (
+            {loading ? (
+              <SkeletonCard variant="schedule" /> // Render one skeleton card per semester and period
+            ) : courses.length > 0 ? (
               courses.map((course: Course, index: number) => (
                 <Draggable
                   draggableId={`${course.id}-${period}`}
@@ -66,9 +71,11 @@ export const SemesterBlock = ({
       </Droppable>
     ) : (
       <div className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4">
-        {courses.length > 0 ? (
+        {loading ? (
+          <SkeletonCard variant="schedule" /> // Render one skeleton card per semester and period
+        ) : courses.length > 0 ? (
           courses.map((course: Course) => (
-            <div key={`${course.id}-${period}`} style={{ minHeight: 40 }}>
+            <div key={`${course.id}-${period}`}>
               <CourseCard
                 variant="user-visit"
                 course={course}
