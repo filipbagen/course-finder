@@ -71,3 +71,11 @@ export interface SemesterGroupings {
 export interface SemesterCourses {
   [key: number]: CourseWithEnrollment[];
 }
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  user: User;
+}
