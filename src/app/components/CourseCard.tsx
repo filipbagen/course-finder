@@ -8,7 +8,7 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import React, { useMemo, Suspense } from 'react';
 import { toast } from 'sonner';
-import { CourseDetails } from '@/app/dashboard/schedule/components/CourseDetails';
+import { CourseCardDetails } from './CourseCardDetails';
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
 import { Badge } from '@/components/ui/badge';
 import { GripVertical, Trash2 } from 'lucide-react';
@@ -21,7 +21,7 @@ import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 // Lazy load the drawer content component
 const LazyCustomDrawerContent = React.lazy(
-  () => import('@/app/dashboard/schedule/components/DrawerContent')
+  () => import('@/app/dashboard/schedule/components/CustomDrawerContent')
 );
 
 const CourseCard = ({
@@ -82,7 +82,7 @@ const CourseCard = ({
   };
 
   const memoizedCourseContent = useMemo(
-    () => <CourseDetails course={course} />,
+    () => <CourseCardDetails course={course} />,
     [course]
   );
 

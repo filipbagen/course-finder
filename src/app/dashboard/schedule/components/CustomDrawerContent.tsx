@@ -1,89 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Star, MessageSquare, MapPin } from 'lucide-react';
 import { Examination, Course, Review } from '@/app/utilities/types';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import ReactStars from 'react-stars';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const ReviewForm = ({
-  courseId,
-  addReview,
-}: {
-  courseId: string;
-  addReview: (review: any) => void;
-}) => {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch('/api/review', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rating,
-          comment,
-          courseId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to post review');
-      }
-
-      const newReview = await response.json();
-
-      // Update the parent state
-      addReview(newReview);
-
-      setRating(0);
-      setComment('');
-      setError('');
-    } catch (error) {
-      setError('Failed to post review.');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <label>Rating:</label>
-        <ReactStars
-          count={5}
-          onChange={(rating) => setRating(rating)}
-          size={24}
-          color2={'#ffd700'}
-        />
-      </div>
-      <div className="flex gap-2">
-        <Textarea
-          value={comment}
-          placeholder="Write your review here."
-          onChange={(e) => setComment(e.target.value)}
-        />
-      </div>
-      <Button type="submit">Submit Review</Button>
-      {error && <p className="text-red-500">{error}</p>}
-    </form>
-  );
-};
+import ReviewForm from './ReviewForm';
+import ReviewList from './ReviewList';
+import CourseDetails from './CourseDetails';
 
 const CustomDrawerContent = ({ course }: { course: Course }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -123,65 +45,11 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
   return (
     <ScrollArea className="h-screen p-12">
       <div className="flex flex-col gap-8">
-        <Card key={course.id} className="flex-grow h-min">
-          <CardHeader>
-            <div className="flex justify-between">
-              <div>
-                <h2>{course.name}</h2>
-                <CardDescription className="mt-0">
-                  {course.code}
-                </CardDescription>
-              </div>
-
-              <Button
-                size="icon"
-                aria-label={`Add ${course.name} to your schedule`}
-              >
-                +
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <div className="flex gap-2 items-center">
-              <MapPin size={16} />
-              <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
-            </div>
-
-            <div className="flex gap-4">
-              <div>
-                <p>Termin {course.semester.join(', ')}</p>
-              </div>
-              <div>
-                <p>Period {course.period.join(', ')}</p>
-              </div>
-              <div>
-                <p>Block {course.block.join(', ')}</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {course.mainFieldOfStudy.length > 0 ? (
-                course.mainFieldOfStudy.map((field) => (
-                  <Badge key={field}>{field}</Badge>
-                ))
-              ) : (
-                <Badge>Inget huvudområde</Badge>
-              )}
-            </div>
-
-            <CardFooter className="flex flex-row gap-4">
-              <div className="flex gap-1 items-center">
-                <Star size={12} />
-                {averageRating}
-              </div>
-
-              <div className="flex gap-1 items-center">
-                <MessageSquare size={12} />
-                {reviews.length}
-              </div>
-            </CardFooter>
-          </CardContent>
-        </Card>
-
+        <CourseDetails
+          course={course}
+          averageRating={averageRating}
+          reviewsCount={reviews.length}
+        />
         <Tabs defaultValue="about" className="flex flex-col gap-4">
           <TabsList className="flex gap-2 w-min">
             <TabsTrigger value="about">About</TabsTrigger>
@@ -200,16 +68,12 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                   schema.
                 </p>
               </div>
-
               <Separator />
-
               <div>
                 <h5>Rekommenderade förkunskaper</h5>
                 <p>{course.prerequisites}</p>
               </div>
-
               <Separator />
-
               <div>
                 <h5>Lärandemål</h5>
                 <p>Studentens lärandemål:</p>
@@ -241,9 +105,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                   </li>
                 </ul>
               </div>
-
               <Separator />
-
               <div>
                 <h5>Kursinnehåll</h5>
                 <p>
@@ -267,9 +129,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                   kunskaper från andra kurser för att lösa praktiska problem.
                 </p>
               </div>
-
               <Separator />
-
               <div>
                 <h5>Undervisnings- och arbetsformer</h5>
                 <p>
@@ -286,48 +146,11 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
           <TabsContent value="reviews" className="flex flex-col gap-4">
             <h5>Leave a review</h5>
             <ReviewForm courseId={course.id} addReview={addReview} />
-
             <Separator />
-
             {reviews.length === 0 ? (
               <p>No reviews yet.</p>
             ) : (
-              <div className="flex flex-col gap-4">
-                <h5>Reviews</h5>
-                {reviews.map((review) => (
-                  <Card key={review.id}>
-                    <CardContent className="flex flex-col items-start gap-2">
-                      <div className="flex flex-row items-center gap-4">
-                        <Avatar className="h-10 w-10 rounded-full">
-                          {review.user?.image ? (
-                            <AvatarImage
-                              src={review.user.image}
-                              alt={review.user.name}
-                            />
-                          ) : (
-                            <AvatarFallback>
-                              {review.user.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-bold">{review.user.name}</span>
-                          <span className="text-muted-foreground">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 items-center">
-                        <Star size={12} />
-                        {review.rating}
-                      </div>
-
-                      {review.comment ? review.comment : 'No comment'}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <ReviewList reviews={reviews} />
             )}
           </TabsContent>
 

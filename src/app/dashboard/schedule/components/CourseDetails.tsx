@@ -1,67 +1,78 @@
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
+  Card,
+  CardHeader,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CardContent, CardFooter } from '@/components/ui/card';
-import { Examination, Course } from '@/app/utilities/types';
+import { Star, MessageSquare, MapPin } from 'lucide-react';
+import { Course } from '@/app/utilities/types';
+import { Button } from '@/components/ui/button';
 
-export const CourseDetails = ({ course }: { course: Course }) => (
-  <CardContent>
-    <div className="flex gap-2 items-center mb-4">
-      <MapPin size={16} />
-      <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
-    </div>
-    <Accordion type="multiple" className="w-full">
-      <AccordionItem value="mainFieldOfStudy" border={false}>
+const CourseDetails = ({
+  course,
+  averageRating,
+  reviewsCount,
+}: {
+  course: Course;
+  averageRating: number;
+  reviewsCount: number;
+}) => {
+  return (
+    <Card key={course.id} className="flex-grow h-min">
+      <CardHeader>
         <div className="flex justify-between">
-          <CardFooter className="flex gap-4">
-            <div>
-              <p>Termin {course.semester.join(', ')}</p>
-            </div>
-            <div>
-              <p>Period {course.period.join(', ')}</p>
-            </div>
-            <div>
-              <p>Block {course.block.join(', ')}</p>
-            </div>
-          </CardFooter>
-
-          <AccordionTrigger className="p-0" />
+          <div>
+            <h2>{course.name}</h2>
+            <CardDescription className="mt-0">{course.code}</CardDescription>
+          </div>
+          <Button
+            size="icon"
+            aria-label={`Add ${course.name} to your schedule`}
+          >
+            +
+          </Button>
         </div>
-        <AccordionContent className="flex flex-col gap-4 p-0 mt-6">
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
+        <div className="flex gap-2 items-center">
+          <MapPin size={16} />
+          <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
+        </div>
+        <div className="flex gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <BookText size={16} />
-              <h6>Förkunskaper</h6>
-            </div>
-            <p>{course.prerequisites}</p>
+            <p>Termin {course.semester.join(', ')}</p>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <SignpostBig size={16} />
-              <h6>Huvudområde</h6>
-            </div>
-            <p>{course.mainFieldOfStudy || 'Inget huvudområde'}</p>
+            <p>Period {course.period.join(', ')}</p>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <NotebookPen size={16} />
-              <h6>Examination</h6>
-            </div>
-            <ul>
-              {course.examinations?.map((ex: Examination) => (
-                <li key={ex.id}>
-                  {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
-                </li>
-              ))}
-            </ul>
+            <p>Block {course.block.join(', ')}</p>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  </CardContent>
-);
+        </div>
+        <div className="flex gap-2">
+          {course.mainFieldOfStudy.length > 0 ? (
+            course.mainFieldOfStudy.map((field) => (
+              <Badge key={field}>{field}</Badge>
+            ))
+          ) : (
+            <Badge>Inget huvudområde</Badge>
+          )}
+        </div>
+        <CardFooter className="flex flex-row gap-4">
+          <div className="flex gap-1 items-center">
+            <Star size={12} />
+            {averageRating}
+          </div>
+          <div className="flex gap-1 items-center">
+            <MessageSquare size={12} />
+            {reviewsCount}
+          </div>
+        </CardFooter>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default CourseDetails;
