@@ -17,7 +17,13 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactStars from 'react-stars';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const ReviewForm = ({ courseId }: { courseId: string }) => {
+const ReviewForm = ({
+  courseId,
+  addReview,
+}: {
+  courseId: string;
+  addReview: (review: any) => void;
+}) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
@@ -42,14 +48,19 @@ const ReviewForm = ({ courseId }: { courseId: string }) => {
         throw new Error('Failed to post review');
       }
 
+      const newReview = await response.json();
+
+      // Update the parent state
+      addReview(newReview);
+
       setRating(0);
       setComment('');
       setError('');
-      // Optionally, refresh the reviews after posting a new one
     } catch (error) {
       setError('Failed to post review.');
     }
   };
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
@@ -69,6 +80,7 @@ const ReviewForm = ({ courseId }: { courseId: string }) => {
         />
       </div>
       <Button type="submit">Submit Review</Button>
+      {error && <p className="text-red-500">{error}</p>}
     </form>
   );
 };
@@ -93,6 +105,10 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
 
     fetchReviews();
   }, [course.id]);
+
+  const addReview = (newReview: Review) => {
+    setReviews((prevReviews) => [newReview, ...prevReviews]);
+  };
 
   const averageRating =
     reviews.length > 0
@@ -206,7 +222,6 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                   <li>
                     Att jämföra olika problem med avseende på svårighetsgrad.
                   </li>
-
                   <li>
                     Att använda teknik för algoritmdesign som giriga algoritmer,
                     dynamisk programmering, söndra och härska samt sökning för
@@ -216,12 +231,10 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                     Strategier för att testa och debugga algoritmer och
                     datastrukturer.
                   </li>
-
                   <li>
                     Att snabbt och korrekt implementera algoritmer och
                     datastrukturer.
                   </li>
-
                   <li>
                     Att kommunicera och samarbeta med andra studenter vid
                     problemlösning i grupp.
@@ -272,7 +285,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
 
           <TabsContent value="reviews" className="flex flex-col gap-4">
             <h5>Leave a review</h5>
-            <ReviewForm courseId={course.id} />
+            <ReviewForm courseId={course.id} addReview={addReview} />
 
             <Separator />
 
@@ -286,18 +299,22 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                     <CardContent className="flex flex-col items-start gap-2">
                       <div className="flex flex-row items-center gap-4">
                         <Avatar className="h-10 w-10 rounded-full">
-                          <AvatarImage src={review.user.image} alt="@shadcn" />
-                          <AvatarFallback>
-                            {review.user.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
+                          {review.user?.image ? (
+                            <AvatarImage
+                              src={review.user.image}
+                              alt={review.user.name}
+                            />
+                          ) : (
+                            <AvatarFallback>
+                              {review.user.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          )}
                         </Avatar>
                         <div className="flex flex-col gap-1">
                           <span className="font-bold">{review.user.name}</span>
                           <span className="text-muted-foreground">
-                            {review.createdAt}
+                            {new Date(review.createdAt).toLocaleDateString()}
                           </span>
-
-                          <div className="flex items-center gap-1"></div>
                         </div>
                       </div>
 

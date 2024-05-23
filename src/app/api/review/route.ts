@@ -18,13 +18,9 @@ export async function GET(request: Request) {
 
   try {
     const reviews = await prisma.review.findMany({
-      where: {
-        courseId: courseId as string,
-      },
+      where: { courseId: courseId as string },
       include: {
-        user: {
-          select: { name: true, image: true },
-        },
+        user: { select: { name: true, image: true } },
       },
     });
     return NextResponse.json(reviews, { status: 200 });
@@ -61,6 +57,9 @@ export async function POST(request: Request) {
         comment,
         user: { connect: { id: user.id } },
         course: { connect: { id: courseId } },
+      },
+      include: {
+        user: { select: { name: true, image: true } },
       },
     });
     return NextResponse.json(review, { status: 201 });
