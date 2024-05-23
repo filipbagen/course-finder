@@ -13,6 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MessageSquare, MapPin } from 'lucide-react';
 import { Examination, Course, Review } from '@/app/utilities/types';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import ReactStars from 'react-stars';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const ReviewForm = ({ courseId }: { courseId: string }) => {
   const [rating, setRating] = useState(0);
@@ -47,28 +50,25 @@ const ReviewForm = ({ courseId }: { courseId: string }) => {
       setError('Failed to post review.');
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <label>Rating:</label>
-        <input
-          type="number"
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          min="1"
-          max="5"
+        <ReactStars
+          count={5}
+          onChange={(rating) => setRating(rating)}
+          size={24}
+          color2={'#ffd700'}
         />
       </div>
       <div className="flex gap-2">
-        <label>Comment:</label>
-        <textarea
+        <Textarea
           value={comment}
+          placeholder="Write your review here."
           onChange={(e) => setComment(e.target.value)}
-        ></textarea>
+        />
       </div>
-      {error && <p className="text-red-500">{error}</p>}
-      <button type="submit">Submit Review</button>
+      <Button type="submit">Submit Review</Button>
     </form>
   );
 };
@@ -93,6 +93,16 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
 
     fetchReviews();
   }, [course.id]);
+
+  const averageRating =
+    reviews.length > 0
+      ? parseFloat(
+          (
+            reviews.reduce((acc, review) => acc + review.rating, 0) /
+            reviews.length
+          ).toFixed(2)
+        )
+      : 0;
 
   return (
     <ScrollArea className="h-screen p-12">
@@ -145,12 +155,12 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
             <CardFooter className="flex flex-row gap-4">
               <div className="flex gap-1 items-center">
                 <Star size={12} />
-                {4.2}
+                {averageRating}
               </div>
 
               <div className="flex gap-1 items-center">
                 <MessageSquare size={12} />
-                {12}
+                {reviews.length}
               </div>
             </CardFooter>
           </CardContent>
@@ -260,36 +270,48 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
             </div>
           </TabsContent>
 
-          <TabsContent value="reviews">
-            <div>
-              <h5>Reviews</h5>
-              {reviews.length === 0 ? (
-                <p>No reviews yet.</p>
-              ) : (
-                <ul>
-                  {reviews.map((review) => (
-                    <li key={review.id}>
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={review.user.image}
-                          alt={review.user.name}
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <div>
-                          <p className="font-bold">{review.user.name}</p>
-                          <p>{review.comment}</p>
-                          <div className="flex items-center gap-1">
-                            <Star size={12} />
-                            {review.rating}
-                          </div>
+          <TabsContent value="reviews" className="flex flex-col gap-4">
+            <h5>Leave a review</h5>
+            <ReviewForm courseId={course.id} />
+
+            <Separator />
+
+            {reviews.length === 0 ? (
+              <p>No reviews yet.</p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <h5>Reviews</h5>
+                {reviews.map((review) => (
+                  <Card key={review.id}>
+                    <CardContent className="flex flex-col items-start gap-2">
+                      <div className="flex flex-row items-center gap-4">
+                        <Avatar className="h-10 w-10 rounded-full">
+                          <AvatarImage src={review.user.image} alt="@shadcn" />
+                          <AvatarFallback>
+                            {review.user.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold">{review.user.name}</span>
+                          <span className="text-muted-foreground">
+                            {review.createdAt}
+                          </span>
+
+                          <div className="flex items-center gap-1"></div>
                         </div>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <ReviewForm courseId={course.id} />
-            </div>
+
+                      <div className="flex gap-2 items-center">
+                        <Star size={12} />
+                        {review.rating}
+                      </div>
+
+                      {review.comment ? review.comment : 'No comment'}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="examination">

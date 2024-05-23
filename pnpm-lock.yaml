@@ -77,6 +77,9 @@ dependencies:
   react-dom:
     specifier: ^18
     version: 18.2.0(react@18.2.0)
+  react-stars:
+    specifier: ^2.2.5
+    version: 2.2.5
   sonner:
     specifier: ^1.4.41
     version: 1.4.41(react-dom@18.2.0)(react@18.2.0)
@@ -109,6 +112,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^18
     version: 18.2.24
+  '@types/react-stars':
+    specifier: ^2.2.4
+    version: 2.2.4
   '@types/uuid':
     specifier: ^9.0.8
     version: 9.0.8
@@ -2503,6 +2509,12 @@ packages:
     dependencies:
       '@types/react': 18.2.74
 
+  /@types/react-stars@2.2.4:
+    resolution: {integrity: sha512-7wZNmH28ZeDSkesOmpvenLOLJ3StRdHzAbbs+ZkLEOx75Qe8vUWl+qCGnJHdKr+HCF/BSZPvw7LF96Fl+fTUSw==}
+    dependencies:
+      '@types/react': 18.2.74
+    dev: true
+
   /@types/react@18.2.74:
     resolution: {integrity: sha512-9AEqNZZyBx8OdZpxzQlaFEVCSFUM2YXJH46yPOiOpm078k6ZLOCcuAzGum/zK8YBwY+dbahVNbHrbgrAwIRlqw==}
     dependencies:
@@ -4706,6 +4718,10 @@ packages:
       tslib: 2.6.2
       use-callback-ref: 1.3.2(@types/react@18.2.74)(react@18.2.0)
       use-sidecar: 1.1.2(@types/react@18.2.74)(react@18.2.0)
+    dev: false
+
+  /react-stars@2.2.5:
+    resolution: {integrity: sha512-O//KS6Z9RZnUOU/r+3+wxCzNalVn/wEWIcbAQFRV3dw8WbV+ys/kgcpBPijqTiNpHGrcwZdtb/7wF/UVem20CQ==}
     dev: false
 
   /react-style-singleton@2.2.1(@types/react@18.2.74)(react@18.2.0):
