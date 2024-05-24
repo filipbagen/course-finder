@@ -4,9 +4,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { MapPin, BookText, SignpostBig, NotebookPen } from 'lucide-react';
-import { CardContent, CardFooter } from '@/components/ui/card';
+import { BookText, SignpostBig, NotebookPen } from 'lucide-react';
+import { CardFooter } from '@/components/ui/card';
 import { Examination, Course } from '@/app/utilities/types';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 export const CourseCardDetails = ({ course }: { course: Course }) => (
   <Accordion type="multiple" className="w-full">
@@ -27,19 +29,30 @@ export const CourseCardDetails = ({ course }: { course: Course }) => (
         <AccordionTrigger className="p-0" />
       </div>
       <AccordionContent className="flex flex-col gap-4 p-0 mt-6">
+        <Separator className="mt-2" />
+
         <div>
           <div className="flex items-center gap-2">
             <BookText size={16} />
             <h6>Förkunskaper</h6>
           </div>
           <p>{course.prerequisites}</p>
+
+          <Separator className="mt-2" />
         </div>
         <div>
           <div className="flex items-center gap-2">
             <SignpostBig size={16} />
             <h6>Huvudområde</h6>
           </div>
-          <p>{course.mainFieldOfStudy || 'Inget huvudområde'}</p>
+
+          <p>
+            {course.mainFieldOfStudy.length > 0
+              ? course.mainFieldOfStudy.join(', ')
+              : 'Inget huvudområde'}
+          </p>
+
+          <Separator className="mt-2" />
         </div>
         <div>
           <div className="flex items-center gap-2">
