@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 // prisma
 import prisma from '../../lib/db';
@@ -83,7 +84,7 @@ export default async function SettingPage() {
       </div>
 
       <Card>
-        <form action={postData}>
+        <form action={postData} className="flex flex-col gap-4">
           <CardHeader>
             <CardTitle>General Data</CardTitle>
             <CardDescription>
@@ -91,6 +92,7 @@ export default async function SettingPage() {
               to save
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="space-y-2">
               <div className="space-y-1">
@@ -137,14 +139,12 @@ export default async function SettingPage() {
                 </Select>
               </div>
 
-              <div className="space-y-1">
+              <div className="flex flex-col gap-2 space-y-1">
                 <Label htmlFor="isPublic">Make Schedule Public</Label>
-                <input
-                  type="checkbox"
+                <Switch
+                  defaultChecked={data?.isPublic ?? true}
                   id="isPublic"
                   name="isPublic"
-                  defaultChecked={data?.isPublic ?? false}
-                  className="toggle toggle-accent" // Assume you have a toggle CSS
                 />
               </div>
             </div>
