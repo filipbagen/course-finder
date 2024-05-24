@@ -18,6 +18,7 @@ import {
   isCourseWithEnrollment,
 } from '@/app/utilities/types';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { MapPin } from 'lucide-react';
 
 // Lazy load the drawer content component
 const LazyCustomDrawerContent = React.lazy(
@@ -142,25 +143,31 @@ const CourseCard = ({
     <Drawer direction="right">
       <Card
         key={course.id}
-        className="flex-grow h-min hover:shadow transition-shadow ease-out duration-200"
+        className="flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200"
       >
         <CardHeader>
-          <DrawerTrigger asChild className="cursor-pointer">
-            <div className="flex justify-between">
+          <div className="flex justify-between">
+            <DrawerTrigger asChild className="cursor-pointer">
               <div>
                 <CardTitle>{course.name}</CardTitle>
                 <CardDescription className="mt-0">
                   {course.code}
                 </CardDescription>
               </div>
-              <EnrollmentButton
-                course={course}
-                addToEnrollment={addToEnrollment}
-              />
-            </div>
-          </DrawerTrigger>
+            </DrawerTrigger>
+            <EnrollmentButton
+              course={course}
+              addToEnrollment={addToEnrollment}
+            />
+          </div>
         </CardHeader>
-        {memoizedCourseContent}
+        <CardContent>
+          <div className="flex gap-2 items-center mb-4">
+            <MapPin size={16} />
+            <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
+          </div>
+          {memoizedCourseContent}
+        </CardContent>
       </Card>
       <DrawerContent
         showBar={false}

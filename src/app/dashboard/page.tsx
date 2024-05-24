@@ -1,7 +1,7 @@
 'use client';
 
 // React and Libraries
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
 
 // Components and Styles
@@ -20,6 +20,7 @@ import { useState, useEffect } from 'react';
 import { SkeletonCard } from '../components/SkeletonComponent';
 
 export default function Dashboard() {
+  const [isGrid, setIsGrid] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -94,6 +95,10 @@ export default function Dashboard() {
     fetchFilteredCourses({ semester: [] }); // Initial load with no filters
   }, []);
 
+  const toggleLayout = () => {
+    setIsGrid((prev) => !prev);
+  };
+
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
@@ -129,11 +134,29 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
 
-            <LayoutGrid size={24} />
+            <div className="hover:text-primary transition">
+              {isGrid ? (
+                <Rows3
+                  size={24}
+                  onClick={toggleLayout}
+                  className="cursor-pointer"
+                />
+              ) : (
+                <LayoutGrid
+                  size={24}
+                  onClick={toggleLayout}
+                  className="cursor-pointer"
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 justify-between">
+        <div
+          className={`flex ${
+            isGrid ? 'flex-wrap' : 'flex-col'
+          } gap-4 justify-between`}
+        >
           {loading && (
             <>
               {Array.from({ length: 12 }).map((_, index) => (

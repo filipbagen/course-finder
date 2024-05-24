@@ -27,12 +27,12 @@ const CourseDetails = ({
             <h2>{course.name}</h2>
             <CardDescription className="mt-0">{course.code}</CardDescription>
           </div>
-          <Button
+          {/* <Button
             size="icon"
             aria-label={`Add ${course.name} to your schedule`}
           >
             +
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
