@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       .get('examinations')
       ?.split(',')
       .filter(Boolean),
-    location: url.searchParams.get('location')?.split(',').filter(Boolean),
+    campus: url.searchParams.get('campus')?.split(',').filter(Boolean),
   };
 
   // Set sorting options based on the query parameter
@@ -87,7 +87,8 @@ export async function GET(request: NextRequest) {
             Array.isArray(course[key]) &&
             course[key].some((value) => values.includes(String(value)))
         );
-      } else if (key === 'courseLevel') {
+      } 
+      else if (key === 'courseLevel') {
         const advancedOptions = values.map(
           (value) => value === 'Avancerad nivå'
         );
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
         courses = courses.filter((course) =>
           advancedOptions.includes(course.advanced)
         );
-      } else if (key === 'location') {
+      } else if (key === 'campus') {
         courses = courses.filter((course) => String(course[key]) === values[0]);
       } else if (key === 'studyPace') {
         courses = courses.filter((course) =>

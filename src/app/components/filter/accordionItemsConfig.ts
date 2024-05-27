@@ -77,7 +77,7 @@ export const accordionItems: AccordionItemProps[] = [
   {
     value: 'campus',
     title: 'Campus',
-    filterType: 'location',
+    filterType: 'campus',
     options: ['Norrköping', 'Linköping'],
     displayValue: (campus: string | number) => campus.toString(),
     icon: School,

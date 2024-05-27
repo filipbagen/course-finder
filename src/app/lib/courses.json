@@ -10,7 +10,7 @@
       "semester": [7, 9],
       "period": [1, 2],
       "block": [1, 1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TEIO87",
       "prerequisites": "Genomgångna studier av de tre första åren i ett civilingenjörsprogram",
       "exclusions": ["None"]
@@ -25,7 +25,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TGTU94",
       "prerequisites": "Inga rekommenderade förkunskaper",
       "exclusions": ["TGTU01"]
@@ -40,7 +40,7 @@
       "semester": [7, 9],
       "period": [1, 2],
       "block": [4, 4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/THEN09",
       "prerequisites": "En grundläggande  kurs i engelska",
       "exclusions": ["None"]
@@ -55,7 +55,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNCG15",
       "prerequisites": "Datorgrafik, 3D datorgrafik och animering.",
       "exclusions": ["None"]
@@ -70,7 +70,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM031",
       "prerequisites": "Internetteknik och digitala bilder, algoritmer och datastrukturer",
       "exclusions": ["None"]
@@ -90,7 +90,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM067",
       "prerequisites": "Datorgrafik, Fysikaliska modeller",
       "exclusions": ["None"]
@@ -105,7 +105,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM103",
       "prerequisites": "Kunskaper från kurser som Signaler och system, Tillämpad transformteori, Ljudfysik, eller motsvarande. Programmeringskunskaper, motsvarande Programmering grk.",
       "exclusions": ["TNM054"]
@@ -120,7 +120,7 @@
       "semester": [7, 9],
       "period": [1, 2],
       "block": [3, 3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM108",
       "prerequisites": "Sannolikhetslära och statistik, matematisk analys, linjär algebra och grundläggande programmering.",
       "exclusions": ["TDDE01", "TDDE15", "TDDE16"]
@@ -135,7 +135,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TEAE11",
       "prerequisites": "Inga rekommenderade förkunskaper",
       "exclusions": ["None"]
@@ -150,7 +150,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNA010",
       "prerequisites": "Linjär algebra, flervariabelanalys, matematisk statistik, tillämpad matematik, grundläggande kunskaper i MATLAB.",
       "exclusions": ["None"]
@@ -165,7 +165,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM034",
       "prerequisites": "Bildbehandling och bildanalys. Programmeringskunskaper i Matlab.",
       "exclusions": ["None"]
@@ -180,7 +180,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM084",
       "prerequisites": "En- och flervariabelanalys samt linjär algebra. Goda kunskaper i datorgrafik. Programmeringskunskaper, objektorienterad  nprogrammering, datastrukturer och algoritmer. Kunskaper  i bildbehandling och bildanalys är önskvärt och nyttigt, men inte ett krav.",
       "exclusions": ["None"]
@@ -199,7 +199,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM086",
       "prerequisites": "3D-datorgrafik, linjär algebra, programmering C++, OpenGL",
       "exclusions": ["None"]
@@ -214,7 +214,7 @@
       "semester": [7, 9],
       "period": [1, 2],
       "block": [2, 1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM091",
       "prerequisites": "Programmeringskunskaper i C++. Erfarenhet av 3D datorgrafik, grundläggande ljudfysik och videoproduktion.",
       "exclusions": ["None"]
@@ -229,7 +229,7 @@
       "semester": [8],
       "period": [1],
       "block": [1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TEIE53",
       "prerequisites": "Matematisk grundkurs För FL, SL: Matematik",
       "exclusions": ["None"]
@@ -244,7 +244,7 @@
       "semester": [8],
       "period": [1, 2],
       "block": [1, 1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNKA10",
       "prerequisites": "Inga rekommenderade förkunskaper",
       "exclusions": ["TNKA08"]
@@ -259,7 +259,7 @@
       "semester": [8],
       "period": [1],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM097",
       "prerequisites": "Kurser i Grafisk teknik  xa0och  xa0Bildbehandling och bildanalys. Grundläggande programmeringskunskaper i Matlab.",
       "exclusions": ["None"]
@@ -274,7 +274,7 @@
       "semester": [8],
       "period": [1, 2],
       "block": [1, 3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM100",
       "prerequisites": "Kommunikation och användargränssnitt eller motsvarande.",
       "exclusions": ["TDDD53"]
@@ -289,7 +289,7 @@
       "semester": [8],
       "period": [1],
       "block": [3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM111",
       "prerequisites": "Programmering.",
       "exclusions": ["TNM048"]
@@ -304,7 +304,7 @@
       "semester": [8],
       "period": [2],
       "block": [4],
-      "location": "Linköping",
+      "campus": "Linköping",
       "url": "https://studieinfo.liu.se/kurs/TSBK38",
       "prerequisites": "Sannolikhetslära, grundläggande signalbehandling, grundläggande transformteori.",
       "exclusions": ["TSBK02", "TSBK35"]
@@ -323,7 +323,7 @@
       "semester": [8],
       "period": [2],
       "block": [3],
-      "location": "Linköping",
+      "campus": "Linköping",
       "url": "https://studieinfo.liu.se/kurs/TDDD27",
       "prerequisites": "God programmeringsförmåga och förmåga att arbeta med ramverk.  xa0  nGod förståelse för hur HTML/CSS/Javascript utgör grunden för systemutveckling i webbläsaren.  xa0  xa0  nGoda JavaScript kunskaper och kunskap om asynkron kommunikation med server och användning av ROUTS och JSON.  xa0  xa0  nGod förståelse för webbens tekniker REST, microramverk som Flask och Express.js, integration av externa tjänster via REST-API.  xa0  nFörmåga att bygga större webbaserade interaktiva system och till att självständig driva mjukvaruprojekt.",
       "exclusions": ["None"]
@@ -338,7 +338,7 @@
       "semester": [8],
       "period": [2],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM079",
       "prerequisites": "Datorgrafik, 3-D Datorgrafik och animering, Linjär algebra, Flervariabelanalys, Programmering",
       "exclusions": ["None"]
@@ -353,7 +353,7 @@
       "semester": [8],
       "period": [2],
       "block": [1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM096",
       "prerequisites": "Programmering i ett imperativ programspråk. Kunskaper om datastrukturer och algoritmer.",
       "exclusions": ["None"]
@@ -368,7 +368,7 @@
       "semester": [8],
       "period": [2],
       "block": [4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM098",
       "prerequisites": "Färdigheter i matematik, programmering och webbprogrammering.",
       "exclusions": ["None"]
@@ -383,7 +383,7 @@
       "semester": [8],
       "period": [2],
       "block": [4],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM113",
       "prerequisites": "Grundläggande kunskaper från kurser inom användargränssnitt, visualisering, och programmering, såväl som grundläggande ljudteknik och signalbehandling.",
       "exclusions": ["None"]
@@ -402,7 +402,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [4],
-      "location": "Linköping",
+      "campus": "Linköping",
       "url": "https://studieinfo.liu.se/kurs/TDDE45",
       "prerequisites": "Programutvecklingsmetodik (inkl. UML)  n  tKunskaper i programmering i flera språk (inkl. objektorienterad programmering och hantering av pekare)  n  tDatastrukturer  n  tKunna läsa forskningsartiklar inom programvarukonstruktion (software engineering) och söka information i nya ämnesområden självständigt och kritiskt",
       "exclusions": ["TDDB84"]
@@ -417,7 +417,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [1],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM089",
       "prerequisites": "Linjär algebra, Matematisk statistik, Transformteori, Bildbehandling och bildanalys, Matlabprogrammering. Kunskaper om färgsystem och färgrymder, samt kännedom om objektiva kvalitetsmått för bildkvalitet.",
       "exclusions": ["None"]
@@ -437,7 +437,7 @@
       "semester": [7, 9],
       "period": [1],
       "block": [2],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM114",
       "prerequisites": "Artificiell intelligens",
       "exclusions": ["TNM095"]
@@ -457,7 +457,7 @@
       "semester": [7, 9],
       "period": [1, 2],
       "block": [1, 0],
-      "location": "Linköping",
+      "campus": "Linköping",
       "url": "https://studieinfo.liu.se/kurs/TSBK03",
       "prerequisites": "Programmeringskunskaper. Datorgrafik. Linjär algebra. Grundkurs i fysik.",
       "exclusions": ["None"]
@@ -472,7 +472,7 @@
       "semester": [7, 9],
       "period": [2],
       "block": [3],
-      "location": "Norrköping",
+      "campus": "Norrköping",
       "url": "https://studieinfo.liu.se/kurs/TNM107",
       "prerequisites": "30 hp på avancerad nivå inom sitt huvudområde. Erfarenhet av att läsa vetenskapliga, granskade artiklar inom sitt huvudområde.",
       "exclusions": ["TDDD89"]

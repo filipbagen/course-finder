@@ -12,15 +12,21 @@ export interface Course {
   code: string;
   name: string;
   credits: number;
+  scheduledHours: number;
+  selfStudyHours: number;
   mainFieldOfStudy: string[];
   advanced: boolean;
   semester: number[];
   period: number[];
   block: number[];
-  location: string;
-  url: string;
-  prerequisites: string;
+  campus?: string;
   exclusions: string[];
+  courseOfferedFor: string[];
+  prerequisites: string;
+  recommendedPrerequisites: string;
+  learningOutcomes: string;
+  content: string;
+  teachingMethods: string;
   examinations?: Examination[];
 }
 
@@ -52,7 +58,7 @@ export interface FilterState {
   courseLevel: string[];
   mainFieldOfStudy: string[];
   examinations: string[];
-  location: string[];
+  campus: string[];
 }
 
 export interface FilterProps {

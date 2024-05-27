@@ -117,7 +117,7 @@ export default async function Home() {
         <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-gray-900"></div>
 
         <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
-          {db.Courses.map((course: Course) => (
+          {db.Courses.map((course: any) => (
             <Card
               key={course.code}
               className="
@@ -138,7 +138,7 @@ export default async function Home() {
               <CardContent>
                 <div className="flex gap-2 items-center mb-4">
                   <MapPin size={16} />
-                  <p>{course.location}</p>
+                  <p>{course.campus}</p>
                 </div>
 
                 <div className="flex justify-between">

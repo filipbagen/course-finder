@@ -38,7 +38,7 @@ const CourseDetails = ({
       <CardContent className="flex flex-col gap-2">
         <div className="flex gap-2 items-center">
           <MapPin size={16} />
-          <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
+          <p className="[&:not(:first-child)]:mt-0">{course.campus}</p>
         </div>
         <div className="flex gap-4">
           <div>

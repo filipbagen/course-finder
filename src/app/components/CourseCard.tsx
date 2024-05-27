@@ -164,7 +164,7 @@ const CourseCard = ({
         <CardContent>
           <div className="flex gap-2 items-center mb-4">
             <MapPin size={16} />
-            <p className="[&:not(:first-child)]:mt-0">{course.location}</p>
+            <p className="[&:not(:first-child)]:mt-0">{course.campus}</p>
           </div>
           {memoizedCourseContent}
         </CardContent>

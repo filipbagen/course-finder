@@ -33,7 +33,7 @@ export default function Dashboard() {
     courseLevel: [],
     mainFieldOfStudy: [],
     examinations: [],
-    location: [],
+    campus: [],
   });
 
   const handleFilterChange = (

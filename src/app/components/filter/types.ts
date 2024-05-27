@@ -9,7 +9,7 @@ interface FilterState {
   courseLevel: string[];
   mainFieldOfStudy: string[];
   examinations: string[];
-  location: string[];
+  campus: string[];
 }
 
 export interface AccordionItemProps {

@@ -42,22 +42,28 @@ model Subscription {
 }
 
 model Courses {
-  id                   String @id @unique
-  code                 String @unique
-  name                 String
-  credits              Int
-  mainFieldOfStudy     String[]
-  advanced             Boolean
-  semester             Int[]
-  period               Int[]
-  block                Int[]
-  location             String
-  url                  String
-  prerequisites        String
-  exclusions           String[]
-  examinations         Examinations[]
-  enrollment           Enrollment[]
-  reviews              Review[] // Added relation to reviews
+  id                        String @id @unique
+  code                      String @unique
+  name                      String
+  credits                   Int
+  scheduledHours            Int
+  selfStudyHours            Int
+  mainFieldOfStudy          String[]
+  advanced                  Boolean
+  semester                  Int[]
+  period                    Int[]
+  block                     Int[]
+  campus                    String
+  exclusions                String[]
+  courseOfferedFor          String[]
+  prerequisites             String
+  recommendedPrerequisites  String
+  learningOutcomes          String
+  content                   String
+  teachingMethods           String
+  examinations              Examinations[]
+  enrollment                Enrollment[]
+  reviews                   Review[] // Added relation to reviews
 }
 
 model Examinations {

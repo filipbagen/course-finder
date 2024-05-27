@@ -62,83 +62,42 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
           <TabsContent value="about">
             <div className="flex flex-col gap-6">
               <div>
-                <h5>Särskild information</h5>
-                <p>
-                  Denna kurs krockar inte med någon kurs du lagt till i ditt
-                  schema.
-                </p>
+                <h5>Kursen får ej läsas med:</h5>
+                <p>{course.exclusions}</p>
               </div>
               <Separator />
               <div>
-                <h5>Rekommenderade förkunskaper</h5>
-                <p>{course.prerequisites}</p>
-              </div>
-              <Separator />
-              <div>
-                <h5>Lärandemål</h5>
-                <p>Studentens lärandemål:</p>
+                <h5>Kursen erbjuds för:</h5>
                 <ul>
-                  <li>
-                    Att analysera effektiviteten hos olika möjliga lösningar på
-                    ett problem för att avgöra vilken som är tillräckligt
-                    effektivt för en given situation.
-                  </li>
-                  <li>
-                    Att jämföra olika problem med avseende på svårighetsgrad.
-                  </li>
-                  <li>
-                    Att använda teknik för algoritmdesign som giriga algoritmer,
-                    dynamisk programmering, söndra och härska samt sökning för
-                    att skapa algoritmer för att lösa givna problem.
-                  </li>
-                  <li>
-                    Strategier för att testa och debugga algoritmer och
-                    datastrukturer.
-                  </li>
-                  <li>
-                    Att snabbt och korrekt implementera algoritmer och
-                    datastrukturer.
-                  </li>
-                  <li>
-                    Att kommunicera och samarbeta med andra studenter vid
-                    problemlösning i grupp.
-                  </li>
+                  {course.courseOfferedFor.map((offeredFor: string) => (
+                    <li key={offeredFor}>{offeredFor}</li>
+                  ))}
                 </ul>
               </div>
               <Separator />
               <div>
+                <h5>Förkunskaper</h5>
+                <p>{course.prerequisites}</p>
+              </div>
+              <Separator />
+              <div>
+                <h5>Rekommenderade förkunskaper</h5>
+                <p>{course.recommendedPrerequisites}</p>
+              </div>
+              <Separator />
+              <div>
+                <h5>Lärandemål</h5>
+                <p>{course.learningOutcomes}</p>
+              </div>
+              <Separator />
+              <div>
                 <h5>Kursinnehåll</h5>
-                <p>
-                  För att framgångsrikt lösa datavetenskapliga problem krävs en
-                  solid teoretisk grund samt förmågan att applicera teorierna
-                  vid praktisk problemlösning. Målet med den här kursen är att
-                  utveckla förmågan att lösa komplicerade algoritmiska problem
-                  genom att utnyttja kunskaper om algoritmer, data strukturer
-                  och komplexitetsteori. För att lösa den här typen av problem
-                  är det viktigt att kunna analysera problemet, välja eller
-                  designa en algoritm, avgöra hur mycket resursers (tid och
-                  minne) algoritmen kräver samt att implementera och testa
-                  algoritmen snabbt och korrekt. I den här kursen tränas detta
-                  genom att lösa uppgifter och att arbeta under tidspress under
-                  problemlösningstillfällen. Kursen innehåller också
-                  tävlingsmoment där studenterna enskilt eller i grupp ska lösa
-                  algoritmiska problem under tidspress och med begränsade
-                  resurser.Syftet är att studenterna ska kunna använda
-                  programmering och algoritmer som ett effektivt verktyg för
-                  problemlösning samt få en möjlighet att tillämpa teoretiska
-                  kunskaper från andra kurser för att lösa praktiska problem.
-                </p>
+                <p>{course.content}</p>
               </div>
               <Separator />
               <div>
                 <h5>Undervisnings- och arbetsformer</h5>
-                <p>
-                  Kursen består av seminarier och laborationer. Seminarierna
-                  används för att gå igenom hemuppgifter, algoritmer och
-                  algoritmisk problemlösning. Några av laborationerna är
-                  särskilda problemlösningssessioner där studenterna ska lösa så
-                  många problem som möjligt från en uppsättning problem.
-                </p>
+                <p>{course.teachingMethods}</p>
               </div>
             </div>
           </TabsContent>
