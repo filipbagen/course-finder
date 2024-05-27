@@ -69,7 +69,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
               <div>
                 <h5>Kursen erbjuds för:</h5>
                 <ul>
-                  {course.courseOfferedFor.map((offeredFor: string) => (
+                  {course.offeredFor.map((offeredFor: string) => (
                     <li key={offeredFor}>{offeredFor}</li>
                   ))}
                 </ul>

@@ -46,8 +46,8 @@ model Courses {
   code                      String @unique
   name                      String
   credits                   Int
-  scheduledHours            Int
-  selfStudyHours            Int
+  scheduledHours            Int?
+  selfStudyHours            Int?
   mainFieldOfStudy          String[]
   advanced                  Boolean
   semester                  Int[]
@@ -55,7 +55,7 @@ model Courses {
   block                     Int[]
   campus                    String
   exclusions                String[]
-  courseOfferedFor          String[]
+  offeredFor                String[]
   prerequisites             String
   recommendedPrerequisites  String
   learningOutcomes          String

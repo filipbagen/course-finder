@@ -21,7 +21,7 @@ export interface Course {
   block: number[];
   campus?: string;
   exclusions: string[];
-  courseOfferedFor: string[];
+  offeredFor: string[];
   prerequisites: string;
   recommendedPrerequisites: string;
   learningOutcomes: string;
