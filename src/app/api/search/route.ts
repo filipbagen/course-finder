@@ -1,21 +1,94 @@
+// src/pages/api/courses.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/db';
-import { Prisma } from '@prisma/client';
+import { Prisma, Courses } from '@prisma/client';
 
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const searchQuery = (url.searchParams.get('q') || '').toLowerCase(); // Normalize the search query
-  const sort = url.searchParams.get('sort') || '';
+// Define the type for filter values as an optional array of strings.
+type FilterValues = string[] | undefined;
 
-  type FilterKeys = keyof Prisma.CoursesWhereInput;
-  type FilterValues = string[] | undefined;
+// Filters interface mapping each key to its respective filter values.
+interface Filters {
+  [key: string]: FilterValues;
+}
 
-  interface Filters {
-    [key: string]: FilterValues;
+// Sort options type defining how sorting parameters should be structured.
+interface SortOptions {
+  [key: string]: Prisma.SortOrder;
+}
+
+// Asynchronously fetch courses from the database with optional search and filters.
+const fetchCourses = async (
+  searchQuery: string,
+  sortOptions: SortOptions,
+  filters: Filters
+): Promise<Courses[]> => {
+  // Initial fetch with possible sort orders.
+  let courses = await prisma.courses.findMany({
+    include: { examinations: true },
+    orderBy: sortOptions,
+  });
+
+  // Filter courses based on the search query.
+  if (searchQuery) {
+    courses = courses.filter(
+      (course) =>
+        course.name.toLowerCase().includes(searchQuery) ||
+        course.code.toLowerCase().includes(searchQuery)
+    );
   }
 
-  // Retrieve filters from query parameters
-  const filters = {
+  // Apply additional filters.
+  return applyFilters(courses, filters);
+};
+
+// Apply filters to the course list based on the filter criteria.
+const applyFilters = (courses: Courses[], filters: Filters): Courses[] => {
+  // Iterate over each filter type and apply them to the course list.
+  Object.entries(filters).forEach(([key, values]) => {
+    if (values && values.length > 0) {
+      courses = courses.filter((course) => {
+        const courseValue = course[key as keyof Courses];
+        // Handle array and non-array types appropriately.
+        if (Array.isArray(courseValue)) {
+          return values.some((value) =>
+            (courseValue as Array<string | number>).includes(
+              Number(value) || value
+            )
+          );
+        }
+        return values.includes(String(courseValue));
+      });
+    }
+  });
+  return courses;
+};
+
+// Determine sort options based on the provided sort parameter.
+const getSortOptions = (sort: string): SortOptions => {
+  switch (sort) {
+    case 'courseCode':
+      return { code: 'asc' };
+    case 'courseCodeReversed':
+      return { code: 'desc' };
+    case 'courseName':
+      return { name: 'asc' };
+    case 'courseNameReverse':
+      return { name: 'desc' };
+    default:
+      return {};
+  }
+};
+
+// Main API route handler to process GET requests.
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  // Retrieve search and sort parameters from the URL.
+  const searchQuery = (url.searchParams.get('q') || '').toLowerCase();
+  const sort = url.searchParams.get('sort') || '';
+
+  // Build the filters object from URL parameters.
+  const filters: Filters = {
     semester: url.searchParams.get('semester')?.split(',').filter(Boolean),
     period: url.searchParams.get('period')?.split(',').filter(Boolean),
     block: url.searchParams.get('block')?.split(',').filter(Boolean),
@@ -35,84 +108,16 @@ export async function GET(request: NextRequest) {
     campus: url.searchParams.get('campus')?.split(',').filter(Boolean),
   };
 
-  // Set sorting options based on the query parameter
-  let sortOptions = {};
-  switch (sort) {
-    case 'courseCode':
-      sortOptions = { code: 'asc' };
-      break;
-    case 'courseCodeReversed':
-      sortOptions = { code: 'desc' };
-      break;
-    case 'courseName':
-      sortOptions = { name: 'asc' };
-      break;
-    case 'courseNameReverse':
-      sortOptions = { name: 'desc' };
-      break;
-    default:
-      sortOptions = {}; // Default case can be handled as no sorting or some default sorting
+  // Determine the sorting options from the 'sort' parameter.
+  const sortOptions = getSortOptions(sort);
+
+  try {
+    // Fetch and return filtered courses.
+    const courses = await fetchCourses(searchQuery, sortOptions, filters);
+    return NextResponse.json(courses);
+  } catch (error) {
+    console.error('Failed to fetch courses:', error);
+    // Return an error response if the fetch fails.
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
-
-  // Fetch all courses from the database
-  let courses = await prisma.courses.findMany({
-    include: {
-      examinations: true,
-    },
-    orderBy: sortOptions,
-  });
-
-  // Apply the search query filter if there is a search query
-  if (searchQuery) {
-    courses = courses.filter(
-      (course) =>
-        course.name.toLowerCase().includes(searchQuery) ||
-        course.code.toLowerCase().includes(searchQuery)
-    );
-  }
-
-  // Apply the filters
-  Object.entries(filters).forEach(([key, values]) => {
-    if (values && values.length > 0) {
-      if (['semester', 'period', 'block'].includes(key)) {
-        courses = courses.filter((course) => {
-          const courseValues = course[key as keyof typeof course] as number[];
-          return courseValues.some((courseValue) =>
-            values.map(Number).includes(courseValue)
-          );
-        });
-      } else if (key === 'examinations' || key === 'mainFieldOfStudy') {
-        courses = courses.filter(
-          (course) =>
-            Array.isArray(course[key]) &&
-            course[key].some((value) => values.includes(String(value)))
-        );
-      } 
-      else if (key === 'courseLevel') {
-        const advancedOptions = values.map(
-          (value) => value === 'Avancerad nivå'
-        );
-        // Filter courses that match any of the selected advanced levels
-        courses = courses.filter((course) =>
-          advancedOptions.includes(course.advanced)
-        );
-      } else if (key === 'campus') {
-        courses = courses.filter((course) => String(course[key]) === values[0]);
-      } else if (key === 'studyPace') {
-        courses = courses.filter((course) =>
-          values[0] === 'Helfart'
-            ? course.period.length === 1
-            : course.period.length >= 2
-        );
-      } else {
-        courses = courses.filter((course) => {
-          const courseValue = String(course[key as keyof typeof course]);
-          return values.includes(courseValue);
-        });
-      }
-    }
-  });
-
-  // Return the filtered courses
-  return NextResponse.json(courses);
 }

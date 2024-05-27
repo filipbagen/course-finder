@@ -1,3 +1,4 @@
+import React, { forwardRef, useMemo, Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -6,7 +7,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import React, { useMemo, Suspense } from 'react';
 import { toast } from 'sonner';
 import { CourseCardDetails } from './CourseCardDetails';
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
@@ -20,22 +20,19 @@ import {
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { MapPin } from 'lucide-react';
 
-// Lazy load the drawer content component
 const LazyCustomDrawerContent = React.lazy(
   () => import('@/app/dashboard/schedule/components/CustomDrawerContent')
 );
 
-const CourseCard = ({
-  course,
-  variant,
-  handleUpdateAfterDeletion,
-  dragHandleProps,
-}: {
-  course: Course | CourseWithEnrollment;
-  variant?: 'default' | 'schedule' | 'user-visit';
-  handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  dragHandleProps?: DraggableProvidedDragHandleProps | null;
-}) => {
+const CourseCard = forwardRef<
+  HTMLDivElement,
+  {
+    course: Course | CourseWithEnrollment;
+    variant?: 'default' | 'schedule' | 'user-visit';
+    handleUpdateAfterDeletion?: (enrollmentId: string) => void;
+    dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  }
+>(({ course, variant, handleUpdateAfterDeletion, dragHandleProps }, ref) => {
   const addToEnrollment = async (courseId: string, semester: number) => {
     try {
       const response = await fetch('/api/enrollment', {
@@ -179,6 +176,6 @@ const CourseCard = ({
       </DrawerContent>
     </Drawer>
   );
-};
+});
 
 export default React.memo(CourseCard);

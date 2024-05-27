@@ -56,22 +56,31 @@ export default function Dashboard() {
   }, [searchQuery, sortOrder, filters]);
 
   const fetchData = async () => {
-    const query = new URLSearchParams({
-      q: encodeURIComponent(searchQuery),
-      sort: encodeURIComponent(sortOrder), // Ensure this matches the backend expected keys
-    });
+    const query = new URLSearchParams();
+    if (searchQuery) query.append('q', searchQuery);
+    if (sortOrder) query.append('sort', sortOrder);
 
+    // Loop over each filter and append it to the query if it has selected values
     Object.entries(filters).forEach(([key, values]) => {
       if (values.length) {
-        query.set(key, values.join(',')); // Append filter settings
+        query.append(key, values.join(','));
       }
     });
 
-    const response = await fetch(`/api/search?${query.toString()}`);
-    const data = await response.json();
+    console.log(`/api/search?${query.toString()}`);
 
-    setCourses(data); // Set the fetched data to state
-    setLoading(false); // Set loading to false after data is fetched
+    try {
+      const response = await fetch(`/api/search?${query.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch: ' + response.statusText);
+      }
+      const data = await response.json();
+      setCourses(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch courses:', error);
+      setLoading(false);
+    }
   };
 
   const fetchFilteredCourses = async (filter: { semester: number[] }) => {
