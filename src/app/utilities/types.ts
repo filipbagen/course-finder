@@ -12,13 +12,12 @@ export interface Course {
   code: string;
   name: string;
   credits: number;
-  scheduledHours: number;
-  selfStudyHours: number;
+  scheduledHours: number | null;
+  selfStudyHours: number | null;
   mainFieldOfStudy: string[];
   advanced: boolean;
   semester: number[];
   period: number[];
-  block: number[];
   campus?: string;
   exclusions: string[];
   offeredFor: string[];
@@ -27,7 +26,7 @@ export interface Course {
   learningOutcomes: string;
   content: string;
   teachingMethods: string;
-  examinations?: Examination[];
+  examinations?: Examination[]; // Ensure this is included
 }
 
 export interface CourseWithEnrollment extends Course {

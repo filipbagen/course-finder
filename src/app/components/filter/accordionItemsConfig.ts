@@ -92,7 +92,7 @@ export const accordionItems: AccordionItemProps[] = [
     value: 'examinations',
     title: 'Examination',
     filterType: 'examinations',
-    options: ['Tentamen', 'Laboration', 'Projekt', 'Övrigt'],
+    options: ['Tentamen', 'Laborationer', 'Projekt', 'Inlämning'],
     displayValue: (type: string | number) => type.toString(),
     icon: NotebookPen,
   },

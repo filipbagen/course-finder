@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/db';
 import { Prisma, Courses } from '@prisma/client';
+import { Course } from '@/app/utilities/types';
 
 // Define the type for filter values as an optional array of strings.
 type FilterValues = string[] | undefined;
@@ -22,12 +23,15 @@ const fetchCourses = async (
   searchQuery: string,
   sortOptions: SortOptions,
   filters: Filters
-): Promise<Courses[]> => {
+): Promise<Course[]> => {
   // Initial fetch with possible sort orders.
-  let courses = await prisma.courses.findMany({
-    include: { examinations: true },
+  // When fetching, cast the result to the expected type if you are sure the types are aligned correctly.
+  let courses = (await prisma.courses.findMany({
+    include: {
+      examinations: true,
+    },
     orderBy: sortOptions,
-  });
+  })) as unknown as Course[];
 
   // Filter courses based on the search query.
   if (searchQuery) {
@@ -43,22 +47,33 @@ const fetchCourses = async (
 };
 
 // Apply filters to the course list based on the filter criteria.
-const applyFilters = (courses: Courses[], filters: Filters): Courses[] => {
+const applyFilters = (courses: Course[], filters: Filters): Course[] => {
   // Iterate over each filter type and apply them to the course list.
   Object.entries(filters).forEach(([key, values]) => {
     if (values && values.length > 0) {
-      courses = courses.filter((course) => {
-        const courseValue = course[key as keyof Courses];
-        // Handle array and non-array types appropriately.
-        if (Array.isArray(courseValue)) {
-          return values.some((value) =>
-            (courseValue as Array<string | number>).includes(
-              Number(value) || value
+      if (key === 'examinations') {
+        // Special filtering for the 'examinations' property, case-insensitive
+        courses = courses.filter((course) =>
+          course.examinations?.some((exam) =>
+            values.some((value) =>
+              exam.name.toLowerCase().includes(value.toLowerCase())
             )
-          );
-        }
-        return values.includes(String(courseValue));
-      });
+          )
+        );
+      } else {
+        // General filtering for other properties, considering array and non-array types
+        courses = courses.filter((course) => {
+          const courseValue = course[key as keyof Course];
+          if (Array.isArray(courseValue)) {
+            return values.some((value) =>
+              (courseValue as Array<string | number>).includes(
+                Number(value) || value
+              )
+            );
+          }
+          return values.includes(String(courseValue));
+        });
+      }
     }
   });
   return courses;
