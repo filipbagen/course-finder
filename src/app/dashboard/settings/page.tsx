@@ -58,17 +58,23 @@ export default async function SettingPage() {
 
     const name = formData.get('name') as string;
     const colorScheme = formData.get('color') as string;
-    const isPublic = formData.get('isPublic') === 'on'; // Assumes checkbox sending 'on' when checked
+    const isPublic = formData.get('isPublic'); // Don't assume 'on' or 'off' yet
+
+    const data: any = {
+      name: name ?? undefined,
+      colorScheme: colorScheme ?? undefined,
+    };
+
+    // Only update isPublic if the switch was turned on or off
+    if (isPublic !== null) {
+      data.isPublic = isPublic === 'on';
+    }
 
     await prisma.user.update({
       where: {
         id: user?.id,
       },
-      data: {
-        name: name ?? undefined,
-        colorScheme: colorScheme ?? undefined,
-        isPublic: isPublic, // Updating the isPublic status
-      },
+      data: data,
     });
 
     revalidatePath('/', 'layout');
