@@ -15,10 +15,19 @@ import {
 import { Button } from '@/components/ui/button';
 
 // icons
-import { MapPin } from 'lucide-react';
+import {
+  MapPin,
+  Star,
+  Search,
+  Sparkles,
+  LineChart,
+  ArrowDownWideNarrow,
+  Handshake,
+} from 'lucide-react';
 
 // kinde
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components';
 
 // data
 import db from '../app/lib/courses.json';
@@ -31,25 +40,31 @@ export default async function Home() {
   }
 
   return (
-    <div className="pt-20 sm:pt-22 pb-20 sm:pb-40 flex flex-col items-center gap-8 justify-center text-center">
-      <div>
+    <div className="pt-20 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center">
+      <div className="flex flex-col gap-4 items-center">
         <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50">
           <p className="text-sm font-semibold text-gray-700">
-            Course Finder is public!
+            Skapa ett konto idag!
           </p>
         </div>
+
         <h1 className="max-w-3xl text-4xl font-bold md:text-6xl lg:text-6xl">
-          Choose your{' '}
+          Hitta de bästa{' '}
           <span className="bg-gradient-to-r from-primary to-blue-400 inline-block text-transparent bg-clip-text">
-            next course
+            masterkurserna
           </span>{' '}
-          with confidence 🚀
+          snabbt och enkelt!
         </h1>
+
         <p className="mt-5 max-w-prose text-zinc-700 dark:text-white sm:text-lg">
-          Find the best courses to learn the latest technologies and skills. We
-          have a wide range of courses from top universities and institutions
-          around the world. Start learning today!
+          Hitta enkelt bland LiUs alla masterkurser och hitta den kurs som
+          passar dig bäst. Sök bland kurser, filtrera och jämför för att hitta
+          den bästa mastern för dig. Börja idag!
         </p>
+
+        <Button className="w-min">
+          <RegisterLink>Skapa konto</RegisterLink>
+        </Button>
       </div>
 
       {/* gradient */}
@@ -97,20 +112,21 @@ export default async function Home() {
       </div>
 
       {/* Feature section */}
-      <div className="mb-12 px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl sm:text-center">
+      <div className="my-24 px-6 lg:px-8 ">
+        <div className="mx-auto max-w-4xl sm:text-center">
           <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
-            Find your courses in minutes
+            Välj masterkurser på några minuter
           </h2>
           <p className="mt-4 text-lg text-gray-600 dark:text-white">
-            We have a wide range of courses from top universities and
-            institutions around the world. Start learning today!
+            Course Finder innehåller alla masterkurser som erbjuds vid
+            Linköpings universitet. Hitta enkelt och snabbt den kurs som passar
+            dig bäst.
           </p>
         </div>
       </div>
 
       {/* Course animation */}
-      <div className="relative text-left mt-10 overflow-hidden">
+      <div className="relative text-left my-10 overflow-hidden">
         <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-gray-900"></div>
         <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-gray-900"></div>
         <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-gray-900"></div>
@@ -155,41 +171,34 @@ export default async function Home() {
       </div>
 
       {/* Steps */}
-      <ol className="my-8 space-y-4 md:flex md:space-x-12 md:space-y-0">
+      <ol className="my-24 space-y-4 md:flex md:space-x-12 md:space-y-0">
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Step 1</span>
-            <span className="text-xl font-semibold">
-              Sign up for an account
-            </span>
+            <span className="text-xl font-semibold">Skapa ett konto</span>
             <span className="mt-2 text-zink-700">
-              Either stanting out with a free plan or choose our{' '}
-              <Link
-                href="/pricing"
-                className="text-blue-700 underline-offset-2"
-              >
-                pro plan
-              </Link>
-              {''}.
+              Course Finder är helt gratis att använda. Skapa ett konto för att
+              komma igång.
             </span>
           </div>
         </li>
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Step 2</span>
-            <span className="text-xl font-semibold">Choose your courses</span>
+            <span className="text-xl font-semibold">Välj masterkurser</span>
             <span className="mt-2 text-zink-700">
-              We&apos;ve got a wide range of courses
+              Lägg enkelt till en kurs till ditt schema och jämför dina kurser
+              med dina vänners.
             </span>
           </div>
         </li>
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Step 3</span>
-            <span className="text-xl font-semibold">Start learning today</span>
+            <span className="text-xl font-semibold">Klart!</span>
             <span className="mt-2 text-zink-700">
-              It&apos;s time to start learning and improve your skills - it only
-              takes a few minutes to get started!
+              Att skapa, dela och jämföra dina masterkurser har aldrig varit
+              enklare.
             </span>
           </div>
         </li>
@@ -208,6 +217,81 @@ export default async function Home() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="my-24 flex flex-col gap-16 px-6 lg:px-8 mx-auto max-w-4xl">
+        <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+          Funktioner
+        </h2>
+
+        <div className="grid grid-cols-2 gap-12 text-start">
+          <div className="flex flex-col gap-4">
+            <Search />
+            <h5 className="text-primary">Sök</h5>
+            <span>
+              Hitta enkelt den kurs du letar efter geneom att sök efter kurser
+              baserat på kursnamn och kurskod.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <ArrowDownWideNarrow />
+            <h5 className="text-primary">Filter</h5>
+            <span>
+              Filtrera enkelt kurser baserat på bland annat termin, studietakt,
+              huvudområde och examinationsmoment.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <LineChart />
+            <h5 className="text-primary">Statistik</h5>
+            <span>
+              Se exakt hur många högskolepoäng du har läst och hur många du
+              behöver för att nå din examen.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Handshake />
+            <h5 className="text-primary">Samarbete</h5>
+            <span>
+              Dela dina kurser med dina vänner och se vilka kurser ni har
+              gemensamt. Hjälp varandra att hitta de bästa kurserna.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Star />
+            <h5 className="text-primary">Recension</h5>
+            <span>
+              Se recensioner på kurser och lämna rekommendationer på en kurs och
+              hjälp andra studenter att hitta rätt.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Sparkles />
+            <h5 className="text-primary">AI-rekommendationer</h5>
+            <span>
+              Få rekommendationer på kurser som passar dina intressen och
+              tidigare valda kurser. Hitta nya spännande kurser att läsa (kommer
+              i framtiden).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="my-12 px-6 lg:px-8 mx-auto max-w-4xl">
+        <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+          Kom igång
+        </h2>
+
+        <p>Vad väntar du på? Skapa ett konto och börja idag!</p>
+
+        <Button className="w-min mt-4">
+          <RegisterLink>Skapa konto</RegisterLink>
+        </Button>
       </div>
     </div>
   );

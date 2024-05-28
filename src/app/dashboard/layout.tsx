@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import prisma from '../lib/db';
 import { Toaster } from '@/components/ui/sonner';
-import Footer from '../components/Footer';
 
 // next
 import { redirect } from 'next/navigation';
@@ -88,7 +87,6 @@ export default async function DashboardLayout({
         <main>{children}</main>
         <Toaster />
       </div>
-      <Footer />
     </div>
   );
 }

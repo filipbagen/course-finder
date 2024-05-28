@@ -6,10 +6,10 @@ const Footer: React.FC = () => {
     <footer className="w-full flex flex-col justify-center items-center my-8">
       <Separator />
       <p className="text-slate-400 text-sm">
-        Designed and developed by{' '}
+        Designad och utvecklad av{' '}
         <a href="https://filipbagen.com" target="_blank">
           <u>
-            <b>me</b>
+            <b>mig</b>
           </u>
         </a>
       </p>
