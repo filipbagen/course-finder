@@ -24,7 +24,7 @@ const CourseDetails = ({
       <CardHeader>
         <div className="flex justify-between">
           <div>
-            <h2>{course.name}</h2>
+            <h2 className="leading-10">{course.name}</h2>
             <CardDescription className="mt-0">{course.code}</CardDescription>
           </div>
           {/* <Button

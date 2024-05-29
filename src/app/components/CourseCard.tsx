@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo, Suspense } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -170,9 +170,7 @@ const CourseCard = forwardRef<
         showBar={false}
         className="h-screen top-0 right-0 left-auto mt-0 w-[800px] rounded-l-xl bg-white dark:bg-gray-800"
       >
-        <Suspense fallback={<div>Loading...</div>}>
-          <LazyCustomDrawerContent course={course} />
-        </Suspense>
+        <LazyCustomDrawerContent course={course} />
       </DrawerContent>
     </Drawer>
   );

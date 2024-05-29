@@ -18,6 +18,7 @@ export interface Course {
   advanced: boolean;
   semester: number[];
   period: number[];
+  block: number[];
   campus?: string;
   exclusions: string[];
   offeredFor: string[];

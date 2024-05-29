@@ -6,13 +6,29 @@ import { Examination, Course, Review } from '@/app/utilities/types';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import CourseDetails from './CourseDetails';
+import React, { useMemo } from 'react';
+import { SkeletonCard } from '@/app/components/SkeletonComponent';
+
+const ReviewListMemoized = React.memo(ReviewList);
 
 const CustomDrawerContent = ({ course }: { course: Course }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // useMemo to calculate average rating
+  const averageRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return parseFloat(
+      (
+        reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      ).toFixed(2)
+    );
+  }, [reviews]);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
+        setLoading(true); // Set loading to true while fetching
         const response = await fetch(`/api/review?courseId=${course.id}`);
         if (response.ok) {
           const data = await response.json();
@@ -22,6 +38,8 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
         }
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched
       }
     };
 
@@ -32,15 +50,21 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
     setReviews((prevReviews) => [newReview, ...prevReviews]);
   };
 
-  const averageRating =
-    reviews.length > 0
-      ? parseFloat(
-          (
-            reviews.reduce((acc, review) => acc + review.rating, 0) /
-            reviews.length
-          ).toFixed(2)
-        )
-      : 0;
+  {
+    /* <div>
+                <h5>Kursen får ej läsas med:</h5>
+                <p>{course.exclusions}</p>
+              </div>
+              <Separator /> */
+  }
+
+  if (loading) {
+    return (
+      <ScrollArea className="h-screen p-12">
+        <SkeletonCard />
+      </ScrollArea>
+    );
+  }
 
   return (
     <ScrollArea className="h-screen p-12">
@@ -61,12 +85,6 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
 
           <TabsContent value="about">
             <div className="flex flex-col gap-6">
-              {/* <div>
-                <h5>Kursen får ej läsas med:</h5>
-                <p>{course.exclusions}</p>
-              </div>
-              <Separator /> */}
-
               {course.prerequisites != 'None' && (
                 <>
                   <div>
@@ -152,7 +170,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
             {reviews.length === 0 ? (
               <p>Inga recensioner än.</p>
             ) : (
-              <ReviewList reviews={reviews} />
+              <ReviewListMemoized reviews={reviews} />
             )}
           </TabsContent>
         </Tabs>
