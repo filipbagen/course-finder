@@ -12,11 +12,11 @@ export function SubmitButton() {
       {pending ? (
         <Button disabled className="w-fit">
           <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-          Please wait...
+          Vänligen vänta...
         </Button>
       ) : (
         <Button type="submit" className="w-fit">
-          Save
+          Spara
         </Button>
       )}
     </>
@@ -31,11 +31,11 @@ export function StripeSubscriptionCreationButton() {
       {pending ? (
         <Button disabled className="w-full">
           <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-          Please wait...
+          Vänligen vänta...
         </Button>
       ) : (
         <Button type="submit" className="w-full">
-          Create Subscription
+          Skapa prenumeration
         </Button>
       )}
     </>
@@ -50,11 +50,11 @@ export function StripePortal() {
       {pending ? (
         <Button disabled className="w-fit">
           <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-          Please wait...
+          Vänligen vänta...
         </Button>
       ) : (
         <Button type="submit" className="w-fit">
-          View payment details
+          Visa betalningsdetaljer
         </Button>
       )}
     </>

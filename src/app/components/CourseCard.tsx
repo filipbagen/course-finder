@@ -140,7 +140,7 @@ const CourseCard = forwardRef<
     <Drawer direction="right">
       <Card
         key={course.id}
-        className="flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200"
+        className="flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200 max-w-full"
       >
         <CardHeader>
           <div className="flex justify-between">

@@ -91,7 +91,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
         })}
       </Accordion>
       <CardFooter>
-        <Button onClick={resetFilters}>Reset Filter</Button>
+        <Button onClick={resetFilters}>Ta bort filter</Button>
       </CardFooter>
     </Card>
   );

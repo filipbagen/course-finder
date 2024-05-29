@@ -33,28 +33,28 @@ import {
 
 const featureItems = [
   {
-    name: 'AI course recommendations',
-    description: 'Get personalized course recommendations',
+    name: 'AI-kursrekommendationer',
+    description: 'Få personliga kursrekommendationer',
   },
   {
-    name: 'Unlimited access to all courses',
-    description: 'Access to all premium courses',
+    name: 'Obegränsad tillgång till alla kurser',
+    description: 'Tillgång till alla premiumkurser',
   },
   {
-    name: 'Download courses for offline viewing',
-    description: 'Download courses to watch offline',
+    name: 'Ladda ner kurser för offline-visning',
+    description: 'Ladda ner kurser för att titta offline',
   },
   {
-    name: 'Custom playlists',
-    description: 'Create custom playlists of courses',
+    name: 'Anpassade spellistor',
+    description: 'Skapa anpassade spellistor med kurser',
   },
   {
-    name: 'Course notes',
-    description: 'Take notes on courses',
+    name: 'Kursanteckningar',
+    description: 'Ta anteckningar om kurser',
   },
   {
-    name: 'Priority support',
-    description: 'Get help when you need it',
+    name: 'Prioriterad support',
+    description: 'Få hjälp när du behöver det',
   },
 ];
 
@@ -154,16 +154,16 @@ export default async function BillingPage() {
         <CardContent className="py-8">
           <div>
             <h3 className="inline-flex px-4 py-1 rounded-full text-sm font-semibold tracking-wide uppercase bg-primary/10 text-primary">
-              Monthly
+              Premium
             </h3>
           </div>
 
           <div className="mt-4 flex items-baseline text-6xl font-extrabold">
             49kr{' '}
-            <span className="ml-1 text-2xl text-muted-foreground">/mo</span>
+            <span className="ml-1 text-2xl text-muted-foreground">/månad</span>
           </div>
           <p className="mt-5 text-lg text-muted-foreground">
-            Let AI choose courses for you and get access to all premium features
+            Låt AI välja kurser åt dig och få tillgång till alla premiumfunktioner
           </p>
         </CardContent>
         <div className="flex-1 flex flex-col justify-between px-6 pt-6 pb-8 bg-secondary rounded-lg m-1 space-y-6 sm:p-10">

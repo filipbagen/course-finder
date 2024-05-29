@@ -51,7 +51,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
 
   return (
     <>
-      <h2>Statistics</h2>
+      <h2>Statistik</h2>
       <div className="flex min-w-full gap-4">
         {/* Main card taking 50% width and as tall as two cards */}
         <div className="w-1/2">
@@ -84,7 +84,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
           <div className="flex gap-4 ">
             <Card className="flex-1 min-w-0">
               <CardHeader>
-                <CardDescription>Added courses</CardDescription>
+                <CardDescription>Inlagda kurser</CardDescription>
               </CardHeader>
               <CardContent>
                 <h3>{courses.length}</h3>
@@ -93,7 +93,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
 
             <Card className="flex-1 min-w-0">
               <CardHeader>
-                <CardDescription>Main Field of Study</CardDescription>
+                <CardDescription>Huvudområde</CardDescription>
               </CardHeader>
               <CardContent className="flex gap-2 flex-wrap whitespace-nowrap">
                 {topFieldsOfStudy.map((field) => {
@@ -106,7 +106,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
           <div className="flex gap-4">
             <Card className="flex-1 min-w-0">
               <CardHeader>
-                <CardDescription>Advanced credits</CardDescription>
+                <CardDescription>Avancerade poäng</CardDescription>
               </CardHeader>
               <CardContent>
                 <h3>{totalAdvancedCredits} hp</h3>
@@ -115,7 +115,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
 
             <Card className="flex-1 min-w-0">
               <CardHeader>
-                <CardDescription>Basic credits</CardDescription>
+                <CardDescription>Grundpoäng</CardDescription>
               </CardHeader>
               <CardContent>
                 <h3>{totalBasicCredits} hp</h3>

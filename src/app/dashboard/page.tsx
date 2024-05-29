@@ -115,30 +115,28 @@ export default function Dashboard() {
       <div className="flex flex-col gap-4 w-full">
         <Input
           type="text"
-          placeholder="Search course"
+          placeholder="Sök kurs..."
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
         <div className="flex gap-4 items-center justify-between">
           <p>
-            Showing <b>{courses.length}</b> search results
+            Visar <b>{courses.length}</b> sökresultat
           </p>
 
           <div className="flex items-center gap-4">
             <Select onValueChange={(value) => setSortOrder(value)}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort" />
+                <SelectValue placeholder="Sortera" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+                  <SelectItem value="courseCode">Kurskod (A-Z)</SelectItem>
                   <SelectItem value="courseCodeReversed">
-                    Course Code (Z-A)
+                    Kurskod (Z-A)
                   </SelectItem>
-                  <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
-                  <SelectItem value="courseNameReverse">
-                    Course Name (Z-A)
-                  </SelectItem>
+                  <SelectItem value="courseName">Namn (A-Z)</SelectItem>
+                  <SelectItem value="courseNameReverse">Namn (Z-A)</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

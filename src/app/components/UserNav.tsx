@@ -62,7 +62,7 @@ export function UserNav({
           asChild
         >
           <Link href={'/dashboard/billing'}>
-            Billing{' '}
+            Betalning{' '}
             <span>
               <CreditCard className="w-4 h-4" />
             </span>
@@ -74,7 +74,7 @@ export function UserNav({
           asChild
         >
           <Link href={'/dashboard/settings'}>
-            Settings{' '}
+            Inställningar{' '}
             <span>
               <Settings className="w-4 h-4" />
             </span>
@@ -88,7 +88,7 @@ export function UserNav({
           asChild
         >
           <LogoutLink>
-            Logout{' '}
+            Logga ut{' '}
             <span>
               <DoorClosed className="w-4 h-4" />
             </span>

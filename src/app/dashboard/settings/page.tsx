@@ -84,25 +84,24 @@ export default async function SettingPage() {
     <div className="grid items-start gap-8">
       <div className="flex items-center justify-between px-2">
         <div className="grid gap-1">
-          <h1>Settings</h1>
-          <p className="text-muted-foreground">Your profile settings</p>
+          <h1>Inställningar</h1>
+          <p className="text-muted-foreground">Dina profilinställningar</p>
         </div>
       </div>
 
       <Card>
         <form action={postData} className="flex flex-col gap-4">
           <CardHeader>
-            <CardTitle>General Data</CardTitle>
+            <CardTitle>Allmänna uppgifter</CardTitle>
             <CardDescription>
-              Please provide general information about yourself and don't forget
-              to save
+              Vänligan fyll i dina uppgifter och glöm inte att spara.
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <div className="space-y-2">
               <div className="space-y-1">
-                <Label>Your Name</Label>
+                <Label>Namn</Label>
                 <Input
                   name="name"
                   type="text"
@@ -113,7 +112,7 @@ export default async function SettingPage() {
               </div>
 
               <div className="space-y-1">
-                <Label>Your email</Label>
+                <Label>Email</Label>
                 <Input
                   name="email"
                   type="text"
@@ -125,28 +124,28 @@ export default async function SettingPage() {
               </div>
 
               <div className="space-y-1">
-                <Label>Color Scheme</Label>
+                <Label>Färgschema</Label>
                 <Select name="color" defaultValue={data?.colorScheme}>
                   <SelectTrigger className="w-fill">
                     <SelectValue placeholder="Select a Color" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Color</SelectLabel>
-                      <SelectItem value="theme-green">Green</SelectItem>
-                      <SelectItem value="theme-blue">Blue</SelectItem>
-                      <SelectItem value="theme-violet">Violet</SelectItem>
-                      <SelectItem value="theme-yellow">Yellow</SelectItem>
+                      <SelectLabel>Färg</SelectLabel>
+                      <SelectItem value="theme-green">Grön</SelectItem>
+                      <SelectItem value="theme-blue">Blå</SelectItem>
+                      <SelectItem value="theme-violet">Lila</SelectItem>
+                      <SelectItem value="theme-yellow">Gul</SelectItem>
                       <SelectItem value="theme-orange">Orange</SelectItem>
-                      <SelectItem value="theme-red">Red</SelectItem>
-                      <SelectItem value="theme-rose">Rose</SelectItem>
+                      <SelectItem value="theme-red">Röd</SelectItem>
+                      <SelectItem value="theme-rose">Rosa</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-2 space-y-1">
-                <Label htmlFor="isPublic">Make Schedule Public</Label>
+                <Label htmlFor="isPublic">Gör schemat publikt</Label>
                 <Switch
                   defaultChecked={data?.isPublic ?? true}
                   id="isPublic"

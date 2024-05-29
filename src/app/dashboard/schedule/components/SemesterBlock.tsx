@@ -19,8 +19,8 @@ export const SemesterBlock = ({
   draggable?: boolean;
   loading?: boolean; // Add loading prop
 }) => (
-  <div key={`${semester}-${period}`} className="w-full">
-    <h5 className="mb-4">Semester {semester}</h5>
+  <div key={`${semester}-${period}`} className="w-ful pt-1">
+    <h5 className="mb-4">Termin {semester}</h5>
     {draggable ? (
       <Droppable
         droppableId={`${semester}-${period}`}
@@ -61,8 +61,8 @@ export const SemesterBlock = ({
                 </Draggable>
               ))
             ) : (
-              <div className="text-center text-gray-500">
-                No courses this semester
+              <div className="text-center text-gray-500 min-w-80">
+                Inga kurser inlagda.
               </div>
             )}
             {provided.placeholder}
@@ -84,8 +84,8 @@ export const SemesterBlock = ({
             </div>
           ))
         ) : (
-          <div className="text-center text-gray-500">
-            No courses this semester
+          <div className="text-center text-gray-500 min-w-80">
+            Inga kurser inlagda.
           </div>
         )}
       </div>

@@ -33,8 +33,8 @@ export default function OtherUserSchedule({ params }: Props) {
 
       <Tabs defaultValue="schedule" className="flex flex-col gap-4">
         <TabsList className="flex gap-2 w-min">
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews (12)</TabsTrigger>
+          <TabsTrigger value="schedule">Schema</TabsTrigger>
+          <TabsTrigger value="reviews">Recension</TabsTrigger>
         </TabsList>
 
         <TabsContent value="schedule">
@@ -48,8 +48,8 @@ export default function OtherUserSchedule({ params }: Props) {
 
         <TabsContent value="reviews">
           <div>
-            <h5>Reviews</h5>
-            <p>Reviews coming soon...</p>
+            <h5>Recension</h5>
+            <p>Recensioner kommer snart!</p>
           </div>
         </TabsContent>
       </Tabs>

@@ -30,16 +30,16 @@ export async function Navbar() {
           <div className="flex items-center gap-x-5">
             {(await isAuthenticated()) ? (
               <div className="flex items-center gap-x-5">
-                <Button>
+                {/* <Button>
                   <Link href="/dashboard">Dashboard</Link>
+                </Button> */}
+
+                <Button variant={'ghost'}>
+                  <Link href="/dashboard/schedule">Schema</Link>
                 </Button>
 
-                <Button variant={'secondary'}>
-                  <Link href="/dashboard/schedule">Schedule</Link>
-                </Button>
-
-                <Button variant={'secondary'}>
-                  <Link href="/dashboard/social">Social</Link>
+                <Button variant={'ghost'}>
+                  <Link href="/dashboard/social">Användare</Link>
                 </Button>
 
                 <UserNav
@@ -51,11 +51,11 @@ export async function Navbar() {
             ) : (
               <div className="flex items-center gap-x-5">
                 <LoginLink>
-                  <Button>Sign In</Button>
+                  <Button variant={'secondary'}>Logga in</Button>
                 </LoginLink>
 
-                <Button variant={'secondary'}>
-                  <RegisterLink>Sign up</RegisterLink>
+                <Button>
+                  <RegisterLink>Skapa konto</RegisterLink>
                 </Button>
               </div>
             )}

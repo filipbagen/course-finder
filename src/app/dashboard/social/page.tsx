@@ -42,17 +42,17 @@ const UsersPage = () => {
     <div className="flex flex-col gap-4 w-full">
       <Input
         type="text"
-        placeholder="Search users..."
+        placeholder="Sök användare..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
       <div className="flex gap-4 items-center justify-between">
         <p>
-          Showing <b>{searchQuery ? filteredUsers.length : 0}</b> search results
+          Visar <b>{searchQuery ? filteredUsers.length : 0}</b> sökresultat
         </p>
 
-        <Select onValueChange={(value) => setSortOrder(value)}>
+        {/* <Select onValueChange={(value) => setSortOrder(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
@@ -68,7 +68,7 @@ const UsersPage = () => {
               </SelectItem>
             </SelectGroup>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       {isLoading ? (
@@ -81,11 +81,9 @@ const UsersPage = () => {
             ))}
           </div>
         ) : (
-          <p>No users found with that name.</p>
+          <p>Ingen användare kunde hittas.</p>
         )
-      ) : (
-        <p>Please enter a search query.</p>
-      )}
+      ) : null}
     </div>
   );
 };
