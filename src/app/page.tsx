@@ -84,11 +84,18 @@ export default async function Home() {
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
-                  src="/assets/dashboard-preview.jpg"
+                  src="/assets/dashboard-preview-dark.jpg"
                   alt="product preview"
                   width={2368}
                   height={1452}
-                  className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10"
+                  className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
+                />
+                <Image
+                  src="/assets/dashboard-preview-light.jpg"
+                  alt="product preview"
+                  width={2368}
+                  height={1452}
+                  className="rounded-md bg-background p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
                 />
               </div>
             </div>
@@ -125,10 +132,10 @@ export default async function Home() {
 
       {/* Course animation */}
       <div className="relative text-left my-10 overflow-hidden">
-        <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-gray-900"></div>
-        <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-gray-900"></div>
-        <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-gray-900"></div>
-        <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-gray-900"></div>
+        <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-background"></div>
 
         <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
           {db.Courses.map((course: any) => (
@@ -221,11 +228,18 @@ export default async function Home() {
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
-                  src="/assets/schedule.jpg"
+                  src="/assets/schedule-dark.jpg"
                   alt="Schedule view"
-                  width={2546}
-                  height={1488}
-                  className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10"
+                  width={2368}
+                  height={1452}
+                  className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
+                />
+                <Image
+                  src="/assets/schedule-light.jpg"
+                  alt="Schedule view"
+                  width={2368}
+                  height={1452}
+                  className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
                 />
               </div>
             </div>

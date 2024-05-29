@@ -28,7 +28,7 @@ export const SemesterBlock = ({
       >
         {(provided) => (
           <div
-            className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4"
+            className="h-max p-4 bg-primary/10 rounded-md flex flex-col gap-4"
             {...provided.droppableProps}
             ref={provided.innerRef}
           >

@@ -25,7 +25,7 @@ const CourseDetails = ({
   reviewsCount: number;
 }) => {
   return (
-    <Card key={course.id} className="flex-grow h-min">
+    <Card key={course.id} className="flex-grow h-min dark:bg-secondary">
       <CardHeader>
         <div className="flex justify-between">
           <div>

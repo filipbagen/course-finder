@@ -111,7 +111,7 @@ export default function Statistics({
                       return <h3 key={field}>{field}</h3>;
                     })
                   ) : (
-                    <h3>Inget huvudområde</h3>
+                    <h3>Saknas</h3>
                   )}
                 </CardContent>
               </Card>

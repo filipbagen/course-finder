@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import UserCard from './UserCard';
 import { User } from '@/app/utilities/types';
+import { Separator } from '@/components/ui/separator';
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -75,9 +76,12 @@ const UsersPage = () => {
         <p>Loading...</p>
       ) : searchQuery ? (
         filteredUsers.length ? (
-          <div className="bg-white shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
+          <div className="bg-card shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
             {filteredUsers.map((user) => (
-              <UserCard key={user.id} user={user} />
+              <>
+                <UserCard key={user.id} user={user} />
+                <Separator />
+              </>
             ))}
           </div>
         ) : (

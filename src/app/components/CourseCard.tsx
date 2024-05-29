@@ -185,7 +185,7 @@ const CourseCard = forwardRef<
         </Card>
         <DrawerContent
           showBar={false}
-          className="h-screen top-0 right-0 left-auto mt-0 w-[800px] rounded-l-xl bg-white dark:bg-gray-800"
+          className="h-screen top-0 right-0 left-auto mt-0 w-[800px] rounded-l-xl bg-white"
         >
           <LazyCustomDrawerContent course={course} />
         </DrawerContent>

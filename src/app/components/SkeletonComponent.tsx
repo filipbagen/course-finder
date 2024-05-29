@@ -7,7 +7,7 @@ interface SkeletonCardProps {
 export function SkeletonCard({ variant = 'default' }: SkeletonCardProps) {
   if (variant === 'schedule') {
     return (
-      <div className="bg-white rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between">
+      <div className="bg-white rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between dark:bg-card dark:border-none">
         <Skeleton className="h-4 w-24" />
 
         <div className="flex gap-4">
@@ -21,7 +21,7 @@ export function SkeletonCard({ variant = 'default' }: SkeletonCardProps) {
 
   if (variant === 'statistics') {
     return (
-      <div className="bg-white h-60 rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between">
+      <div className="bg-white h-60 rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between dark:bg-card dark:border-none">
         <Skeleton className="h-4 w-24" />
 
         <div className="flex gap-4">
@@ -34,7 +34,7 @@ export function SkeletonCard({ variant = 'default' }: SkeletonCardProps) {
   }
 
   return (
-    <div className="rounded-lg border border-muted p-8 flex flex-col gap-4 justify-between min-w-80 basis-1 flex-grow h-[218px]">
+    <div className="rounded-lg border border-border p-8 flex flex-col gap-4 justify-between min-w-80 basis-1 flex-grow h-[218px] dark:bg-card dark:border-none">
       <div className="flex justify-between">
         <Skeleton className="h-4 w-[250px]" />
         <Skeleton className="h-6 w-6" />
