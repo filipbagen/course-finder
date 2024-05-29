@@ -134,50 +134,52 @@ export default async function SettingPage() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Program</SelectLabel>
-                      <SelectItem value="program-D">Datateknik</SelectItem>
-                      <SelectItem value="program-DP">
+                      <SelectItem value="Datateknik">Datateknik</SelectItem>
+                      <SelectItem value="Design och produktutveckling">
                         Design och produktutveckling
                       </SelectItem>
-                      <SelectItem value="program-ED">
+                      <SelectItem value="Elektronikdesign">
                         Elektronikdesign
                       </SelectItem>
-                      <SelectItem value="program-EMM">
+                      <SelectItem value="Energi- miljö- managment">
                         Energi- miljö- managment
                       </SelectItem>
-                      <SelectItem value="program-I">
+                      <SelectItem value="Industriell ekonomi">
                         Industriell ekonomi
                       </SelectItem>
-                      <SelectItem value="program-IT">
+                      <SelectItem value="Informationsteknologi">
                         Informationsteknologi
                       </SelectItem>
-                      <SelectItem value="program-KB">Kemisk biologi</SelectItem>
-                      <SelectItem value="program-KTS">
+                      <SelectItem value="Kemisk biologi">
+                        Kemisk biologi
+                      </SelectItem>
+                      <SelectItem value="Kommunikation, transport och samhälle">
                         Kommunikation, transport och samhälle
                       </SelectItem>
-                      <SelectItem value="program-MED">
+                      <SelectItem value="Medicinsk teknik">
                         Medicinsk teknik
                       </SelectItem>
-                      <SelectItem value="program-MT">Medieteknik</SelectItem>
-                      <SelectItem value="program-MTEK">
+                      <SelectItem value="Medieteknik">Medieteknik</SelectItem>
+                      <SelectItem value="Mjukvaruteknik">
                         Mjukvaruteknik
                       </SelectItem>
-                      <SelectItem value="program-M">Maskinteknik</SelectItem>
-                      <SelectItem value="program-TB">
+                      <SelectItem value="Maskinteknik">Maskinteknik</SelectItem>
+                      <SelectItem value="Teknisk biologi">
                         Teknisk biologi
                       </SelectItem>
-                      <SelectItem value="program-TE">
+                      <SelectItem value="Teknisk fysik och elektroteknik">
                         Teknisk fysik och elektroteknik
                       </SelectItem>
-                      <SelectItem value="program-II">
+                      <SelectItem value="Industriell ekonomi - internationell">
                         Industriell ekonomi - internationell
                       </SelectItem>
-                      <SelectItem value="program-TFI">
+                      <SelectItem value="Teknisk fysik och elektroteknik - internationell">
                         Teknisk fysik och elektroteknik - internationell
                       </SelectItem>
-                      <SelectItem value="program-TM">
+                      <SelectItem value="Teknisk matematik">
                         Teknisk matematik
                       </SelectItem>
-                      <SelectItem value="program-DU">
+                      <SelectItem value="Datadriven utveckling">
                         Datadriven utveckling
                       </SelectItem>
                     </SelectGroup>

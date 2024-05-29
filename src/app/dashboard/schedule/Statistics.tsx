@@ -68,7 +68,7 @@ export default function Statistics({ courses, user }: StatisticsProps) {
               </Avatar>
               <div className="flex flex-col">
                 <CardTitle>{user.name}</CardTitle>
-                <Badge>{user.colorScheme}</Badge>
+                <Badge>{user.program}</Badge>
               </div>
             </CardHeader>
 
