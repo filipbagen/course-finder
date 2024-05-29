@@ -42,6 +42,7 @@ async function getData(userId: string) {
       email: true,
       colorScheme: true,
       isPublic: true,
+      program: true,
     },
   });
 
@@ -127,7 +128,7 @@ export default async function SettingPage() {
 
               <div className="space-y-1">
                 <Label>Program</Label>
-                <Select name="program">
+                <Select name="program" defaultValue={data?.program ?? ''}>
                   <SelectTrigger className="w-fill">
                     <SelectValue placeholder="Välj program" />
                   </SelectTrigger>
