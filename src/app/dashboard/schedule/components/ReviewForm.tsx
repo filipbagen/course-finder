@@ -50,7 +50,7 @@ const ReviewForm = ({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <label>Rating:</label>
+        <label>Betyg</label>
         <ReactStars
           count={5}
           onChange={(rating) => setRating(rating)}
@@ -61,11 +61,13 @@ const ReviewForm = ({
       <div className="flex gap-2">
         <Textarea
           value={comment}
-          placeholder="Write your review here."
+          placeholder="Skriv vad du tycker om kursen..."
           onChange={(e) => setComment(e.target.value)}
         />
       </div>
-      <Button type="submit">Submit Review</Button>
+      <Button type="submit">
+        Skicka recensionen
+        </Button>
       {error && <p className="text-red-500">{error}</p>}
     </form>
   );

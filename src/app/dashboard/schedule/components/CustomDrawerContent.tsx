@@ -50,80 +50,110 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
           averageRating={averageRating}
           reviewsCount={reviews.length}
         />
-        <Tabs defaultValue="about" className="flex flex-col gap-4">
+        <Tabs defaultValue="about" className="flex flex-col gap-8">
           <TabsList className="flex gap-2 w-min">
-            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="about">Om</TabsTrigger>
             <TabsTrigger value="examination">Examination</TabsTrigger>
             <TabsTrigger value="reviews">
-              Reviews ({reviews.length})
+              Recension ({reviews.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="about">
             <div className="flex flex-col gap-6">
-              <div>
+              {/* <div>
                 <h5>Kursen får ej läsas med:</h5>
                 <p>{course.exclusions}</p>
               </div>
-              <Separator />
-              <div>
-                <h5>Kursen erbjuds för:</h5>
-                <ul>
-                  {course.offeredFor.map((offeredFor: string) => (
-                    <li key={offeredFor}>{offeredFor}</li>
-                  ))}
-                </ul>
-              </div>
-              <Separator />
-              <div>
-                <h5>Förkunskaper</h5>
-                <p>{course.prerequisites}</p>
-              </div>
-              <Separator />
-              <div>
-                <h5>Rekommenderade förkunskaper</h5>
-                <p>{course.recommendedPrerequisites}</p>
-              </div>
-              <Separator />
-              <div>
-                <h5>Lärandemål</h5>
-                <p>{course.learningOutcomes}</p>
-              </div>
-              <Separator />
-              <div>
-                <h5>Kursinnehåll</h5>
-                <p>{course.content}</p>
-              </div>
-              <Separator />
-              <div>
-                <h5>Undervisnings- och arbetsformer</h5>
-                <p>{course.teachingMethods}</p>
-              </div>
-            </div>
-          </TabsContent>
+              <Separator /> */}
 
-          <TabsContent value="reviews" className="flex flex-col gap-4">
-            <h5>Leave a review</h5>
-            <ReviewForm courseId={course.id} addReview={addReview} />
-            <Separator />
-            {reviews.length === 0 ? (
-              <p>No reviews yet.</p>
-            ) : (
-              <ReviewList reviews={reviews} />
-            )}
+              {course.prerequisites != 'None' && (
+                <>
+                  <div>
+                    <h5>Förkunskaper</h5>
+                    <p>{course.prerequisites}</p>
+                  </div>
+
+                  <Separator />
+                </>
+              )}
+
+              {course.recommendedPrerequisites != 'None' && (
+                <>
+                  <div>
+                    <h5>Rekommenderade förkunskaper</h5>
+                    <p>{course.recommendedPrerequisites}</p>
+                  </div>
+                  <Separator />
+                </>
+              )}
+
+              {course.learningOutcomes && (
+                <>
+                  <div>
+                    <h5>Lärandemål</h5>
+                    <p>{course.learningOutcomes}</p>
+                  </div>
+                  <Separator />
+                </>
+              )}
+
+              {course.content && (
+                <>
+                  <div>
+                    <h5>Kursinnehåll</h5>
+                    <p>{course.content}</p>
+                  </div>
+                  <Separator />
+                </>
+              )}
+
+              {course.teachingMethods && (
+                <>
+                  <div>
+                    <h5>Undervisnings- och arbetsformer</h5>
+                    <p>{course.teachingMethods}</p>
+                  </div>
+
+                  <Separator />
+                </>
+              )}
+
+              {course.offeredFor.length > 0 && (
+                <>
+                  <div>
+                    <h5>Kursen erbjuds för:</h5>
+                    <ul>
+                      {course.offeredFor.map((offeredFor: string) => (
+                        <li key={offeredFor}>{offeredFor}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="examination">
-            <div>
-              <h5>Examination</h5>
-              <ul>
-                {course.examinations?.map((ex: Examination) => (
-                  <li key={ex.id}>
-                    {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <h5>Examination</h5>
+            <ul>
+              {course.examinations?.map((ex: Examination) => (
+                <li key={ex.id}>
+                  {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
+                </li>
+              ))}
+            </ul>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="flex flex-col gap-4">
+            <h5>Skriv en recension</h5>
+            <ReviewForm courseId={course.id} addReview={addReview} />
+            <Separator />
+            {reviews.length === 0 ? (
+              <p>Inga recensioner än.</p>
+            ) : (
+              <ReviewList reviews={reviews} />
+            )}
           </TabsContent>
         </Tabs>
       </div>
