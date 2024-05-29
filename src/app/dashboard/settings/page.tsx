@@ -59,10 +59,12 @@ export default async function SettingPage() {
     const name = formData.get('name') as string;
     const colorScheme = formData.get('color') as string;
     const isPublic = formData.get('isPublic'); // Don't assume 'on' or 'off' yet
+    const program = formData.get('program') as string;
 
     const data: any = {
       name: name ?? undefined,
       colorScheme: colorScheme ?? undefined,
+      program: program ?? undefined,
     };
 
     // Only update isPublic if the switch was turned on or off
@@ -121,6 +123,66 @@ export default async function SettingPage() {
                   disabled
                   defaultValue={data?.email as string}
                 />
+              </div>
+
+              <div className="space-y-1">
+                <Label>Program</Label>
+                <Select name="program">
+                  <SelectTrigger className="w-fill">
+                    <SelectValue placeholder="Välj program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Program</SelectLabel>
+                      <SelectItem value="program-D">Datateknik</SelectItem>
+                      <SelectItem value="program-DP">
+                        Design och produktutveckling
+                      </SelectItem>
+                      <SelectItem value="program-ED">
+                        Elektronikdesign
+                      </SelectItem>
+                      <SelectItem value="program-EMM">
+                        Energi- miljö- managment
+                      </SelectItem>
+                      <SelectItem value="program-I">
+                        Industriell ekonomi
+                      </SelectItem>
+                      <SelectItem value="program-IT">
+                        Informationsteknologi
+                      </SelectItem>
+                      <SelectItem value="program-KB">Kemisk biologi</SelectItem>
+                      <SelectItem value="program-KTS">
+                        Kommunikation, transport och samhälle
+                      </SelectItem>
+                      <SelectItem value="program-MED">
+                        Medicinsk teknik
+                      </SelectItem>
+                      <SelectItem value="program-MT">Medieteknik</SelectItem>
+                      <SelectItem value="program-MTEK">
+                        Mjukvaruteknik
+                      </SelectItem>
+                      <SelectItem value="program-M">Maskinteknik</SelectItem>
+                      <SelectItem value="program-TB">
+                        Teknisk biologi
+                      </SelectItem>
+                      <SelectItem value="program-TE">
+                        Teknisk fysik och elektroteknik
+                      </SelectItem>
+                      <SelectItem value="program-II">
+                        Industriell ekonomi - internationell
+                      </SelectItem>
+                      <SelectItem value="program-TFI">
+                        Teknisk fysik och elektroteknik - internationell
+                      </SelectItem>
+                      <SelectItem value="program-TM">
+                        Teknisk matematik
+                      </SelectItem>
+                      <SelectItem value="program-DU">
+                        Datadriven utveckling
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1">

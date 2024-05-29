@@ -22,6 +22,7 @@ model User {
   stripeCustomerId String?       @unique
   colorScheme      String        @default("theme-blue")
   isPublic         Boolean       @default(true)
+  program          String?
   image            String?
   Subscription     Subscription?
   Enrollment       Enrollment[]

@@ -4,6 +4,7 @@ export interface User {
   email: string;
   colorScheme: string;
   isPublic: boolean;
+  program: string;
   image: string;
 }
 
