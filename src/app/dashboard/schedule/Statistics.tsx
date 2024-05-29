@@ -16,6 +16,8 @@ interface StatisticsProps {
 }
 
 export default function Statistics({ courses, user }: StatisticsProps) {
+  const themeClass = user.colorScheme ? user.colorScheme : 'theme-blue';
+
   const totalPassedCredits = courses.reduce(
     (acc, course) => acc + course.credits,
     0
@@ -68,7 +70,9 @@ export default function Statistics({ courses, user }: StatisticsProps) {
               </Avatar>
               <div className="flex flex-col">
                 <CardTitle>{user.name}</CardTitle>
-                <Badge>{user.program}</Badge>
+                <Badge className={themeClass}>
+                  {user.program ? user.program : 'Inget program valt'}
+                </Badge>
               </div>
             </CardHeader>
 
@@ -96,9 +100,13 @@ export default function Statistics({ courses, user }: StatisticsProps) {
                 <CardDescription>Huvudområde</CardDescription>
               </CardHeader>
               <CardContent className="flex gap-2 flex-wrap whitespace-nowrap">
-                {topFieldsOfStudy.map((field) => {
-                  return <h3 key={field}>{field}</h3>;
-                })}
+                {topFieldsOfStudy.length > 0 ? (
+                  topFieldsOfStudy.map((field) => {
+                    return <h3 key={field}>{field}</h3>;
+                  })
+                ) : (
+                  <h3>Inget huvudområde</h3>
+                )}
               </CardContent>
             </Card>
           </div>
