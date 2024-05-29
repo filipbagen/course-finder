@@ -6,6 +6,7 @@ import useCourseData from '../../schedule/hooks/useCourseData';
 import useOtherUserData from '../../schedule/hooks/useOtherUserData';
 import Statistics from '../../schedule/Statistics';
 import { Separator } from '@/components/ui/separator';
+import { SkeletonCard } from '@/app/components/SkeletonComponent';
 
 type Props = {
   params: {
@@ -22,13 +23,24 @@ export default function OtherUserSchedule({ params }: Props) {
     loading: coursesLoading,
   } = useCourseData(id);
   const { user, loading: userLoading, error: userError } = useOtherUserData(id);
-
-  // if (coursesLoading || userLoading) return <div>Loading...</div>;
-  // if (userError) return <div>Error loading user data</div>;
+  const defaultUser = user || {
+    name: '',
+    image: '',
+    program: '',
+    colorScheme: '',
+    email: '',
+    isPublic: true,
+    id: '',
+  };
 
   return (
     <div className="flex flex-col gap-8">
-      {user && <Statistics courses={courses} user={user} />}
+      <Statistics
+        loading={coursesLoading}
+        courses={courses}
+        user={defaultUser}
+      />
+
       <Separator />
 
       <Tabs defaultValue="schedule" className="flex flex-col gap-4">

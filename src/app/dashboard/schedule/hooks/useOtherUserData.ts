@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@/app/utilities/types';
 
 const useOtherUserData = (userId: string) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 

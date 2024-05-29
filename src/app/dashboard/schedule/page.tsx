@@ -7,6 +7,7 @@ import useUserData from './hooks/useUserData';
 import ScheduleView from './components/ScheduleView';
 import Statistics from './Statistics';
 import { Separator } from '@/components/ui/separator';
+import { User } from '@/app/utilities/types';
 
 export default function Schedule() {
   const {
@@ -50,12 +51,25 @@ export default function Schedule() {
     setSemestersP2((prevSemestersP2) => updateSemesterCourses(prevSemestersP2));
   };
 
-  // if (coursesLoading || userLoading) return <div>Loading...</div>;
-  // if (userError) return <div>Error loading user data</div>;
+  if (userError) return <div>Error loading user data</div>;
+
+  const defaultUser: User = {
+    id: '',
+    name: 'Unknown',
+    image: '',
+    program: '',
+    colorScheme: 'theme-blue',
+    email: '',
+    isPublic: true,
+  };
 
   return (
     <div className="flex flex-col gap-8">
-      {user && <Statistics courses={courses} user={user} />}
+      <Statistics
+        courses={courses}
+        user={user || defaultUser}
+        loading={userLoading || coursesLoading}
+      />
 
       <Separator />
 
