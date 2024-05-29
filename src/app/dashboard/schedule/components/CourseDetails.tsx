@@ -6,7 +6,12 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MessageSquare, MapPin } from 'lucide-react';
+import {
+  Star,
+  MessageSquare,
+  MapPin,
+  SquareArrowOutUpRight,
+} from 'lucide-react';
 import { Course } from '@/app/utilities/types';
 import { Button } from '@/components/ui/button';
 
@@ -33,6 +38,18 @@ const CourseDetails = ({
           >
             +
           </Button> */}
+          <Button
+            size="icon"
+            aria-label={`Open URL`}
+            onClick={() =>
+              window.open(
+                `https://studieinfo.liu.se/kurs/${course.code}`,
+                '_blank'
+              )
+            }
+          >
+            <SquareArrowOutUpRight size={20} />
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
