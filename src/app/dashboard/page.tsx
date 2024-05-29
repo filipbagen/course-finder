@@ -1,10 +1,8 @@
 'use client';
 
-// React and Libraries
+import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
-
-// Components and Styles
 import {
   Select,
   SelectContent,
@@ -16,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import Filter from './Filter';
 import CourseCard from '../components/CourseCard';
-import { useState, useEffect } from 'react';
 import { SkeletonCard } from '../components/SkeletonComponent';
 
 export default function Dashboard() {
@@ -35,6 +32,7 @@ export default function Dashboard() {
     examinations: [],
     campus: [],
   });
+  const [enrollments, setEnrollments] = useState<Course[]>([]);
 
   const handleFilterChange = (
     filterType: keyof FilterState,
@@ -55,12 +53,15 @@ export default function Dashboard() {
     fetchData().catch(console.error);
   }, [searchQuery, sortOrder, filters]);
 
+  useEffect(() => {
+    fetchEnrollments().catch(console.error);
+  }, []);
+
   const fetchData = async () => {
     const query = new URLSearchParams();
     if (searchQuery) query.append('q', searchQuery);
     if (sortOrder) query.append('sort', sortOrder);
 
-    // Loop over each filter and append it to the query if it has selected values
     Object.entries(filters).forEach(([key, values]) => {
       if (values.length) {
         query.append(key, values.join(','));
@@ -83,29 +84,27 @@ export default function Dashboard() {
     }
   };
 
-  const fetchFilteredCourses = async (filter: { semester: number[] }) => {
-    const query = filter.semester.length
-      ? `?semester=${filter.semester.join(',')}`
-      : '';
-    const url = `/api/search${query}`;
+  const fetchEnrollments = async () => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(`/api/enrollment`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to fetch enrollments: ' + response.statusText);
       }
       const data = await response.json();
-      setCourses(data);
+      setEnrollments(data.courses);
     } catch (error) {
-      console.error('Failed to fetch courses:', error);
+      console.error('Failed to fetch enrollments:', error);
     }
   };
 
-  useEffect(() => {
-    fetchFilteredCourses({ semester: [] }); // Initial load with no filters
-  }, []);
-
   const toggleLayout = () => {
     setIsGrid((prev) => !prev);
+  };
+
+  const checkExclusions = (course: Course) => {
+    return enrollments.some((enrollment) =>
+      course.exclusions.includes(enrollment.code)
+    );
   };
 
   return (
@@ -173,7 +172,11 @@ export default function Dashboard() {
           )}
 
           {courses.map((course: Course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              hasExclusion={checkExclusions(course)}
+            />
           ))}
         </div>
       </div>
