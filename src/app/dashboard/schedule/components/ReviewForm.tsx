@@ -1,18 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
-import ReactStars from 'react-stars';
+import ReactStars from 'react-rating-stars-component';
 
-const ReviewForm = ({
-  courseId,
-  addReview,
-}: {
+type ReviewFormProps = {
   courseId: string;
   addReview: (review: any) => void;
-}) => {
+};
+
+const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
+
+  const handleRatingChange = (newRating: number) => {
+    setRating(newRating);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +56,10 @@ const ReviewForm = ({
         <label>Betyg</label>
         <ReactStars
           count={5}
-          onChange={(rating) => setRating(rating)}
+          value={rating}
+          onChange={handleRatingChange}
           size={24}
-          color2={'#ffd700'}
+          activeColor="#ffd700"
         />
       </div>
       <div className="flex gap-2">
@@ -65,9 +69,7 @@ const ReviewForm = ({
           onChange={(e) => setComment(e.target.value)}
         />
       </div>
-      <Button type="submit">
-        Skicka recensionen
-        </Button>
+      <Button type="submit">Skicka recensionen</Button>
       {error && <p className="text-red-500">{error}</p>}
     </form>
   );
