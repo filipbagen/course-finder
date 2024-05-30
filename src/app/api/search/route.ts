@@ -60,6 +60,11 @@ const applyFilters = (courses: Course[], filters: Filters): Course[] => {
             )
           )
         );
+      } else if (key === 'courseLevel') {
+        // Special filtering for the 'courseLevel' property based on 'course.advanced'
+        courses = courses.filter((course) =>
+          values.includes(course.advanced ? 'Avancerad nivå' : 'Grundnivå')
+        );
       } else {
         // General filtering for other properties, considering array and non-array types
         courses = courses.filter((course) => {
