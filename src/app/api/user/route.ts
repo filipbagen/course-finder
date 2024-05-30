@@ -11,8 +11,6 @@ export async function GET() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  console.log('User session:', user); // Debugging line
-
   // Check if user is logged in
   if (!user) {
     return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
@@ -38,6 +36,9 @@ export async function GET() {
     return NextResponse.json({ user: userData });
   } catch (error) {
     console.error('Failed to fetch user data:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
