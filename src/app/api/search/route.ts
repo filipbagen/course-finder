@@ -65,6 +65,11 @@ const applyFilters = (courses: Course[], filters: Filters): Course[] => {
         courses = courses.filter((course) =>
           values.includes(course.advanced ? 'Avancerad nivå' : 'Grundnivå')
         );
+      } else if (key === 'studyPace') {
+        // Special filtering for the 'studyPace' property based on 'course.pace'
+        courses = courses.filter((course) =>
+          values.includes(course.period.length == 2 && course.credits == 6 ? 'Halvfart' : 'Helfart')
+        );
       } else {
         // General filtering for other properties, considering array and non-array types
         courses = courses.filter((course) => {
