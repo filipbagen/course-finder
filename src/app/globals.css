@@ -253,7 +253,7 @@
 .dark .theme-red {
   --background: 0 0% 3.9%;
   --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
+  --card: 0 20% 8%;
   --card-foreground: 0 0% 98%;
   --popover: 0 0% 3.9%;
   --popover-foreground: 0 0% 98%;
@@ -298,7 +298,7 @@
 .dark .theme-rose {
   --background: 20 14.3% 4.1%;
   --foreground: 0 0% 95%;
-  --card: 24 9.8% 10%;
+  --card: 24 30% 8%;
   --card-foreground: 0 0% 95%;
   --popover: 0 0% 9%;
   --popover-foreground: 0 0% 95%;
@@ -343,7 +343,7 @@
 .dark .theme-orange {
   --background: 20 14.3% 4.1%;
   --foreground: 60 9.1% 97.8%;
-  --card: 20 14.3% 4.1%;
+  --card: 20 20% 8%;
   --card-foreground: 60 9.1% 97.8%;
   --popover: 20 14.3% 4.1%;
   --popover-foreground: 60 9.1% 97.8%;
@@ -478,7 +478,7 @@
 .dark .theme-yellow {
   --background: 20 14.3% 4.1%;
   --foreground: 60 9.1% 97.8%;
-  --card: 20 14.3% 4.1%;
+  --card: 20 10% 8%;
   --card-foreground: 60 9.1% 97.8%;
   --popover: 20 14.3% 4.1%;
   --popover-foreground: 60 9.1% 97.8%;
@@ -523,7 +523,7 @@
 .dark .theme-violet {
   --background: 224 71.4% 4.1%;
   --foreground: 210 20% 98%;
-  --card: 224 71.4% 4.1%;
+  --card: 224 45% 8%;
   --card-foreground: 210 20% 98%;
   --popover: 224 71.4% 4.1%;
   --popover-foreground: 210 20% 98%;

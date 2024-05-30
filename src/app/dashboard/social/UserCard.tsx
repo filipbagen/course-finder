@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 const UserCard = ({ user }: { user: User }) => {
   return (
-    <Card className="flex-grow h-min hover:bg-slate-100 transition cursor-pointer dark:hover:bg-primary-foreground">
+    <Card className="flex-grow h-min transition cursor-pointer hover:bg-background dark:hover:bg-background">
       <Link href={`/dashboard/social/${user.id}`}>
         <CardHeader>
           <div className="flex gap-4">

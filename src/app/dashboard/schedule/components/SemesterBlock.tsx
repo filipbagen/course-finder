@@ -61,7 +61,7 @@ export const SemesterBlock = ({
                 </Draggable>
               ))
             ) : (
-              <div className="text-center text-gray-500 min-w-80">
+              <div className="text-center text-ring min-w-80">
                 Inga kurser inlagda.
               </div>
             )}
@@ -70,7 +70,7 @@ export const SemesterBlock = ({
         )}
       </Droppable>
     ) : (
-      <div className="h-max p-4 bg-primary/10 dark:bg-gray-800 rounded-md flex flex-col gap-4">
+      <div className="h-max p-4 bg-primary/10 rounded-md flex flex-col gap-4">
         {loading ? (
           <SkeletonCard variant="schedule" /> // Render one skeleton card per semester and period
         ) : courses.length > 0 ? (
@@ -84,7 +84,7 @@ export const SemesterBlock = ({
             </div>
           ))
         ) : (
-          <div className="text-center text-gray-500 min-w-80">
+          <div className="text-center text-ring min-w-80">
             Inga kurser inlagda.
           </div>
         )}
