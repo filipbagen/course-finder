@@ -8,6 +8,14 @@ import ScheduleView from './components/ScheduleView';
 import Statistics from './Statistics';
 import { Separator } from '@/components/ui/separator';
 import { User } from '@/app/utilities/types';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 
 export default function Schedule() {
   const {
@@ -65,22 +73,36 @@ export default function Schedule() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Statistics
-        courses={courses}
-        user={user || defaultUser}
-        loading={userLoading || coursesLoading}
-      />
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Hem</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Schema</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <Separator />
+      {/* <div className="flex flex-col gap-8"> */}
+        <Statistics
+          courses={courses}
+          user={user || defaultUser}
+          loading={userLoading || coursesLoading}
+        />
 
-      <ScheduleView
-        semesters={semesters}
-        semestersP2={semestersP2}
-        loading={coursesLoading}
-        handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-        handleDragAndDrop={handleDragAndDrop}
-        draggable={true} // Enable drag-and-drop
-      />
+        <Separator />
+
+        <ScheduleView
+          semesters={semesters}
+          semestersP2={semestersP2}
+          loading={coursesLoading}
+          handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+          handleDragAndDrop={handleDragAndDrop}
+          draggable={true} // Enable drag-and-drop
+        />
+      {/* </div> */}
     </div>
   );
 }

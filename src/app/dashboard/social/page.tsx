@@ -14,6 +14,14 @@ import {
 import UserCard from './UserCard';
 import { User } from '@/app/utilities/types';
 import { Separator } from '@/components/ui/separator';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -40,20 +48,33 @@ const UsersPage = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <Input
-        type="text"
-        placeholder="Sök användare..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+    <div className="flex flex-col gap-8 w-full">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Hem</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Användare</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div className="flex gap-4 items-center justify-between">
-        <p>
-          Visar <b>{searchQuery ? filteredUsers.length : 0}</b> sökresultat
-        </p>
+      <div className="flex flex-col gap-4">
+        <Input
+          type="text"
+          placeholder="Sök användare..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-        {/* <Select onValueChange={(value) => setSortOrder(value)}>
+        <div className="flex gap-4 items-center justify-between">
+          <p>
+            Visar <b>{searchQuery ? filteredUsers.length : 0}</b> sökresultat
+          </p>
+
+          {/* <Select onValueChange={(value) => setSortOrder(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
@@ -70,6 +91,7 @@ const UsersPage = () => {
             </SelectGroup>
           </SelectContent>
         </Select> */}
+        </div>
       </div>
 
       {isLoading ? (
