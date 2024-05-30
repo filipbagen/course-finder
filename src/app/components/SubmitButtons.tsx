@@ -60,3 +60,24 @@ export function StripePortal() {
     </>
   );
 }
+
+type SubmitReviewButtonProps = {
+  loading: boolean;
+};
+
+export function SubmitReviewButton({ loading }: SubmitReviewButtonProps) {
+  return (
+    <>
+      {loading ? (
+        <Button disabled className="w-fit">
+          <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+          Vänligen vänta...
+        </Button>
+      ) : (
+        <Button type="submit" className="w-fit">
+          Skicka recension
+        </Button>
+      )}
+    </>
+  );
+}

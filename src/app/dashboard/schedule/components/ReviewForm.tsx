@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import ReactStars from 'react-rating-stars-component';
+import { SubmitReviewButton } from '@/app/components/SubmitButtons';
 
 type ReviewFormProps = {
   courseId: string;
@@ -12,6 +13,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleRatingChange = (newRating: number) => {
     setRating(newRating);
@@ -19,6 +21,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await fetch('/api/review', {
@@ -47,6 +50,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
       setError('');
     } catch (error) {
       setError('Failed to post review.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,6 +64,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
           value={rating}
           onChange={handleRatingChange}
           size={24}
+          isHalf={true}
           activeColor="#ffd700"
         />
       </div>
@@ -69,7 +75,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
           onChange={(e) => setComment(e.target.value)}
         />
       </div>
-      <Button type="submit">Skicka recensionen</Button>
+
+      <SubmitReviewButton loading={loading} />
       {error && <p className="text-red-500">{error}</p>}
     </form>
   );
