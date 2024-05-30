@@ -131,19 +131,18 @@ export default async function BillingPage() {
       <div className="grid items-start gap-8">
         <div className="flex items-center justify-between px-2">
           <div className="grid gap-1">
-            <h1>Subscription</h1>
+            <h1>Prenumeration</h1>
             <p className="text-muted-foreground">
-              Settings regarding your subscription
+              Inställningar för din prenumeration
             </p>
           </div>
         </div>
         <Card className="w-full lg:w-2/3">
           <CardHeader>
-            <CardTitle>Edit subscription</CardTitle>
+            <CardTitle>Ändra prenumeration</CardTitle>
             <CardDescription>
-              Click on the button below, this will give you the opportunity to
-              change your payment details and view your statement at the same
-              time.
+              Klicka på knappen nedan, detta ger dig möjlighet att ändra dina
+              betalningsuppgifter och se din faktura samtidigt.
             </CardDescription>
           </CardHeader>
           <CardContent>
