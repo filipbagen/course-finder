@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Course } from '@/app/utilities/types';
-import CourseCard from '@/app/components/CourseCard';
+import CourseCard from '@/app/components/course/CourseCard';
 import { SkeletonCard } from '@/app/components/SkeletonComponent';
 
 export const SemesterBlock = ({

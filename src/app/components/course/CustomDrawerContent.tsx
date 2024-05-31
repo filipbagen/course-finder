@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
@@ -6,12 +6,18 @@ import { Examination, Course, Review } from '@/app/utilities/types';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import CourseDetails from './CourseDetails';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { SkeletonCard } from '@/app/components/SkeletonComponent';
 
 const ReviewListMemoized = React.memo(ReviewList);
 
-const CustomDrawerContent = ({ course }: { course: Course }) => {
+interface CustomDrawerContentProps {
+  course: Course;
+}
+
+const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
+  course,
+}) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +34,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setLoading(true); // Set loading to true while fetching
+        setLoading(true);
         const response = await fetch(`/api/review?courseId=${course.id}`);
         if (response.ok) {
           const data = await response.json();
@@ -39,7 +45,7 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
       } finally {
-        setLoading(false); // Set loading to false once data is fetched
+        setLoading(false);
       }
     };
 
@@ -49,14 +55,6 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
   const addReview = (newReview: Review) => {
     setReviews((prevReviews) => [newReview, ...prevReviews]);
   };
-
-  {
-    /* <div>
-                <h5>Kursen får ej läsas med:</h5>
-                <p>{course.exclusions}</p>
-              </div>
-              <Separator /> */
-  }
 
   if (loading) {
     return (
@@ -85,18 +83,17 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
 
           <TabsContent value="about">
             <div className="flex flex-col gap-6">
-              {course.prerequisites != 'None' && (
+              {course.prerequisites !== 'None' && (
                 <>
                   <div>
                     <h5>Förkunskaper</h5>
                     <p>{course.prerequisites}</p>
                   </div>
-
                   <Separator />
                 </>
               )}
 
-              {course.recommendedPrerequisites != 'None' && (
+              {course.recommendedPrerequisites !== 'None' && (
                 <>
                   <div>
                     <h5>Rekommenderade förkunskaper</h5>
@@ -132,7 +129,6 @@ const CustomDrawerContent = ({ course }: { course: Course }) => {
                     <h5>Undervisnings- och arbetsformer</h5>
                     <p>{course.teachingMethods}</p>
                   </div>
-
                   <Separator />
                 </>
               )}

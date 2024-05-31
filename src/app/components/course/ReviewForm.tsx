@@ -3,10 +3,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import ReactStars from 'react-rating-stars-component';
 import { SubmitReviewButton } from '@/app/components/SubmitButtons';
+import { Review } from '@/app/utilities/types';
 
 type ReviewFormProps = {
   courseId: string;
-  addReview: (review: any) => void;
+  addReview: (review: Review) => void;
 };
 
 const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
@@ -40,7 +41,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
         throw new Error('Failed to post review');
       }
 
-      const newReview = await response.json();
+      const newReview: Review = await response.json();
 
       // Update the parent state
       addReview(newReview);
@@ -75,7 +76,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
           onChange={(e) => setComment(e.target.value)}
         />
       </div>
-
       <SubmitReviewButton loading={loading} />
       {error && <p className="text-red-500">{error}</p>}
     </form>

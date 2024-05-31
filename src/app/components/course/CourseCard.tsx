@@ -20,7 +20,7 @@ import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useEnrollment } from '@/app/hooks/useEnrollment';
 
 const LazyCustomDrawerContent = React.lazy(
-  () => import('@/app/dashboard/schedule/components/CustomDrawerContent')
+  () => import('@/app/components/course/CustomDrawerContent')
 );
 
 interface CourseCardProps {

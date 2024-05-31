@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import Filter from './Filter';
-import CourseCard from '../components/CourseCard';
+import CourseCard from '../components/course/CourseCard';
 import { SkeletonCard } from '../components/SkeletonComponent';
 import { useCourses } from '../hooks/courses/useCourses';
 import { useEnrollments } from '../hooks/courses/useEnrollments';

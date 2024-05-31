@@ -2,38 +2,41 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star } from 'lucide-react';
 import { Review } from '@/app/utilities/types';
+import React from 'react';
 
-const ReviewList = ({ reviews }: { reviews: Review[] }) => {
+interface ReviewListProps {
+  reviews: Review[];
+}
+
+const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => {
   return (
     <div className="flex flex-col gap-4">
       <h5>Reviews</h5>
-      {reviews.map((review) => (
-        <Card key={review.id}>
+      {reviews.map(({ id, user, rating, comment, createdAt }) => (
+        <Card key={id}>
           <CardContent className="flex flex-col items-start gap-2">
             <div className="flex flex-row items-center gap-4">
               <Avatar className="h-10 w-10 rounded-full">
-                {review.user?.image ? (
-                  <AvatarImage src={review.user.image} alt={review.user.name} />
+                {user?.image ? (
+                  <AvatarImage src={user.image} alt={user.name} />
                 ) : (
                   <AvatarFallback>
-                    {review.user.name.charAt(0).toUpperCase()}
+                    {user.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="flex flex-col gap-1">
-                <span className="font-bold">{review.user.name}</span>
+                <span className="font-bold">{user.name}</span>
                 <span className="text-muted-foreground">
-                  {new Date(review.createdAt).toLocaleDateString()}
+                  {new Date(createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
-
             <div className="flex gap-2 items-center">
               <Star size={12} />
-              {review.rating}
+              {rating}
             </div>
-
-            {review.comment ? review.comment : 'No comment'}
+            <p>{comment || 'No comment'}</p>
           </CardContent>
         </Card>
       ))}
@@ -41,4 +44,4 @@ const ReviewList = ({ reviews }: { reviews: Review[] }) => {
   );
 };
 
-export default ReviewList;
+export default React.memo(ReviewList);
