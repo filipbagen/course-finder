@@ -90,7 +90,7 @@ const OtherUserSchedule: React.FC<Props> = ({ params }) => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/social">Användare</BreadcrumbLink>
+            <BreadcrumbLink href="/dashboard/social">Användare</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
