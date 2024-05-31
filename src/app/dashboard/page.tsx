@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
 import {
@@ -15,11 +15,11 @@ import { Input } from '@/components/ui/input';
 import Filter from './Filter';
 import CourseCard from '../components/CourseCard';
 import { SkeletonCard } from '../components/SkeletonComponent';
+import { useCourses } from '../hooks/useCourses';
+import { useEnrollments } from '../hooks/useEnrollments';
 
 export default function Dashboard() {
   const [isGrid, setIsGrid] = useState(true);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
   const [filters, setFilters] = useState<FilterState>({
@@ -32,7 +32,9 @@ export default function Dashboard() {
     examinations: [],
     campus: [],
   });
-  const [enrollments, setEnrollments] = useState<Course[]>([]);
+
+  const { courses, loading } = useCourses(searchQuery, sortOrder, filters);
+  const { enrollments } = useEnrollments();
 
   const handleFilterChange = (
     filterType: keyof FilterState,
@@ -44,57 +46,8 @@ export default function Dashboard() {
         ? [...prev[filterType], value]
         : prev[filterType].filter((v) => v !== value);
 
-      const newFilters = { ...prev, [filterType]: updatedValues };
-      return newFilters;
+      return { ...prev, [filterType]: updatedValues };
     });
-  };
-
-  useEffect(() => {
-    fetchData().catch(console.error);
-  }, [searchQuery, sortOrder, filters]);
-
-  useEffect(() => {
-    fetchEnrollments().catch(console.error);
-  }, []);
-
-  const fetchData = async () => {
-    const query = new URLSearchParams();
-    if (searchQuery) query.append('q', searchQuery);
-    if (sortOrder) query.append('sort', sortOrder);
-
-    Object.entries(filters).forEach(([key, values]) => {
-      if (values.length) {
-        query.append(key, values.join(','));
-      }
-    });
-
-    console.log(`/api/search?${query.toString()}`);
-
-    try {
-      const response = await fetch(`/api/search?${query.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch: ' + response.statusText);
-      }
-      const data = await response.json();
-      setCourses(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch courses:', error);
-      setLoading(false);
-    }
-  };
-
-  const fetchEnrollments = async () => {
-    try {
-      const response = await fetch(`/api/enrollment`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch enrollments: ' + response.statusText);
-      }
-      const data = await response.json();
-      setEnrollments(data.courses);
-    } catch (error) {
-      console.error('Failed to fetch enrollments:', error);
-    }
   };
 
   const toggleLayout = () => {
