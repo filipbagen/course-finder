@@ -1,7 +1,7 @@
 import React from 'react';
 import { DragDropContext, OnDragEndResponder } from '@hello-pangea/dnd';
 import { SemesterCourses } from '@/app/utilities/types';
-import { SemesterBlock } from './SemesterBlock';
+import SemesterBlock from './SemesterBlock';
 
 interface ScheduleViewProps {
   semesters: SemesterCourses;
@@ -20,7 +20,6 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
   handleDragAndDrop,
   draggable = true,
 }) => {
-  // Ensure at least 3 columns for each period
   const fixedSemesters = [7, 8, 9];
 
   const renderSemesterBlock = (
@@ -47,7 +46,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
 
   return (
     <>
-      <h2>Schema</h2>
+      <h2>Schedule</h2>
       <div className="flex flex-col gap-12 overflow-x-auto">
         {draggable ? (
           <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>

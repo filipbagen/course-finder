@@ -23,7 +23,7 @@ export default function Statistics({
   user,
   loading,
 }: StatisticsProps) {
-  const themeClass = user.colorScheme ? user.colorScheme : 'theme-blue';
+  const themeClass = user.colorScheme || 'theme-blue';
 
   const totalPassedCredits = courses.reduce(
     (acc, course) => acc + course.credits,
@@ -49,7 +49,6 @@ export default function Statistics({
   );
 
   const maxCredits = Math.max(...Object.values(creditCount));
-
   const topFieldsOfStudy = Object.keys(creditCount).filter(
     (field) => creditCount[field] === maxCredits
   );
@@ -58,7 +57,7 @@ export default function Statistics({
 
   return (
     <>
-      <h2>Statistik</h2>
+      <h2>Statistics</h2>
       {loading ? (
         <SkeletonCard variant="statistics" />
       ) : (
@@ -78,7 +77,7 @@ export default function Statistics({
                 <div className="flex flex-col">
                   <CardTitle>{user.name}</CardTitle>
                   <Badge className={themeClass}>
-                    {user.program ? user.program : 'Inget program valt'}
+                    {user.program || 'No program selected'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -91,10 +90,10 @@ export default function Statistics({
           </div>
 
           <div className="flex-1 flex flex-col gap-4">
-            <div className="flex gap-4 ">
+            <div className="flex gap-4">
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Inlagda kurser</CardDescription>
+                  <CardDescription>Enrolled Courses</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{courses.length}</h3>
@@ -103,15 +102,15 @@ export default function Statistics({
 
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Huvudområde</CardDescription>
+                  <CardDescription>Main Field of Study</CardDescription>
                 </CardHeader>
                 <CardContent className="flex gap-2 flex-wrap whitespace-nowrap">
                   {topFieldsOfStudy.length > 0 ? (
-                    topFieldsOfStudy.map((field) => {
-                      return <h3 key={field}>{field}</h3>;
-                    })
+                    topFieldsOfStudy.map((field) => (
+                      <h3 key={field}>{field}</h3>
+                    ))
                   ) : (
-                    <h3>Saknas</h3>
+                    <h3>None</h3>
                   )}
                 </CardContent>
               </Card>
@@ -120,7 +119,7 @@ export default function Statistics({
             <div className="flex gap-4">
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Avancerade poäng</CardDescription>
+                  <CardDescription>Advanced Credits</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{totalAdvancedCredits} hp</h3>
@@ -129,7 +128,7 @@ export default function Statistics({
 
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Grundpoäng</CardDescription>
+                  <CardDescription>Basic Credits</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{totalBasicCredits} hp</h3>

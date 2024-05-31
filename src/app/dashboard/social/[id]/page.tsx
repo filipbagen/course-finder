@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ScheduleView from '@/app/dashboard/schedule/components/ScheduleView';
 import useCourseData from '../../schedule/hooks/useCourseData';
-import useOtherUserData from '../../schedule/hooks/useOtherUserData';
+import useOtherUserData from '../hooks/useOtherUserData';
 import Statistics from '../../schedule/Statistics';
 import { Separator } from '@/components/ui/separator';
 import {

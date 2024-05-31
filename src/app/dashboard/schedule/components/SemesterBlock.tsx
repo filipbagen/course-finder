@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Course } from '@/app/utilities/types';
 import CourseCard from '@/app/components/course/CourseCard';
 import { SkeletonCard } from '@/app/components/SkeletonComponent';
 
-export const SemesterBlock = ({
-  semester,
-  courses,
-  period,
-  handleUpdateAfterDeletion,
-  draggable,
-  loading,
-}: {
+interface SemesterBlockProps {
   semester: number;
   courses: Course[];
   period: string;
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
   draggable?: boolean;
-  loading?: boolean; // Add loading prop
+  loading?: boolean;
+}
+
+const SemesterBlock: React.FC<SemesterBlockProps> = ({
+  semester,
+  courses,
+  period,
+  handleUpdateAfterDeletion,
+  draggable = true,
+  loading = false,
 }) => (
   <div key={`${semester}-${period}`} className="w-ful pt-1">
     <h5 className="mb-4">Termin {semester}</h5>
@@ -92,3 +94,5 @@ export const SemesterBlock = ({
     )}
   </div>
 );
+
+export default SemesterBlock;

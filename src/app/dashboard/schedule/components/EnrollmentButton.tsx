@@ -1,16 +1,29 @@
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { Course } from '@/app/utilities/types';
 
-export const EnrollmentButton = ({ course, addToEnrollment }: { course: Course, addToEnrollment: (courseId: string, semester: number) => void }) => {
+interface EnrollmentButtonProps {
+  course: Course;
+  addToEnrollment: (courseId: string, semester: number) => void;
+}
+
+export const EnrollmentButton: React.FC<EnrollmentButtonProps> = ({
+  course,
+  addToEnrollment,
+}) => {
   const handleEnrollment = useCallback(() => {
     const semesters = course.semester;
     if (semesters.length === 1) {
       addToEnrollment(course.id, semesters[0]);
     }
-  }, [course]);
+  }, [course, addToEnrollment]);
 
   return (
     <DropdownMenu>
@@ -26,7 +39,10 @@ export const EnrollmentButton = ({ course, addToEnrollment }: { course: Course, 
       {course.semester.length > 1 && (
         <DropdownMenuContent className="w-56">
           {course.semester.map((semester) => (
-            <DropdownMenuItem key={semester} onClick={() => addToEnrollment(course.id, semester)}>
+            <DropdownMenuItem
+              key={semester}
+              onClick={() => addToEnrollment(course.id, semester)}
+            >
               Semester {semester}
             </DropdownMenuItem>
           ))}

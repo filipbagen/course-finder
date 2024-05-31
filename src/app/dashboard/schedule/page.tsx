@@ -76,33 +76,31 @@ export default function Schedule() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Hem</BreadcrumbLink>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Schema</BreadcrumbPage>
+            <BreadcrumbPage>Schedule</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* <div className="flex flex-col gap-8"> */}
-        <Statistics
-          courses={courses}
-          user={user || defaultUser}
-          loading={userLoading || coursesLoading}
-        />
+      <Statistics
+        courses={courses}
+        user={user || defaultUser}
+        loading={userLoading || coursesLoading}
+      />
 
-        <Separator />
+      <Separator />
 
-        <ScheduleView
-          semesters={semesters}
-          semestersP2={semestersP2}
-          loading={coursesLoading}
-          handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-          handleDragAndDrop={handleDragAndDrop}
-          draggable={true} // Enable drag-and-drop
-        />
-      {/* </div> */}
+      <ScheduleView
+        semesters={semesters}
+        semestersP2={semestersP2}
+        loading={coursesLoading}
+        handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+        handleDragAndDrop={handleDragAndDrop}
+        draggable={true}
+      />
     </div>
   );
 }
