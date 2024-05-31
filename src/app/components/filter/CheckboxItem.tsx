@@ -10,16 +10,16 @@ interface CheckboxItemProps {
   checked: boolean;
 }
 
-const CheckboxItem: React.FC<
-  CheckboxItemProps & { onChange: (checked: boolean) => void; checked: boolean }
-> = React.memo(({ displayValue, onChange, checked }) => (
-  <label className="flex items-center gap-3 cursor-pointer">
-    <Checkbox
-      checked={checked}
-      onCheckedChange={(isChecked) => onChange(isChecked === true)} // Assuming 'onChange' needs a boolean
-    />
-    <span className="leading-none text-base">{displayValue}</span>
-  </label>
-));
+const CheckboxItem: React.FC<CheckboxItemProps> = React.memo(
+  ({ displayValue, onChange, checked }) => (
+    <label className="flex items-center gap-3 cursor-pointer">
+      <Checkbox
+        checked={checked}
+        onCheckedChange={(isChecked) => onChange(isChecked === true)}
+      />
+      <span className="leading-none text-base">{displayValue}</span>
+    </label>
+  )
+);
 
 export default CheckboxItem;

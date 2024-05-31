@@ -1,11 +1,7 @@
-// react
-import React, { useState, useEffect } from 'react';
-
-// shadcn
+import React from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -38,7 +34,6 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
     >
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
         {accordionItems.map((item) => {
-          // Check if any option in this item's filter type is selected
           const isAnyOptionChecked =
             currentFilters[item.filterType as keyof FilterState].length > 0;
 
@@ -76,7 +71,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
                         onChange={(checked) =>
                           onFilterChange(
                             item.filterType as keyof FilterState,
-                            String(optionString),
+                            optionString,
                             checked
                           )
                         }

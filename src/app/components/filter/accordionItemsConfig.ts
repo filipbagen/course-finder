@@ -17,7 +17,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Termin',
     filterType: 'semester',
     options: ['7', '8', '9'],
-    displayValue: (semester: string | number) => `Termin ${semester}`,
+    displayValue: (semester) => `Termin ${semester}`,
     icon: BetweenHorizontalStart,
   },
   {
@@ -25,7 +25,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Period',
     filterType: 'period',
     options: ['1', '2'],
-    displayValue: (period: string | number) => `Period ${period}`,
+    displayValue: (period) => `Period ${period}`,
     icon: AlignVerticalJustifyCenter,
   },
   {
@@ -33,7 +33,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Block',
     filterType: 'block',
     options: ['1', '2', '3', '4'],
-    displayValue: (block: string | number) => `Block ${block}`,
+    displayValue: (block) => `Block ${block}`,
     icon: Blocks,
   },
   {
@@ -41,7 +41,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Studietakt',
     filterType: 'studyPace',
     options: ['Helfart', 'Halvfart'],
-    displayValue: (pace: string | number) => pace.toString(),
+    displayValue: (pace) => pace.toString(),
     icon: Gauge,
   },
   {
@@ -49,7 +49,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Utbildningsnivå',
     filterType: 'courseLevel',
     options: ['Grundnivå', 'Avancerad nivå'],
-    displayValue: (level: string | number) => level.toString(),
+    displayValue: (level) => level.toString(),
     icon: Network,
   },
   {
@@ -85,7 +85,7 @@ export const accordionItems: AccordionItemProps[] = [
       'Transportsystem',
       'Inget huvudområde',
     ],
-    displayValue: (field: string | number) => field.toString(),
+    displayValue: (field) => field.toString(),
     icon: SignpostBig,
   },
   {
@@ -93,7 +93,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Examination',
     filterType: 'examinations',
     options: ['Tentamen', 'Laborationer', 'Projekt', 'Inlämning'],
-    displayValue: (type: string | number) => type.toString(),
+    displayValue: (type) => type.toString(),
     icon: NotebookPen,
   },
   {
@@ -101,7 +101,7 @@ export const accordionItems: AccordionItemProps[] = [
     title: 'Campus',
     filterType: 'campus',
     options: ['Norrköping', 'Linköping'],
-    displayValue: (campus: string | number) => campus.toString(),
+    displayValue: (campus) => campus.toString(),
     icon: School,
   },
 ];
