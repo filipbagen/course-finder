@@ -2,26 +2,28 @@ import { Course } from '@/app/utilities/types';
 import { DropResult } from '@hello-pangea/dnd';
 import { SemesterCourses } from '@/app/utilities/types';
 
+interface UseDragAndDropProps {
+  semesters: SemesterCourses;
+  setSemesters: React.Dispatch<React.SetStateAction<SemesterCourses>>;
+  semestersP2: SemesterCourses;
+  setSemestersP2: React.Dispatch<React.SetStateAction<SemesterCourses>>;
+}
+
 export default function useDragAndDrop({
   semesters,
   setSemesters,
   semestersP2,
   setSemestersP2,
-}: {
-  semesters: SemesterCourses;
-  setSemesters: React.Dispatch<React.SetStateAction<SemesterCourses>>;
-  semestersP2: SemesterCourses;
-  setSemestersP2: React.Dispatch<React.SetStateAction<SemesterCourses>>;
-}) {
+}: UseDragAndDropProps) {
   const handleDragAndDrop = async (results: DropResult) => {
     const { source, destination, type } = results;
 
-    if (!destination) return; // No valid drop location
+    if (!destination) return;
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) {
-      return; // Dropped in the same place, no action needed
+      return;
     }
 
     const sourceSemesterId = parseInt(source.droppableId.split('-')[0], 10);
@@ -31,11 +33,9 @@ export default function useDragAndDrop({
     );
     const period = source.droppableId.endsWith('1') ? 'P1' : 'P2';
 
-    // Choose the correct state and setter based on the period
     const semesterKey = period === 'P1' ? semesters : semestersP2;
     const setSemesterKey = period === 'P1' ? setSemesters : setSemestersP2;
 
-    // Only allow same-semester movement for 'unique' types
     if (
       type.startsWith('unique') &&
       sourceSemesterId !== destinationSemesterId
@@ -43,7 +43,6 @@ export default function useDragAndDrop({
       return;
     }
 
-    // Clone the source and destination course arrays
     const newSourceCourses = [...(semesterKey[sourceSemesterId] || [])];
     const newDestinationCourses =
       sourceSemesterId === destinationSemesterId
@@ -52,25 +51,21 @@ export default function useDragAndDrop({
     const movedCourse = newSourceCourses[source.index];
 
     if (!movedCourse) {
-      return; // No course found, exit
+      return;
     }
 
     newSourceCourses.splice(source.index, 1);
     newDestinationCourses.splice(destination.index, 0, movedCourse);
 
-    // Update the state for the current period
     setSemesterKey((prev) => ({
       ...prev,
       [sourceSemesterId]: newSourceCourses,
       [destinationSemesterId]: newDestinationCourses,
     }));
 
-    // Synchronize the course across periods if it runs in both '1' and '2'
     if (movedCourse.period.includes(1) && movedCourse.period.includes(2)) {
       const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
       const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
-
-      // Find the same course in the other period array
       const otherSourceCourses = [...(otherPeriodKey[sourceSemesterId] || [])];
       const otherDestinationCourses = [
         ...(otherPeriodKey[destinationSemesterId] || []),
@@ -82,13 +77,12 @@ export default function useDragAndDrop({
       if (otherCourseIndex !== -1) {
         const otherMovedCourse = otherSourceCourses[otherCourseIndex];
         otherSourceCourses.splice(otherCourseIndex, 1);
-        // Ensure the course is not added to the same destination index to avoid duplicates
         if (
           !otherDestinationCourses.some(
             (course) => course.id === otherMovedCourse.id
           )
         ) {
-          otherDestinationCourses.push(otherMovedCourse); // Just push to the end
+          otherDestinationCourses.push(otherMovedCourse);
         }
 
         setOtherPeriodKey((prev) => ({
@@ -99,7 +93,6 @@ export default function useDragAndDrop({
       }
     }
 
-    // Update the database with the new semester
     try {
       const response = await fetch('/api/enrollment/update', {
         method: 'PATCH',

@@ -1,5 +1,3 @@
-// useCourseData.ts
-
 import { useState, useEffect } from 'react';
 import {
   CourseWithEnrollment,
@@ -23,7 +21,6 @@ export default function useCourseData(userId?: string) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-
       setCourses(data.courses);
 
       const groupedP1 = data.courses.reduce(
