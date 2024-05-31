@@ -88,7 +88,11 @@ async function getData(userId: string) {
 export default async function BillingPage() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
-  const data = await getData(user?.id as string);
+  if (!user) {
+    return redirect('/'); // Redirect if no user is found
+  }
+
+  const data = await getData(user.id);
 
   async function createSubscription() {
     'use server';
