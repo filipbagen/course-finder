@@ -8,7 +8,6 @@ import { BookText, SignpostBig, NotebookPen } from 'lucide-react';
 import { CardFooter } from '@/components/ui/card';
 import { Examination, Course } from '@/app/utilities/types';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 
 export const CourseCardDetails = ({ course }: { course: Course }) => (
   <Accordion type="multiple" className="w-full">
@@ -36,7 +35,7 @@ export const CourseCardDetails = ({ course }: { course: Course }) => (
             <BookText size={16} />
             <h6>Förkunskaper</h6>
           </div>
-          <p>{course.prerequisites}</p>
+          <p>{course.prerequisites == "None" ? "Inga förkunskaper krävs" : course.prerequisites}</p>
 
           <Separator className="mt-2" />
         </div>

@@ -128,29 +128,43 @@ export default async function BillingPage() {
 
   if (data?.status === 'active') {
     return (
-      <div className="grid items-start gap-8">
-        <div className="flex items-center justify-between px-2">
-          <div className="grid gap-1">
-            <h1>Prenumeration</h1>
-            <p className="text-muted-foreground">
-              Inställningar för din prenumeration
-            </p>
+      <div className="flex flex-col gap-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Hem</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Betalning</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="grid items-start gap-8">
+          <div className="flex items-center justify-between px-2">
+            <div className="grid gap-1">
+              <h1>Prenumeration</h1>
+              <p className="text-muted-foreground">
+                Inställningar för din prenumeration
+              </p>
+            </div>
           </div>
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Ändra prenumeration</CardTitle>
+              <CardDescription>
+                Klicka på knappen nedan, detta ger dig möjlighet att ändra dina
+                betalningsuppgifter och se din faktura samtidigt.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={createCustomerPortal}>
+                <StripePortal />
+              </form>
+            </CardContent>
+          </Card>
         </div>
-        <Card className="w-full lg:w-2/3">
-          <CardHeader>
-            <CardTitle>Ändra prenumeration</CardTitle>
-            <CardDescription>
-              Klicka på knappen nedan, detta ger dig möjlighet att ändra dina
-              betalningsuppgifter och se din faktura samtidigt.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={createCustomerPortal}>
-              <StripePortal />
-            </form>
-          </CardContent>
-        </Card>
       </div>
     );
   }
