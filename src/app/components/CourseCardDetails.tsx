@@ -1,3 +1,4 @@
+import React, { memo } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +10,11 @@ import { CardFooter } from '@/components/ui/card';
 import { Examination, Course } from '@/app/utilities/types';
 import { Separator } from '@/components/ui/separator';
 
-export const CourseCardDetails = ({ course }: { course: Course }) => (
+interface CourseCardDetailsProps {
+  course: Course;
+}
+
+const CourseCardDetails: React.FC<CourseCardDetailsProps> = ({ course }) => (
   <Accordion type="multiple" className="w-full">
     <AccordionItem value="mainFieldOfStudy" border={false}>
       <div className="flex justify-between">
@@ -35,7 +40,11 @@ export const CourseCardDetails = ({ course }: { course: Course }) => (
             <BookText size={16} />
             <h6>Förkunskaper</h6>
           </div>
-          <p>{course.prerequisites == "None" ? "Inga förkunskaper krävs" : course.prerequisites}</p>
+          <p>
+            {course.prerequisites === 'None'
+              ? 'Inga förkunskaper krävs'
+              : course.prerequisites}
+          </p>
 
           <Separator className="mt-2" />
         </div>
@@ -44,7 +53,6 @@ export const CourseCardDetails = ({ course }: { course: Course }) => (
             <SignpostBig size={16} />
             <h6>Huvudområde</h6>
           </div>
-
           <p>
             {course.mainFieldOfStudy.length > 0
               ? course.mainFieldOfStudy.join(', ')
@@ -70,3 +78,5 @@ export const CourseCardDetails = ({ course }: { course: Course }) => (
     </AccordionItem>
   </Accordion>
 );
+
+export default memo(CourseCardDetails);

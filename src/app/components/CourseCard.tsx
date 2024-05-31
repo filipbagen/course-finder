@@ -7,33 +7,31 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { toast } from 'sonner';
-import { CourseCardDetails } from './CourseCardDetails';
+import CourseCardDetails from './CourseCardDetails';
 import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
 import { Badge } from '@/components/ui/badge';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2, MapPin } from 'lucide-react';
 import {
   Course,
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/app/utilities/types';
 import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { MapPin } from 'lucide-react';
+import { useEnrollment } from '@/app/hooks/useEnrollment';
 
 const LazyCustomDrawerContent = React.lazy(
   () => import('@/app/dashboard/schedule/components/CustomDrawerContent')
 );
 
-const CourseCard = forwardRef<
-  HTMLDivElement,
-  {
-    course: Course | CourseWithEnrollment;
-    variant?: 'default' | 'schedule' | 'user-visit';
-    handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-    dragHandleProps?: DraggableProvidedDragHandleProps | null;
-    hasExclusion?: boolean; // Add this prop to show warning
-  }
->(
+interface CourseCardProps {
+  course: Course | CourseWithEnrollment;
+  variant?: 'default' | 'schedule' | 'user-visit';
+  handleUpdateAfterDeletion?: (enrollmentId: string) => void;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  hasExclusion?: boolean; // Add this prop to show warning
+}
+
+const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
   (
     {
       course,
@@ -44,51 +42,10 @@ const CourseCard = forwardRef<
     },
     ref
   ) => {
-    const addToEnrollment = async (courseId: string, semester: number) => {
-      try {
-        const response = await fetch('/api/enrollment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ courseId, semester }),
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const enrollment = await response.json();
-
-        toast.success(`Added ${course.name} to schedule 🎉`, {
-          action: {
-            label: 'Undo',
-            onClick: () => deleteEnrollment(enrollment.enrollment.id),
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    const deleteEnrollment = async (enrollmentId: string) => {
-      try {
-        const response = await fetch('/api/enrollment', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ enrollmentId }),
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        toast.success(`Removed ${course.name} from schedule`);
-        if (handleUpdateAfterDeletion) {
-          handleUpdateAfterDeletion(enrollmentId);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    const { addToEnrollment, deleteEnrollment } = useEnrollment(
+      course.name,
+      handleUpdateAfterDeletion
+    );
 
     const memoizedCourseContent = useMemo(
       () => <CourseCardDetails course={course} />,

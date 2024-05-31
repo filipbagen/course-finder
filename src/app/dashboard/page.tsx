@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input';
 import Filter from './Filter';
 import CourseCard from '../components/CourseCard';
 import { SkeletonCard } from '../components/SkeletonComponent';
-import { useCourses } from '../hooks/useCourses';
-import { useEnrollments } from '../hooks/useEnrollments';
+import { useCourses } from '../hooks/courses/useCourses';
+import { useEnrollments } from '../hooks/courses/useEnrollments';
 
 export default function Dashboard() {
   const [isGrid, setIsGrid] = useState(true);
