@@ -33,6 +33,7 @@ export default function Dashboard() {
     campus: [],
   });
 
+  // Fetch courses and enrollments from the API
   const { courses, loading } = useCourses(searchQuery, sortOrder, filters);
   const { enrollments } = useEnrollments();
 

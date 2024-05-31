@@ -15,6 +15,7 @@ export async function POST(request: Request) {
 
   const { courseId, semester } = await request.json();
 
+  // Check if enrollment already exists
   const existingEnrollment = await prisma.enrollment.findFirst({
     where: {
       userId: user.id,
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
+  // Create new enrollment
   const enrollment = await prisma.enrollment.create({
     data: {
       id: uuidv4() as string,

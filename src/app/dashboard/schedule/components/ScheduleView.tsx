@@ -46,7 +46,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
 
   return (
     <>
-      <h2>Schedule</h2>
+      <h2>Schema</h2>
       <div className="flex flex-col gap-12 overflow-x-auto">
         {draggable ? (
           <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>

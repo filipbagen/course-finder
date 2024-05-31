@@ -41,9 +41,9 @@ const CourseCardDetails: React.FC<CourseCardDetailsProps> = ({ course }) => (
             <h6>Förkunskaper</h6>
           </div>
           <p>
-            {course.prerequisites === 'None'
-              ? 'Inga förkunskaper krävs'
-              : course.prerequisites}
+            {course.recommendedPrerequisites === 'None'
+              ? 'Inga rekommenderade förkunskaper krävs'
+              : course.recommendedPrerequisites}
           </p>
 
           <Separator className="mt-2" />

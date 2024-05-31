@@ -43,7 +43,7 @@ export const EnrollmentButton: React.FC<EnrollmentButtonProps> = ({
               key={semester}
               onClick={() => addToEnrollment(course.id, semester)}
             >
-              Semester {semester}
+              Termin {semester}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

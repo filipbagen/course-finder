@@ -47,6 +47,7 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
       handleUpdateAfterDeletion
     );
 
+    // Memoize the course content to prevent re-rendering
     const memoizedCourseContent = useMemo(
       () => <CourseCardDetails course={course} />,
       [course]
@@ -120,8 +121,8 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
                   </CardDescription>
                   {hasExclusion && (
                     <div className="text-red-500 text-sm mt-2">
-                      Warning: This course cannot be combined with one of your
-                      enrolled courses.
+                      Varning: Denna kurs kan inte kombineras med en av dina
+                      inskrivna kurser.
                     </div>
                   )}
                 </div>

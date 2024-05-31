@@ -57,7 +57,7 @@ export default function Statistics({
 
   return (
     <>
-      <h2>Statistics</h2>
+      <h2>Statistik</h2>
       {loading ? (
         <SkeletonCard variant="statistics" />
       ) : (
@@ -93,7 +93,7 @@ export default function Statistics({
             <div className="flex gap-4">
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Enrolled Courses</CardDescription>
+                  <CardDescription>Inlagda kurser</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{courses.length}</h3>
@@ -102,7 +102,7 @@ export default function Statistics({
 
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Main Field of Study</CardDescription>
+                  <CardDescription>Huvudområde</CardDescription>
                 </CardHeader>
                 <CardContent className="flex gap-2 flex-wrap whitespace-nowrap">
                   {topFieldsOfStudy.length > 0 ? (
@@ -110,7 +110,7 @@ export default function Statistics({
                       <h3 key={field}>{field}</h3>
                     ))
                   ) : (
-                    <h3>None</h3>
+                    <h3>Saknas</h3>
                   )}
                 </CardContent>
               </Card>
@@ -119,7 +119,7 @@ export default function Statistics({
             <div className="flex gap-4">
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Advanced Credits</CardDescription>
+                  <CardDescription>Avancerade poäng</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{totalAdvancedCredits} hp</h3>
@@ -128,7 +128,7 @@ export default function Statistics({
 
               <Card className="flex-1 min-w-0">
                 <CardHeader>
-                  <CardDescription>Basic Credits</CardDescription>
+                  <CardDescription>Grundläggande poäng</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <h3>{totalBasicCredits} hp</h3>

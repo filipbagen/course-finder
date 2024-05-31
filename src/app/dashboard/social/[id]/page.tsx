@@ -129,10 +129,10 @@ const OtherUserSchedule: React.FC<Props> = ({ params }) => {
             <div>
               {loadingReviews ? (
                 <p>Loading reviews...</p>
-              ) : reviews.length === 0 ? (
-                <p>{user?.name} har inte lämnat någon recension än.</p>
               ) : reviewsError ? (
                 <p>Error loading reviews: {reviewsError}</p>
+              ) : reviews.length === 0 ? (
+                <p>{user?.name} har inte lämnat någon recension än.</p>
               ) : (
                 reviews.map((review: Review) => (
                   <div className="flex flex-col gap-4" key={review.id}>
@@ -147,16 +147,13 @@ const OtherUserSchedule: React.FC<Props> = ({ params }) => {
                             {new Date(review.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-
                         <div className="flex gap-2 items-center">
                           <Star size={12} />
                           {review.rating}
                         </div>
-
-                        {review.comment ? review.comment : 'No comment'}
+                        {review.comment || 'No comment'}
                       </CardContent>
                     </Card>
-
                     <Separator />
                   </div>
                 ))
