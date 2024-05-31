@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ScheduleView from '@/app/dashboard/schedule/components/ScheduleView';
-import useCourseData from '../../schedule/hooks/useCourseData';
-import useOtherUserData from '../hooks/useOtherUserData';
-import Statistics from '../../schedule/Statistics';
+import useCourseData from '@/app/dashboard/schedule/hooks/useCourseData';
+import useOtherUserData from '@/app/dashboard/social/hooks/useOtherUserData';
+import Statistics from '@/app/dashboard/schedule/Statistics';
 import { Separator } from '@/components/ui/separator';
 import {
   Breadcrumb,
@@ -39,7 +39,7 @@ interface Review {
   course: Course;
 }
 
-export default function OtherUserSchedule({ params }: Props) {
+const OtherUserSchedule: React.FC<Props> = ({ params }) => {
   const { id } = params;
   const {
     courses,
@@ -69,7 +69,7 @@ export default function OtherUserSchedule({ params }: Props) {
         if (!response.ok) {
           throw new Error('Failed to fetch reviews');
         }
-        const data = (await response.json()) as Review[];
+        const data = await response.json();
         setReviews(data);
       } catch (error) {
         setReviewsError((error as Error).message);
@@ -167,4 +167,6 @@ export default function OtherUserSchedule({ params }: Props) {
       </div>
     </div>
   );
-}
+};
+
+export default OtherUserSchedule;

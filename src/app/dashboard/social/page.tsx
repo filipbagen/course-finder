@@ -1,6 +1,5 @@
 'use client';
 
-// pages/users.tsx
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,7 +10,7 @@ import {
   SelectGroup,
   SelectItem,
 } from '@/components/ui/select';
-import UserCard from './UserCard';
+import UserCard from './components/UserCard';
 import { User } from '@/app/utilities/types';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -34,11 +33,18 @@ const UsersPage = () => {
   }, []);
 
   const fetchData = async () => {
-    const response = await fetch('/api/users');
-    const data = await response.json();
-
-    setUsers(data); // Set the fetched data to state
-    setLoading(false); // Set loading to false after data is fetched
+    try {
+      const response = await fetch('/api/users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredUsers = users.filter(
@@ -75,22 +81,22 @@ const UsersPage = () => {
           </p>
 
           {/* <Select onValueChange={(value) => setSortOrder(value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
-              <SelectItem value="courseCodeReversed">
-                Course Code (Z-A)
-              </SelectItem>
-              <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
-              <SelectItem value="courseNameReverse">
-                Course Name (Z-A)
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select> */}
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
+                <SelectItem value="courseCodeReversed">
+                  Course Code (Z-A)
+                </SelectItem>
+                <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
+                <SelectItem value="courseNameReverse">
+                  Course Name (Z-A)
+                </SelectItem>
+                </SelectGroup>
+            </SelectContent>
+          </Select> */}
         </div>
       </div>
 
@@ -100,10 +106,10 @@ const UsersPage = () => {
         filteredUsers.length ? (
           <div className="bg-card shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
             {filteredUsers.map((user) => (
-              <>
-                <UserCard key={user.id} user={user} />
+              <div key={user.id}>
+                <UserCard user={user} />
                 <Separator />
-              </>
+              </div>
             ))}
           </div>
         ) : (
