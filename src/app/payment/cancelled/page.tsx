@@ -25,9 +25,12 @@ export default function CancelledRoute() {
           </div>
 
           <div className="mt-3 text-center sm:mt-5 w-full">
-            <h4>Payment failed</h4>
+            <h4>Betalning misslyckades</h4>
             <div className="mt-2">
-              <p>No worries, you won't be charged. Please try again.</p>
+              <p>
+                Ingen fara, du kommer inte att bli debiterad. Vänligen försök
+                igen.
+              </p>
             </div>
             <div className="mt-5 sm:mt-6 w-full">
               <Button className="w-full" asChild>

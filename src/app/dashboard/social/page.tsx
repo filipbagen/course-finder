@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -28,11 +28,8 @@ const UsersPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
 
-  useEffect(() => {
-    fetchData().catch(console.error);
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await fetch('/api/users');
       if (!response.ok) {
@@ -45,12 +42,16 @@ const UsersPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    fetchData().catch(console.error);
+  }, [fetchData]);
+
+  const filteredUsers = users.filter((user) =>
+    [user.name.toLowerCase(), user.email.toLowerCase()].some((value) =>
+      value.includes(searchQuery.toLowerCase())
+    )
   );
 
   return (
@@ -75,47 +76,25 @@ const UsersPage = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <div className="flex gap-4 items-center justify-between">
-          <p>
-            Visar <b>{searchQuery ? filteredUsers.length : 0}</b> sökresultat
-          </p>
-
-          {/* <Select onValueChange={(value) => setSortOrder(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="courseCode">Course Code (A-Z)</SelectItem>
-                <SelectItem value="courseCodeReversed">
-                  Course Code (Z-A)
-                </SelectItem>
-                <SelectItem value="courseName">Course Name (A-Z)</SelectItem>
-                <SelectItem value="courseNameReverse">
-                  Course Name (Z-A)
-                </SelectItem>
-                </SelectGroup>
-            </SelectContent>
-          </Select> */}
-        </div>
+        <p>
+          Visar <b>{filteredUsers.length}</b> resultat
+        </p>
       </div>
 
       {isLoading ? (
         <p>Loading...</p>
-      ) : searchQuery ? (
-        filteredUsers.length ? (
-          <div className="bg-card shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
-            {filteredUsers.map((user) => (
-              <div key={user.id}>
-                <UserCard user={user} />
-                <Separator />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>Ingen användare kunde hittas.</p>
-        )
-      ) : null}
+      ) : filteredUsers.length > 0 ? (
+        <div className="bg-card shadow-2xl h-full w-full flex flex-col gap-2 p-6 rounded-md">
+          {filteredUsers.map((user) => (
+            <div key={user.id}>
+              <UserCard user={user} />
+              <Separator />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>Ingen användare kunde hittas.</p>
+      )}
     </div>
   );
 };

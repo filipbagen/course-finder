@@ -152,4 +152,6 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
   }
 );
 
+CourseCard.displayName = 'CourseCard';
+
 export default React.memo(CourseCard);
