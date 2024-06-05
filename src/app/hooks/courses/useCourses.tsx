@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Course, FilterState } from '@/app/utilities/types';
 
 // This is a custom hook that fetches courses from the API, based on the search query, sort order, and filters.
@@ -15,19 +15,15 @@ export const useCourses = (
   }, [searchQuery, sortOrder, filters]);
 
   // Fetch courses from the API based on the search query, sort order, and filters
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const query = new URLSearchParams();
     if (searchQuery) query.append('q', searchQuery);
     if (sortOrder) query.append('sort', sortOrder);
-
-    // Append each filter to the query string
     Object.entries(filters).forEach(([key, values]) => {
       if (values.length) {
         query.append(key, values.join(','));
       }
     });
-
-    // Fetch courses from the API
     try {
       const response = await fetch(`/api/search?${query.toString()}`);
       if (!response.ok)
@@ -39,7 +35,11 @@ export const useCourses = (
       console.error('Failed to fetch courses:', error);
       setLoading(false);
     }
-  };
+  }, [searchQuery, sortOrder, filters]); // Include all dependencies here
+
+  useEffect(() => {
+    fetchData().catch(console.error);
+  }, [fetchData]); // Include fetchData as a dependency
 
   return { courses, loading };
 };

@@ -5,34 +5,6 @@ export const useEnrollment = (
   courseName: string,
   handleUpdateAfterDeletion?: (enrollmentId: string) => void
 ) => {
-  const addToEnrollment = useCallback(
-    async (courseId: string, semester: number) => {
-      try {
-        const response = await fetch('/api/enrollment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ courseId, semester }),
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const enrollment = await response.json();
-
-        toast.success(`Added ${courseName} to schedule 🎉`, {
-          action: {
-            label: 'Undo',
-            onClick: () => deleteEnrollment(enrollment.enrollment.id),
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [courseName]
-  );
-
   const deleteEnrollment = useCallback(
     async (enrollmentId: string) => {
       try {
@@ -56,6 +28,37 @@ export const useEnrollment = (
     },
     [courseName, handleUpdateAfterDeletion]
   );
+  
+  const addToEnrollment = useCallback(
+    async (courseId: string, semester: number) => {
+      try {
+        const response = await fetch('/api/enrollment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ courseId, semester }),
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const enrollment = await response.json();
+  
+        toast.success(`Added ${courseName} to schedule 🎉`, {
+          action: {
+            label: 'Undo',
+            onClick: () => deleteEnrollment(enrollment.enrollment.id),
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [courseName, deleteEnrollment]  // Include deleteEnrollment here
+  );
+  
+
+  
 
   return { addToEnrollment, deleteEnrollment };
 };

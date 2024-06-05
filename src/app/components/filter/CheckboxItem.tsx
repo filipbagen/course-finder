@@ -22,4 +22,5 @@ const CheckboxItem: React.FC<CheckboxItemProps> = React.memo(
   )
 );
 
+CheckboxItem.displayName = 'CheckboxItem';
 export default CheckboxItem;
