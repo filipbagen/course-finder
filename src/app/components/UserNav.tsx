@@ -57,7 +57,7 @@ export function UserNav({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuLabel
+        {/* <DropdownMenuLabel
           className="w-full flex justify-between items-center"
           asChild
         >
@@ -67,7 +67,7 @@ export function UserNav({
               <CreditCard className="w-4 h-4" />
             </span>
           </Link>
-        </DropdownMenuLabel>
+        </DropdownMenuLabel> */}
 
         <DropdownMenuLabel
           className="w-full flex justify-between items-center"
