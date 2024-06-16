@@ -1,10 +1,5 @@
 # 🧭 Course Finder
 
-Project Screencast: https://youtu.be/kuc8MQz1-wM \
-Code Demonstration: https://youtu.be/4WQKG8EViWo
-
-If there are any additional tasks or areas where I can improve, please let me know. My aim is to get as high of a grade as possible. Please let me know if i can do anything to enhance my grade.
-
 ## Overview
 
 Course Finder simplifies the course selection process for graduate students at Linköping University (LiU). Utilizing a comprehensive database and an intelligent recommendation system (coming soon), this tool supports students in making informed decisions tailored to their individual academic needs.
