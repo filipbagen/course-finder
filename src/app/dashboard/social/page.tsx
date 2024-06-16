@@ -2,16 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from '@/components/ui/select';
-import UserCard from './components/UserCard';
 import { User } from '@/app/utilities/types';
+import UserCard from './components/UserCard';
 import { Separator } from '@/components/ui/separator';
 import {
   Breadcrumb,
@@ -24,28 +16,36 @@ import {
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortOrder, setSortOrder] = useState<string>('');
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/users');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
+    if (searchQuery.length > 0) {
+      // Check if the search query is not empty
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/users?query=${encodeURIComponent(searchQuery)}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, [searchQuery]);
 
   useEffect(() => {
-    fetchData().catch(console.error);
+    const handle = setTimeout(() => {
+      fetchData().catch(console.error);
+    }, 500); // Add a debounce time to reduce number of requests
+
+    return () => clearTimeout(handle);
   }, [fetchData]);
 
   const filteredUsers = users.filter((user) =>
