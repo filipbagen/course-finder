@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 // kinde
 import {
@@ -23,8 +24,16 @@ export async function Navbar() {
     <nav className="mb-8 flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-border bg-background/75 backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
         <div className="flex items-center justify-between">
-          <Link href="/">
-            <h4 className="font-semibold">🧭 Course Finder</h4>
+          <Link href="/" className="flex gap-2">
+            <Image
+              src="/assets/compass.png"
+              alt="logo"
+              width={20}
+              height={20}
+            />
+            <h4 className="font-semibold mr-12 whitespace-nowrap">
+              Course Finder
+            </h4>
           </Link>
 
           <div className="flex items-center gap-x-5">
