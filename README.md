@@ -1,5 +1,7 @@
 # 🧭 Course Finder
 
+![alt text](public/assets/dashboard-preview-light.jpg)
+
 ## Overview
 
 Course Finder simplifies the course selection process for graduate students at Linköping University (LiU). Utilizing a comprehensive database and an intelligent recommendation system (coming soon), this tool supports students in making informed decisions tailored to their individual academic needs.
