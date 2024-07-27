@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
 import { Button } from '@/components/ui/button';
@@ -44,23 +44,44 @@ export default function Dashboard() {
     examinations: [],
     campus: [],
   });
+  const [mobileFilters, setMobileFilters] = useState<FilterState>(filters);
+  const [mounted, setMounted] = useState(false);
 
   // Fetch courses and enrollments from the API
   const { courses, loading } = useCourses(searchQuery, sortOrder, filters);
   const { enrollments } = useEnrollments();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleFilterChange = (
     filterType: keyof FilterState,
     value: string,
-    isChecked: boolean
+    isChecked: boolean,
+    isMobile: boolean = false
   ) => {
-    setFilters((prev) => {
+    const updateFilters = (prev: FilterState) => {
       const updatedValues = isChecked
         ? [...prev[filterType], value]
         : prev[filterType].filter((v) => v !== value);
 
       return { ...prev, [filterType]: updatedValues };
-    });
+    };
+
+    if (isMobile) {
+      setMobileFilters(updateFilters);
+    } else {
+      setFilters(updateFilters);
+    }
+  };
+
+  const applyMobileFilters = () => {
+    setFilters(mobileFilters);
+  };
+
+  const resetMobileFilters = () => {
+    setMobileFilters(filters);
   };
 
   const toggleLayout = () => {
@@ -73,12 +94,18 @@ export default function Dashboard() {
     );
   };
 
+  if (!mounted) {
+    return null; // or some loading indicator
+  }
+
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
       <div className="md:block hidden">
         <Filter
           screen="desktop"
-          onFilterChange={handleFilterChange}
+          onFilterChange={(filterType, value, isChecked) =>
+            handleFilterChange(filterType, value, isChecked)
+          }
           currentFilters={filters}
         />
       </div>
@@ -90,7 +117,7 @@ export default function Dashboard() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <AlertDialog>
+        <AlertDialog onOpenChange={resetMobileFilters}>
           <AlertDialogTrigger className="block md:hidden">
             <Button className="w-full">Filter</Button>
           </AlertDialogTrigger>
@@ -100,14 +127,18 @@ export default function Dashboard() {
               <AlertDialogDescription>
                 <Filter
                   screen="mobile"
-                  onFilterChange={handleFilterChange}
-                  currentFilters={filters}
+                  onFilterChange={(filterType, value, isChecked) =>
+                    handleFilterChange(filterType, value, isChecked, true)
+                  }
+                  currentFilters={mobileFilters}
                 />
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction>Continue</AlertDialogAction>
+              <AlertDialogAction onClick={applyMobileFilters}>
+                Continue
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

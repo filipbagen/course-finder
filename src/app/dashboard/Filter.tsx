@@ -33,12 +33,12 @@ const Filter: React.FC<FilterProps> = ({
 
   return (
     <Card
-      className={
+      className={`${
         screen === 'desktop'
-          ? 'sticky inset-x-0 top-20 overflow-y-auto h-full'
+          ? 'sticky inset-x-0 top-20 overflow-y-auto h-fit max-h-[calc(100vh - 74px)]'
           : ''
-      }
-      style={screen === 'desktop' ? { maxHeight: 'calc(100vh - 74px)' } : {}}
+      }`}
+      style={screen === 'desktop' ? { maxHeight: 'calc(100vh - 100px)' } : {}}
     >
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
         {accordionItems.map((item) => {
