@@ -117,7 +117,7 @@ export default async function Home() {
       </div>
 
       {/* Feature section */}
-      <div className="my-24 px-6 lg:px-8 ">
+      <div className="my-6 px-6 lg:my-24 lg:px-8 ">
         <div className="mx-auto max-w-4xl sm:text-center">
           <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
             Välj masterkurser på några minuter
@@ -130,8 +130,8 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Course animation */}
-      <div className="relative text-left my-10 overflow-hidden">
+      {/* Course carousell */}
+      <div className="relative text-left my-10 overflow-hidden hidden lg:block md:block">
         <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-background"></div>
         <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-background"></div>
         <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-background"></div>
@@ -176,10 +176,10 @@ export default async function Home() {
       </div>
 
       {/* Steps */}
-      <ol className="my-24 space-y-4 md:flex md:space-x-12 md:space-y-0">
+      <ol className="my-6 lg:my-24 space-y-4 md:flex md:space-x-12 md:space-y-0">
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
-            <span className="text-sm font-medium text-blue-600">Step 1</span>
+            <span className="text-sm font-medium text-blue-600">Steg 1</span>
             <span className="text-xl font-semibold">Skapa ett konto</span>
             <span className="mt-2 text-zink-700">
               Course Finder är helt gratis att använda. Skapa ett konto för att
@@ -189,7 +189,7 @@ export default async function Home() {
         </li>
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
-            <span className="text-sm font-medium text-blue-600">Step 2</span>
+            <span className="text-sm font-medium text-blue-600">Steg 2</span>
             <span className="text-xl font-semibold">Välj masterkurser</span>
             <span className="mt-2 text-zink-700">
               Lägg enkelt till en kurs till ditt schema och jämför dina kurser
@@ -199,7 +199,7 @@ export default async function Home() {
         </li>
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
-            <span className="text-sm font-medium text-blue-600">Step 3</span>
+            <span className="text-sm font-medium text-blue-600">Steg 3</span>
             <span className="text-xl font-semibold">Klart!</span>
             <span className="mt-2 text-zink-700">
               Att skapa, dela och jämföra dina masterkurser har aldrig varit
@@ -260,7 +260,7 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="my-24 flex flex-col gap-16 px-6 lg:px-8 mx-auto max-w-4xl">
+      <div className="my-6 lg:my-24 flex flex-col gap-16 px-6 lg:px-8 mx-auto max-w-4xl">
         <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
           Funktioner
         </h2>
@@ -313,17 +313,16 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <Sparkles />
-            <h5 className="text-primary">AI-rekommendationer</h5>
+            <h5 className="text-primary">AI-rekommendationer (kommer snart)</h5>
             <span>
               Få rekommendationer på kurser som passar dina intressen och
-              tidigare valda kurser. Hitta nya spännande kurser att läsa (kommer
-              i framtiden).
+              tidigare valda kurser. Hitta nya spännande kurser att läsa.
             </span>
           </div>
         </div>
       </div>
 
-      <div className="my-12 px-6 lg:px-8 mx-auto max-w-4xl">
+      <div className="my-8 lg:my-12 px-6 lg:px-8 mx-auto max-w-4xl">
         <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
           Kom igång
         </h2>
