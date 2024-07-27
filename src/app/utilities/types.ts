@@ -69,6 +69,7 @@ export interface FilterProps {
     isChecked: boolean
   ) => void;
   currentFilters: FilterState;
+  screen: 'desktop' | 'mobile';
 }
 
 export interface SemesterGroupings {

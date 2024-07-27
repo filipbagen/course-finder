@@ -18,7 +18,11 @@ import CheckboxItem from '../components/filter/CheckboxItem';
 import { accordionItems } from '../components/filter/accordionItemsConfig';
 import { FilterState, FilterProps } from '../utilities/types';
 
-const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
+const Filter: React.FC<FilterProps> = ({
+  screen,
+  onFilterChange,
+  currentFilters,
+}) => {
   const resetFilters = () => {
     Object.keys(currentFilters).forEach((filterType) => {
       currentFilters[filterType as keyof FilterState].forEach((value) => {
@@ -29,8 +33,12 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, currentFilters }) => {
 
   return (
     <Card
-      className="sticky inset-x-0 top-20 overflow-y-auto h-full"
-      style={{ maxHeight: 'calc(100vh - 74px)' }}
+      className={
+        screen === 'desktop'
+          ? 'sticky inset-x-0 top-20 overflow-y-auto h-full'
+          : ''
+      }
+      style={screen === 'desktop' ? { maxHeight: 'calc(100vh - 74px)' } : {}}
     >
       <Accordion type="multiple" defaultValue={['semester']} className="w-full">
         {accordionItems.map((item) => {

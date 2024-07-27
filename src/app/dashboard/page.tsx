@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -11,6 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import Filter from './Filter';
 import CourseCard from '../components/course/CourseCard';
@@ -63,7 +75,13 @@ export default function Dashboard() {
 
   return (
     <div className="mt-28 sm:mt-24 flex gap-4">
-      <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
+      <div className="md:block hidden">
+        <Filter
+          screen="desktop"
+          onFilterChange={handleFilterChange}
+          currentFilters={filters}
+        />
+      </div>
 
       <div className="flex flex-col gap-4 w-full">
         <Input
@@ -71,6 +89,28 @@ export default function Dashboard() {
           placeholder="Sök kurs..."
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+
+        <AlertDialog>
+          <AlertDialogTrigger className="block md:hidden">
+            <Button className="w-full">Filter</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="h-5/6 overflow-scroll">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Filtrera</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Filter
+                  screen="mobile"
+                  onFilterChange={handleFilterChange}
+                  currentFilters={filters}
+                />
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction>Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <div className="flex gap-4 items-center justify-between">
           <p>
