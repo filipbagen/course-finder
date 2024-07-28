@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from './themeToggle';
 
@@ -32,69 +33,58 @@ export function UserNav({
   image: string;
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10 rounded-full">
-            {/* <AvatarImage src={image} alt="@shadcn" /> */}
-            <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{name}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
+    <>
+      <div className="sm:hidden flex items-center gap-2">
+        <Avatar className="h-10 w-10 rounded-full">
+          <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{name}</span>
+          <span className="text-xs text-muted-foreground">{email}</span>
+        </div>
+      </div>
 
-        <DropdownMenuSeparator />
-
-        <ThemeToggle />
-
-        <DropdownMenuSeparator />
-
-        {/* <DropdownMenuLabel
-          className="w-full flex justify-between items-center"
-          asChild
-        >
-          <Link href={'/dashboard/billing'}>
-            Betalning{' '}
-            <span>
-              <CreditCard className="w-4 h-4" />
-            </span>
-          </Link>
-        </DropdownMenuLabel> */}
-
-        <DropdownMenuLabel
-          className="w-full flex justify-between items-center"
-          asChild
-        >
-          <Link href={'/dashboard/settings'}>
-            Inställningar{' '}
-            <span>
-              <Settings className="w-4 h-4" />
-            </span>
-          </Link>
-        </DropdownMenuLabel>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuLabel
-          className="w-full flex justify-between items-center"
-          asChild
-        >
-          <LogoutLink>
-            Logga ut{' '}
-            <span>
-              <DoorClosed className="w-4 h-4" />
-            </span>
-          </LogoutLink>
-        </DropdownMenuLabel>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <div className="hidden sm:block">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10 rounded-full">
+                <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <ThemeToggle />
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="w-full flex justify-between items-center"
+              asChild
+            >
+              <Link href={'/dashboard/settings'}>
+                Inställningar <Settings className="w-4 h-4" />
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="w-full flex justify-between items-center"
+              asChild
+            >
+              <LogoutLink>
+                Logga ut <DoorClosed className="w-4 h-4" />
+              </LogoutLink>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
   );
 }

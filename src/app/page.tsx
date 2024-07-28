@@ -38,7 +38,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="pt-20 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center">
+    <div className="pt-10 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center">
       <div className="flex flex-col gap-4 items-center">
         <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50">
           <p className="text-sm font-semibold text-gray-700">

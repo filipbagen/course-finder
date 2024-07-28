@@ -30,7 +30,9 @@ const CourseDetails = ({
         <div className="flex justify-between">
           <div>
             <h2 className="leading-10">{course.name}</h2>
-            <CardDescription className="mt-0">{course.code}</CardDescription>
+            <CardDescription className="[&:not(:first-child)]:mt-0">
+              {course.code}
+            </CardDescription>
           </div>
           {/* <Button
             size="icon"

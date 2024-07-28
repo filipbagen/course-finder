@@ -99,7 +99,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="mt-28 sm:mt-24 flex gap-4">
+    <div className="mt-8 flex gap-4">
       <div className="md:block hidden">
         <Filter
           screen="desktop"
