@@ -98,7 +98,7 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
       );
     } else if (variant === 'user-visit') {
       return (
-        <Card className="flex-grow h-min">
+        <Card className="flex-grow h-min min-w-0">
           {renderCardHeader()}
           {renderCardContent()}
         </Card>
