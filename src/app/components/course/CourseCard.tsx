@@ -62,7 +62,7 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
             </div>
           )}
           <div className="flex flex-col">
-            <h6 className="leading-5">{course.name}</h6>
+            <h6 className="leading-5 break-word hyphens-auto">{course.name}</h6>
             <span className="text-slate-400 text-sm">{course.code}</span>
           </div>
         </div>
@@ -91,7 +91,7 @@ const CourseCard = forwardRef<HTMLDivElement, CourseCardProps>(
 
     if (variant === 'schedule' && isCourseWithEnrollment(course)) {
       return (
-        <Card className="flex-grow h-min">
+        <Card className="flex-grow h-min min-w-0">
           {renderCardHeader()}
           {renderCardContent()}
         </Card>

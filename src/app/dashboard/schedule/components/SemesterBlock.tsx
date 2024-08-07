@@ -63,16 +63,17 @@ const SemesterBlock: React.FC<SemesterBlockProps> = ({
                 </Draggable>
               ))
             ) : (
-              <div className="text-center text-ring min-w-80">
-                Inga kurser inlagda.
-              </div>
+              <div className="text-center text-ring">Inga kurser inlagda.</div>
             )}
             {provided.placeholder}
           </div>
         )}
       </Droppable>
     ) : (
-      <div className="h-max p-4 bg-primary/10 rounded-md flex flex-col gap-4">
+      <div
+        className="h-max p-4 bg-primary/10 rounded-md flex flex-col gap-4"
+        style={{ width: '100%' }}
+      >
         {loading ? (
           <SkeletonCard variant="schedule" /> // Render one skeleton card per semester and period
         ) : courses.length > 0 ? (
@@ -86,9 +87,7 @@ const SemesterBlock: React.FC<SemesterBlockProps> = ({
             </div>
           ))
         ) : (
-          <div className="text-center text-ring min-w-80">
-            Inga kurser inlagda.
-          </div>
+          <div className="text-center text-ring">Inga kurser inlagda.</div>
         )}
       </div>
     )}
