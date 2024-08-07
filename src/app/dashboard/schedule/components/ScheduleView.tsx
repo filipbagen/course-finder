@@ -27,18 +27,20 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
     semestersData: SemesterCourses
   ) => (
     <div className="flex flex-col gap-8">
-      <p className="md:block">Period {period}</p>
+      <p>Period {period}</p>
       <div className="flex w-full min-w-min justify-between gap-4 md:flex-row flex-col md:overflow-x-auto">
         {fixedSemesters.map((semester) => (
-          <SemesterBlock
-            key={semester}
-            semester={semester}
-            courses={semestersData[semester] || []}
-            period={period}
-            handleUpdateAfterDeletion={handleUpdateAfterDeletion}
-            draggable={draggable}
-            loading={loading}
-          />
+          <div key={semester} className="w-full md:w-auto">
+            <h5 className="hidden md:block mb-2">Termin {semester}</h5>
+            <SemesterBlock
+              semester={semester}
+              courses={semestersData[semester] || []}
+              period={period}
+              handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+              draggable={draggable}
+              loading={loading}
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -48,8 +50,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
     <div className="flex flex-col gap-4">
       {fixedSemesters.flatMap((semester) => [
         <div key={`1-${semester}`} className="flex flex-col gap-2">
-          {/* <p>Period 1</p> */}
-          <h5>Termin {semester}</h5>
+          <h5 className="text-lg font-semibold">Termin {semester}</h5>
           <SemesterBlock
             semester={semester}
             courses={semesters[semester] || []}
@@ -60,8 +61,6 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
           />
         </div>,
         <div key={`2-${semester}`} className="flex flex-col gap-2">
-          {/* <p className="text-lg font-semibold">Period 2</p> */}
-          {/* <p className="text-sm font-medium">Termin {semester}</p> */}
           <SemesterBlock
             semester={semester}
             courses={semestersP2[semester] || []}
