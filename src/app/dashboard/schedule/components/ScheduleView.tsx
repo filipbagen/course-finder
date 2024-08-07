@@ -27,8 +27,8 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
     semestersData: SemesterCourses
   ) => (
     <div className="flex flex-col gap-8">
-      <p>Period {period}</p>
-      <div className="flex w-full min-w-min justify-between gap-4 md:flex-row overflow-x-auto">
+      <p className="md:block">Period {period}</p>
+      <div className="flex w-full min-w-min justify-between gap-4 md:flex-row flex-col md:overflow-x-auto">
         {fixedSemesters.map((semester) => (
           <SemesterBlock
             key={semester}
@@ -44,19 +44,56 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
     </div>
   );
 
+  const renderMobileView = () => (
+    <div className="flex flex-col gap-4">
+      {fixedSemesters.flatMap((semester) => [
+        <div key={`1-${semester}`} className="flex flex-col gap-2">
+          {/* <p>Period 1</p> */}
+          <h5>Termin {semester}</h5>
+          <SemesterBlock
+            semester={semester}
+            courses={semesters[semester] || []}
+            period="1"
+            handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+            draggable={draggable}
+            loading={loading}
+          />
+        </div>,
+        <div key={`2-${semester}`} className="flex flex-col gap-2">
+          {/* <p className="text-lg font-semibold">Period 2</p> */}
+          {/* <p className="text-sm font-medium">Termin {semester}</p> */}
+          <SemesterBlock
+            semester={semester}
+            courses={semestersP2[semester] || []}
+            period="2"
+            handleUpdateAfterDeletion={handleUpdateAfterDeletion}
+            draggable={draggable}
+            loading={loading}
+          />
+        </div>,
+      ])}
+    </div>
+  );
+
   return (
     <>
       <h2>Schema</h2>
       <div className="flex flex-col gap-12 overflow-x-auto">
         {draggable ? (
           <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
-            {renderSemesterBlock('1', semesters)}
-            {renderSemesterBlock('2', semestersP2)}
+            <div className="hidden md:block">
+              {renderSemesterBlock('1', semesters)}
+              {renderSemesterBlock('2', semestersP2)}
+            </div>
+            <div className="block md:hidden">{renderMobileView()}</div>
           </DragDropContext>
         ) : (
           <>
-            {renderSemesterBlock('1', semesters)}
-            {renderSemesterBlock('2', semestersP2)}
+            <div className="hidden md:block">
+              {renderSemesterBlock('1', semesters)}
+              {renderSemesterBlock('2', semestersP2)}
+            </div>
+            <div className="block md:hidden">{renderMobileView()}</div>
           </>
         )}
       </div>

@@ -21,8 +21,9 @@ const SemesterBlock: React.FC<SemesterBlockProps> = ({
   draggable = true,
   loading = false,
 }) => (
-  <div key={`${semester}-${period}`} className="w-ful pt-1">
-    <h5 className="mb-4">Termin {semester}</h5>
+  <div key={`${semester}-${period}`} className="w-full pt-1">
+    <h5 className="mb-4 sm:hidden md:block">Termin {semester}</h5>
+    <p className="md:hidden">Period {period}</p>
     {draggable ? (
       <Droppable
         droppableId={`${semester}-${period}`}
