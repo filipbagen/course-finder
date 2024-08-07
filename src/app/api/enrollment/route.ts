@@ -15,20 +15,29 @@ export async function POST(request: Request) {
 
   const { courseId, semester } = await request.json();
 
-  // Check if enrollment already exists
+  // Check if enrollment already exists for this course in any semester
   const existingEnrollment = await prisma.enrollment.findFirst({
     where: {
       userId: user.id,
       courseId: courseId,
-      semester: semester,
     },
   });
 
   if (existingEnrollment) {
-    return NextResponse.json(
-      { error: 'Enrollment already exists for this course and semester' },
-      { status: 409 }
-    );
+    if (existingEnrollment.semester === semester) {
+      return NextResponse.json(
+        { error: 'Enrollment already exists for this course and semester' },
+        { status: 409 }
+      );
+    } else {
+      // Update the existing enrollment with the new semester
+      const updatedEnrollment = await prisma.enrollment.update({
+        where: { id: existingEnrollment.id },
+        data: { semester: semester },
+      });
+
+      return NextResponse.json({ updatedEnrollment });
+    }
   }
 
   // Create new enrollment

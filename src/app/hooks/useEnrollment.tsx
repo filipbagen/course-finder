@@ -28,7 +28,7 @@ export const useEnrollment = (
     },
     [courseName, handleUpdateAfterDeletion]
   );
-  
+
   const addToEnrollment = useCallback(
     async (courseId: string, semester: number) => {
       try {
@@ -39,11 +39,19 @@ export const useEnrollment = (
           },
           body: JSON.stringify({ courseId, semester }),
         });
+
         if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+          const errorData = await response.json();
+          if (response.status === 409 && errorData.error) {
+            console.log('Already added');
+          } else {
+            throw new Error(`Error: ${response.status}`);
+          }
+          return;
         }
+
         const enrollment = await response.json();
-  
+
         toast.success(`Added ${courseName} to schedule 🎉`, {
           action: {
             label: 'Undo',
@@ -54,11 +62,8 @@ export const useEnrollment = (
         console.error(error);
       }
     },
-    [courseName, deleteEnrollment]  // Include deleteEnrollment here
+    [courseName, deleteEnrollment]
   );
-  
-
-  
 
   return { addToEnrollment, deleteEnrollment };
 };
