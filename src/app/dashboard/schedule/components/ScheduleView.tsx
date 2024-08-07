@@ -79,13 +79,19 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
       <h2>Schema</h2>
       <div className="flex flex-col gap-12 overflow-x-auto">
         {draggable ? (
-          <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
+          <>
             <div className="hidden md:block">
-              {renderSemesterBlock('1', semesters)}
-              {renderSemesterBlock('2', semestersP2)}
+              <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
+                {renderSemesterBlock('1', semesters)}
+                {renderSemesterBlock('2', semestersP2)}
+              </DragDropContext>
             </div>
-            <div className="block md:hidden">{renderMobileView()}</div>
-          </DragDropContext>
+            <div className="block md:hidden">
+              <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
+                {renderMobileView()}
+              </DragDropContext>
+            </div>
+          </>
         ) : (
           <>
             <div className="hidden md:block">
