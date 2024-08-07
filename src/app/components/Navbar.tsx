@@ -36,8 +36,8 @@ export async function Navbar() {
   const user = await getUser();
 
   return (
-    <MaxWidthWrapper className="mb-8 flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-border bg-background/75 backdrop-blur-lg transition-all">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+    <div className="mb-8 flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-border bg-background/75 backdrop-blur-lg transition-all">
+      <MaxWidthWrapper className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex gap-2 items-center">
             <img src="/assets/compass.png" alt="logo" className="h-6 w-6" />
@@ -123,7 +123,7 @@ export async function Navbar() {
             )}
           </div>
         </div>
-      </div>
-    </MaxWidthWrapper>
+      </MaxWidthWrapper>
+    </div>
   );
 }
