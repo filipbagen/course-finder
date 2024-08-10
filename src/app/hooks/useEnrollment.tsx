@@ -1,10 +1,13 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
+import { useCounterStore } from '@/stores/store';
 
 export const useEnrollment = (
   courseName: string,
   handleUpdateAfterDeletion?: (enrollmentId: string) => void
 ) => {
+  const increment = useCounterStore((state) => state.increment);
+
   const deleteEnrollment = useCallback(
     async (enrollmentId: string) => {
       try {
@@ -51,6 +54,7 @@ export const useEnrollment = (
         }
 
         const enrollment = await response.json();
+        increment();
 
         toast.success(`Added ${courseName} to schedule 🎉`, {
           action: {
