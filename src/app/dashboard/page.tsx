@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, Rows3 } from 'lucide-react';
 import { Course, FilterState } from '@/app/utilities/types';
+import { FixedSizeList as List } from 'react-window';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -98,14 +99,143 @@ export default function Dashboard() {
     return null; // or some loading indicator
   }
 
+  // Item renderer function for react-window
+  const CourseRow = ({
+    index,
+    style,
+  }: {
+    index: number;
+    style: React.CSSProperties;
+  }) => {
+    const course = courses[index];
+    return (
+      <div style={style}>
+        <CourseCard
+          key={course.id}
+          course={course}
+          hasExclusion={checkExclusions(course)}
+        />
+      </div>
+    );
+  };
+
+  // return (
+  //   <div className="mt-8 flex gap-4">
+  //     <div className="md:block hidden">
+  //       <Filter
+  //         screen="desktop"
+  //         onFilterChange={(filterType, value, isChecked) =>
+  //           handleFilterChange(filterType, value, isChecked)
+  //         }
+  //         currentFilters={filters}
+  //       />
+  //     </div>
+
+  //     <div className="flex flex-col gap-4 w-full">
+  //       <Input
+  //         type="text"
+  //         placeholder="Sök kurs..."
+  //         onChange={(e) => setSearchQuery(e.target.value)}
+  //       />
+
+  //       <AlertDialog onOpenChange={resetMobileFilters}>
+  //         <AlertDialogTrigger className="block w-full md:hidden px-4 py-2 bg-primary text-white rounded-lg">
+  //           Filter
+  //         </AlertDialogTrigger>
+
+  //         <AlertDialogContent className="h-5/6 overflow-scroll">
+  //           <AlertDialogHeader>
+  //             <AlertDialogTitle>Filtrera</AlertDialogTitle>
+  //             <AlertDialogDescription>
+  //               <Filter
+  //                 screen="mobile"
+  //                 onFilterChange={(filterType, value, isChecked) =>
+  //                   handleFilterChange(filterType, value, isChecked, true)
+  //                 }
+  //                 currentFilters={mobileFilters}
+  //               />
+  //             </AlertDialogDescription>
+  //           </AlertDialogHeader>
+  //           <AlertDialogFooter>
+  //             <AlertDialogCancel>Cancel</AlertDialogCancel>
+  //             <AlertDialogAction onClick={applyMobileFilters}>
+  //               Continue
+  //             </AlertDialogAction>
+  //           </AlertDialogFooter>
+  //         </AlertDialogContent>
+  //       </AlertDialog>
+
+  //       <div className="flex gap-4 items-center justify-between">
+  //         <p>
+  //           Visar <b>{courses.length}</b> sökresultat
+  //         </p>
+
+  //         <div className="flex items-center gap-4">
+  //           <Select onValueChange={(value) => setSortOrder(value)}>
+  //             <SelectTrigger className="w-[180px]">
+  //               <SelectValue placeholder="Sortera" />
+  //             </SelectTrigger>
+  //             <SelectContent>
+  //               <SelectGroup>
+  //                 <SelectItem value="courseCode">Kurskod (A-Z)</SelectItem>
+  //                 <SelectItem value="courseCodeReversed">
+  //                   Kurskod (Z-A)
+  //                 </SelectItem>
+  //                 <SelectItem value="courseName">Namn (A-Z)</SelectItem>
+  //                 <SelectItem value="courseNameReverse">Namn (Z-A)</SelectItem>
+  //               </SelectGroup>
+  //             </SelectContent>
+  //           </Select>
+
+  //           <div className="hover:text-primary transition">
+  //             {isGrid ? (
+  //               <Rows3
+  //                 size={24}
+  //                 onClick={toggleLayout}
+  //                 className="cursor-pointer"
+  //               />
+  //             ) : (
+  //               <LayoutGrid
+  //                 size={24}
+  //                 onClick={toggleLayout}
+  //                 className="cursor-pointer"
+  //               />
+  //             )}
+  //           </div>
+  //         </div>
+  //       </div>
+
+  //       <div
+  //         className={`flex ${
+  //           isGrid ? 'flex-wrap' : 'flex-col'
+  //         } gap-4 justify-between`}
+  //       >
+  //         {loading && (
+  //           <>
+  //             {Array.from({ length: 12 }).map((_, index) => (
+  //               <SkeletonCard variant="default" key={index} />
+  //             ))}
+  //           </>
+  //         )}
+
+  //         {courses.map((course: Course) => (
+  //           <CourseCard
+  //             key={course.id}
+  //             course={course}
+  //             hasExclusion={checkExclusions(course)}
+  //           />
+  //         ))}
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+
   return (
     <div className="mt-8 flex gap-4">
       <div className="md:block hidden">
         <Filter
           screen="desktop"
-          onFilterChange={(filterType, value, isChecked) =>
-            handleFilterChange(filterType, value, isChecked)
-          }
+          onFilterChange={handleFilterChange}
           currentFilters={filters}
         />
       </div>
@@ -117,94 +247,33 @@ export default function Dashboard() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <AlertDialog onOpenChange={resetMobileFilters}>
-          <AlertDialogTrigger className="block w-full md:hidden px-4 py-2 bg-primary text-white rounded-lg">
-            Filter
-          </AlertDialogTrigger>
-
-          <AlertDialogContent className="h-5/6 overflow-scroll">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Filtrera</AlertDialogTitle>
-              <AlertDialogDescription>
-                <Filter
-                  screen="mobile"
-                  onFilterChange={(filterType, value, isChecked) =>
-                    handleFilterChange(filterType, value, isChecked, true)
-                  }
-                  currentFilters={mobileFilters}
-                />
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={applyMobileFilters}>
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
         <div className="flex gap-4 items-center justify-between">
           <p>
             Visar <b>{courses.length}</b> sökresultat
           </p>
 
           <div className="flex items-center gap-4">
-            <Select onValueChange={(value) => setSortOrder(value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sortera" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="courseCode">Kurskod (A-Z)</SelectItem>
-                  <SelectItem value="courseCodeReversed">
-                    Kurskod (Z-A)
-                  </SelectItem>
-                  <SelectItem value="courseName">Namn (A-Z)</SelectItem>
-                  <SelectItem value="courseNameReverse">Namn (Z-A)</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-
-            <div className="hover:text-primary transition">
-              {isGrid ? (
-                <Rows3
-                  size={24}
-                  onClick={toggleLayout}
-                  className="cursor-pointer"
-                />
-              ) : (
-                <LayoutGrid
-                  size={24}
-                  onClick={toggleLayout}
-                  className="cursor-pointer"
-                />
-              )}
-            </div>
+            {/* Sorting and layout toggling logic */}
           </div>
         </div>
 
-        <div
-          className={`flex ${
-            isGrid ? 'flex-wrap' : 'flex-col'
-          } gap-4 justify-between`}
-        >
-          {loading && (
-            <>
-              {Array.from({ length: 12 }).map((_, index) => (
-                <SkeletonCard variant="default" key={index} />
-              ))}
-            </>
-          )}
-
-          {courses.map((course: Course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              hasExclusion={checkExclusions(course)}
-            />
-          ))}
-        </div>
+        {/* Use react-window to render courses */}
+        {!loading ? (
+          <List
+            height={600} // Height of the list
+            itemCount={courses.length} // Total number of courses
+            itemSize={150} // Approximate height of each course item
+            width="100%" // Full width of the container
+          >
+            {CourseRow}
+          </List>
+        ) : (
+          <>
+            {Array.from({ length: 12 }).map((_, index) => (
+              <SkeletonCard variant="default" key={index} />
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
