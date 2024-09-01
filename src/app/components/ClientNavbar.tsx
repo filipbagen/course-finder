@@ -57,7 +57,7 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
             {user ? (
               <>
                 <Link href="/dashboard/schedule">
-                  <Button variant="ghost">Schema {count}</Button>
+                  <Button variant="ghost">Schema</Button>
                 </Link>
 
                 <Link href="/dashboard/social">
