@@ -118,9 +118,10 @@ export default function Dashboard() {
         />
 
         <AlertDialog onOpenChange={resetMobileFilters}>
-          <AlertDialogTrigger className="block md:hidden">
-            <Button className="w-full">Filter</Button>
+          <AlertDialogTrigger className="block w-full md:hidden px-4 py-2 bg-primary text-white rounded-lg">
+            Filter
           </AlertDialogTrigger>
+
           <AlertDialogContent className="h-5/6 overflow-scroll">
             <AlertDialogHeader>
               <AlertDialogTitle>Filtrera</AlertDialogTitle>
