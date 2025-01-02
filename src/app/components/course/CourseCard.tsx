@@ -131,17 +131,17 @@ const CourseCard = ({
   return (
     <Card
       className={cn(
-        'flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200 max-w-full',
+        'flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200 max-w-full gap-2',
         isDefault && '',
         isScheduleVariant && '',
         isUserVisitVariant && ''
       )}
     >
       <CardHeader>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {/* Header Section */}
           <div className="flex justify-between items-start">
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {isScheduleVariant && dragHandleProps && (
                 <div {...dragHandleProps}>
                   <GripVertical className="h-5 w-5 text-gray-400" />
@@ -182,7 +182,7 @@ const CourseCard = ({
         </div>
       </CardHeader>
 
-      <CardContent className={cn('flex flex-col gap-4')}>
+      <CardContent className={cn('flex flex-col gap-2')}>
         {/* Course Location - Not shown in schedule variant */}
         {!isScheduleVariant && (
           <div className="flex items-center gap-2 text-gray-600">
@@ -192,7 +192,7 @@ const CourseCard = ({
         )}
 
         {/* Fields of Study - Shown in all variants */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {course.mainFieldOfStudy.length === 0 ? (
             <Badge variant={isScheduleVariant ? 'secondary' : 'default'}>
               Inget huvudområde
