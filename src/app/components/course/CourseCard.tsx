@@ -45,58 +45,6 @@ const CourseCard = ({
   const isScheduleVariant = variant === 'schedule';
   const isUserVisitVariant = variant === 'user-visit';
 
-  const renderCardHeader = () => (
-    <CardHeader className="flex flex-row justify-between items-center">
-      <div className="flex flex-row gap-4 items-center">
-        {variant === 'schedule' && dragHandleProps && (
-          <div {...dragHandleProps}>
-            <GripVertical size={18} />
-          </div>
-        )}
-        <div className="flex flex-col">
-          <h6 className="leading-5 break-word hyphens-auto">{course.name}</h6>
-          <span className="text-slate-400 text-sm">{course.code}</span>
-        </div>
-      </div>
-      {variant === 'schedule' && isCourseWithEnrollment(course) && (
-        <Trash2
-          onClick={() => deleteEnrollment(course.enrollmentId)}
-          color="red"
-          size={18}
-          className="w-min h-min cursor-pointer hover:bg-red-100 ease-out duration-200 rounded-md p-2"
-        />
-      )}
-    </CardHeader>
-  );
-
-  const renderCardContent = () => (
-    <CardContent>
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap gap-2">
-          {course.mainFieldOfStudy.map((field) => (
-            <Badge key={field}>{field}</Badge>
-          ))}
-        </div>
-      </div>
-    </CardContent>
-  );
-
-  if (variant === 'schedule' && isCourseWithEnrollment(course)) {
-    return (
-      <Card className="flex-grow h-min min-w-0">
-        {renderCardHeader()}
-        {renderCardContent()}
-      </Card>
-    );
-  } else if (variant === 'user-visit') {
-    return (
-      <Card className="flex-grow h-min min-w-0">
-        {renderCardHeader()}
-        {renderCardContent()}
-      </Card>
-    );
-  }
-
   return (
     <Card
       className={cn(
