@@ -32,8 +32,21 @@ const CourseCardDetails: React.FC<CourseCardDetailsProps> = ({ course }) => (
 
         <AccordionTrigger className="p-0" />
       </div>
-      <AccordionContent className="flex flex-col gap-4 p-0 mt-6">
+      <AccordionContent className="flex flex-col gap-4 p-0 mt-4">
         <Separator className="mt-2" />
+        <div>
+          <div className="flex items-center gap-2">
+            <SignpostBig size={16} />
+            <h6>Huvudområde</h6>
+          </div>
+          <p>
+            {course.mainFieldOfStudy.length > 0
+              ? course.mainFieldOfStudy.join(', ')
+              : 'Inget huvudområde'}
+          </p>
+
+          <Separator className="mt-2" />
+        </div>
 
         <div>
           <div className="flex items-center gap-2">
@@ -48,19 +61,7 @@ const CourseCardDetails: React.FC<CourseCardDetailsProps> = ({ course }) => (
 
           <Separator className="mt-2" />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <SignpostBig size={16} />
-            <h6>Huvudområde</h6>
-          </div>
-          <p>
-            {course.mainFieldOfStudy.length > 0
-              ? course.mainFieldOfStudy.join(', ')
-              : 'Inget huvudområde'}
-          </p>
 
-          <Separator className="mt-2" />
-        </div>
         <div>
           <div className="flex items-center gap-2">
             <NotebookPen size={16} />
@@ -69,7 +70,7 @@ const CourseCardDetails: React.FC<CourseCardDetailsProps> = ({ course }) => (
           <ul>
             {course.examinations?.map((ex: Examination) => (
               <li key={ex.id}>
-                {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
+                {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits} hp
               </li>
             ))}
           </ul>
