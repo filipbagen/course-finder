@@ -25,8 +25,16 @@ const fetchCourses = async (
   // Initial fetch with possible sort orders.
   // When fetching, cast the result to the expected type if you are sure the types are aligned correctly.
   let courses = (await prisma.courses.findMany({
-    include: {
-      examinations: true,
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      campus: true,
+      semester: true,
+      mainFieldOfStudy: true,
+      period: true,
+      block: true,
+      exclusions: true,
     },
     orderBy: sortOptions,
   })) as unknown as Course[];
