@@ -30,7 +30,8 @@ import {
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/app/utilities/types';
-import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { DraggableAttributes } from '@dnd-kit/core';
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import { useEnrollment } from '@/app/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +39,10 @@ interface CourseCardProps {
   course: Course | CourseWithEnrollment;
   variant?: 'default' | 'schedule' | 'user-visit';
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  dragHandleProps?: {
+    attributes?: DraggableAttributes;
+    listeners?: SyntheticListenerMap;
+  } | null;
   hasExclusion?: boolean;
   className?: string;
 }
@@ -143,7 +147,10 @@ const CourseCard = ({
           <div className="flex justify-between items-start">
             <div className="flex gap-2">
               {isScheduleVariant && dragHandleProps && (
-                <div {...dragHandleProps}>
+                <div
+                  {...dragHandleProps.attributes}
+                  {...dragHandleProps.listeners}
+                >
                   <GripVertical className="h-5 w-5 text-gray-400" />
                 </div>
               )}

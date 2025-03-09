@@ -1,6 +1,6 @@
-import { Course } from '@/app/utilities/types';
-import { DropResult } from '@hello-pangea/dnd';
-import { SemesterCourses } from '@/app/utilities/types';
+import { Course, SemesterCourses } from '@/app/utilities/types';
+import { DragEndEvent } from '@dnd-kit/core';
+import { DragItemData, DropResult } from '@/app/utilities/dnd-types';
 
 interface UseDragAndDropProps {
   semesters: SemesterCourses;
@@ -15,31 +15,26 @@ export default function useDragAndDrop({
   semestersP2,
   setSemestersP2,
 }: UseDragAndDropProps) {
-  const handleDragAndDrop = async (results: DropResult) => {
-    const { source, destination, type } = results;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    if (!destination) return;
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return;
-    }
+    if (!active || !over || active.id === over.id) return;
 
-    const sourceSemesterId = parseInt(source.droppableId.split('-')[0], 10);
-    const destinationSemesterId = parseInt(
-      destination.droppableId.split('-')[0],
-      10
-    );
-    const period = source.droppableId.endsWith('1') ? 'P1' : 'P2';
+    const activeData = active.data.current as DragItemData;
+    const overData = over.data.current as DragItemData;
+
+    // Extract needed information
+    const sourceSemesterId = activeData.semesterId;
+    const destinationSemesterId = overData.semesterId;
+    const sourceIndex = activeData.index;
+    const destinationIndex = overData.index;
+    const period = activeData.period === '1' ? 'P1' : 'P2';
 
     const semesterKey = period === 'P1' ? semesters : semestersP2;
     const setSemesterKey = period === 'P1' ? setSemesters : setSemestersP2;
 
-    if (
-      type.startsWith('unique') &&
-      sourceSemesterId !== destinationSemesterId
-    ) {
+    // Handle special case for semester 8 (unique-period constraint)
+    if (sourceSemesterId === 8 && destinationSemesterId !== 8) {
       return;
     }
 
@@ -48,14 +43,15 @@ export default function useDragAndDrop({
       sourceSemesterId === destinationSemesterId
         ? newSourceCourses
         : [...(semesterKey[destinationSemesterId] || [])];
-    const movedCourse = newSourceCourses[source.index];
+
+    const movedCourse = newSourceCourses[sourceIndex];
 
     if (!movedCourse) {
       return;
     }
 
-    newSourceCourses.splice(source.index, 1);
-    newDestinationCourses.splice(destination.index, 0, movedCourse);
+    newSourceCourses.splice(sourceIndex, 1);
+    newDestinationCourses.splice(destinationIndex, 0, movedCourse);
 
     setSemesterKey((prev) => ({
       ...prev,
@@ -63,6 +59,7 @@ export default function useDragAndDrop({
       [destinationSemesterId]: newDestinationCourses,
     }));
 
+    // Handle courses that span both periods
     if (movedCourse.period.includes(1) && movedCourse.period.includes(2)) {
       const otherPeriodKey = period === 'P1' ? semestersP2 : semesters;
       const setOtherPeriodKey = period === 'P1' ? setSemestersP2 : setSemesters;
@@ -112,5 +109,5 @@ export default function useDragAndDrop({
     }
   };
 
-  return handleDragAndDrop;
+  return handleDragEnd;
 }
