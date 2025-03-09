@@ -1,5 +1,5 @@
 import React from 'react';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DragDropContext, OnDragEndResponder } from '@hello-pangea/dnd';
 import { SemesterCourses } from '@/app/utilities/types';
 import SemesterBlock from './SemesterBlock';
 
@@ -8,7 +8,7 @@ interface ScheduleViewProps {
   semestersP2: SemesterCourses;
   loading: boolean;
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  handleDragAndDrop?: (event: DragEndEvent) => void;
+  handleDragAndDrop?: OnDragEndResponder;
   draggable?: boolean;
 }
 
@@ -81,15 +81,15 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({
         {draggable ? (
           <>
             <div className="hidden md:block">
-              <DndContext onDragEnd={handleDragAndDrop || (() => {})}>
+              <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
                 {renderSemesterBlock('1', semesters)}
                 {renderSemesterBlock('2', semestersP2)}
-              </DndContext>
+              </DragDropContext>
             </div>
             <div className="block md:hidden">
-              <DndContext onDragEnd={handleDragAndDrop || (() => {})}>
+              <DragDropContext onDragEnd={handleDragAndDrop || (() => {})}>
                 {renderMobileView()}
-              </DndContext>
+              </DragDropContext>
             </div>
           </>
         ) : (
