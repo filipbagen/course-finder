@@ -1,46 +1,70 @@
-// /app/onboarding/actions.ts
-'use server';
+'use server'
 
-import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export async function updateUserProfile(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
-  const userId = formData.get('userId') as string;
-  const name = formData.get('name') as string;
-  const program = formData.get('program') as string;
-  const colorScheme = formData.get('colorScheme') as string;
-  const isPublic = formData.get('isPublic') === 'on';
-  const avatarUrl = formData.get('avatarUrl') as string;
+  // Verify authentication
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    redirect('/login')
+  }
 
-  console.log('Updating user profile:', {
-    userId,
+  const name = formData.get('name') as string
+  const program = formData.get('program') as string
+  const colorScheme = formData.get('colorScheme') as string
+  const isPublic = formData.get('isPublic') === 'on'
+  const avatarUrl = formData.get('avatarUrl') as string
+
+  console.log('Creating/updating user profile:', {
+    userId: user.id,
     name,
     program,
     colorScheme,
     isPublic,
     avatarUrl,
-  });
+  })
 
-  const { error } = await supabase
-    .from('User')
-    .update({
-      name,
-      program,
-      colorScheme,
-      isPublic,
-      image: avatarUrl || null, // Store the avatar URL in the image field
+  try {
+    // Use upsert to create or update user profile
+    const result = await prisma.user.upsert({
+      where: { id: user.id },
+      update: {
+        name,
+        program,
+        colorScheme,
+        isPublic,
+        image: avatarUrl || null,
+      },
+      create: {
+        id: user.id,
+        email: user.email!,
+        name,
+        program,
+        colorScheme,
+        isPublic,
+        image: avatarUrl || null,
+      },
     })
-    .eq('id', userId);
 
-  if (error) {
-    console.error('Error updating user profile:', error);
-    throw new Error('Failed to update profile');
+    console.log('Profile created/updated successfully:', result)
+  } catch (error) {
+    console.error('Error creating/updating profile with Prisma:', error)
+    
+    // Check if it's a permissions error
+    if (error instanceof Error && error.message.includes('permission denied')) {
+      throw new Error('Database permission error - please check RLS policies')
+    }
+    
+    throw new Error('Failed to update profile')
   }
 
-  console.log('Profile updated successfully');
-  revalidatePath('/', 'layout');
-  redirect('/private');
+  // Redirect OUTSIDE of try/catch block
+  console.log('Redirecting to private page...')
+  revalidatePath('/', 'layout')
+  redirect('/private')
 }

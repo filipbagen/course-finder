@@ -6,6 +6,8 @@ export interface User {
   isPublic: boolean;
   program: string;
   image: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Course {

@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -16,69 +10,103 @@ datasource db {
 }
 
 model User {
-  id               String        @id @db.Uuid
-  name             String?
-  email            String        @unique
-  colorScheme      String        @default("theme-blue")
-  isPublic         Boolean       @default(true)
-  program          String?
-  image            String?
-  Enrollment       Enrollment[]
-  reviews          Review[]      // Added relation to reviews
+  id          String       @id @db.Uuid
+  name        String?      // Make optional for onboarding
+  email       String       @unique
+  colorScheme String       @default("theme-blue")
+  isPublic    Boolean      @default(true)
+  program     String?      // Make optional for onboarding
+  image       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  enrollments Enrollment[]
+  reviews     Review[]
 }
 
-model Courses {
-  id                        String @id @db.Uuid @default(uuid())
-  code                      String @unique
-  name                      String
-  credits                   Int
-  scheduledHours            Int?
-  selfStudyHours            Int?
-  mainFieldOfStudy          String[]
-  advanced                  Boolean
-  semester                  Int[]
-  period                    Int[]
-  block                     Int[]
-  campus                    String
-  exclusions                String[]
-  offeredFor                String[]
-  prerequisites             String
-  recommendedPrerequisites  String
-  learningOutcomes          String
-  content                   String
-  teachingMethods           String
-  examinations              Examinations[]
-  enrollment                Enrollment[]
-  reviews                   Review[] // Added relation to reviews
+model Course {
+  id                       String   @id @db.Uuid
+  code                     String   @unique
+  name                     String
+  credits                  Int
+  scheduledHours           Int?
+  selfStudyHours           Int?
+  mainFieldOfStudy         String[]
+  advanced                 Boolean
+  semester                 Int[]
+  period                   Int[]
+  block                    Int[]
+  campus                   String
+  exclusions               String[]
+  offeredFor               String[]
+  prerequisites            String
+  recommendedPrerequisites String
+  learningOutcomes         String
+  content                  String
+  teachingMethods          String
+
+  // Relations
+  examinations Examination[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+
+  // Search optimization indexes
+  @@index([code])                    // Fast lookup by course code
+  @@index([name])                    // Fast search by name
+  @@index([mainFieldOfStudy])        // Filter by field of study
+  @@index([advanced])                // Filter basic vs advanced
+  @@index([campus])                  // Filter by campus
+  @@index([credits])                 // Sort by credits
+  @@index([code, name])              // Compound index for search
 }
 
-model Examinations {
-  id                  String @id @db.Uuid @default(uuid())
-  courseId            String
-  code                String
-  name                String
-  credits             Int
-  gradingScale        String
-  course              Courses @relation(fields: [courseId], references: [id])
+model Examination {
+  id           String  @id @db.Uuid
+  courseId     String  @db.Uuid      // ✅ This should be UUID!
+  code         String
+  name         String
+  credits      Int
+  gradingScale String
+  
+  // Relations
+  course       Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@index([courseId])  // Fast lookup of exams by course
 }
 
 model Enrollment {
-  id                  String  @id @db.Uuid @default(uuid())
-  semester            Int
-  user                User    @relation(fields: [userId], references: [id])
-  userId              String
-  course              Courses @relation(fields: [courseId], references: [id])
-  courseId            String
+  id       String @id @db.Uuid
+  semester Int
+  userId   String @db.Uuid          // ✅ This should be UUID!
+  courseId String @db.Uuid          // ✅ This should be UUID!
+  
+  // Relations
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  // Prevent duplicate enrollments
+  @@unique([userId, courseId, semester])
+  @@index([userId])    // Fast lookup of user's enrollments
+  @@index([courseId])  // Fast lookup of course enrollments
 }
 
 model Review {
-  id          String   @id @db.Uuid @default(uuid())
-  rating      Int      
-  comment     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  course      Courses  @relation(fields: [courseId], references: [id])
-  courseId    String
+  id        String   @id @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @db.Uuid        // ✅ This should be UUID!
+  courseId  String   @db.Uuid        // ✅ This should be UUID!
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  // One review per user per course
+  @@unique([userId, courseId])
+  @@index([courseId])          // Fast lookup of course reviews
+  @@index([rating])            // Sort by rating
+  @@index([createdAt])         // Sort by newest
 }
