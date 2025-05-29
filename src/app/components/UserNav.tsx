@@ -17,8 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from './themeToggle';
 
-// kinde
-import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
+// Auth
+import { SignOutButton } from './auth/AuthButtons';
 
 // icons
 import { DoorClosed, CreditCard } from 'lucide-react';
@@ -36,27 +36,35 @@ export function UserNav({
     <>
       <div className="sm:hidden flex items-center gap-2">
         <Avatar className="h-10 w-10 rounded-full">
-          <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+          {image ? (
+            <AvatarImage src={image} alt={name} />
+          ) : (
+            <AvatarFallback>{name?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+          )}
         </Avatar>
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{name}</span>
+          <span className="text-sm font-medium">{name || 'User'}</span>
           <span className="text-xs text-muted-foreground">{email}</span>
         </div>
       </div>
 
       <div className="hidden sm:block">
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 rounded-full">
-                <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+                {image ? (
+                  <AvatarImage src={image} alt={name} />
+                ) : (
+                  <AvatarFallback>{name?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+                )}
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{name}</p>
+                <p className="text-sm font-medium leading-none">{name || 'User'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {email}
                 </p>
@@ -76,14 +84,15 @@ export function UserNav({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="w-full flex justify-between items-center"
-              asChild
             >
-              <LogoutLink>
-                Logga ut <DoorClosed className="w-4 h-4" />
-              </LogoutLink>
+              <div className="flex justify-between items-center w-full">
+                <span>Logga ut</span>
+                <DoorClosed className="w-4 h-4" />
+              </div>
+              <SignOutButton />
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
     </>
   );

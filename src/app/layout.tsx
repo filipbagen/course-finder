@@ -4,8 +4,9 @@ import './globals.css';
 import { ThemeProvider } from './components/theme-provider';
 import { Navbar } from './components/Navbar';
 import { MaxWidthWrapper } from './components/MaxWidthWrapper';
-import prisma from './lib/db';
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { prisma } from '../../lib/db';
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { unstable_noStore as noStore } from 'next/cache';
 import Footer from './components/Footer';
 
@@ -32,12 +33,17 @@ async function getData(userId: string) {
   }
 }
 
+async function getUser() {
+  const supabase = createServerComponentClient({ cookies });
+  const { data } = await supabase.auth.getUser();
+  return data?.user;
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { getUser } = getKindeServerSession();
   const user = await getUser();
   const data = await getData(user?.id as string);
 

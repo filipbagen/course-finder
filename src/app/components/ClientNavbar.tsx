@@ -8,12 +8,9 @@ import { useCounterStore } from '@/stores/store';
 import { Button } from '@/components/ui/button';
 import { UserNav } from './UserNav';
 
-// kinde
-import {
-  RegisterLink,
-  LoginLink,
-  LogoutLink,
-} from '@kinde-oss/kinde-auth-nextjs/components';
+// Auth buttons
+// import { SignInButton, SignUpButton, SignOutButton } from './auth/AuthButtons';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,23 +62,23 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                 </Link>
                 <UserNav
                   email={user?.email as string}
-                  name={user?.given_name as string}
-                  image={user?.picture as string}
+                  name={user?.user_metadata?.name || user?.user_metadata?.full_name || ''}
+                  image={user?.user_metadata?.avatar_url as string}
                 />
               </>
             ) : (
               <>
-                <LoginLink>
-                  <Button variant="secondary">Logga in</Button>
-                </LoginLink>
-                <Button>
-                  <RegisterLink>Skapa konto</RegisterLink>
-                </Button>
+                <Link href="/auth/login">
+                  <Button variant="ghost">Logga in</Button>
+                </Link>
+                <Link href="/auth/login">
+                  <Button variant="default">Skapa konto</Button>
+                </Link>
               </>
             )}
           </div>
 
-          <div className="sm:hidden flex items-center">
+          {/* <div className="sm:hidden flex items-center">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -95,11 +92,12 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                   forceMount
                 >
                   <div className="flex flex-col space-y-1">
-                    <UserNav
-                      email={user?.email as string}
-                      name={user?.given_name as string}
-                      image={user?.picture as string}
-                    />
+                    <p className="font-medium text-sm">
+                      {user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email}
+                    </p>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem className="flex gap-3 items-center">
@@ -118,18 +116,18 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="flex gap-3 items-center">
                         <DoorClosed size={20} />
-                        <LogoutLink>Logga ut</LogoutLink>
+                        <SignOutButton />
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <LoginLink>
+              <Link href="/auth/login">
                 <Button variant="outline">Logga in</Button>
-              </LoginLink>
+              </Link>
             )}
-          </div>
+          </div> */}
         </div>
       </MaxWidthWrapper>
     </div>

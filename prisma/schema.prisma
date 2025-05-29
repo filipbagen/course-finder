@@ -16,34 +16,19 @@ datasource db {
 }
 
 model User {
-  id               String        @id @unique
+  id               String        @id @db.Uuid
   name             String?
   email            String        @unique
-  stripeCustomerId String?       @unique
   colorScheme      String        @default("theme-blue")
   isPublic         Boolean       @default(true)
   program          String?
   image            String?
-  Subscription     Subscription?
   Enrollment       Enrollment[]
   reviews          Review[]      // Added relation to reviews
 }
 
-model Subscription {
-  stripeSubscriptionId String   @id @unique
-  interval             String
-  status               String
-  planId               String
-  currentPeriodStart   Int
-  currentPeriodEnd     Int
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  user                 User     @relation(fields: [userId], references: [id])
-  userId               String   @unique
-}
-
 model Courses {
-  id                        String @id @unique
+  id                        String @id @db.Uuid @default(uuid())
   code                      String @unique
   name                      String
   credits                   Int
@@ -68,7 +53,7 @@ model Courses {
 }
 
 model Examinations {
-  id                  String @id @unique
+  id                  String @id @db.Uuid @default(uuid())
   courseId            String
   code                String
   name                String
@@ -78,7 +63,7 @@ model Examinations {
 }
 
 model Enrollment {
-  id                  String  @id @unique
+  id                  String  @id @db.Uuid @default(uuid())
   semester            Int
   user                User    @relation(fields: [userId], references: [id])
   userId              String
@@ -87,7 +72,7 @@ model Enrollment {
 }
 
 model Review {
-  id          String   @id @unique @default(uuid())
+  id          String   @id @db.Uuid @default(uuid())
   rating      Int      
   comment     String?
   createdAt   DateTime @default(now())

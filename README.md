@@ -33,15 +33,13 @@ Course Finder simplifies the course selection process for graduate students at L
 - **Supabase**: Open-source alternative to Firebase.
 - **Prisma**: ORM for efficient database management.
 
-### Authentication and Payment
+### Authentication
 
-- **Kinde Authentication**: Secure user authentication.
-- **Stripe**: Manage subscriptions and process payments.
+- **Supabase Authentication**: Secure user authentication.
 
-## Subscription Plans
+## Free Access
 
-- **Free Version**: Access to basic functionalities including course exploration and schedule management.
-- **Premium Membership**: Offers advanced features like AI recommendations, supporting a more tailored educational experience (planned feature).
+- Access to all functionalities including course exploration and schedule management.
 
 ## Future Enhancements
 
