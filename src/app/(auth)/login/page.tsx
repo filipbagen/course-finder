@@ -4,11 +4,14 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 interface LoginPageProps {
-  searchParams: { error?: string; message?: string };
+  searchParams: Promise<{ error?: string; message?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const supabase = await createClient();
+  
+  // Await searchParams before using it
+  const params = await searchParams;
 
   // Check if user is already authenticated
   const {
@@ -51,7 +54,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         {/* Error Message */}
-        {searchParams.error && (
+        {params.error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -70,7 +73,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <div className="ml-3">
                 <p className="text-sm font-medium text-red-800">
                   {errorMessages[
-                    searchParams.error as keyof typeof errorMessages
+                    params.error as keyof typeof errorMessages
                   ] || 'An error occurred. Please try again.'}
                 </p>
               </div>
@@ -79,7 +82,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         )}
 
         {/* Success Message */}
-        {searchParams.message && (
+        {params.message && (
           <div className="bg-green-50 border border-green-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -98,14 +101,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
                   {successMessages[
-                    searchParams.message as keyof typeof successMessages
-                  ] || searchParams.message}
+                    params.message as keyof typeof successMessages
+                  ] || params.message}
                 </p>
               </div>
             </div>
           </div>
         )}
 
+        {/* Rest of your form remains the same */}
         <div className="mt-8 space-y-6">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form className="space-y-6">

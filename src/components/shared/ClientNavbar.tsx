@@ -69,10 +69,10 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
               </>
             ) : (
               <>
-                <Link href="/auth/login">
+                <Link href="/login">
                   <Button variant="ghost">Logga in</Button>
                 </Link>
-                <Link href="/auth/login">
+                <Link href="/signup">
                   <Button variant="default">Skapa konto</Button>
                 </Link>
               </>
