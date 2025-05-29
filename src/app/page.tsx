@@ -1,18 +1,18 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
-  const supabase = await createClient()
-  
+  const supabase = await createClient();
+
   // Use getUser() instead of getSession() for server components
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   // Redirect authenticated users to the private page
   if (user && !error) {
-    redirect('/private')
+    redirect('/private');
   }
 
   return (
@@ -26,7 +26,7 @@ export default async function Home() {
             Please sign in or create an account to continue
           </p>
         </div>
-        
+
         <div className="text-center space-y-4">
           <a
             href="/login"
@@ -43,7 +43,7 @@ export default async function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // import Image from 'next/image';
