@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 // components
 import { SubmitButton } from '../../../components/shared/SubmitButtons';
 import { DeleteImageButton } from '@/components/shared/DeleteImageButton';
-import { SettingsForm } from '@/components/shared/SettingsForm';
+import { SettingsForm } from '@/app/(dashboard)/settings/SettingsForm';
 
 // shadcn
 import {

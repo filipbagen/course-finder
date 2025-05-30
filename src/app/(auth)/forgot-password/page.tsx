@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 
 // components
-import { ForgotPasswordForm } from '@/components/shared/ForgotPasswordForm';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
 
 // shadcn
 import {
