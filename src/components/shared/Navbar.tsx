@@ -16,7 +16,9 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function Navbar() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const userName =
     user?.user_metadata?.name || user?.user_metadata?.full_name || '';
@@ -24,222 +26,287 @@ export async function Navbar() {
   const userImage = user?.user_metadata?.avatar_url || '';
 
   return (
-    <div className="sticky h-16 inset-x-0 top-0 z-30 w-full bg-background/75 backdrop-blur-lg transition-all border-b border-border">
-      <div className="flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link
-          href={user ? '/courses' : '/'}
-          className="flex gap-2 items-center"
-        >
-          <Image
-            src="/assets/compass.png"
-            alt="Course Finder logo"
-            width={24}
-            height={24}
-          />
-          <h4 className="font-semibold whitespace-nowrap">Course Finder</h4>
-        </Link>
+    <div className="sticky h-20 inset-x-0 top-0 z-30 w-full transition-all">
+      {/* Glassmorphism Container */}
+      <div className="mx-4 mt-4 rounded-3xl bg-white/10 backdrop-blur-2xl min-w-64 dark:bg-[#14161A]/80 shadow-[0px_0px_0px_1px_rgba(100,6,69,0.10),0px_3px_6px_0px_rgba(100,6,69,0.12),0px_-4px_0px_0px_rgba(100,6,69,0.08)_inset] dark:shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
+        <div className="flex items-center justify-between h-16 px-6">
+          {/* Logo */}
+          <Link
+            href={user ? '/courses' : '/'}
+            className="flex gap-2 items-center"
+          >
+            <Image
+              src="/assets/compass.png"
+              alt="Course Finder logo"
+              width={22}
+              height={22}
+              className="transition-transform duration-150 group-hover:rotate-12"
+            />
+            <h4 className="font-medium whitespace-nowrap">Course Finder</h4>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden sm:flex items-center gap-x-6">
-          {user ? (
-            // Authenticated User Navigation
-            <>
-              <Link href="/courses">
-                <Button variant="ghost" className="text-sm font-medium">
-                  Utforska kurser
-                </Button>
-              </Link>
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center gap-x-2">
+            {user ? (
+              // Authenticated User Navigation
+              <>
+                <Link href="/courses">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                  >
+                    Utforska kurser
+                  </Button>
+                </Link>
 
-              <Link href="/schedule">
-                <Button variant="ghost" className="text-sm font-medium">
-                  Mitt schema
-                </Button>
-              </Link>
+                <Link href="/schedule">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                  >
+                    Mitt schema
+                  </Button>
+                </Link>
 
-              <Link href="/students">
-                <Button variant="ghost" className="text-sm font-medium">
-                  Hitta studenter
-                </Button>
-              </Link>
+                <Link href="/students">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                  >
+                    Hitta studenter
+                  </Button>
+                </Link>
 
-              {/* User Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Avatar className="h-9 w-9">
-                    {userImage ? (
-                      <AvatarImage
-                        src={userImage}
-                        alt={userName || userEmail}
-                      />
-                    ) : (
-                      <AvatarFallback className="text-sm">
-                        {userName?.charAt(0)?.toUpperCase() ||
-                          userEmail?.charAt(0)?.toUpperCase() ||
-                          'U'}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {userName || 'User'}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {userEmail}
-                      </p>
+                {/* User Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="ml-3">
+                    <div className="p-1 rounded-full backdrop-blur-sm transition-all duration-150">
+                      <Avatar className="h-8 w-8">
+                        {userImage ? (
+                          <AvatarImage
+                            src={userImage}
+                            alt={userName || userEmail}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                            {userName?.charAt(0)?.toUpperCase() ||
+                              userEmail?.charAt(0)?.toUpperCase() ||
+                              'U'}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
                     </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/profile"
-                      className="flex items-center w-full"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/settings"
-                      className="flex items-center w-full"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <SignOutButton />
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            // Unauthenticated User Navigation
-            <>
-              <Link href="/courses">
-                <Button variant="ghost" className="text-sm font-medium">
-                  Utforska kurser
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-64 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl mt-2"
+                    align="end"
+                    forceMount
+                  >
+                    <DropdownMenuLabel className="p-4">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-semibold leading-none text-gray-900">
+                          {userName || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-gray-600">
+                          {userEmail}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/profile"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <User className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Profile
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/settings"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <Settings className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Settings
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors">
+                      <LogOut className="mr-3 h-4 w-4" />
+                      <SignOutButton />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              // Unauthenticated User Navigation
+              <>
+                <Link href="/courses">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                  >
+                    Utforska kurser
+                  </Button>
+                </Link>
+
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+
+                <Link href="/signup">
+                  <Button className="text-sm font-medium rounded-xl px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="sm:hidden flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl p-2 bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-sm transition-all duration-150"
+                >
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
                 </Button>
-              </Link>
-
-              <Link href="/login">
-                <Button variant="ghost" className="text-sm font-medium">
-                  Sign In
-                </Button>
-              </Link>
-
-              <Link href="/signup">
-                <Button className="text-sm font-medium">Sign Up</Button>
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="sm:hidden flex items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              {user ? (
-                // Authenticated Mobile Menu
-                <>
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {userName || 'User'}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {userEmail}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/courses"
-                      className="flex items-center w-full"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Utforska kurser
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/schedule"
-                      className="flex items-center w-full"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Mitt schema
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/students"
-                      className="flex items-center w-full"
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      Hitta studenter
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/profile"
-                      className="flex items-center w-full"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/settings"
-                      className="flex items-center w-full"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <SignOutButton />
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                // Unauthenticated Mobile Menu
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/courses" className="w-full">
-                      Utforska kurser
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/login" className="w-full">
-                      Sign In
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/signup" className="font-medium w-full">
-                      Sign Up
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-64 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl mt-2"
+                align="end"
+                forceMount
+              >
+                {user ? (
+                  // Authenticated Mobile Menu
+                  <>
+                    <DropdownMenuLabel className="p-4">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-semibold leading-none text-gray-900">
+                          {userName || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-gray-600">
+                          {userEmail}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/courses"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <Calendar className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Utforska kurser
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/schedule"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <Calendar className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Mitt schema
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/students"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <Users className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Hitta studenter
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/profile"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <User className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Profile
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/settings"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <Settings className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Settings
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors">
+                      <LogOut className="mr-3 h-4 w-4" />
+                      <SignOutButton />
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  // Unauthenticated Mobile Menu
+                  <>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/courses"
+                        className="w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <span className="font-medium text-gray-900">
+                          Utforska kurser
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/30" />
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/login"
+                        className="w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <span className="font-medium text-gray-900">
+                          Sign In
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/signup"
+                        className="font-semibold w-full p-3 hover:bg-white/50 transition-colors"
+                      >
+                        <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                          Sign Up
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
     </div>
