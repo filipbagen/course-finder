@@ -201,7 +201,7 @@ export default async function SettingPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto px-4">
+    <div className="flex flex-col gap-8 mx-auto px-4">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -253,7 +253,7 @@ export default async function SettingPage() {
                         name="picture"
                         type="file"
                         accept="image/*"
-                        className="max-w-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                        className="max-w-sm cursor-pointer"
                       />
                       {data?.image && (
                         <Button
@@ -269,20 +269,6 @@ export default async function SettingPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Ladda upp en profilbild (JPG, PNG, GIF - max 5MB)
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="image">Eller ange bild-URL</Label>
-                    <Input
-                      name="image"
-                      type="url"
-                      id="image"
-                      placeholder="https://exempel.se/bild.jpg"
-                      defaultValue={data?.image || ''}
-                      className="max-w-sm"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Alternativt: länka till en befintlig bild
                     </p>
                   </div>
                 </div>
@@ -325,59 +311,59 @@ export default async function SettingPage() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Civilingenjörsprogram</SelectLabel>
-                      <SelectItem value="Medicinsk teknik">
-                        Medicinsk teknik
+                      <SelectItem value="Datadriven utveckling">
+                        Datadriven utveckling
                       </SelectItem>
-                      <SelectItem value="Informationsteknologi">
-                        Informationsteknologi
+                      <SelectItem value="Datateknik">Datateknik</SelectItem>
+                      <SelectItem value="Design och produktutveckling">
+                        Design och produktutveckling
                       </SelectItem>
-                      <SelectItem value="Kommunikation, transport och samhälle">
-                        Kommunikation, transport och samhälle
+                      <SelectItem value="Elektronik och systemdesign">
+                        Elektronik och systemdesign
                       </SelectItem>
-                      <SelectItem value="Industriell ekonomi - internationell">
-                        Industriell ekonomi - internationell
-                      </SelectItem>
-                      <SelectItem value="Industriell ekonomi">
-                        Industriell ekonomi
-                      </SelectItem>
-                      <SelectItem value="Medieteknik">Medieteknik</SelectItem>
                       <SelectItem value="Elektronikdesign">
                         Elektronikdesign
                       </SelectItem>
                       <SelectItem value="Energi - miljö - management">
                         Energi - miljö - management
                       </SelectItem>
-                      <SelectItem value="Design och produktutveckling">
-                        Design och produktutveckling
+                      <SelectItem value="Industriell ekonomi">
+                        Industriell ekonomi
+                      </SelectItem>
+                      <SelectItem value="Industriell ekonomi - internationell">
+                        Industriell ekonomi - internationell
+                      </SelectItem>
+                      <SelectItem value="Informationsteknologi">
+                        Informationsteknologi
+                      </SelectItem>
+                      <SelectItem value="Kemisk biologi">
+                        Kemisk biologi
+                      </SelectItem>
+                      <SelectItem value="Kommunikation, transport och samhälle">
+                        Kommunikation, transport och samhälle
                       </SelectItem>
                       <SelectItem value="Maskinteknik">Maskinteknik</SelectItem>
+                      <SelectItem value="Medieteknik">Medieteknik</SelectItem>
+                      <SelectItem value="Medieteknik och AI">
+                        Medieteknik och AI
+                      </SelectItem>
+                      <SelectItem value="Medicinsk teknik">
+                        Medicinsk teknik
+                      </SelectItem>
                       <SelectItem value="Mjukvaruteknik">
                         Mjukvaruteknik
                       </SelectItem>
-                      <SelectItem value="Datateknik">Datateknik</SelectItem>
+                      <SelectItem value="Teknisk biologi">
+                        Teknisk biologi
+                      </SelectItem>
                       <SelectItem value="Teknisk fysik och elektroteknik">
                         Teknisk fysik och elektroteknik
                       </SelectItem>
                       <SelectItem value="Teknisk fysik och elektroteknik - internationell">
                         Teknisk fysik och elektroteknik - internationell
                       </SelectItem>
-                      <SelectItem value="Kemisk biologi">
-                        Kemisk biologi
-                      </SelectItem>
-                      <SelectItem value="Teknisk biologi">
-                        Teknisk biologi
-                      </SelectItem>
-                      <SelectItem value="Datadriven utveckling">
-                        Datadriven utveckling
-                      </SelectItem>
-                      <SelectItem value="Medieteknik och AI">
-                        Medieteknik och AI
-                      </SelectItem>
                       <SelectItem value="Teknisk matematik">
                         Teknisk matematik
-                      </SelectItem>
-                      <SelectItem value="Elektronik och systemdesign">
-                        Elektronik och systemdesign
                       </SelectItem>
                     </SelectGroup>
                   </SelectContent>
