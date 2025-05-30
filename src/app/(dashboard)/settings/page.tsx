@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 
 // components
 import { SubmitButton } from '../../../components/shared/SubmitButtons';
+import { DeleteImageButton } from '@/components/shared/DeleteImageButton';
+import { SettingsForm } from '@/components/shared/SettingsForm';
 
 // shadcn
 import {
@@ -45,6 +47,59 @@ import { createClient } from '@/lib/supabase/server';
 // prisma
 import { prisma } from '@/lib/prisma';
 
+async function deleteProfileImage(userId: string) {
+  'use server';
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || user.id !== userId) {
+    redirect('/login');
+  }
+
+  try {
+    // Get current user data to check if image is from Supabase Storage
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { image: true },
+    });
+
+    if (userData?.image) {
+      // Check if the image is from Supabase Storage (contains our storage URL pattern)
+      if (
+        userData.image.includes('supabase') &&
+        userData.image.includes('avatars')
+      ) {
+        // Extract file path from the URL
+        const urlParts = userData.image.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+
+        // Delete from Supabase Storage
+        const { error: deleteError } = await supabase.storage
+          .from('avatars')
+          .remove([fileName]);
+
+        if (deleteError) {
+          console.error('Error deleting file from storage:', deleteError);
+        }
+      }
+    }
+
+    // Update database to remove image reference
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image: null },
+    });
+
+    revalidatePath('/settings');
+  } catch (error) {
+    console.error('Error deleting profile image:', error);
+    throw error;
+  }
+}
+
 async function getData(userId: string) {
   const data = await prisma.user.findUnique({
     where: {
@@ -79,6 +134,12 @@ export default async function SettingPage() {
 
   // Get user data from database
   const data = await getData(user.id);
+
+  // Create a bound function for deleting the profile image
+  const handleDeleteImage = async () => {
+    'use server';
+    await deleteProfileImage(user.id);
+  };
 
   async function postData(formData: FormData) {
     'use server';
@@ -224,7 +285,7 @@ export default async function SettingPage() {
           </div>
         </div>
 
-        <form action={postData} className="space-y-8">
+        <SettingsForm action={postData}>
           {/* Profile Information Card */}
           <Card>
             <CardHeader>
@@ -239,7 +300,7 @@ export default async function SettingPage() {
               {/* Profile Picture Section */}
               <div className="flex items-start gap-6">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={data?.image || ''} />
+                  <AvatarImage src={data?.image || undefined} />
                   <AvatarFallback className="text-lg">
                     {getInitials(data?.name)}
                   </AvatarFallback>
@@ -256,15 +317,7 @@ export default async function SettingPage() {
                         className="max-w-sm cursor-pointer"
                       />
                       {data?.image && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Ta bort
-                        </Button>
+                        <DeleteImageButton onDelete={handleDeleteImage} />
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -429,7 +482,7 @@ export default async function SettingPage() {
 
           {/* Save Button */}
           <SubmitButton />
-        </form>
+        </SettingsForm>
       </div>
     </div>
   );

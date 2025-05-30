@@ -47,7 +47,8 @@ export async function Navbar() {
     user?.user_metadata?.full_name ||
     '';
   const userEmail = userData?.email || user?.email || '';
-  const userImage = userData?.image || user?.user_metadata?.avatar_url || '';
+  const userImage =
+    userData?.image || user?.user_metadata?.avatar_url || undefined;
 
   const getInitials = (name: string) => {
     if (!name) return 'U';
