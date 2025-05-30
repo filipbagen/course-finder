@@ -76,8 +76,7 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                 
                 {/* User Dropdown */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                  <DropdownMenuTrigger>
                       <Avatar className="h-9 w-9">
                         {userImage ? (
                           <AvatarImage src={userImage} alt={userName || userEmail} />
@@ -87,7 +86,6 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                           </AvatarFallback>
                         )}
                       </Avatar>
-                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel>
@@ -101,14 +99,14 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="flex items-center w-full">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/settings" className="flex items-center w-full">
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
@@ -148,7 +146,7 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
           {/* Mobile Navigation */}
           <div className="sm:hidden flex items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger>
                 <Button variant="ghost" size="sm">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
@@ -169,33 +167,33 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/courses" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/courses" className="flex items-center w-full">
                         <Calendar className="mr-2 h-4 w-4" />
                         Explore Courses
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/schedule" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/schedule" className="flex items-center w-full">
                         <Calendar className="mr-2 h-4 w-4" />
                         My Schedule
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/students" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/students" className="flex items-center w-full">
                         <Users className="mr-2 h-4 w-4" />
                         Find Students
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="flex items-center w-full">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center">
+                    <DropdownMenuItem>
+                      <Link href="/settings" className="flex items-center w-full">
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
@@ -209,15 +207,15 @@ export default function ClientNavbar({ user }: ClientNavbarProps) {
                 ) : (
                   // Unauthenticated Mobile Menu
                   <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/courses">Explore Courses</Link>
+                    <DropdownMenuItem>
+                      <Link href="/courses" className="w-full">Explore Courses</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/login">Sign In</Link>
+                    <DropdownMenuItem>
+                      <Link href="/login" className="w-full">Sign In</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup" className="font-medium">Sign Up</Link>
+                    <DropdownMenuItem>
+                      <Link href="/signup" className="font-medium w-full">Sign Up</Link>
                     </DropdownMenuItem>
                   </>
                 )}
