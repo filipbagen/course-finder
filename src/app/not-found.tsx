@@ -1,6 +1,6 @@
 export default function NotFound() {
   return (
-    <div className="min-h-[70svh] text-center mt-32">
+    <div className="text-center mt-32">
       <h2>404: Sidan kan inte hittas.</h2>
       <p>
         Vi kan inte hitta den sida du söker. Det kan bero på att sidan har

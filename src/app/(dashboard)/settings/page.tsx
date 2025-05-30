@@ -1,5 +1,6 @@
 // next
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 // components
 import { SubmitButton } from '../../../components/shared/SubmitButtons';
@@ -25,12 +26,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-
-// prisma
-import prisma from '../../../lib/db';
-
-// kinde
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -39,6 +34,12 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
+
+// supabase
+import { createClient } from '@/lib/supabase/server';
+
+// prisma
+import { prisma } from '@/lib/prisma';
 
 async function getData(userId: string) {
   const data = await prisma.user.findUnique({
@@ -58,19 +59,36 @@ async function getData(userId: string) {
 }
 
 export default async function SettingPage() {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
-  const data = await getData(user?.id as string);
+  const supabase = await createClient();
+  
+  // Get authenticated user
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  // Redirect if not authenticated
+  if (!user || error) {
+    redirect('/login');
+  }
+
+  // Get user data from database
+  const data = await getData(user.id);
 
   async function postData(formData: FormData) {
     'use server';
+
+    // Re-verify auth in server action
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (!user || error) {
+      redirect('/login');
+    }
 
     const name = formData.get('name') as string;
     const colorScheme = formData.get('color') as string;
     const isPublic = formData.get('isPublic'); // Don't assume 'on' or 'off' yet
     const program = formData.get('program') as string;
 
-    const data: any = {
+    const updateData: any = {
       name: name ?? undefined,
       colorScheme: colorScheme ?? undefined,
       program: program ?? undefined,
@@ -78,14 +96,14 @@ export default async function SettingPage() {
 
     // Only update isPublic if the switch was turned on or off
     if (isPublic !== null) {
-      data.isPublic = isPublic === 'on';
+      updateData.isPublic = isPublic === 'on';
     }
 
     await prisma.user.update({
       where: {
-        id: user?.id,
+        id: user.id,
       },
-      data: data,
+      data: updateData,
     });
 
     revalidatePath('/', 'layout');
@@ -129,7 +147,7 @@ export default async function SettingPage() {
                   <Input
                     name="name"
                     type="text"
-                    id="nama"
+                    id="name"
                     placeholder="Your name"
                     defaultValue={data?.name ?? undefined}
                   />
@@ -143,7 +161,7 @@ export default async function SettingPage() {
                     id="email"
                     placeholder="Your Email"
                     disabled
-                    defaultValue={data?.email as string}
+                    defaultValue={data?.email ?? user.email ?? ''}
                   />
                 </div>
 
