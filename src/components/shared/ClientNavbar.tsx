@@ -3,132 +3,227 @@
 import Link from 'next/link';
 import { MaxWidthWrapper } from './MaxWidthWrapper';
 import Image from 'next/image';
-
 import { Button } from '../ui/button';
-import { UserNav } from './UserNav';
-
-// Auth buttons
-// import { SignInButton, SignUpButton, SignOutButton } from './auth/AuthButtons';
-
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import {
   Menu,
-  CalendarDays,
-  UsersRound,
+  Calendar,
+  Users,
   Settings,
-  DoorClosed,
+  LogOut,
+  User,
 } from 'lucide-react';
+import { SignOutButton } from '@/components/shared/SignOutButton';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 type ClientNavbarProps = {
-  user: any; // Replace with actual user type if available
+  user: SupabaseUser | null;
 };
 
 export default function ClientNavbar({ user }: ClientNavbarProps) {
+  const userName = user?.user_metadata?.name || user?.user_metadata?.full_name || '';
+  const userEmail = user?.email || '';
+  const userImage = user?.user_metadata?.avatar_url || '';
+
   return (
-    <div className="mb-8 flex justify-between items-center sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-border bg-background/75 backdrop-blur-lg transition-all">
+    <div className="sticky h-16 inset-x-0 top-0 z-30 w-full border-b border-border bg-background/75 backdrop-blur-lg transition-all">
       <MaxWidthWrapper className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex gap-2 items-center">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Logo */}
+          <Link href={user ? "/courses" : "/"} className="flex gap-2 items-center">
             <Image
               src="/assets/compass.png"
-              alt="logo"
+              alt="Course Finder logo"
               width={24}
               height={24}
             />
-            <h4 className="font-semibold mr-12 whitespace-nowrap">
+            <h4 className="font-semibold whitespace-nowrap">
               Course Finder
             </h4>
           </Link>
 
-          <div className="hidden sm:flex items-center gap-x-5">
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center gap-x-6">
             {user ? (
+              // Authenticated User Navigation
               <>
-                <Link href="/dashboard/schedule">
-                  <Button variant="ghost">Schema</Button>
+                <Link href="/courses">
+                  <Button variant="ghost" className="text-sm font-medium">
+                    Explore Courses
+                  </Button>
                 </Link>
-
-                <Link href="/dashboard/social">
-                  <Button variant="ghost">Användare</Button>
+                
+                <Link href="/schedule">
+                  <Button variant="ghost" className="text-sm font-medium">
+                    My Schedule
+                  </Button>
                 </Link>
-                <UserNav
-                  email={user?.email as string}
-                  name={
-                    user?.user_metadata?.name ||
-                    user?.user_metadata?.full_name ||
-                    ''
-                  }
-                  image={user?.user_metadata?.avatar_url as string}
-                />
+                
+                <Link href="/students">
+                  <Button variant="ghost" className="text-sm font-medium">
+                    Find Students
+                  </Button>
+                </Link>
+                
+                {/* User Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        {userImage ? (
+                          <AvatarImage src={userImage} alt={userName || userEmail} />
+                        ) : (
+                          <AvatarFallback className="text-sm">
+                            {userName?.charAt(0)?.toUpperCase() || userEmail?.charAt(0)?.toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userName || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {userEmail}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <SignOutButton />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
+              // Unauthenticated User Navigation
               <>
-                <Link href="/login">
-                  <Button variant="ghost">Logga in</Button>
+                <Link href="/courses">
+                  <Button variant="ghost" className="text-sm font-medium">
+                    Explore Courses
+                  </Button>
                 </Link>
+                
+                <Link href="/login">
+                  <Button variant="ghost" className="text-sm font-medium">
+                    Sign In
+                  </Button>
+                </Link>
+                
                 <Link href="/signup">
-                  <Button variant="default">Skapa konto</Button>
+                  <Button className="text-sm font-medium">
+                    Sign Up
+                  </Button>
                 </Link>
               </>
             )}
           </div>
 
-          {/* <div className="sm:hidden flex items-center">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative rounded-full">
-                    <Menu />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 p-4"
-                  align="end"
-                  forceMount
-                >
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-medium text-sm">
-                      {user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
+          {/* Mobile Navigation */}
+          <div className="sm:hidden flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                {user ? (
+                  // Authenticated Mobile Menu
+                  <>
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userName || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {userEmail}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem className="flex gap-3 items-center">
-                        <CalendarDays size={20} />
-                        <Link href="/dashboard/schedule">Schema</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="flex gap-3 items-center">
-                        <UsersRound size={20} />
-                        <Link href="/dashboard/social">Användare</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="flex gap-3 items-center">
-                        <Settings size={20} />
-                        <Link href="/dashboard/settings">Inställningar</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="flex gap-3 items-center">
-                        <DoorClosed size={20} />
-                        <SignOutButton />
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link href="/auth/login">
-                <Button variant="outline">Logga in</Button>
-              </Link>
-            )}
-          </div> */}
+                    <DropdownMenuItem asChild>
+                      <Link href="/courses" className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Explore Courses
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/schedule" className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        My Schedule
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/students" className="flex items-center">
+                        <Users className="mr-2 h-4 w-4" />
+                        Find Students
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <SignOutButton />
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  // Unauthenticated Mobile Menu
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/courses">Explore Courses</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Sign In</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/signup" className="font-medium">Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </MaxWidthWrapper>
     </div>

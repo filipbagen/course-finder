@@ -1,13 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-
-async function signOut() {
-  'use server'
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  redirect('/')
-}
+import { signOut } from '@/app/actions/auth';
 
 export default async function PrivatePage() {
   const supabase = await createClient()

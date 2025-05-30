@@ -1,11 +1,9 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createClient } from '@/lib/supabase/server';
 import ClientNavbar from './ClientNavbar';
 
 export async function Navbar() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return <ClientNavbar user={user} />;
 }

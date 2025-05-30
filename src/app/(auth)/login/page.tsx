@@ -1,4 +1,4 @@
-import { login } from './actions';
+import { signIn } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -9,19 +9,15 @@ interface LoginPageProps {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const supabase = await createClient();
-  
-  // Await searchParams before using it
   const params = await searchParams;
 
-  // Check if user is already authenticated
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser();
 
-  // Redirect authenticated users to private page
   if (user && !error) {
-    redirect('/private');
+    redirect('/courses');
   }
 
   // Error messages mapping
@@ -72,9 +68,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-red-800">
-                  {errorMessages[
-                    params.error as keyof typeof errorMessages
-                  ] || 'An error occurred. Please try again.'}
+                  {errorMessages[params.error as keyof typeof errorMessages] ||
+                    'An error occurred. Please try again.'}
                 </p>
               </div>
             </div>
@@ -112,7 +107,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {/* Rest of your form remains the same */}
         <div className="mt-8 space-y-6">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form className="space-y-6">
+            <form action={signIn} className="space-y-6">
               <div>
                 <label
                   htmlFor="email"
@@ -155,9 +150,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
               <div>
                 <button
-                  formAction={login}
                   type="submit"
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                   Sign in
                 </button>
