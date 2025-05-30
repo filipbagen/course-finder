@@ -67,9 +67,7 @@ export default async function RootLayout({
         >
           <MaxWidthWrapper className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
+            <main className="flex-1 pt-6">{children}</main>
             <Footer />
           </MaxWidthWrapper>
         </ThemeProvider>

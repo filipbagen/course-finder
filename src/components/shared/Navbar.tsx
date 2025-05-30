@@ -13,6 +13,24 @@ import {
 import { Menu, Calendar, Users, Settings, LogOut, User } from 'lucide-react';
 import { SignOutButton } from '@/components/shared/SignOutButton';
 import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
+
+async function getUserData(userId: string) {
+  try {
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        email: true,
+        image: true,
+      },
+    });
+    return userData;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    return null;
+  }
+}
 
 export async function Navbar() {
   const supabase = await createClient();
@@ -20,13 +38,29 @@ export async function Navbar() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Get user data from database if user is authenticated
+  const userData = user ? await getUserData(user.id) : null;
+
   const userName =
-    user?.user_metadata?.name || user?.user_metadata?.full_name || '';
-  const userEmail = user?.email || '';
-  const userImage = user?.user_metadata?.avatar_url || '';
+    userData?.name ||
+    user?.user_metadata?.name ||
+    user?.user_metadata?.full_name ||
+    '';
+  const userEmail = userData?.email || user?.email || '';
+  const userImage = userData?.image || user?.user_metadata?.avatar_url || '';
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <div className="sticky h-20 inset-x-0 top-0 z-30 w-full transition-all">
+    <div className="h-20 inset-x-0 top-0 z-30 w-full transition-all">
       {/* Glassmorphism Container */}
       <div className="mt-4 rounded-3xl bg-white/10 backdrop-blur-2xl min-w-64 dark:bg-[#14161A]/80 shadow-[0px_0px_0px_1px_rgba(100,6,69,0.10),0px_3px_6px_0px_rgba(100,6,69,0.12),0px_-4px_0px_0px_rgba(100,6,69,0.08)_inset] dark:shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
         <div className="flex items-center justify-between h-16 px-6">
@@ -82,19 +116,14 @@ export async function Navbar() {
                   <DropdownMenuTrigger className="ml-3">
                     <div className="p-1 rounded-full backdrop-blur-sm transition-all duration-150">
                       <Avatar className="h-8 w-8">
-                        {userImage ? (
-                          <AvatarImage
-                            src={userImage}
-                            alt={userName || userEmail}
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                            {userName?.charAt(0)?.toUpperCase() ||
-                              userEmail?.charAt(0)?.toUpperCase() ||
-                              'U'}
-                          </AvatarFallback>
-                        )}
+                        <AvatarImage
+                          src={userImage}
+                          alt={userName || userEmail}
+                          className="rounded-full"
+                        />
+                        <AvatarFallback className="text-xs">
+                          {getInitials(userName || userEmail)}
+                        </AvatarFallback>
                       </Avatar>
                     </div>
                   </DropdownMenuTrigger>
