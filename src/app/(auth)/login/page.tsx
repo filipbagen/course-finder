@@ -156,6 +156,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   Sign in
                 </button>
               </div>
+
+              <div className="text-center mt-4">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-indigo-600 hover:text-indigo-500"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </form>
 
             <div className="mt-6">

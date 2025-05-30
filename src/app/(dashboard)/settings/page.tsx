@@ -162,6 +162,9 @@ export default async function SettingPage() {
     const program = formData.get('program') as string;
     const image = formData.get('image') as string;
     const pictureFile = formData.get('picture') as File;
+    const currentPassword = formData.get('current_password') as string;
+    const newPassword = formData.get('new_password') as string;
+    const confirmPassword = formData.get('confirm_password') as string;
 
     const updateData: any = {
       name: name || undefined,
@@ -238,6 +241,42 @@ export default async function SettingPage() {
     // Only update isPublic if the switch was interacted with
     if (isPublic !== null) {
       updateData.isPublic = isPublic === 'on';
+    }
+
+    // Handle password change
+    if (newPassword && newPassword.trim()) {
+      // Validate password fields
+      if (!currentPassword || !currentPassword.trim()) {
+        throw new Error('Nuvarande lösenord krävs för att ändra lösenord');
+      }
+
+      if (newPassword !== confirmPassword) {
+        throw new Error('Nya lösenord matchar inte');
+      }
+
+      if (newPassword.length < 6) {
+        throw new Error('Nytt lösenord måste vara minst 6 tecken långt');
+      }
+
+      // First verify the current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        throw new Error('Nuvarande lösenord är felaktigt');
+      }
+
+      // Update the password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.error('Password update error:', updateError);
+        throw new Error('Kunde inte uppdatera lösenord');
+      }
     }
 
     await prisma.user.update({
@@ -475,6 +514,50 @@ export default async function SettingPage() {
                   defaultChecked={data?.isPublic ?? true}
                   id="isPublic"
                   name="isPublic"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Password & Security Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lösenord & Säkerhet</CardTitle>
+              <CardDescription>
+                Hantera ditt lösenord och säkerhetsinställningar
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="current_password">Nuvarande lösenord</Label>
+                <Input
+                  name="current_password"
+                  type="password"
+                  id="current_password"
+                  placeholder="Ange ditt nuvarande lösenord"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new_password">Nytt lösenord</Label>
+                <Input
+                  name="new_password"
+                  type="password"
+                  id="new_password"
+                  placeholder="Ange ditt nya lösenord"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Lösenordet måste vara minst 6 tecken långt
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm_password">Bekräfta nytt lösenord</Label>
+                <Input
+                  name="confirm_password"
+                  type="password"
+                  id="confirm_password"
+                  placeholder="Bekräfta ditt nya lösenord"
                 />
               </div>
             </CardContent>
