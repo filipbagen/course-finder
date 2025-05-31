@@ -2,7 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Users, BookOpen, MessageSquare, Filter, SortAsc } from 'lucide-react';
+import {
+  Users,
+  BookOpen,
+  MessageSquare,
+  Filter,
+  SortAsc,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';

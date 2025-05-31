@@ -92,7 +92,7 @@ async function getAvailablePrograms() {
 export default async function StudentsPage({
   searchParams,
 }: {
-  searchParams: { search?: string; program?: string; sort?: string };
+  searchParams: Promise<{ search?: string; program?: string; sort?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -103,9 +103,10 @@ export default async function StudentsPage({
     redirect('/login');
   }
 
-  const searchQuery = searchParams.search;
-  const programFilter = searchParams.program;
-  const sortBy = searchParams.sort;
+  const params = await searchParams;
+  const searchQuery = params.search;
+  const programFilter = params.program;
+  const sortBy = params.sort;
 
   const [users, availablePrograms] = await Promise.all([
     getUsers(searchQuery, programFilter, sortBy),
