@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   Card,
@@ -14,7 +16,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
-import { EnrollmentButton } from '@/app/dashboard/schedule/components/EnrollmentButton';
+import { EnrollmentButton } from '@/components/course/EnrollmentButton';
 import { Badge } from '@/components/ui/badge';
 import {
   GripVertical,
@@ -30,7 +32,6 @@ import {
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/types/types';
-import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { useEnrollment } from '@/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
 
@@ -38,15 +39,16 @@ interface CourseCardProps {
   course: Course | CourseWithEnrollment;
   variant?: 'default' | 'schedule' | 'user-visit';
   handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  dragHandleProps?: any;
   hasExclusion?: boolean;
   className?: string;
+  isAuthenticated?: boolean;
 }
 
 const CourseCardDetails = ({ course }: { course: Course }) => {
   return (
     <Accordion type="multiple" className="w-full">
-      <AccordionItem value="mainFieldOfStudy" border={false}>
+      <AccordionItem value="mainFieldOfStudy" className="border-0">
         <div className="flex justify-between">
           <CardFooter className="flex gap-4">
             <div>
@@ -117,6 +119,7 @@ const CourseCard = ({
   handleUpdateAfterDeletion,
   dragHandleProps,
   hasExclusion,
+  isAuthenticated = false,
 }: CourseCardProps) => {
   const { addToEnrollment, deleteEnrollment } = useEnrollment(
     course.name,
@@ -161,6 +164,7 @@ const CourseCard = ({
               <EnrollmentButton
                 course={course}
                 addToEnrollment={addToEnrollment}
+                isAuthenticated={isAuthenticated}
               />
             )}
 

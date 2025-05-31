@@ -1,11 +1,11 @@
 export interface User {
   id: string;
-  name: string;
+  name: string;        // ← Remove | null since it's required in schema
   email: string;
   colorScheme: string;
   isPublic: boolean;
-  program: string;
-  image: string;
+  program: string | null;  // ← This one can be null
+  image: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }

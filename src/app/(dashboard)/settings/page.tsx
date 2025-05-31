@@ -135,6 +135,12 @@ export default async function SettingPage() {
   // Get user data from database
   const data = await getData(user.id);
 
+  // This should never happen for authenticated users, but add a safeguard
+  if (!data) {
+    console.error('Authenticated user not found in database:', user.id);
+    redirect('/login');
+  }
+
   // Create a bound function for deleting the profile image
   const handleDeleteImage = async () => {
     'use server';
@@ -290,8 +296,7 @@ export default async function SettingPage() {
     revalidatePath('/settings');
   }
 
-  const getInitials = (name: string | null) => {
-    if (!name) return 'U';
+  const getInitials = (name: string) => {
     return name
       .split(' ')
       .map((n) => n[0])
