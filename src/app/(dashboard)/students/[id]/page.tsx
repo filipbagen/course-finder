@@ -80,12 +80,13 @@ async function getUserProfile(userId: string) {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
+  const { id } = await params;
   const supabase = await createClient();
   const {
     data: { user: currentUser },
@@ -95,7 +96,7 @@ export default async function UserProfilePage({ params }: PageProps) {
     redirect('/login');
   }
 
-  const userProfile = await getUserProfile(params.id);
+  const userProfile = await getUserProfile(id);
 
   if (!userProfile) {
     notFound();
@@ -105,7 +106,7 @@ export default async function UserProfilePage({ params }: PageProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <UserProfileComponent
         userProfile={userProfile}
-        isOwnProfile={currentUser.id === params.id}
+        isOwnProfile={currentUser.id === id}
       />
     </div>
   );

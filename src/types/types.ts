@@ -33,14 +33,23 @@ export interface Course {
   examinations?: Examination[]; // Ensure this is included
 }
 
+export interface Enrollment {
+  id: string;
+  semester: number;
+  period: number;
+  status: string;
+  grade: string | null;
+  enrolledAt: Date;
+}
+
 export interface CourseWithEnrollment extends Course {
-  enrollmentId: string;
+  enrollment: Enrollment;
 }
 
 export const isCourseWithEnrollment = (
   course: Course | CourseWithEnrollment
 ): course is CourseWithEnrollment => {
-  return 'enrollmentId' in course;
+  return 'enrollment' in course;
 };
 
 export interface Examination {

@@ -170,7 +170,7 @@ const CourseCard = ({
 
             {isScheduleVariant && isCourseWithEnrollment(course) && (
               <Trash2
-                onClick={() => deleteEnrollment(course.enrollmentId)}
+                onClick={() => deleteEnrollment(course.enrollment.id)}
                 className="h-5 w-5 text-red-500 cursor-pointer hover:bg-red-50 rounded-md p-1"
               />
             )}
