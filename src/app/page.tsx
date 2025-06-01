@@ -4,19 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 // shadcn
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 // icons
 import {
-  MapPin,
   Star,
   Search,
   Sparkles,
@@ -25,8 +16,8 @@ import {
   Handshake,
 } from 'lucide-react';
 
-// data
-import db from '@/lib/courses.json';
+// components
+import { CourseCarousel } from '@/components/course/CourseCarousel';
 
 export default async function Home() {
   const supabase = await createClient();
@@ -135,50 +126,8 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Course carousell */}
-      <div className="relative text-left my-10 overflow-hidden hidden lg:block md:block">
-        <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-background"></div>
-        <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-background"></div>
-        <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-background"></div>
-        <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-background"></div>
-
-        <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
-          {db.Courses.map((course: any) => (
-            <Card
-              key={course.code}
-              className="
-                flex-grow h-min bg-white rounded-md border border-gray-100
-                px-5 py-3 shadow-md transition-all hover:translate-x-1 hover:-translate-y-1
-                hover:scale-[1.025] hover:shadow-xl p-8"
-            >
-              <CardHeader>
-                <div className="flex justify-between gap-2 items-start">
-                  <CardTitle>{course.name}</CardTitle>
-                  <Button size={'icon'} className="hover:cursor-default">
-                    +
-                  </Button>
-                </div>
-                <CardDescription>{course.code}</CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <div className="flex gap-2 items-center mb-4">
-                  <MapPin size={16} />
-                  <p>{course.campus}</p>
-                </div>
-
-                <div className="flex justify-between">
-                  <CardFooter className="flex gap-4">
-                    <p>Termin {course.semester}</p>
-                    <p>Period {course.period}</p>
-                    <p>Block {course.block}</p>
-                  </CardFooter>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      {/* Course carousel */}
+      <CourseCarousel />
 
       {/* Steps */}
       <ol className="my-6 lg:my-24 space-y-4 md:flex md:space-x-12 md:space-y-0">
@@ -342,12 +291,7 @@ export default async function Home() {
   );
 }
 
-
 // OLD CODE BELOW
-
-
-
-
 
 // export default async function Home() {
 //   const supabase = createClientComponentClient();
@@ -361,5 +305,4 @@ export default async function Home() {
 //     redirect('/private');
 //   }
 
-  
 // }

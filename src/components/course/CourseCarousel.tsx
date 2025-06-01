@@ -1,0 +1,104 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { LandingCourseCard } from './LandingCourseCard';
+import { SkeletonCard } from '@/components/shared/SkeletonComponent';
+
+interface Course {
+  id: string;
+  code: string;
+  name: string;
+  credits: number;
+  mainFieldOfStudy: string[];
+  advanced: boolean;
+  semester: number[];
+  period: number[];
+  block: number[];
+  campus: string;
+  content?: string;
+}
+
+/**
+ * Course Carousel Component
+ * 
+ * Displays a scrolling carousel of random courses from the database.
+ * Automatically fetches fresh course data on component mount.
+ */
+export function CourseCarousel() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/courses/random?count=12');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses');
+        }
+        
+        const data = await response.json();
+        setCourses(data);
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+        setError('Failed to load courses');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="relative text-left my-10 overflow-hidden hidden lg:block md:block">
+        <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-background"></div>
+        <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-background"></div>
+
+        <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} variant="course" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || courses.length === 0) {
+    return (
+      <div className="relative text-left my-10 overflow-hidden hidden lg:block md:block">
+        <div className="text-center py-20">
+          <p className="text-muted-foreground">
+            {error || 'No courses available at the moment.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative text-left my-10 overflow-hidden hidden lg:block md:block">
+      {/* Gradient overlays */}
+      <div className="pointer-events-none absolute -top-1 z-10 h-20 w-full bg-gradient-to-b from-white to-transparent dark:from-background"></div>
+      <div className="pointer-events-none absolute -bottom-1 z-10 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-background"></div>
+      <div className="pointer-events-none absolute -left-1 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent dark:from-background"></div>
+      <div className="pointer-events-none absolute -right-1 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent dark:from-background"></div>
+
+      {/* Course grid with animation */}
+      <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
+        {courses.map((course) => (
+          <LandingCourseCard
+            key={course.id}
+            course={course}
+            className="flex-grow h-min"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
