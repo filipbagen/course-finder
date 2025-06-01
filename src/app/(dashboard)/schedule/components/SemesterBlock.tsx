@@ -174,19 +174,22 @@ function isValidDropTarget(
   targetSemester: number,
   targetPeriod: number
 ): boolean {
-  // Basic validation - courses can generally be moved between semesters
-  // You can add more complex validation logic here based on:
-  // - Course prerequisites
-  // - Course offerings (some courses might only be offered in specific semesters)
-  // - Program requirements
-  // - Credit limits per semester
+  // Rule 1: Course must be offered in the target semester
+  if (!course.semester.includes(targetSemester)) {
+    return false;
+  }
 
-  // For now, allow all moves within semesters 7-9 and periods 1-2
-  return (
-    targetSemester >= 7 &&
-    targetSemester <= 9 &&
-    (targetPeriod === 1 || targetPeriod === 2)
-  );
+  // Rule 2: Course cannot be moved between different periods
+  // The course must be offered in the target period
+  if (!course.period.includes(targetPeriod)) {
+    return false;
+  }
+
+  // Rule 3: Single semester courses cannot be moved at all
+  // This is handled by Rule 1 above - if only offered in one semester,
+  // it can't be moved to another
+
+  return true;
 }
 
 /**

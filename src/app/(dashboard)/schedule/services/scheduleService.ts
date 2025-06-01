@@ -141,18 +141,34 @@ export class ScheduleService {
         };
 
         const semester = enrollment.semester;
-        const period = enrollment.period;
 
-        if (semester >= 7 && semester <= 9 && (period === 1 || period === 2)) {
+        if (semester >= 7 && semester <= 9) {
           const semesterKey = `semester${semester}` as keyof ScheduleData;
-          const periodKey = `period${period}` as 'period1' | 'period2';
 
           const courseWithEnrollment: CourseWithEnrollment = {
             ...course,
             enrollment,
           };
 
-          schedule[semesterKey][periodKey].push(courseWithEnrollment);
+          // Handle multi-period courses: if course.period includes multiple periods,
+          // show the course in all those periods
+          if (course.period && Array.isArray(course.period)) {
+            course.period.forEach((coursePeriod: number) => {
+              if (coursePeriod === 1 || coursePeriod === 2) {
+                const periodKey = `period${coursePeriod}` as
+                  | 'period1'
+                  | 'period2';
+                schedule[semesterKey][periodKey].push(courseWithEnrollment);
+              }
+            });
+          } else {
+            // Fallback: use enrollment period if course.period is not available
+            const period = enrollment.period;
+            if (period === 1 || period === 2) {
+              const periodKey = `period${period}` as 'period1' | 'period2';
+              schedule[semesterKey][periodKey].push(courseWithEnrollment);
+            }
+          }
         }
       });
     }

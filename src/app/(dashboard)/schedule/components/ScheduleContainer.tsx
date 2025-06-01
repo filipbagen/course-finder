@@ -93,6 +93,32 @@ export function ScheduleContainer({
   };
 
   /**
+   * Validate if a course can be moved to a specific semester and period
+   */
+  const isValidMove = (
+    course: CourseWithEnrollment,
+    targetSemester: number,
+    targetPeriod: number
+  ): boolean => {
+    // Rule 1: Course must be offered in the target semester
+    if (!course.semester.includes(targetSemester)) {
+      return false;
+    }
+
+    // Rule 2: Course cannot be moved between different periods
+    // The course must be offered in the target period
+    if (!course.period.includes(targetPeriod)) {
+      return false;
+    }
+
+    // Rule 3: Single semester courses cannot be moved at all
+    // This is handled by Rule 1 above - if only offered in one semester,
+    // it can't be moved to another
+
+    return true;
+  };
+
+  /**
    * Handle drag end - update the schedule
    */
   const handleDragEnd = (event: DragEndEvent) => {
@@ -144,6 +170,19 @@ export function ScheduleContainer({
       currentPosition.semester === targetSemester &&
       currentPosition.period === targetPeriod
     ) {
+      return;
+    }
+
+    // Validate if the course can be moved to the target position
+    if (!isValidMove(activeCourse, targetSemester, targetPeriod)) {
+      // TODO: Show user feedback about why the move isn't allowed
+      console.warn('Move not allowed:', {
+        course: activeCourse.code,
+        from: currentPosition,
+        to: { semester: targetSemester, period: targetPeriod },
+        availableSemesters: activeCourse.semester,
+        availablePeriods: activeCourse.period,
+      });
       return;
     }
 

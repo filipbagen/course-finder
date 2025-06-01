@@ -157,8 +157,32 @@ export function CourseCard({
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-3 w-3" />
                   <span>
-                    S{course.enrollment.semester} P{course.enrollment.period}
+                    S{course.enrollment.semester}
+                    {course.period.length > 1 && (
+                      <span className="ml-1 text-blue-600 font-medium">
+                        P{course.period.join('+')}
+                      </span>
+                    )}
+                    {course.period.length === 1 && (
+                      <span className="ml-1">P{course.period[0]}</span>
+                    )}
                   </span>
+                  {course.semester.length > 1 && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs py-0 px-1 h-4 text-amber-600 border-amber-300"
+                    >
+                      Multi-sem
+                    </Badge>
+                  )}
+                  {course.period.length > 1 && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs py-0 px-1 h-4 text-blue-600 border-blue-300"
+                    >
+                      Full-year
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="h-3 w-3" />

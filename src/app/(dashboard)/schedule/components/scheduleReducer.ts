@@ -115,26 +115,74 @@ function moveCourseInSchedule(
     },
   };
 
-  // Get source and destination arrays
+  // Get source and destination keys
   const fromSemesterKey = `semester${fromSemester}` as keyof ScheduleData;
   const toSemesterKey = `semester${toSemester}` as keyof ScheduleData;
   const fromPeriodKey = `period${fromPeriod}` as 'period1' | 'period2';
   const toPeriodKey = `period${toPeriod}` as 'period1' | 'period2';
 
+  // Find the course in the source location
   const fromArray = newSchedule[fromSemesterKey][fromPeriodKey];
-  const toArray = newSchedule[toSemesterKey][toPeriodKey];
-
-  // Find and remove the course from source
   const courseIndex = fromArray.findIndex((course) => course.id === courseId);
   if (courseIndex === -1) {
     console.warn('Course not found in source location:', courseId);
     return schedule;
   }
 
-  const [course] = fromArray.splice(courseIndex, 1);
+  const course = fromArray[courseIndex];
 
-  // Add to destination
-  toArray.push(course);
+  // Check if this is a multi-period course
+  const isMultiPeriod =
+    course.period && Array.isArray(course.period) && course.period.length > 1;
+
+  if (isMultiPeriod) {
+    // For multi-period courses, remove from all periods in source semester
+    // and add to all periods in destination semester
+    course.period.forEach((period: number) => {
+      if (period === 1 || period === 2) {
+        const sourcePeriodKey = `period${period}` as 'period1' | 'period2';
+        const destPeriodKey = `period${period}` as 'period1' | 'period2';
+
+        // Remove from source semester
+        const sourceArray = newSchedule[fromSemesterKey][sourcePeriodKey];
+        const courseIdx = sourceArray.findIndex((c) => c.id === courseId);
+        if (courseIdx !== -1) {
+          sourceArray.splice(courseIdx, 1);
+        }
+
+        // Add to destination semester (avoid duplicates)
+        const destArray = newSchedule[toSemesterKey][destPeriodKey];
+        const exists = destArray.some((c) => c.id === courseId);
+        if (!exists) {
+          // Update the enrollment semester
+          const updatedCourse = {
+            ...course,
+            enrollment: {
+              ...course.enrollment,
+              semester: toSemester,
+            },
+          };
+          destArray.push(updatedCourse);
+        }
+      }
+    });
+  } else {
+    // Single period course - normal move logic
+    const [courseToMove] = fromArray.splice(courseIndex, 1);
+
+    // Update the enrollment semester
+    const updatedCourse = {
+      ...courseToMove,
+      enrollment: {
+        ...courseToMove.enrollment,
+        semester: toSemester,
+      },
+    };
+
+    // Add to destination
+    const toArray = newSchedule[toSemesterKey][toPeriodKey];
+    toArray.push(updatedCourse);
+  }
 
   return newSchedule;
 }
