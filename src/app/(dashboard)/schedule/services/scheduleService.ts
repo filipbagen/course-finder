@@ -1,10 +1,9 @@
-
 import { CourseWithEnrollment } from '@/types/types';
 import { ScheduleData, ScheduleUpdate } from '../types/schedule.types';
 
 /**
  * Schedule Service
- * 
+ *
  * Handles all API calls related to schedule management.
  * Implements the Repository pattern for clean separation of concerns.
  */
@@ -16,10 +15,8 @@ export class ScheduleService {
    */
   static async fetchSchedule(userId?: string): Promise<ScheduleData> {
     try {
-      const url = userId 
-        ? `${this.BASE_URL}?userId=${userId}` 
-        : this.BASE_URL;
-      
+      const url = userId ? `${this.BASE_URL}?userId=${userId}` : this.BASE_URL;
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -32,7 +29,7 @@ export class ScheduleService {
       }
 
       const data = await response.json();
-      
+
       // Transform the data to match our ScheduleData interface
       return this.transformApiResponse(data);
     } catch (error) {
@@ -44,7 +41,9 @@ export class ScheduleService {
   /**
    * Update course placement in schedule
    */
-  static async updateCourseSchedule(update: ScheduleUpdate): Promise<CourseWithEnrollment> {
+  static async updateCourseSchedule(
+    update: ScheduleUpdate
+  ): Promise<CourseWithEnrollment> {
     try {
       const response = await fetch(`${this.BASE_URL}/course`, {
         method: 'PUT',
@@ -68,7 +67,11 @@ export class ScheduleService {
   /**
    * Add course to schedule
    */
-  static async addCourseToSchedule(courseId: string, semester: number, period: number): Promise<CourseWithEnrollment> {
+  static async addCourseToSchedule(
+    courseId: string,
+    semester: number,
+    period: number
+  ): Promise<CourseWithEnrollment> {
     try {
       const response = await fetch(`${this.BASE_URL}/course`, {
         method: 'POST',
@@ -136,19 +139,19 @@ export class ScheduleService {
           grade: enrollmentData.grade,
           enrolledAt: enrollmentData.enrolledAt,
         };
-        
+
         const semester = enrollment.semester;
         const period = enrollment.period;
 
         if (semester >= 7 && semester <= 9 && (period === 1 || period === 2)) {
           const semesterKey = `semester${semester}` as keyof ScheduleData;
           const periodKey = `period${period}` as 'period1' | 'period2';
-          
+
           const courseWithEnrollment: CourseWithEnrollment = {
             ...course,
             enrollment,
           };
-          
+
           schedule[semesterKey][periodKey].push(courseWithEnrollment);
         }
       });
@@ -167,8 +170,11 @@ export class ScheduleService {
     let creditsPerSemester = { 7: 0, 8: 0, 9: 0 };
 
     Object.entries(schedule).forEach(([semesterKey, semesterData]) => {
-      const semester = parseInt(semesterKey.replace('semester', '')) as 7 | 8 | 9;
-      
+      const semester = parseInt(semesterKey.replace('semester', '')) as
+        | 7
+        | 8
+        | 9;
+
       Object.values(semesterData).forEach((courses) => {
         const courseArray = courses as CourseWithEnrollment[];
         courseArray.forEach((course) => {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -20,37 +19,35 @@ interface SemesterBlockProps {
 
 /**
  * Semester Block Component
- * 
+ *
  * Represents a single cell in the schedule grid.
  * Acts as a drop zone for drag and drop operations.
- * 
+ *
  * Features:
  * - Visual feedback during drag operations
  * - Empty state with add course option
  * - Responsive course layout
  * - Accessibility support
  */
-export function SemesterBlock({ 
-  semester, 
-  period, 
-  courses, 
-  dropZoneId, 
-  readonly = false 
+export function SemesterBlock({
+  semester,
+  period,
+  courses,
+  dropZoneId,
+  readonly = false,
 }: SemesterBlockProps) {
   const { state } = useSchedule();
   const { isDragging, draggedCourse } = state;
 
-  const {
-    isOver,
-    setNodeRef,
-  } = useDroppable({
+  const { isOver, setNodeRef } = useDroppable({
     id: dropZoneId,
     disabled: readonly,
   });
 
   // Check if the dragged course can be dropped here
   const canDrop = isDragging && draggedCourse && !readonly;
-  const isValidDrop = canDrop && isValidDropTarget(draggedCourse, semester, period);
+  const isValidDrop =
+    canDrop && isValidDropTarget(draggedCourse, semester, period);
 
   return (
     <div
@@ -61,12 +58,12 @@ export function SemesterBlock({
         {
           // Default state
           'border-border': !isDragging,
-          
+
           // Drag states
           'border-primary bg-primary/5': isOver && isValidDrop,
           'border-destructive bg-destructive/5': isOver && !isValidDrop,
           'border-muted-foreground/50': isDragging && !isOver,
-          
+
           // Readonly state
           'cursor-not-allowed opacity-60': readonly,
         }
@@ -80,7 +77,7 @@ export function SemesterBlock({
             S{semester} P{period}
           </span>
         </div>
-        
+
         {!readonly && courses.length > 0 && (
           <span className="text-xs text-muted-foreground">
             {courses.length} course{courses.length !== 1 ? 's' : ''}
@@ -153,14 +150,17 @@ export function SemesterBlock({
 
       {/* Drop feedback overlay */}
       {isDragging && (
-        <div className={cn(
-          'absolute inset-0 rounded-lg border-2 pointer-events-none transition-opacity',
-          {
-            'border-primary bg-primary/5 opacity-100': isOver && isValidDrop,
-            'border-destructive bg-destructive/5 opacity-100': isOver && !isValidDrop,
-            'opacity-0': !isOver,
-          }
-        )} />
+        <div
+          className={cn(
+            'absolute inset-0 rounded-lg border-2 pointer-events-none transition-opacity',
+            {
+              'border-primary bg-primary/5 opacity-100': isOver && isValidDrop,
+              'border-destructive bg-destructive/5 opacity-100':
+                isOver && !isValidDrop,
+              'opacity-0': !isOver,
+            }
+          )}
+        />
       )}
     </div>
   );
@@ -170,8 +170,8 @@ export function SemesterBlock({
  * Check if a course can be dropped in a specific semester/period
  */
 function isValidDropTarget(
-  course: CourseWithEnrollment, 
-  targetSemester: number, 
+  course: CourseWithEnrollment,
+  targetSemester: number,
   targetPeriod: number
 ): boolean {
   // Basic validation - courses can generally be moved between semesters
@@ -180,9 +180,13 @@ function isValidDropTarget(
   // - Course offerings (some courses might only be offered in specific semesters)
   // - Program requirements
   // - Credit limits per semester
-  
+
   // For now, allow all moves within semesters 7-9 and periods 1-2
-  return targetSemester >= 7 && targetSemester <= 9 && (targetPeriod === 1 || targetPeriod === 2);
+  return (
+    targetSemester >= 7 &&
+    targetSemester <= 9 &&
+    (targetPeriod === 1 || targetPeriod === 2)
+  );
 }
 
 /**
@@ -192,7 +196,7 @@ function handleAddCourse(semester: number, period: number) {
   // This would typically open a course selection modal/drawer
   // For now, we'll just log the action
   console.log(`Add course to Semester ${semester}, Period ${period}`);
-  
+
   // TODO: Implement course selection modal
   // This could:
   // 1. Open a modal with available courses

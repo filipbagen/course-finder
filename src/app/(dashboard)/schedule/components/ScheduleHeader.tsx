@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -20,15 +19,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, 
-  Download, 
-  Share2, 
-  Settings, 
+import {
+  Calendar,
+  Download,
+  Share2,
+  Settings,
   MoreHorizontal,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
 } from 'lucide-react';
 import { ScheduleActions } from '../types/schedule.types';
 
@@ -40,20 +39,20 @@ interface ScheduleHeaderProps {
 
 /**
  * Schedule Header Component
- * 
+ *
  * Displays the page header with breadcrumbs, title, and actions.
  * Provides context-aware actions based on readonly state.
- * 
+ *
  * Features:
  * - Breadcrumb navigation
  * - Schedule actions (export, share, settings)
  * - Loading state handling
  * - User context for viewing other schedules
  */
-export function ScheduleHeader({ 
-  readonly = false, 
+export function ScheduleHeader({
+  readonly = false,
   viewingUserId,
-  viewingUserName 
+  viewingUserName,
 }: ScheduleHeaderProps) {
   const { state, dispatch } = useSchedule();
   const { loading, lastUpdated } = state;
@@ -100,7 +99,9 @@ export function ScheduleHeader({
           {readonly && viewingUserName ? (
             <>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/students">Students</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard/students">
+                  Students
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -122,16 +123,14 @@ export function ScheduleHeader({
             <Calendar className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                {readonly && viewingUserName 
+                {readonly && viewingUserName
                   ? `${viewingUserName}'s Schedule`
-                  : 'My Schedule'
-                }
+                  : 'My Schedule'}
               </h1>
               <p className="text-muted-foreground">
-                {readonly 
+                {readonly
                   ? 'View student course schedule and progress'
-                  : 'Plan and manage your academic journey'
-                }
+                  : 'Plan and manage your academic journey'}
               </p>
             </div>
           </div>
@@ -144,7 +143,7 @@ export function ScheduleHeader({
                 View Only
               </Badge>
             )}
-            
+
             {loading && (
               <Badge variant="outline" className="gap-1">
                 <RefreshCw className="h-3 w-3 animate-spin" />
@@ -216,12 +215,12 @@ export function ScheduleHeader({
                   <DropdownMenuSeparator />
                 </>
               )}
-              
+
               <DropdownMenuItem onClick={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Export as PDF
               </DropdownMenuItem>
-              
+
               <DropdownMenuItem onClick={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Export as CSV

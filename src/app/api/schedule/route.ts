@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
@@ -13,7 +12,7 @@ export async function GET(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Get userId from query params for viewing other users' schedules
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get('userId');
-    
+
     // Use target user ID if provided, otherwise use authenticated user
     const userId = targetUserId || user.id;
 
@@ -41,14 +40,11 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [
-        { semester: 'asc' },
-        { course: { name: 'asc' } },
-      ],
+      orderBy: [{ semester: 'asc' }, { course: { name: 'asc' } }],
     });
 
     return NextResponse.json({
-      enrollments: enrollments.map(enrollment => ({
+      enrollments: enrollments.map((enrollment) => ({
         id: enrollment.id,
         semester: enrollment.semester,
         period: 1, // Default period since it's not in the schema

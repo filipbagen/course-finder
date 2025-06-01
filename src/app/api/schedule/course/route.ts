@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
@@ -26,7 +25,7 @@ export async function PUT(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -97,7 +96,8 @@ export async function PUT(request: NextRequest) {
       exclusions: updatedEnrollment.course.exclusions,
       offeredFor: updatedEnrollment.course.offeredFor,
       prerequisites: updatedEnrollment.course.prerequisites,
-      recommendedPrerequisites: updatedEnrollment.course.recommendedPrerequisites,
+      recommendedPrerequisites:
+        updatedEnrollment.course.recommendedPrerequisites,
       learningOutcomes: updatedEnrollment.course.learningOutcomes,
       teachingMethods: updatedEnrollment.course.teachingMethods,
       examinations: updatedEnrollment.course.examinations,
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new enrollment
-    const enrollment = await prisma.enrollment.create({
+    const enrollment = (await prisma.enrollment.create({
       data: {
         id: randomUUID(),
         userId: user.id,
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    }) as EnrollmentWithCourse;
+    })) as EnrollmentWithCourse;
 
     return NextResponse.json({
       id: enrollment.course.id,

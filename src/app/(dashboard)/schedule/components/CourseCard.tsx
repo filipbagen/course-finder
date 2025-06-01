@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,12 +6,12 @@ import { CourseWithEnrollment } from '@/types/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -20,16 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  GripVertical, 
-  MoreHorizontal, 
-  Eye, 
+import {
+  GripVertical,
+  MoreHorizontal,
+  Eye,
   Trash2,
   Clock,
   BookOpen,
   Users,
   X,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 
 interface CourseCardProps {
@@ -42,10 +41,10 @@ interface CourseCardProps {
 
 /**
  * Course Card Component
- * 
+ *
  * Displays course information in the schedule grid.
  * Supports drag and drop operations when not readonly.
- * 
+ *
  * Features:
  * - Draggable functionality
  * - Compact and full view modes
@@ -53,12 +52,12 @@ interface CourseCardProps {
  * - Visual indicators for course status
  * - Accessibility support
  */
-export function CourseCard({ 
-  course, 
-  isDragging = false, 
+export function CourseCard({
+  course,
+  isDragging = false,
   readonly = false,
   compact = false,
-  onRemove
+  onRemove,
 }: CourseCardProps) {
   const {
     attributes,
@@ -71,9 +70,11 @@ export function CourseCard({
     disabled: readonly,
   });
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  } : undefined;
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
 
   // Handle course removal
   const handleRemoveCourse = () => {
@@ -101,16 +102,13 @@ export function CourseCard({
       <Card
         ref={setNodeRef}
         style={style}
-        className={cn(
-          'transition-all duration-200 cursor-pointer group',
-          {
-            'opacity-50 scale-95': isDraggingThis,
-            'shadow-lg scale-105 z-50': isDragging,
-            'hover:shadow-md': !readonly && !isDraggingThis,
-            'cursor-grab': !readonly,
-            'cursor-grabbing': isDraggingThis,
-          }
-        )}
+        className={cn('transition-all duration-200 cursor-pointer group', {
+          'opacity-50 scale-95': isDraggingThis,
+          'shadow-lg scale-105 z-50': isDragging,
+          'hover:shadow-md': !readonly && !isDraggingThis,
+          'cursor-grab': !readonly,
+          'cursor-grabbing': isDraggingThis,
+        })}
       >
         <CardContent className="p-3">
           <div className="flex items-start gap-3">
@@ -150,15 +148,17 @@ export function CourseCard({
                   </button>
                 )}
               </div>
-              
+
               <h3 className="font-medium text-sm leading-tight mb-2 group-hover:text-primary transition-colors">
                 {course.name}
               </h3>
-              
+
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-3 w-3" />
-                  <span>S{course.enrollment.semester} P{course.enrollment.period}</span>
+                  <span>
+                    S{course.enrollment.semester} P{course.enrollment.period}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="h-3 w-3" />
@@ -180,7 +180,7 @@ export function CourseCard({
             <div className="mt-2 pt-2 border-t border-border">
               <div className="flex flex-wrap gap-1">
                 {course.examinations.map((exam) => (
-                  <span 
+                  <span
                     key={exam.id}
                     className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full"
                   >
@@ -200,16 +200,13 @@ export function CourseCard({
     <Card
       ref={setNodeRef}
       style={style}
-      className={cn(
-        'transition-all duration-200 cursor-pointer group',
-        {
-          'opacity-50 scale-95': isDraggingThis,
-          'shadow-lg scale-105 z-50': isDragging,
-          'hover:shadow-md': !readonly && !isDraggingThis,
-          'cursor-grab': !readonly,
-          'cursor-grabbing': isDraggingThis,
-        }
-      )}
+      className={cn('transition-all duration-200 cursor-pointer group', {
+        'opacity-50 scale-95': isDraggingThis,
+        'shadow-lg scale-105 z-50': isDragging,
+        'hover:shadow-md': !readonly && !isDraggingThis,
+        'cursor-grab': !readonly,
+        'cursor-grabbing': isDraggingThis,
+      })}
     >
       <CardHeader className="pb-2">
         <div className="flex items-start gap-3">
@@ -253,7 +250,7 @@ export function CourseCard({
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={handleRemoveCourse}
                       className="text-destructive"
                     >
@@ -302,8 +299,12 @@ export function CourseCard({
 
         {/* Status Badge */}
         <div className="flex items-center justify-between mt-3">
-          <Badge 
-            variant={course.enrollment?.status === 'completed' ? 'default' : 'secondary'}
+          <Badge
+            variant={
+              course.enrollment?.status === 'completed'
+                ? 'default'
+                : 'secondary'
+            }
             className="capitalize"
           >
             {course.enrollment?.status || 'planned'}

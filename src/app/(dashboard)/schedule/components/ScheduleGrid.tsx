@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -10,11 +9,11 @@ import { AlertCircle } from 'lucide-react';
 
 /**
  * Schedule Grid Component
- * 
+ *
  * Renders a 2x3 grid layout for the schedule:
  * - Columns: Semester 7, 8, 9
  * - Rows: Period 1, Period 2
- * 
+ *
  * Features:
  * - Responsive design
  * - Loading states
@@ -35,14 +34,14 @@ export function ScheduleGrid() {
           <SkeletonCard variant="schedule" />
           <SkeletonCard variant="schedule" />
         </div>
-        
+
         {/* Period 1 row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <SkeletonCard variant="schedule" />
           <SkeletonCard variant="schedule" />
           <SkeletonCard variant="schedule" />
         </div>
-        
+
         {/* Period 2 row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <SkeletonCard variant="schedule" />
@@ -58,9 +57,7 @@ export function ScheduleGrid() {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {error}
-        </AlertDescription>
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
   }
@@ -72,11 +69,8 @@ export function ScheduleGrid() {
     <div className="w-full space-y-6">
       {/* Semester Headers */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {semesters.map(semester => (
-          <div
-            key={semester}
-            className="text-center p-4 bg-muted rounded-lg"
-          >
+        {semesters.map((semester) => (
+          <div key={semester} className="text-center p-4 bg-muted rounded-lg">
             <h3 className="text-lg font-semibold text-foreground">
               Semester {semester}
             </h3>
@@ -89,7 +83,7 @@ export function ScheduleGrid() {
 
       {/* Schedule Grid */}
       <div className="space-y-8">
-        {periods.map(period => (
+        {periods.map((period) => (
           <div key={period} className="space-y-4">
             {/* Period Header */}
             <div className="flex items-center gap-3">
@@ -102,9 +96,11 @@ export function ScheduleGrid() {
 
             {/* Period Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {semesters.map(semester => {
-                const semesterKey = `semester${semester}` as keyof typeof schedule;
-                const periodKey = `period${period}` as keyof typeof schedule[typeof semesterKey];
+              {semesters.map((semester) => {
+                const semesterKey =
+                  `semester${semester}` as keyof typeof schedule;
+                const periodKey =
+                  `period${period}` as keyof (typeof schedule)[typeof semesterKey];
                 const courses = schedule?.[semesterKey]?.[periodKey] || [];
 
                 return (
@@ -124,7 +120,9 @@ export function ScheduleGrid() {
 
       {/* Mobile Layout Helper */}
       <div className="md:hidden text-center text-sm text-muted-foreground mt-8">
-        <p>On mobile, each semester is shown separately for better visibility.</p>
+        <p>
+          On mobile, each semester is shown separately for better visibility.
+        </p>
       </div>
     </div>
   );

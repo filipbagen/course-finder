@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -14,9 +13,7 @@ import {
   DragOverlay,
   closestCenter,
 } from '@dnd-kit/core';
-import {
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSchedule } from './ScheduleProvider';
 import { CourseCard } from './CourseCard';
 import { ScheduleActions } from '../types/schedule.types';
@@ -29,19 +26,23 @@ interface ScheduleContainerProps {
 
 /**
  * Schedule Container Component
- * 
+ *
  * Provides drag and drop functionality using dnd-kit.
  * Handles all drag events and updates the schedule state.
- * 
+ *
  * Features:
  * - Optimistic updates for better UX
  * - Error handling with rollback
  * - Accessibility support
  * - Touch and keyboard navigation
  */
-export function ScheduleContainer({ children, readonly = false }: ScheduleContainerProps) {
+export function ScheduleContainer({
+  children,
+  readonly = false,
+}: ScheduleContainerProps) {
   const { state, dispatch } = useSchedule();
-  const [activeCourse, setActiveCourse] = React.useState<CourseWithEnrollment | null>(null);
+  const [activeCourse, setActiveCourse] =
+    React.useState<CourseWithEnrollment | null>(null);
 
   // Configure sensors for different input methods
   const sensors = useSensors(
@@ -63,7 +64,7 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
 
     const { active } = event;
     const courseId = active.id as string;
-    
+
     // Find the active course in the schedule
     const course = findCourseById(courseId);
     if (course) {
@@ -80,9 +81,9 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
    */
   const handleDragOver = (event: DragOverEvent) => {
     if (readonly) return;
-    
+
     const { over } = event;
-    
+
     if (over) {
       const overId = over.id as string;
       if (overId.includes('semester') && overId.includes('period')) {
@@ -124,7 +125,10 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
     const targetPeriod = parseInt(periodPart.replace('period', ''));
 
     if (isNaN(targetSemester) || isNaN(targetPeriod)) {
-      console.error('Invalid semester or period:', { targetSemester, targetPeriod });
+      console.error('Invalid semester or period:', {
+        targetSemester,
+        targetPeriod,
+      });
       return;
     }
 
@@ -136,7 +140,10 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
     }
 
     // Check if position actually changed
-    if (currentPosition.semester === targetSemester && currentPosition.period === targetPeriod) {
+    if (
+      currentPosition.semester === targetSemester &&
+      currentPosition.period === targetPeriod
+    ) {
       return;
     }
 
@@ -158,42 +165,52 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
    */
   const findCourseById = (courseId: string): CourseWithEnrollment | null => {
     const { schedule } = state;
-    
-    for (const semesterKey of Object.keys(schedule) as Array<keyof typeof schedule>) {
+
+    for (const semesterKey of Object.keys(schedule) as Array<
+      keyof typeof schedule
+    >) {
       const semesterData = schedule[semesterKey];
-      for (const periodKey of Object.keys(semesterData) as Array<keyof typeof semesterData>) {
+      for (const periodKey of Object.keys(semesterData) as Array<
+        keyof typeof semesterData
+      >) {
         const courses = semesterData[periodKey];
-        const course = courses.find(c => c.id === courseId);
+        const course = courses.find((c) => c.id === courseId);
         if (course) {
           return course;
         }
       }
     }
-    
+
     return null;
   };
 
   /**
    * Find the position of a course in the schedule
    */
-  const findCoursePosition = (courseId: string): { semester: number; period: number } | null => {
+  const findCoursePosition = (
+    courseId: string
+  ): { semester: number; period: number } | null => {
     const { schedule } = state;
-    
-    for (const semesterKey of Object.keys(schedule) as Array<keyof typeof schedule>) {
+
+    for (const semesterKey of Object.keys(schedule) as Array<
+      keyof typeof schedule
+    >) {
       const semester = parseInt(semesterKey.replace('semester', ''));
       const semesterData = schedule[semesterKey];
-      
-      for (const periodKey of Object.keys(semesterData) as Array<keyof typeof semesterData>) {
+
+      for (const periodKey of Object.keys(semesterData) as Array<
+        keyof typeof semesterData
+      >) {
         const period = parseInt(periodKey.replace('period', ''));
         const courses = semesterData[periodKey];
-        const course = courses.find(c => c.id === courseId);
-        
+        const course = courses.find((c) => c.id === courseId);
+
         if (course) {
           return { semester, period };
         }
       }
     }
-    
+
     return null;
   };
 
@@ -209,10 +226,8 @@ export function ScheduleContainer({ children, readonly = false }: ScheduleContai
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full">
-        {children}
-      </div>
-      
+      <div className="w-full">{children}</div>
+
       <DragOverlay>
         {activeCourse ? (
           <CourseCard

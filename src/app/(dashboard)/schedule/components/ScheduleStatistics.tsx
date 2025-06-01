@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -6,22 +5,22 @@ import { useSchedule } from './ScheduleProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BookOpen, 
-  GraduationCap, 
-  Clock, 
+import {
+  BookOpen,
+  GraduationCap,
+  Clock,
   Target,
   TrendingUp,
-  Award
+  Award,
 } from 'lucide-react';
 import { ScheduleService } from '../services/scheduleService';
 
 /**
  * Schedule Statistics Component
- * 
+ *
  * Displays key metrics and statistics about the schedule.
  * Provides insights into course distribution, credits, and progress.
- * 
+ *
  * Features:
  * - Course and credit statistics
  * - Progress indicators
@@ -62,7 +61,10 @@ export function ScheduleStatistics() {
   // Define expected totals (these could come from program requirements)
   const expectedTotalCredits = 180; // Example total credits needed
   const expectedCoursesPerSemester = 5; // Example courses per semester
-  const progressPercentage = Math.min((stats.totalCredits / expectedTotalCredits) * 100, 100);
+  const progressPercentage = Math.min(
+    (stats.totalCredits / expectedTotalCredits) * 100,
+    100
+  );
 
   return (
     <div className="space-y-6">
@@ -76,9 +78,7 @@ export function ScheduleStatistics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalCourses}</div>
-            <p className="text-xs text-muted-foreground">
-              Across 3 semesters
-            </p>
+            <p className="text-xs text-muted-foreground">Across 3 semesters</p>
           </CardContent>
         </Card>
 
@@ -93,26 +93,23 @@ export function ScheduleStatistics() {
             <p className="text-xs text-muted-foreground">
               of {expectedTotalCredits} required
             </p>
-            <Progress 
-              value={progressPercentage} 
-              className="mt-2 h-2"
-            />
+            <Progress value={progressPercentage} className="mt-2 h-2" />
           </CardContent>
         </Card>
 
         {/* Average Credits */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Credits/Semester</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg Credits/Semester
+            </CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {stats.averageCreditsPerSemester.toFixed(1)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Recommended: 15-18
-            </p>
+            <p className="text-xs text-muted-foreground">Recommended: 15-18</p>
           </CardContent>
         </Card>
 
@@ -123,10 +120,10 @@ export function ScheduleStatistics() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{progressPercentage.toFixed(0)}%</div>
-            <p className="text-xs text-muted-foreground">
-              Program completion
-            </p>
+            <div className="text-2xl font-bold">
+              {progressPercentage.toFixed(0)}%
+            </div>
+            <p className="text-xs text-muted-foreground">Program completion</p>
           </CardContent>
         </Card>
       </div>
@@ -141,9 +138,15 @@ export function ScheduleStatistics() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            {[7, 8, 9].map(semester => {
-              const semesterCourses = stats.coursesPerSemester[semester as keyof typeof stats.coursesPerSemester];
-              const semesterCredits = stats.creditsPerSemester[semester as keyof typeof stats.creditsPerSemester];
+            {[7, 8, 9].map((semester) => {
+              const semesterCourses =
+                stats.coursesPerSemester[
+                  semester as keyof typeof stats.coursesPerSemester
+                ];
+              const semesterCredits =
+                stats.creditsPerSemester[
+                  semester as keyof typeof stats.creditsPerSemester
+                ];
               const isLightLoad = semesterCredits < 12;
               const isHeavyLoad = semesterCredits > 18;
 
@@ -182,8 +185,8 @@ export function ScheduleStatistics() {
                       <span>Credit Load</span>
                       <span>{semesterCredits}/20</span>
                     </div>
-                    <Progress 
-                      value={(semesterCredits / 20) * 100} 
+                    <Progress
+                      value={(semesterCredits / 20) * 100}
                       className="h-2"
                     />
                   </div>
@@ -204,27 +207,36 @@ export function ScheduleStatistics() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
-            {[1, 2].map(period => {
-              const periodCourses = Object.values(schedule).reduce((total, semester) => {
-                const periodKey = `period${period}` as 'period1' | 'period2';
-                return total + semester[periodKey].length;
-              }, 0);
+            {[1, 2].map((period) => {
+              const periodCourses = Object.values(schedule).reduce(
+                (total, semester) => {
+                  const periodKey = `period${period}` as 'period1' | 'period2';
+                  return total + semester[periodKey].length;
+                },
+                0
+              );
 
               return (
                 <div key={period} className="space-y-3">
                   <h4 className="font-medium">Period {period}</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Total Courses:</span>
+                      <span className="text-muted-foreground">
+                        Total Courses:
+                      </span>
                       <span className="font-medium">{periodCourses}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Avg per Semester:</span>
-                      <span className="font-medium">{(periodCourses / 3).toFixed(1)}</span>
+                      <span className="text-muted-foreground">
+                        Avg per Semester:
+                      </span>
+                      <span className="font-medium">
+                        {(periodCourses / 3).toFixed(1)}
+                      </span>
                     </div>
                   </div>
-                  <Progress 
-                    value={(periodCourses / stats.totalCourses) * 100} 
+                  <Progress
+                    value={(periodCourses / stats.totalCourses) * 100}
                     className="h-2"
                   />
                 </div>

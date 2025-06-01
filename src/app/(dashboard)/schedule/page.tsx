@@ -10,11 +10,11 @@ import { Separator } from '@/components/ui/separator';
 
 /**
  * Schedule Page Component
- * 
+ *
  * Main schedule page that displays a 2x3 grid of courses organized by:
  * - Rows: Period 1 and Period 2
  * - Columns: Semester 7, 8, and 9
- * 
+ *
  * Features:
  * - Drag and drop functionality using dnd-kit
  * - Real-time updates with optimistic UI

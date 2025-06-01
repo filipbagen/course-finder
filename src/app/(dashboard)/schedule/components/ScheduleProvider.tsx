@@ -1,7 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { ScheduleContextType, ScheduleState, ScheduleActions } from '../types/schedule.types';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback,
+} from 'react';
+import {
+  ScheduleContextType,
+  ScheduleState,
+  ScheduleActions,
+} from '../types/schedule.types';
 import { scheduleReducer, initialScheduleState } from './scheduleReducer';
 import { ScheduleService } from '../services/scheduleService';
 import { toast } from 'sonner';
@@ -16,14 +26,18 @@ interface ScheduleProviderProps {
 
 /**
  * Schedule Provider Component
- * 
+ *
  * Provides schedule state management using React's useReducer for predictable state updates.
  * Implements SOLID principles:
  * - Single Responsibility: Manages only schedule state
  * - Open/Closed: Extensible through actions and services
  * - Dependency Inversion: Depends on abstractions (services)
  */
-export function ScheduleProvider({ children, userId, readonly = false }: ScheduleProviderProps) {
+export function ScheduleProvider({
+  children,
+  userId,
+  readonly = false,
+}: ScheduleProviderProps) {
   const [state, dispatch] = useReducer(scheduleReducer, {
     ...initialScheduleState,
     readonly,
@@ -37,15 +51,16 @@ export function ScheduleProvider({ children, userId, readonly = false }: Schedul
 
     try {
       const scheduleData = await ScheduleService.fetchSchedule(userId);
-      dispatch({ 
-        type: ScheduleActions.FETCH_SCHEDULE_SUCCESS, 
-        payload: scheduleData 
+      dispatch({
+        type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
+        payload: scheduleData,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load schedule';
-      dispatch({ 
-        type: ScheduleActions.FETCH_SCHEDULE_ERROR, 
-        payload: errorMessage 
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to load schedule';
+      dispatch({
+        type: ScheduleActions.FETCH_SCHEDULE_ERROR,
+        payload: errorMessage,
       });
       toast.error(errorMessage);
     }
@@ -54,63 +69,71 @@ export function ScheduleProvider({ children, userId, readonly = false }: Schedul
   /**
    * Handle course movement with optimistic updates
    */
-  const handleCourseMove = useCallback(async (
-    courseId: string,
-    fromSemester: number,
-    fromPeriod: number,
-    toSemester: number,
-    toPeriod: number
-  ) => {
-    if (readonly) return;
+  const handleCourseMove = useCallback(
+    async (
+      courseId: string,
+      fromSemester: number,
+      fromPeriod: number,
+      toSemester: number,
+      toPeriod: number
+    ) => {
+      if (readonly) return;
 
-    try {
-      // Update via API
-      await ScheduleService.updateCourseSchedule({
-        courseId,
-        semester: toSemester,
-        period: toPeriod,
-      });
-      
-      toast.success('Course moved successfully');
-    } catch (error) {
-      // Revert the optimistic update
-      dispatch({
-        type: ScheduleActions.MOVE_COURSE,
-        payload: {
+      try {
+        // Update via API
+        await ScheduleService.updateCourseSchedule({
           courseId,
-          fromSemester: toSemester,
-          fromPeriod: toPeriod,
-          toSemester: fromSemester,
-          toPeriod: fromPeriod,
-        },
-      });
-      
-      const errorMessage = error instanceof Error ? error.message : 'Failed to move course';
-      dispatch({ 
-        type: ScheduleActions.SET_ERROR, 
-        payload: errorMessage 
-      });
-      toast.error(errorMessage);
-    }
-  }, [readonly]);
+          semester: toSemester,
+          period: toPeriod,
+        });
+
+        toast.success('Course moved successfully');
+      } catch (error) {
+        // Revert the optimistic update
+        dispatch({
+          type: ScheduleActions.MOVE_COURSE,
+          payload: {
+            courseId,
+            fromSemester: toSemester,
+            fromPeriod: toPeriod,
+            toSemester: fromSemester,
+            toPeriod: fromPeriod,
+          },
+        });
+
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to move course';
+        dispatch({
+          type: ScheduleActions.SET_ERROR,
+          payload: errorMessage,
+        });
+        toast.error(errorMessage);
+      }
+    },
+    [readonly]
+  );
 
   /**
    * Handle course removal
    */
-  const handleCourseRemoval = useCallback(async (enrollmentId: string) => {
-    if (readonly) return;
+  const handleCourseRemoval = useCallback(
+    async (enrollmentId: string) => {
+      if (readonly) return;
 
-    try {
-      await ScheduleService.removeCourseFromSchedule(enrollmentId);
-      toast.success('Course removed from schedule');
-    } catch (error) {
-      // Reload data on error to restore state
-      await loadScheduleData();
-      
-      const errorMessage = error instanceof Error ? error.message : 'Failed to remove course';
-      toast.error(errorMessage);
-    }
-  }, [readonly, loadScheduleData]);
+      try {
+        await ScheduleService.removeCourseFromSchedule(enrollmentId);
+        toast.success('Course removed from schedule');
+      } catch (error) {
+        // Reload data on error to restore state
+        await loadScheduleData();
+
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to remove course';
+        toast.error(errorMessage);
+      }
+    },
+    [readonly, loadScheduleData]
+  );
 
   /**
    * Refresh schedule data
@@ -123,13 +146,26 @@ export function ScheduleProvider({ children, userId, readonly = false }: Schedul
   useEffect(() => {
     const handleAsyncAction = async () => {
       const lastAction = state.lastAction;
-      
-      if (lastAction?.type === ScheduleActions.MOVE_COURSE && lastAction.payload) {
-        const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } = lastAction.payload;
-        await handleCourseMove(courseId, fromSemester, fromPeriod, toSemester, toPeriod);
+
+      if (
+        lastAction?.type === ScheduleActions.MOVE_COURSE &&
+        lastAction.payload
+      ) {
+        const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
+          lastAction.payload;
+        await handleCourseMove(
+          courseId,
+          fromSemester,
+          fromPeriod,
+          toSemester,
+          toPeriod
+        );
       }
-      
-      if (lastAction?.type === ScheduleActions.REMOVE_COURSE && lastAction.payload) {
+
+      if (
+        lastAction?.type === ScheduleActions.REMOVE_COURSE &&
+        lastAction.payload
+      ) {
         await handleCourseRemoval(lastAction.payload.enrollmentId);
       }
     };
@@ -162,10 +198,10 @@ export function ScheduleProvider({ children, userId, readonly = false }: Schedul
  */
 export function useSchedule(): ScheduleContextType {
   const context = useContext(ScheduleContext);
-  
+
   if (!context) {
     throw new Error('useSchedule must be used within a ScheduleProvider');
   }
-  
+
   return context;
 }

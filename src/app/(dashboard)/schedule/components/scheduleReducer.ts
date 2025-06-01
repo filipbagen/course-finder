@@ -1,10 +1,10 @@
-import { 
-  ScheduleData, 
-  ScheduleState, 
-  ScheduleAction, 
+import {
+  ScheduleData,
+  ScheduleState,
+  ScheduleAction,
   ScheduleActions,
   MoveOperation,
-  RemoveOperation 
+  RemoveOperation,
 } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
 
@@ -25,11 +25,14 @@ export const initialScheduleState: ScheduleState = {
 
 /**
  * Schedule Reducer
- * 
+ *
  * Handles all schedule state transitions in a pure, predictable way.
  * Each action returns a new state object to maintain immutability.
  */
-export function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
+export function scheduleReducer(
+  state: ScheduleState,
+  action: ScheduleAction
+): ScheduleState {
   switch (action.type) {
     case ScheduleActions.FETCH_SCHEDULE_START:
       return {
@@ -90,11 +93,12 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
  * Move a course between semesters/periods
  */
 function moveCourseInSchedule(
-  schedule: ScheduleData, 
+  schedule: ScheduleData,
   operation: MoveOperation
 ): ScheduleData {
-  const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } = operation;
-  
+  const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
+    operation;
+
   // Create a deep copy of the schedule
   const newSchedule: ScheduleData = {
     semester7: {
@@ -121,7 +125,7 @@ function moveCourseInSchedule(
   const toArray = newSchedule[toSemesterKey][toPeriodKey];
 
   // Find and remove the course from source
-  const courseIndex = fromArray.findIndex(course => course.id === courseId);
+  const courseIndex = fromArray.findIndex((course) => course.id === courseId);
   if (courseIndex === -1) {
     console.warn('Course not found in source location:', courseId);
     return schedule;
@@ -139,35 +143,35 @@ function moveCourseInSchedule(
  * Remove a course from the schedule
  */
 function removeCourseFromSchedule(
-  schedule: ScheduleData, 
+  schedule: ScheduleData,
   operation: RemoveOperation
 ): ScheduleData {
   const { enrollmentId } = operation;
-  
+
   // Create a deep copy of the schedule
   const newSchedule: ScheduleData = {
     semester7: {
-      period1: schedule.semester7.period1.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period1: schedule.semester7.period1.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
-      period2: schedule.semester7.period2.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period2: schedule.semester7.period2.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
     },
     semester8: {
-      period1: schedule.semester8.period1.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period1: schedule.semester8.period1.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
-      period2: schedule.semester8.period2.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period2: schedule.semester8.period2.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
     },
     semester9: {
-      period1: schedule.semester9.period1.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period1: schedule.semester9.period1.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
-      period2: schedule.semester9.period2.filter(course => 
-        course.enrollment?.id !== enrollmentId
+      period2: schedule.semester9.period2.filter(
+        (course) => course.enrollment?.id !== enrollmentId
       ),
     },
   };
