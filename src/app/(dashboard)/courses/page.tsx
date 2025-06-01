@@ -1,5 +1,6 @@
 // next
 import { Suspense } from 'react';
+import Link from 'next/link';
 
 // components
 import CourseCard from '@/components/course/CourseCard';
@@ -11,6 +12,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
 // supabase & prisma
@@ -127,17 +129,25 @@ function CoursesList({ courses, isAuthenticated }: CoursesListProps) {
 export default async function CoursesPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const resolvedSearchParams = await searchParams;
+
   const search =
-    typeof searchParams.search === 'string' ? searchParams.search : undefined;
+    typeof resolvedSearchParams.search === 'string'
+      ? resolvedSearchParams.search
+      : undefined;
   const campus =
-    typeof searchParams.campus === 'string' ? searchParams.campus : undefined;
+    typeof resolvedSearchParams.campus === 'string'
+      ? resolvedSearchParams.campus
+      : undefined;
   const field =
-    typeof searchParams.field === 'string' ? searchParams.field : undefined;
+    typeof resolvedSearchParams.field === 'string'
+      ? resolvedSearchParams.field
+      : undefined;
   const semester =
-    typeof searchParams.semester === 'string'
-      ? searchParams.semester
+    typeof resolvedSearchParams.semester === 'string'
+      ? resolvedSearchParams.semester
       : undefined;
 
   const [courses, user] = await Promise.all([
@@ -149,15 +159,6 @@ export default async function CoursesPage({
 
   return (
     <div className="flex flex-col gap-8 mx-auto px-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Hem</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbPage>Kurser</BreadcrumbPage>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="grid items-start gap-8">
         <div className="flex items-center justify-between px-2">
           <div className="grid gap-1">
