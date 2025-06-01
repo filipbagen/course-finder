@@ -184,6 +184,7 @@ export class ScheduleService {
     let totalCredits = 0;
     let coursesPerSemester = { 7: 0, 8: 0, 9: 0 };
     let creditsPerSemester = { 7: 0, 8: 0, 9: 0 };
+    let allCourses: CourseWithEnrollment[] = [];
 
     Object.entries(schedule).forEach(([semesterKey, semesterData]) => {
       const semester = parseInt(semesterKey.replace('semester', '')) as
@@ -194,13 +195,33 @@ export class ScheduleService {
       Object.values(semesterData).forEach((courses) => {
         const courseArray = courses as CourseWithEnrollment[];
         courseArray.forEach((course) => {
-          totalCourses++;
-          totalCredits += course.credits || 0;
+          // Avoid counting the same course multiple times (for multi-period courses)
+          if (!allCourses.some(c => c.id === course.id)) {
+            totalCourses++;
+            totalCredits += course.credits || 0;
+            allCourses.push(course);
+          }
           coursesPerSemester[semester]++;
           creditsPerSemester[semester] += course.credits || 0;
         });
       });
     });
+
+    // Calculate main field of study based on credits
+    const creditCount = allCourses.reduce(
+      (acc: { [key: string]: number }, course) => {
+        course.mainFieldOfStudy.forEach((field) => {
+          acc[field] = (acc[field] || 0) + course.credits;
+        });
+        return acc;
+      },
+      {}
+    );
+
+    const maxCredits = Math.max(...Object.values(creditCount));
+    const topFieldsOfStudy = Object.keys(creditCount).filter(
+      (field) => creditCount[field] === maxCredits
+    );
 
     return {
       totalCourses,
@@ -208,6 +229,8 @@ export class ScheduleService {
       coursesPerSemester,
       creditsPerSemester,
       averageCreditsPerSemester: totalCredits / 3,
+      topFieldsOfStudy,
+      creditsByField: creditCount,
     };
   }
 }

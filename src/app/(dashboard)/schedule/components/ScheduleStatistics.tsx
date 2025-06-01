@@ -97,19 +97,29 @@ export function ScheduleStatistics() {
           </CardContent>
         </Card>
 
-        {/* Average Credits */}
+        {/* Main Field of Study */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Avg Credits/Semester
+              Main Field of Study
             </CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.averageCreditsPerSemester.toFixed(1)}
+              {stats.topFieldsOfStudy.length > 0 
+                ? stats.topFieldsOfStudy[0]
+                : 'N/A'
+              }
             </div>
-            <p className="text-xs text-muted-foreground">Recommended: 15-18</p>
+            <p className="text-xs text-muted-foreground">
+              {stats.topFieldsOfStudy.length > 1 
+                ? `+${stats.topFieldsOfStudy.length - 1} other${stats.topFieldsOfStudy.length > 2 ? 's' : ''}`
+                : stats.creditsByField[stats.topFieldsOfStudy[0]] 
+                  ? `${stats.creditsByField[stats.topFieldsOfStudy[0]]} credits`
+                  : 'Based on course credits'
+              }
+            </p>
           </CardContent>
         </Card>
 
