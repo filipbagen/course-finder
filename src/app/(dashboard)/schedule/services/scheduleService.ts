@@ -196,7 +196,7 @@ export class ScheduleService {
         const courseArray = courses as CourseWithEnrollment[];
         courseArray.forEach((course) => {
           // Avoid counting the same course multiple times (for multi-period courses)
-          if (!allCourses.some(c => c.id === course.id)) {
+          if (!allCourses.some((c) => c.id === course.id)) {
             totalCourses++;
             totalCredits += course.credits || 0;
             allCourses.push(course);

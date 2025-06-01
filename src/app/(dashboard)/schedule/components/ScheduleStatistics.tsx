@@ -107,18 +107,18 @@ export function ScheduleStatistics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.topFieldsOfStudy.length > 0 
+              {stats.topFieldsOfStudy.length > 0
                 ? stats.topFieldsOfStudy[0]
-                : 'N/A'
-              }
+                : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {stats.topFieldsOfStudy.length > 1 
-                ? `+${stats.topFieldsOfStudy.length - 1} other${stats.topFieldsOfStudy.length > 2 ? 's' : ''}`
-                : stats.creditsByField[stats.topFieldsOfStudy[0]] 
-                  ? `${stats.creditsByField[stats.topFieldsOfStudy[0]]} credits`
-                  : 'Based on course credits'
-              }
+              {stats.topFieldsOfStudy.length > 1
+                ? `+${stats.topFieldsOfStudy.length - 1} other${
+                    stats.topFieldsOfStudy.length > 2 ? 's' : ''
+                  }`
+                : stats.creditsByField[stats.topFieldsOfStudy[0]]
+                ? `${stats.creditsByField[stats.topFieldsOfStudy[0]]} credits`
+                : 'Based on course credits'}
             </p>
           </CardContent>
         </Card>
