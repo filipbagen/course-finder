@@ -1,220 +1,236 @@
 'use client';
 
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from '@/components/ui/card';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Separator } from '@/components/ui/separator';
-import { EnrollmentButton } from '@/components/course/EnrollmentButton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   GripVertical,
   Trash2,
   MapPin,
-  BookText,
-  SignpostBig,
-  NotebookPen,
+  Calendar,
+  Clock,
+  BookOpen,
+  Plus,
+  LogIn,
 } from 'lucide-react';
 import {
   Course,
-  Examination,
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/types/types';
 import { useEnrollment } from '@/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface CourseCardProps {
   course: Course | CourseWithEnrollment;
-  variant?: 'default' | 'schedule' | 'user-visit';
-  handleUpdateAfterDeletion?: (enrollmentId: string) => void;
-  dragHandleProps?: any;
-  hasExclusion?: boolean;
-  className?: string;
+  variant?: 'default' | 'schedule' | 'landing';
   isAuthenticated?: boolean;
+  isDragging?: boolean;
+  dragHandleProps?: any;
+  onRemove?: (enrollmentId: string) => void;
+  className?: string;
 }
 
-const CourseCardDetails = ({ course }: { course: Course }) => {
-  return (
-    <Accordion type="multiple" className="w-full">
-      <AccordionItem value="mainFieldOfStudy" className="border-0">
-        <div className="flex justify-between">
-          <CardFooter className="flex gap-4">
-            <div>
-              <p>Termin {course.semester.join(', ')}</p>
-            </div>
-            <div>
-              <p>Period {course.period.join(', ')}</p>
-            </div>
-            <div>
-              <p>Block {course.block.join(', ')}</p>
-            </div>
-          </CardFooter>
-
-          <AccordionTrigger className="p-0" />
-        </div>
-        <AccordionContent className="flex flex-col gap-4 p-0 mt-4">
-          <Separator className="mt-2" />
-          <div>
-            <div className="flex items-center gap-2">
-              <SignpostBig size={16} />
-              <h6>Huvudområde</h6>
-            </div>
-            <p>
-              {course.mainFieldOfStudy.length > 0
-                ? course.mainFieldOfStudy.join(', ')
-                : 'Inget huvudområde'}
-            </p>
-
-            <Separator className="mt-2" />
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <BookText size={16} />
-              <h6>Förkunskaper</h6>
-            </div>
-            <p>
-              {course.recommendedPrerequisites === 'None'
-                ? 'Inga rekommenderade förkunskaper krävs'
-                : course.recommendedPrerequisites}
-            </p>
-
-            <Separator className="mt-2" />
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <NotebookPen size={16} />
-              <h6>Examination</h6>
-            </div>
-            <ul>
-              {course.examinations?.map((ex: Examination) => (
-                <li key={ex.id}>
-                  {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits} hp
-                </li>
-              ))}
-            </ul>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-};
-
+/**
+ * Unified Course Card Component
+ *
+ * A single, reusable course card component that follows SOLID principles.
+ * Displays essential course information in a clean, intuitive design.
+ * Adapts to different contexts via the variant prop.
+ */
 const CourseCard = ({
   course,
   variant = 'default',
-  handleUpdateAfterDeletion,
-  dragHandleProps,
-  hasExclusion,
   isAuthenticated = false,
+  isDragging = false,
+  dragHandleProps,
+  onRemove,
+  className,
 }: CourseCardProps) => {
   const { addToEnrollment, deleteEnrollment } = useEnrollment(
     course.name,
-    handleUpdateAfterDeletion
+    onRemove
   );
 
-  // Variant checks
-  const isDefault = variant === 'default';
-  const isScheduleVariant = variant === 'schedule';
-  const isUserVisitVariant = variant === 'user-visit';
+  // Format display text
+  const semesterText =
+    course.semester.length > 1
+      ? `T${course.semester.join(', ')}`
+      : `T${course.semester[0]}`;
+  const periodText =
+    course.period.length > 1
+      ? `P${course.period.join('+')}`
+      : `P${course.period[0]}`;
+  const blockText = `Block ${course.block.join(', ')}`;
+
+  // Handle enrollment for authenticated users
+  const handleEnrollment = (semester?: number) => {
+    if (!addToEnrollment) return;
+    const targetSemester = semester || course.semester[0];
+    addToEnrollment(course.id, targetSemester);
+  };
+
+  // Handle course removal (for schedule variant)
+  const handleRemoveCourse = () => {
+    if (isCourseWithEnrollment(course) && course.enrollment?.id && onRemove) {
+      onRemove(course.enrollment.id);
+    }
+  };
+
+  // Enrollment Button Component
+  const EnrollmentButton = () => {
+    if (!isAuthenticated) {
+      return (
+        <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
+          <Link href="/login">
+            <LogIn className="h-4 w-4" />
+          </Link>
+        </Button>
+      );
+    }
+
+    if (course.semester.length === 1) {
+      return (
+        <Button
+          size="sm"
+          onClick={() => handleEnrollment()}
+          className="h-8 w-8 p-0"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      );
+    }
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="sm" className="h-8 w-8 p-0">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-40">
+          {course.semester.map((semester) => (
+            <DropdownMenuItem
+              key={semester}
+              onClick={() => handleEnrollment(semester)}
+            >
+              Termin {semester}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   return (
     <Card
       className={cn(
-        'flex-grow h-min hover:shadow-md transition-shadow ease-out duration-200 max-w-full gap-2',
-        isDefault && '',
-        isScheduleVariant && '',
-        isUserVisitVariant && ''
+        'transition-all duration-200 group',
+        {
+          // Default and Landing variants - for course browsing and carousel
+          'hover:shadow-lg hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50':
+            variant === 'default' || variant === 'landing',
+
+          // Schedule variant - for schedule management
+          'hover:shadow-md': variant === 'schedule' && !isDragging,
+          'opacity-50 scale-95': variant === 'schedule' && isDragging,
+          'cursor-grab': variant === 'schedule' && !isDragging,
+          'cursor-grabbing': variant === 'schedule' && isDragging,
+        },
+        className
       )}
     >
-      <CardHeader>
-        <div className="flex flex-col gap-2">
-          {/* Header Section */}
-          <div className="flex justify-between items-start">
-            <div className="flex gap-2">
-              {isScheduleVariant && dragHandleProps && (
-                <div {...dragHandleProps}>
-                  <GripVertical className="h-5 w-5 text-gray-400" />
-                </div>
-              )}
-              <div>
-                <CardTitle className="font-semibold leading-tight">
-                  {course.name}
-                </CardTitle>
-                <CardDescription className="[&:not(:first-child)]:mt-0">
-                  {course.code}
-                </CardDescription>
-              </div>
-            </div>
-
-            {isDefault && (
-              <EnrollmentButton
-                course={course}
-                addToEnrollment={addToEnrollment}
-                isAuthenticated={isAuthenticated}
-              />
-            )}
-
-            {isScheduleVariant && isCourseWithEnrollment(course) && (
-              <Trash2
-                onClick={() => deleteEnrollment(course.enrollment.id)}
-                className="h-5 w-5 text-red-500 cursor-pointer hover:bg-red-50 rounded-md p-1"
-              />
-            )}
-          </div>
-
-          {/* Warning Message - Only show in default variant */}
-          {isDefault && hasExclusion && (
-            <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">
-              Varning: Denna kurs kan inte kombineras med en av dina inskrivna
-              kurser.
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          {/* Drag handle for schedule variant */}
+          {variant === 'schedule' && dragHandleProps && (
+            <div {...dragHandleProps} className="mt-1">
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
+
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+              {course.name}
+            </h3>
+            <p className="text-sm font-mono text-muted-foreground mt-1">
+              {course.code}
+            </p>
+          </div>
+
+          <div className="flex items-start gap-2">
+            {/* Action buttons */}
+            {variant === 'default' && <EnrollmentButton />}
+
+            {variant === 'schedule' && isCourseWithEnrollment(course) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleRemoveCourse}
+                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className={cn('flex flex-col gap-2')}>
-        {/* Course Location - Not shown in schedule variant */}
-        {!isScheduleVariant && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <MapPin className="h-4 w-4" />
-            <span>{course.campus}</span>
+      <CardContent className="pt-0 space-y-3">
+        {/* Main Field of Study */}
+        <div className="flex items-start gap-2">
+          <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+          <div className="flex flex-wrap gap-1">
+            {course.mainFieldOfStudy.length === 0 ? (
+              <Badge variant="outline" className="text-xs">
+                Inget huvudområde
+              </Badge>
+            ) : (
+              course.mainFieldOfStudy.map((field) => (
+                <Badge key={field} variant="outline" className="text-xs">
+                  {field}
+                </Badge>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Location - Not shown in schedule variant for space efficiency */}
+        {variant !== 'schedule' && course.campus && (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-sm text-muted-foreground">
+              {course.campus}
+            </span>
           </div>
         )}
 
-        {/* Fields of Study - Shown in all variants */}
-        <div className="flex flex-wrap gap-3">
-          {course.mainFieldOfStudy.length === 0 ? (
-            <Badge variant={isScheduleVariant ? 'secondary' : 'default'}>
-              Inget huvudområde
-            </Badge>
-          ) : (
-            course.mainFieldOfStudy.map((field) => (
-              <Badge
-                key={field}
-                variant={isScheduleVariant ? 'secondary' : 'default'}
-              >
-                {field}
-              </Badge>
-            ))
-          )}
+        {/* Schedule Information */}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {semesterText}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {periodText}
+              </span>
+            </div>
+          </div>
+          <div className="text-xs text-muted-foreground">{blockText}</div>
         </div>
-
-        {/* Course Details - Only in default variant */}
-        {isDefault && <CourseCardDetails course={course} />}
       </CardContent>
     </Card>
   );

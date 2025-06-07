@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { LandingCourseCard } from './LandingCourseCard';
+import CourseCard from './CourseCard';
 import { SkeletonCard } from '@/components/shared/SkeletonComponent';
+import { Course as FullCourse } from '@/types/types';
 
 interface Course {
   id: string;
@@ -20,7 +21,7 @@ interface Course {
 
 /**
  * Course Carousel Component
- * 
+ *
  * Displays a scrolling carousel of random courses from the database.
  * Automatically fetches fresh course data on component mount.
  */
@@ -34,11 +35,11 @@ export function CourseCarousel() {
       try {
         setLoading(true);
         const response = await fetch('/api/courses/random?count=12');
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch courses');
         }
-        
+
         const data = await response.json();
         setCourses(data);
       } catch (err) {
@@ -91,13 +92,30 @@ export function CourseCarousel() {
 
       {/* Course grid with animation */}
       <div className="grid skewAnimation grid-cols-1 gap-7 sm:h-[500px] sm:grid-cols-2">
-        {courses.map((course) => (
-          <LandingCourseCard
-            key={course.id}
-            course={course}
-            className="flex-grow h-min"
-          />
-        ))}
+        {courses.map((course) => {
+          // Convert course to match the full Course type
+          const fullCourse: FullCourse = {
+            ...course,
+            scheduledHours: null,
+            selfStudyHours: null,
+            exclusions: [],
+            offeredFor: [],
+            prerequisites: '',
+            recommendedPrerequisites: '',
+            learningOutcomes: '',
+            teachingMethods: '',
+            content: course.content || '',
+          };
+
+          return (
+            <CourseCard
+              key={course.id}
+              course={fullCourse}
+              variant="landing"
+              className="flex-grow h-min"
+            />
+          );
+        })}
       </div>
     </div>
   );
