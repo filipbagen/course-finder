@@ -162,7 +162,68 @@ export function InfiniteCoursesList({
   if (loading && courses.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Results summary with sorting and view controls */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>Laddar kurser...</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Mobile Filter Button - only show on mobile */}
+            {onMobileFilterOpen && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onMobileFilterOpen}
+                className="lg:hidden h-8 px-3 gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+                {hasActiveFilters && (
+                  <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                    •
+                  </span>
+                )}
+              </Button>
+            )}
+
+            {/* Sorting Controls */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-xs text-muted-foreground">
+                Sortera efter:
+              </span>
+              <Select
+                value={currentSortBy}
+                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
+              >
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="code">Kurskod</SelectItem>
+                  <SelectItem value="name">Namn</SelectItem>
+                  <SelectItem value="credits">Poäng</SelectItem>
+                  <SelectItem value="semester">Termin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setCurrentSortOrder(
+                    currentSortOrder === 'asc' ? 'desc' : 'asc'
+                  )
+                }
+                className="h-8 px-2 text-xs"
+              >
+                {currentSortOrder === 'asc' ? '↑' : '↓'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <CourseCardSkeleton key={i} />
           ))}
@@ -283,7 +344,7 @@ export function InfiniteCoursesList({
       </div>
 
       {/* Courses display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {coursesDisplay}
       </div>
 
