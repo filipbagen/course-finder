@@ -2,6 +2,16 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect, notFound } from 'next/navigation';
 import { UserProfileComponent } from '@/components/students/UserProfileComponent';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
+import { User } from 'lucide-react';
 
 async function getUserProfile(userId: string) {
   try {
@@ -103,7 +113,46 @@ export default async function UserProfilePage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="flex flex-col gap-8">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/students">
+              Studenter
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{userProfile.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <User className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {userProfile.name}
+            </h1>
+            <p className="text-muted-foreground">
+              {currentUser.id === id
+                ? 'Din profil och akademiska framsteg'
+                : 'Studentprofil och akademiska framsteg'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Profile Content */}
       <UserProfileComponent
         userProfile={userProfile}
         isOwnProfile={currentUser.id === id}

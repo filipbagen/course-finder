@@ -4,6 +4,16 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { UserSearchComponent } from '@/components/students/UserSearchComponent';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Users } from 'lucide-react';
 
 async function getUsers(
   searchQuery?: string,
@@ -114,43 +124,59 @@ export default async function StudentsPage({
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+    <div className="flex flex-col gap-8">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Studenter</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Users className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
               Hitta studenter
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-muted-foreground">
               Utforska andra studenters profiler, se vilka kurser de läser och
               låt dig inspireras av deras studieplanering.
             </p>
           </div>
-
-          {/* Search and Results */}
-          <Suspense
-            fallback={
-              <div className="space-y-6">
-                <Skeleton className="h-12 w-full max-w-md mx-auto" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-48 w-full rounded-xl" />
-                  ))}
-                </div>
-              </div>
-            }
-          >
-            <UserSearchComponent
-              initialUsers={users}
-              initialQuery={searchQuery}
-              availablePrograms={availablePrograms}
-              initialProgramFilter={programFilter}
-              initialSortBy={sortBy}
-            />
-          </Suspense>
         </div>
       </div>
+
+      <Separator />
+
+      {/* Search and Results */}
+      <Suspense
+        fallback={
+          <div className="space-y-6">
+            <Skeleton className="h-12 w-full max-w-md mx-auto" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-48 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <UserSearchComponent
+          initialUsers={users}
+          initialQuery={searchQuery}
+          availablePrograms={availablePrograms}
+          initialProgramFilter={programFilter}
+          initialSortBy={sortBy}
+        />
+      </Suspense>
     </div>
   );
 }

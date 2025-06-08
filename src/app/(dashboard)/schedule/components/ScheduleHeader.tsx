@@ -54,38 +54,8 @@ export function ScheduleHeader({
   viewingUserId,
   viewingUserName,
 }: ScheduleHeaderProps) {
-  const { state, dispatch } = useSchedule();
-  const { loading, lastUpdated } = state;
-
-  // Handle refresh
-  const handleRefresh = () => {
-    dispatch({ type: ScheduleActions.FETCH_SCHEDULE_START });
-    // The actual fetch will be handled by the provider
-  };
-
-  // Handle export
-  const handleExport = () => {
-    // TODO: Implement schedule export (PDF, CSV, etc.)
-    console.log('Export schedule');
-  };
-
-  // Handle share
-  const handleShare = () => {
-    // TODO: Implement schedule sharing
-    console.log('Share schedule');
-  };
-
-  // Handle settings
-  const handleSettings = () => {
-    // TODO: Navigate to schedule settings
-    console.log('Schedule settings');
-  };
-
-  // Toggle readonly mode (for testing)
-  const handleToggleReadonly = () => {
-    // This would typically be handled at a higher level
-    console.log('Toggle readonly mode');
-  };
+  const { state } = useSchedule();
+  const { loading } = state;
 
   return (
     <div className="space-y-4">
