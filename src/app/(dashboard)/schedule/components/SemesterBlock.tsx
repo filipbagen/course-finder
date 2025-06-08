@@ -135,7 +135,7 @@ export function SemesterBlock({
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Inga kurser schemalagda
+                  Inga kurser inlagda
                 </p>
               </div>
             </div>

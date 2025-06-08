@@ -5,7 +5,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Trash2, Calendar, Clock, BookOpen } from 'lucide-react';
+import { GripVertical, Trash2, Calendar, BookOpen } from 'lucide-react';
 import { CourseWithEnrollment } from '@/types/types';
 import { cn } from '@/lib/utils';
 
@@ -53,14 +53,9 @@ export default function ScheduleCourseCard({
     : undefined;
 
   // Format display text
-  const semesterText =
-    course.semester.length > 1
-      ? `T${course.semester.join(', ')}`
-      : `T${course.semester[0]}`;
-  const periodText =
-    course.period.length > 1
-      ? `P${course.period.join('+')}`
-      : `P${course.period[0]}`;
+  const blockText = course.block.length > 1 
+    ? `Block ${course.block.join(', ')}` 
+    : `Block ${course.block[0]}`;
 
   // Handle course removal
   const handleRemove = () => {
@@ -145,19 +140,11 @@ export default function ScheduleCourseCard({
 
           {/* Schedule Information */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  {semesterText}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  {periodText}
-                </span>
-              </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {blockText}
+              </span>
             </div>
 
             {/* Credits */}
