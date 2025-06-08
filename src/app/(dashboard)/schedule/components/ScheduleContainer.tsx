@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSchedule } from './ScheduleProvider';
-import CourseCard from '@/components/course/CourseCard';
+import ScheduleCourseCard from './ScheduleCourseCard';
 import { ScheduleActions } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
 
@@ -269,11 +269,7 @@ export function ScheduleContainer({
 
       <DragOverlay>
         {activeCourse ? (
-          <CourseCard
-            course={activeCourse}
-            variant="schedule"
-            isDragging={true}
-          />
+          <ScheduleCourseCard course={activeCourse} readonly={true} />
         ) : null}
       </DragOverlay>
     </DndContext>

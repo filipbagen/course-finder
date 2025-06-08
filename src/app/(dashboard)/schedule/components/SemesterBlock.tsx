@@ -3,7 +3,7 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { CourseWithEnrollment } from '@/types/types';
-import CourseCard from '@/components/course/CourseCard';
+import ScheduleCourseCard from './ScheduleCourseCard';
 import { useSchedule } from './ScheduleProvider';
 import { cn } from '@/lib/utils';
 import { Plus, BookOpen } from 'lucide-react';
@@ -88,14 +88,14 @@ export function SemesterBlock({
       {/* Courses */}
       <div className="space-y-3">
         {courses.map((course) => (
-          <CourseCard
+          <ScheduleCourseCard
             key={course.id}
             course={course}
-            variant="schedule"
+            readonly={readonly}
             onRemove={
               readonly
                 ? undefined
-                : (enrollmentId) => {
+                : (enrollmentId: string) => {
                     // Handle course removal
                     console.log('Remove course:', enrollmentId);
                   }
