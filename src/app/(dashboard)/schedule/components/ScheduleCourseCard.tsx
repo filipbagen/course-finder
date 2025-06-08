@@ -53,9 +53,10 @@ export default function ScheduleCourseCard({
     : undefined;
 
   // Format display text
-  const blockText = course.block.length > 1 
-    ? `Block ${course.block.join(', ')}` 
-    : `Block ${course.block[0]}`;
+  const blockText =
+    course.block.length > 1
+      ? `Block ${course.block.join(', ')}`
+      : `Block ${course.block[0]}`;
 
   // Handle course removal
   const handleRemove = () => {
@@ -105,12 +106,12 @@ export default function ScheduleCourseCard({
             </div>
 
             {/* Remove button - only show when not readonly */}
-            {!readonly && (
+            {!readonly && onRemove && (
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={handleRemove}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
                 aria-label={`Remove ${course.name} from schedule`}
               >
                 <Trash2 className="h-4 w-4" />
@@ -142,9 +143,7 @@ export default function ScheduleCourseCard({
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                {blockText}
-              </span>
+              <span className="text-xs text-muted-foreground">{blockText}</span>
             </div>
 
             {/* Credits */}

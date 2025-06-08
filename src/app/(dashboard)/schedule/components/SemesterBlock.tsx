@@ -8,6 +8,7 @@ import { useSchedule } from './ScheduleProvider';
 import { cn } from '@/lib/utils';
 import { Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScheduleActions } from '../types/schedule.types';
 
 interface SemesterBlockProps {
   semester: number;
@@ -36,7 +37,7 @@ export function SemesterBlock({
   dropZoneId,
   readonly = false,
 }: SemesterBlockProps) {
-  const { state } = useSchedule();
+  const { state, dispatch } = useSchedule();
   const { isDragging, draggedCourse } = state;
 
   const { isOver, setNodeRef } = useDroppable({
@@ -48,6 +49,16 @@ export function SemesterBlock({
   const canDrop = isDragging && draggedCourse && !readonly;
   const isValidDrop =
     canDrop && isValidDropTarget(draggedCourse, semester, period);
+
+  // Handle course removal
+  const handleCourseRemoval = (enrollmentId: string) => {
+    if (readonly) return;
+    
+    dispatch({
+      type: ScheduleActions.REMOVE_COURSE,
+      payload: { enrollmentId },
+    });
+  };
 
   return (
     <div
@@ -91,14 +102,7 @@ export function SemesterBlock({
             key={course.id}
             course={course}
             readonly={readonly}
-            onRemove={
-              readonly
-                ? undefined
-                : (enrollmentId: string) => {
-                    // Handle course removal
-                    console.log('Remove course:', enrollmentId);
-                  }
-            }
+            onRemove={readonly ? undefined : handleCourseRemoval}
           />
         ))}
       </div>
