@@ -100,17 +100,17 @@ export function ScheduleHeader({
             <>
               <BreadcrumbItem>
                 <BreadcrumbLink href="/dashboard/students">
-                  Students
+                  Studenter
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{viewingUserName}'s Schedule</BreadcrumbPage>
+                <BreadcrumbPage>{viewingUserName}s schema</BreadcrumbPage>
               </BreadcrumbItem>
             </>
           ) : (
             <BreadcrumbItem>
-              <BreadcrumbPage>My Schedule</BreadcrumbPage>
+              <BreadcrumbPage>Mitt schema</BreadcrumbPage>
             </BreadcrumbItem>
           )}
         </BreadcrumbList>
@@ -124,13 +124,13 @@ export function ScheduleHeader({
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 {readonly && viewingUserName
-                  ? `${viewingUserName}'s Schedule`
-                  : 'My Schedule'}
+                  ? `${viewingUserName}s schema`
+                  : 'Mitt schema'}
               </h1>
               <p className="text-muted-foreground">
                 {readonly
-                  ? 'View student course schedule and progress'
-                  : 'Plan and manage your academic journey'}
+                  ? 'Visa studentens kurser och framsteg'
+                  : 'Planera och hantera din akademiska resa'}
               </p>
             </div>
           </div>
@@ -140,123 +140,17 @@ export function ScheduleHeader({
             {readonly && (
               <Badge variant="secondary" className="gap-1">
                 <Eye className="h-3 w-3" />
-                View Only
+                Endast visning
               </Badge>
             )}
 
             {loading && (
               <Badge variant="outline" className="gap-1">
                 <RefreshCw className="h-3 w-3 animate-spin" />
-                Loading
+                Laddar
               </Badge>
             )}
-
-            {lastUpdated && (
-              <span className="text-xs text-muted-foreground">
-                Last updated: {new Date(lastUpdated).toLocaleString()}
-              </span>
-            )}
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          {/* Refresh Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-
-          {/* Primary Actions */}
-          {!readonly && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
-            </>
-          )}
-
-          {/* More Actions Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {!readonly && (
-                <>
-                  <DropdownMenuItem onClick={handleSettings}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Schedule Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-
-              <DropdownMenuItem onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Export as PDF
-              </DropdownMenuItem>
-
-              <DropdownMenuItem onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Export as CSV
-              </DropdownMenuItem>
-
-              {!readonly && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleShare}>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Schedule
-                  </DropdownMenuItem>
-                </>
-              )}
-
-              {/* Development/Debug Actions */}
-              {process.env.NODE_ENV === 'development' && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleToggleReadonly}>
-                    {readonly ? (
-                      <>
-                        <EyeOff className="h-4 w-4 mr-2" />
-                        Enable Editing
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Only Mode
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   Award,
 } from 'lucide-react';
 import { ScheduleService } from '../services/scheduleService';
+import { CourseWithEnrollment } from '@/types/types';
 
 /**
  * Schedule Statistics Component
@@ -31,6 +32,11 @@ export function ScheduleStatistics() {
   const { state } = useSchedule();
   const { schedule, loading } = state;
 
+  // Define expected totals based on user requirements
+  const expectedTotalCredits = 90; // Total credits needed for 3 semesters
+  const expectedAdvancedCredits = 60; // Advanced credits needed
+  const requiredFieldCredits = 30; // Advanced credits needed in same field for main field
+
   // Calculate statistics
   const stats = React.useMemo(() => {
     if (loading || !schedule) {
@@ -39,6 +45,81 @@ export function ScheduleStatistics() {
     return ScheduleService.calculateStatistics(schedule);
   }, [schedule, loading]);
 
+  // Calculate advanced credits
+  const advancedCredits = React.useMemo(() => {
+    if (!schedule) return 0;
+    let total = 0;
+    let allCourses: CourseWithEnrollment[] = [];
+
+    Object.values(schedule).forEach((semesterData) => {
+      Object.values(semesterData).forEach((courses) => {
+        const courseArray = courses as CourseWithEnrollment[];
+        courseArray.forEach((course) => {
+          // Avoid counting the same course multiple times
+          if (!allCourses.some((c) => c.id === course.id)) {
+            if (course.advanced) {
+              total += course.credits || 0;
+            }
+            allCourses.push(course);
+          }
+        });
+      });
+    });
+
+    return total;
+  }, [schedule]);
+
+  // Calculate advanced credits by field for main field determination
+  const advancedCreditsByField = React.useMemo(() => {
+    if (!schedule) return {};
+    let allCourses: CourseWithEnrollment[] = [];
+    const creditCount: { [key: string]: number } = {};
+
+    Object.values(schedule).forEach((semesterData) => {
+      Object.values(semesterData).forEach((courses) => {
+        const courseArray = courses as CourseWithEnrollment[];
+        courseArray.forEach((course) => {
+          // Avoid counting the same course multiple times
+          if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
+            course.mainFieldOfStudy.forEach((field: string) => {
+              creditCount[field] = (creditCount[field] || 0) + course.credits;
+            });
+            allCourses.push(course);
+          }
+        });
+      });
+    });
+
+    return creditCount;
+  }, [schedule]);
+
+  // Determine main field of study (requires 30+ advanced credits in same field)
+  const mainFieldOfStudy = React.useMemo(() => {
+    const validFields = Object.entries(advancedCreditsByField).filter(
+      ([_, credits]) => credits >= requiredFieldCredits
+    );
+
+    if (validFields.length === 0) return null;
+
+    // Return the field with most credits
+    const sortedFields = validFields.sort((a, b) => b[1] - a[1]);
+    return {
+      field: sortedFields[0][0],
+      credits: sortedFields[0][1],
+    };
+  }, [advancedCreditsByField, requiredFieldCredits]);
+
+  const progressPercentage = React.useMemo(() => {
+    return stats
+      ? Math.min((stats.totalCredits / expectedTotalCredits) * 100, 100)
+      : 0;
+  }, [stats, expectedTotalCredits]);
+
+  const advancedProgressPercentage = React.useMemo(() => {
+    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100);
+  }, [advancedCredits, expectedAdvancedCredits]);
+
+  // Early return after all hooks are declared
   if (loading || !stats) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -58,203 +139,60 @@ export function ScheduleStatistics() {
     );
   }
 
-  // Define expected totals (these could come from program requirements)
-  const expectedTotalCredits = 180; // Example total credits needed
-  const expectedCoursesPerSemester = 5; // Example courses per semester
-  const progressPercentage = Math.min(
-    (stats.totalCredits / expectedTotalCredits) * 100,
-    100
-  );
-
   return (
     <div className="space-y-6">
       {/* Main Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Courses */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCourses}</div>
-            <p className="text-xs text-muted-foreground">Across 3 semesters</p>
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-4 md:grid-cols-3">
         {/* Total Credits */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
+            <CardTitle className="text-sm font-medium">Totala poäng</CardTitle>
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCredits}</div>
+            <div className="text-2xl font-bold">{stats.totalCredits} hp</div>
             <p className="text-xs text-muted-foreground">
-              of {expectedTotalCredits} required
+              av {expectedTotalCredits} hp krävda
             </p>
             <Progress value={progressPercentage} className="mt-2 h-2" />
+          </CardContent>
+        </Card>
+
+        {/* Advanced Credits */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Avancerade poäng
+            </CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{advancedCredits} hp</div>
+            <p className="text-xs text-muted-foreground">
+              av {expectedAdvancedCredits} hp krävda
+            </p>
+            <Progress value={advancedProgressPercentage} className="mt-2 h-2" />
           </CardContent>
         </Card>
 
         {/* Main Field of Study */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Main Field of Study
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Huvudområde</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.topFieldsOfStudy.length > 0
-                ? stats.topFieldsOfStudy[0]
-                : 'N/A'}
+              {mainFieldOfStudy ? mainFieldOfStudy.field : 'Ej uppfyllt'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {stats.topFieldsOfStudy.length > 1
-                ? `+${stats.topFieldsOfStudy.length - 1} other${
-                    stats.topFieldsOfStudy.length > 2 ? 's' : ''
-                  }`
-                : stats.creditsByField[stats.topFieldsOfStudy[0]]
-                ? `${stats.creditsByField[stats.topFieldsOfStudy[0]]} credits`
-                : 'Based on course credits'}
+              {mainFieldOfStudy
+                ? `${mainFieldOfStudy.credits} hp avancerade poäng`
+                : `Behöver ${requiredFieldCredits} hp i samma område`}
             </p>
           </CardContent>
         </Card>
-
-        {/* Progress */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {progressPercentage.toFixed(0)}%
-            </div>
-            <p className="text-xs text-muted-foreground">Program completion</p>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Semester Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Semester Breakdown
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[7, 8, 9].map((semester) => {
-              const semesterCourses =
-                stats.coursesPerSemester[
-                  semester as keyof typeof stats.coursesPerSemester
-                ];
-              const semesterCredits =
-                stats.creditsPerSemester[
-                  semester as keyof typeof stats.creditsPerSemester
-                ];
-              const isLightLoad = semesterCredits < 12;
-              const isHeavyLoad = semesterCredits > 18;
-
-              return (
-                <div key={semester} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Semester {semester}</h4>
-                    <div className="flex gap-2">
-                      {isLightLoad && (
-                        <Badge variant="outline" className="text-yellow-600">
-                          Light Load
-                        </Badge>
-                      )}
-                      {isHeavyLoad && (
-                        <Badge variant="outline" className="text-red-600">
-                          Heavy Load
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Courses:</span>
-                      <span className="font-medium">{semesterCourses}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Credits:</span>
-                      <span className="font-medium">{semesterCredits}</span>
-                    </div>
-                  </div>
-
-                  {/* Credit distribution bar */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Credit Load</span>
-                      <span>{semesterCredits}/20</span>
-                    </div>
-                    <Progress
-                      value={(semesterCredits / 20) * 100}
-                      className="h-2"
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Course Distribution by Period */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5" />
-            Course Distribution
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            {[1, 2].map((period) => {
-              const periodCourses = Object.values(schedule).reduce(
-                (total, semester) => {
-                  const periodKey = `period${period}` as 'period1' | 'period2';
-                  return total + semester[periodKey].length;
-                },
-                0
-              );
-
-              return (
-                <div key={period} className="space-y-3">
-                  <h4 className="font-medium">Period {period}</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Total Courses:
-                      </span>
-                      <span className="font-medium">{periodCourses}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Avg per Semester:
-                      </span>
-                      <span className="font-medium">
-                        {(periodCourses / 3).toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                  <Progress
-                    value={(periodCourses / stats.totalCourses) * 100}
-                    className="h-2"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

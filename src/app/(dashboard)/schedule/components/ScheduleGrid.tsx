@@ -72,7 +72,7 @@ export function ScheduleGrid() {
         {semesters.map((semester) => (
           <div key={semester} className="text-center p-4 bg-muted rounded-lg">
             <h3 className="text-lg font-semibold text-foreground">
-              Semester {semester}
+              Termin {semester}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
               {getSemesterDescription(semester)}
@@ -120,9 +120,7 @@ export function ScheduleGrid() {
 
       {/* Mobile Layout Helper */}
       <div className="md:hidden text-center text-sm text-muted-foreground mt-8">
-        <p>
-          On mobile, each semester is shown separately for better visibility.
-        </p>
+        <p>På mobil visas varje termin separat för bättre överblick.</p>
       </div>
     </div>
   );
@@ -134,11 +132,11 @@ export function ScheduleGrid() {
 function getSemesterDescription(semester: number): string {
   switch (semester) {
     case 7:
-      return 'Fall Year 4';
+      return 'Höst år 4';
     case 8:
-      return 'Spring Year 4';
+      return 'Vår år 4';
     case 9:
-      return 'Summer/Optional';
+      return 'Höst år 5';
     default:
       return '';
   }

@@ -76,11 +76,10 @@ export function SemesterBlock({
           <span className="text-sm font-medium text-muted-foreground">
             S{semester} P{period}
           </span>
-        </div>
-
+        </div>{' '}
         {!readonly && courses.length > 0 && (
           <span className="text-xs text-muted-foreground">
-            {courses.length} course{courses.length !== 1 ? 's' : ''}
+            {courses.length} kurs{courses.length !== 1 ? 'er' : ''}
           </span>
         )}
       </div>
@@ -115,7 +114,7 @@ export function SemesterBlock({
                     <Plus className="h-4 w-4 text-primary" />
                   </div>
                   <p className="text-sm text-primary font-medium">
-                    Drop course here
+                    Släpp kurs här
                   </p>
                 </>
               ) : (
@@ -124,31 +123,20 @@ export function SemesterBlock({
                     <Plus className="h-4 w-4 text-destructive" />
                   </div>
                   <p className="text-sm text-destructive font-medium">
-                    Cannot place course here
+                    Kan inte placera kurs här
                   </p>
                 </>
               )}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 flex flex-col items-center">
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <BookOpen className="h-6 w-6 text-muted-foreground" />
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  No courses scheduled
+                  Inga kurser schemalagda
                 </p>
-                {!readonly && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground"
-                    onClick={() => handleAddCourse(semester, period)}
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add course
-                  </Button>
-                )}
               </div>
             </div>
           )}
