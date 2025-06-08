@@ -59,9 +59,9 @@ const CourseFilter: React.FC<FilterProps> = ({
     <Card
       className={`${
         screen === 'desktop'
-          ? 'sticky top-6 overflow-y-auto h-fit max-h-[calc(100vh-120px)] w-80'
+          ? 'sticky top-6 overflow-y-auto h-fit max-h-[calc(100vh-120px)]'
           : 'w-full'
-      } border border-border`}
+      } border border-border m-0`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">

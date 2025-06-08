@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RefreshCw, Loader2, Grid3X3, List, Filter } from 'lucide-react';
+import { RefreshCw, Loader2, Filter } from 'lucide-react';
 
 interface InfiniteCoursesListProps {
   isAuthenticated: boolean;
@@ -29,7 +29,6 @@ interface InfiniteCoursesListProps {
   onMobileFilterOpen?: () => void;
 }
 
-type ViewMode = 'grid' | 'list';
 type SortOption = 'code' | 'name' | 'credits' | 'semester';
 
 const CourseCardSkeleton = () => (
@@ -109,7 +108,6 @@ export function InfiniteCoursesList({
   filters,
   onMobileFilterOpen,
 }: InfiniteCoursesListProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [currentSortBy, setCurrentSortBy] = useState<SortOption>(
     (sortBy as SortOption) || 'code'
   );
@@ -144,10 +142,9 @@ export function InfiniteCoursesList({
         course={course}
         isAuthenticated={isAuthenticated}
         variant="default"
-        className={viewMode === 'list' ? 'w-full' : ''}
       />
     ));
-  }, [courses, isAuthenticated, viewMode]);
+  }, [courses, isAuthenticated]);
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
@@ -282,37 +279,11 @@ export function InfiniteCoursesList({
               {currentSortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </div>
-
-          {/* View Mode Toggle */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            className="h-8 px-3 gap-2"
-          >
-            {viewMode === 'grid' ? (
-              <>
-                <List className="h-4 w-4" />
-                Lista
-              </>
-            ) : (
-              <>
-                <Grid3X3 className="h-4 w-4" />
-                Rutnät
-              </>
-            )}
-          </Button>
         </div>
       </div>
 
       {/* Courses display */}
-      <div
-        className={
-          viewMode === 'grid'
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-            : 'flex flex-col gap-4'
-        }
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {coursesDisplay}
       </div>
 

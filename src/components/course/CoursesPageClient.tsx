@@ -55,16 +55,14 @@ export function CoursesPageClient({
   );
 
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-6">
       {/* Desktop Filter Panel */}
-      <div className="hidden lg:block w-96 flex-shrink-0">
-        <div className="sticky top-6">
-          <CourseFilter
-            onFilterChange={handleFilterChange}
-            currentFilters={filters}
-            screen="desktop"
-          />
-        </div>
+      <div className="hidden lg:block w-80 flex-shrink-0">
+        <CourseFilter
+          onFilterChange={handleFilterChange}
+          currentFilters={filters}
+          screen="desktop"
+        />
       </div>
 
       {/* Main Content */}
