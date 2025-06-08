@@ -53,7 +53,7 @@ export function SemesterBlock({
   // Handle course removal
   const handleCourseRemoval = (enrollmentId: string) => {
     if (readonly) return;
-    
+
     dispatch({
       type: ScheduleActions.REMOVE_COURSE,
       payload: { enrollmentId },
