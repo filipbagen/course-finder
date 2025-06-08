@@ -1,13 +1,21 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import CourseCard from '@/components/course/CourseCard';
 import { useInfiniteCourses } from '@/hooks/courses/useInfiniteCourses';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { FilterState } from '@/types/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RefreshCw, Loader2, Grid3X3, List, Filter } from 'lucide-react';
 
 interface InfiniteCoursesListProps {
   isAuthenticated: boolean;
@@ -17,7 +25,12 @@ interface InfiniteCoursesListProps {
   semester?: string;
   sortBy?: string;
   sortOrder?: string;
+  filters?: FilterState;
+  onMobileFilterOpen?: () => void;
 }
+
+type ViewMode = 'grid' | 'list';
+type SortOption = 'code' | 'name' | 'credits' | 'semester';
 
 const CourseCardSkeleton = () => (
   <div className="space-y-3">
@@ -93,7 +106,17 @@ export function InfiniteCoursesList({
   semester,
   sortBy,
   sortOrder,
+  filters,
+  onMobileFilterOpen,
 }: InfiniteCoursesListProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [currentSortBy, setCurrentSortBy] = useState<SortOption>(
+    (sortBy as SortOption) || 'code'
+  );
+  const [currentSortOrder, setCurrentSortOrder] = useState<'asc' | 'desc'>(
+    (sortOrder as 'asc' | 'desc') || 'asc'
+  );
+
   const {
     courses,
     loading,
@@ -108,8 +131,9 @@ export function InfiniteCoursesList({
     campus,
     mainFieldOfStudy,
     semester,
-    sortBy,
-    sortOrder,
+    sortBy: currentSortBy,
+    sortOrder: currentSortOrder,
+    filters,
     limit: 20,
   });
 
@@ -120,9 +144,22 @@ export function InfiniteCoursesList({
         course={course}
         isAuthenticated={isAuthenticated}
         variant="default"
+        className={viewMode === 'list' ? 'w-full' : ''}
       />
     ));
-  }, [courses, isAuthenticated]);
+  }, [courses, isAuthenticated, viewMode]);
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    if (search) return true;
+    if (campus || mainFieldOfStudy || semester) return true;
+    if (filters) {
+      return Object.values(filters).some(
+        (filterArray: string[]) => filterArray.length > 0
+      );
+    }
+    return false;
+  }, [search, campus, mainFieldOfStudy, semester, filters]);
 
   // Loading state for initial load
   if (loading && courses.length === 0) {
@@ -164,11 +201,11 @@ export function InfiniteCoursesList({
           Inga kurser hittades
         </h3>
         <p className="text-muted-foreground mb-4">
-          {search || campus || mainFieldOfStudy || semester
+          {hasActiveFilters
             ? 'Inga kurser matchar dina filterkriterier.'
             : 'Det verkar som att det inte finns några kurser att visa just nu.'}
         </p>
-        {(search || campus || mainFieldOfStudy || semester) && (
+        {hasActiveFilters && (
           <Button onClick={refresh} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Rensa filter
@@ -180,21 +217,102 @@ export function InfiniteCoursesList({
 
   return (
     <div className="space-y-6">
-      {/* Results summary */}
-      <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <div>
-          Visar {courses.length}
-          {totalCount !== null && ` av ${totalCount}`} kurser
+      {/* Results summary with sorting and view controls */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>
+            Visar {courses.length}
+            {totalCount !== null && ` av ${totalCount}`} kurser
+          </span>
         </div>
-        {error && (
-          <div className="text-destructive">
-            Fel vid hämtning av fler kurser
+
+        <div className="flex items-center gap-4">
+          {/* Mobile Filter Button - only show on mobile */}
+          {onMobileFilterOpen && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onMobileFilterOpen}
+              className="lg:hidden h-8 px-3 gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+              {hasActiveFilters && (
+                <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                  •
+                </span>
+              )}
+            </Button>
+          )}
+
+          {error && (
+            <div className="text-destructive text-sm">
+              Fel vid hämtning av fler kurser
+            </div>
+          )}
+
+          {/* Sorting Controls */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-xs text-muted-foreground">
+              Sortera efter:
+            </span>
+            <Select
+              value={currentSortBy}
+              onValueChange={(value: SortOption) => setCurrentSortBy(value)}
+            >
+              <SelectTrigger className="w-32 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="code">Kurskod</SelectItem>
+                <SelectItem value="name">Namn</SelectItem>
+                <SelectItem value="credits">Poäng</SelectItem>
+                <SelectItem value="semester">Termin</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                setCurrentSortOrder(currentSortOrder === 'asc' ? 'desc' : 'asc')
+              }
+              className="h-8 px-2 text-xs"
+            >
+              {currentSortOrder === 'asc' ? '↑' : '↓'}
+            </Button>
           </div>
-        )}
+
+          {/* View Mode Toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+            className="h-8 px-3 gap-2"
+          >
+            {viewMode === 'grid' ? (
+              <>
+                <List className="h-4 w-4" />
+                Lista
+              </>
+            ) : (
+              <>
+                <Grid3X3 className="h-4 w-4" />
+                Rutnät
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Courses grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Courses display */}
+      <div
+        className={
+          viewMode === 'grid'
+            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+            : 'flex flex-col gap-4'
+        }
+      >
         {coursesDisplay}
       </div>
 

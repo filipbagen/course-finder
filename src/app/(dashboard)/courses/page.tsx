@@ -2,8 +2,7 @@
 import { Suspense } from 'react';
 
 // components
-import { InfiniteCoursesList } from '@/components/course/InfiniteCoursesList';
-import { CourseSearchAndFilter } from '@/components/course/CourseSearchAndFilter';
+import { CoursesPageClient } from '@/components/course/CoursesPageClient';
 
 // shadcn
 import {
@@ -95,18 +94,15 @@ export default async function CoursesPage({
           </div>
         </div>
 
-        {/* Search and Filter */}
-        <CourseSearchAndFilter />
-
-        {/* Infinite Courses List */}
-        <InfiniteCoursesList
+        {/* Courses with Filter System */}
+        <CoursesPageClient
           isAuthenticated={isAuthenticated}
-          search={search}
-          campus={campus}
-          mainFieldOfStudy={field}
-          semester={semester}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
+          initialSearch={search}
+          initialCampus={campus}
+          initialField={field}
+          initialSemester={semester}
+          initialSortBy={sortBy}
+          initialSortOrder={sortOrder}
         />
       </div>
     </div>

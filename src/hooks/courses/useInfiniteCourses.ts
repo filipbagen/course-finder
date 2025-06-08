@@ -1,14 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Course } from '@/types/types';
+import { Course, FilterState } from '@/types/types';
 
 interface UseInfiniteCoursesParams {
   search?: string;
   campus?: string;
   mainFieldOfStudy?: string;
   semester?: string;
+  period?: string;
+  block?: string;
+  studyPace?: string;
+  courseLevel?: string;
+  examinations?: string;
   sortBy?: string;
   sortOrder?: string;
   limit?: number;
+  filters?: FilterState;
 }
 
 interface CourseResponse {
@@ -47,9 +53,15 @@ export function useInfiniteCourses(
     campus,
     mainFieldOfStudy,
     semester,
+    period,
+    block,
+    studyPace,
+    courseLevel,
+    examinations,
     sortBy = 'code',
     sortOrder = 'asc',
     limit = 20,
+    filters,
   } = params;
 
   const buildQueryParams = useCallback(
@@ -59,15 +71,64 @@ export function useInfiniteCourses(
       if (cursor) params.set('cursor', cursor);
       params.set('limit', limit.toString());
       if (search) params.set('search', search);
-      if (campus) params.set('campus', campus);
-      if (mainFieldOfStudy) params.set('mainFieldOfStudy', mainFieldOfStudy);
-      if (semester) params.set('semester', semester);
       if (sortBy) params.set('sortBy', sortBy);
       if (sortOrder) params.set('sortOrder', sortOrder);
 
+      // Use filters object if provided, otherwise fall back to individual params
+      if (filters) {
+        if (filters.campus.length > 0) {
+          params.set('campus', filters.campus.join(','));
+        }
+        if (filters.mainFieldOfStudy.length > 0) {
+          params.set('mainFieldOfStudy', filters.mainFieldOfStudy.join(','));
+        }
+        if (filters.semester.length > 0) {
+          params.set('semester', filters.semester.join(','));
+        }
+        if (filters.period.length > 0) {
+          params.set('period', filters.period.join(','));
+        }
+        if (filters.block.length > 0) {
+          params.set('block', filters.block.join(','));
+        }
+        if (filters.studyPace.length > 0) {
+          params.set('studyPace', filters.studyPace.join(','));
+        }
+        if (filters.courseLevel.length > 0) {
+          params.set('courseLevel', filters.courseLevel.join(','));
+        }
+        if (filters.examinations.length > 0) {
+          params.set('examinations', filters.examinations.join(','));
+        }
+      } else {
+        // Legacy individual parameter support
+        if (campus) params.set('campus', campus);
+        if (mainFieldOfStudy) params.set('mainFieldOfStudy', mainFieldOfStudy);
+        if (semester) params.set('semester', semester);
+        if (period) params.set('period', period);
+        if (block) params.set('block', block);
+        if (studyPace) params.set('studyPace', studyPace);
+        if (courseLevel) params.set('courseLevel', courseLevel);
+        if (examinations) params.set('examinations', examinations);
+      }
+
       return params.toString();
     },
-    [search, campus, mainFieldOfStudy, semester, sortBy, sortOrder, limit]
+    [
+      search,
+      campus,
+      mainFieldOfStudy,
+      semester,
+      period,
+      block,
+      studyPace,
+      courseLevel,
+      examinations,
+      sortBy,
+      sortOrder,
+      limit,
+      filters,
+    ]
   );
 
   const fetchCourses = useCallback(
@@ -146,7 +207,21 @@ export function useInfiniteCourses(
   // Initial fetch and refetch when parameters change
   useEffect(() => {
     refresh();
-  }, [search, campus, mainFieldOfStudy, semester, sortBy, sortOrder, limit]);
+  }, [
+    search,
+    campus,
+    mainFieldOfStudy,
+    semester,
+    period,
+    block,
+    studyPace,
+    courseLevel,
+    examinations,
+    sortBy,
+    sortOrder,
+    limit,
+    filters,
+  ]);
 
   // Cleanup
   useEffect(() => {
