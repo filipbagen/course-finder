@@ -1,28 +1,34 @@
-import { PrismaClient } from '@prisma/client';
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthenticatedUser } from '@/lib/auth';
+import {
+  createSuccessResponse,
+  unauthorized,
+  badRequest,
+  conflict,
+  notFound,
+  internalServerError,
+} from '@/lib/errors';
+import {
+  enrollmentCreateSchema,
+  enrollmentUpdateSchema,
+} from '@/lib/validation';
+import type { ApiResponse } from '@/types/api';
 
-const prisma = new PrismaClient();
-
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+): Promise<NextResponse<ApiResponse<{ enrollment: any }>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
+    const body = await request.json();
+    const validation = enrollmentCreateSchema.safeParse(body);
+
+    if (!validation.success) {
+      return badRequest('Invalid request data', validation.error.errors);
     }
 
-    const { courseId, semester } = await request.json();
-
-    if (!courseId || !semester) {
-      return NextResponse.json(
-        { error: 'CourseId and semester are required' },
-        { status: 400 }
-      );
-    }
+    const { courseId, semester } = validation.data;
 
     // Check if enrollment already exists for this course and semester
     const existingEnrollment = await prisma.enrollment.findFirst({
@@ -34,10 +40,7 @@ export async function POST(request: Request) {
     });
 
     if (existingEnrollment) {
-      return NextResponse.json(
-        { error: 'Enrollment already exists for this course and semester' },
-        { status: 409 }
-      );
+      return conflict('Enrollment already exists for this course and semester');
     }
 
     // Check if user is enrolled in this course in a different semester
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
         where: { id: existingCourseEnrollment.id },
         data: { semester: semester },
       });
-      return NextResponse.json({ enrollment: updatedEnrollment });
+      return createSuccessResponse({ enrollment: updatedEnrollment });
     }
 
     // Create new enrollment
@@ -67,26 +70,18 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ enrollment });
+    return createSuccessResponse({ enrollment });
   } catch (error) {
     console.error('Failed to create enrollment:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to create enrollment');
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request
+): Promise<NextResponse<ApiResponse<{ courses: any[] }>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
-    }
+    const user = await getAuthenticatedUser();
 
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId') || user.id;
@@ -108,34 +103,24 @@ export async function GET(request: Request) {
       enrollmentId: enrollment.id,
     }));
 
-    return NextResponse.json({ courses: coursesWithEnrollmentData });
+    return createSuccessResponse({ courses: coursesWithEnrollmentData });
   } catch (error) {
     console.error('Failed to fetch enrollments:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to fetch enrollments');
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(
+  request: Request
+): Promise<NextResponse<ApiResponse<{ message: string }>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
-    }
-
-    const { enrollmentId } = await request.json();
+    const body = await request.json();
+    const { enrollmentId } = body;
 
     if (!enrollmentId) {
-      return NextResponse.json(
-        { error: 'Invalid enrollmentId' },
-        { status: 400 }
-      );
+      return badRequest('enrollmentId is required');
     }
 
     const existingEnrollment = await prisma.enrollment.findUnique({
@@ -143,55 +128,43 @@ export async function DELETE(request: Request) {
     });
 
     if (!existingEnrollment || existingEnrollment.userId !== user.id) {
-      return NextResponse.json(
-        { error: 'Enrollment not found or access denied' },
-        { status: 404 }
-      );
+      return notFound('Enrollment not found or access denied');
     }
 
     await prisma.enrollment.delete({
       where: { id: enrollmentId },
     });
 
-    return NextResponse.json({ message: 'Enrollment deleted successfully' });
+    return createSuccessResponse({
+      message: 'Enrollment deleted successfully',
+    });
   } catch (error) {
     console.error('Failed to delete enrollment:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to delete enrollment');
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(
+  request: Request
+): Promise<NextResponse<ApiResponse<{ updatedEnrollment: any }>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'No user logged in' }, { status: 401 });
+    const body = await request.json();
+    const validation = enrollmentUpdateSchema.safeParse(body);
+
+    if (!validation.success) {
+      return badRequest('Invalid request data', validation.error.errors);
     }
 
-    const { enrollmentId, newSemester } = await request.json();
-
-    if (!enrollmentId || !newSemester) {
-      return NextResponse.json(
-        { error: 'EnrollmentId and newSemester are required' },
-        { status: 400 }
-      );
-    }
+    const { enrollmentId, newSemester } = validation.data;
 
     const existingEnrollment = await prisma.enrollment.findUnique({
       where: { id: enrollmentId },
     });
 
     if (!existingEnrollment || existingEnrollment.userId !== user.id) {
-      return NextResponse.json(
-        { error: 'Enrollment not found or access denied' },
-        { status: 404 }
-      );
+      return notFound('Enrollment not found or access denied');
     }
 
     const updatedEnrollment = await prisma.enrollment.update({
@@ -201,12 +174,9 @@ export async function PATCH(request: Request) {
       },
     });
 
-    return NextResponse.json({ updatedEnrollment });
+    return createSuccessResponse({ updatedEnrollment });
   } catch (error) {
     console.error('Failed to update enrollment:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to update enrollment');
   }
 }

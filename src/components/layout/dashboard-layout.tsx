@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/shared/Navbar';

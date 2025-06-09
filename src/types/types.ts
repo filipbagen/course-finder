@@ -98,3 +98,61 @@ export interface Review {
   createdAt: string;
   user: User;
 }
+
+// Re-export API types for convenience
+export type {
+  ApiResponse,
+  ApiError,
+  PaginatedResponse,
+  InfiniteResponse,
+} from './api';
+
+// API Response Types
+export interface CourseSearchResponse {
+  items: Course[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+  totalCount: number | null;
+  count: number;
+}
+
+export interface ScheduleResponse {
+  enrollments: Array<{
+    id: string;
+    semester: number;
+    period: number;
+    status: string;
+    grade: string | null;
+    enrolledAt: Date;
+    course: Course;
+  }>;
+}
+
+export interface UserResponse {
+  user: User;
+}
+
+export interface EnrollmentResponse {
+  courses: CourseWithEnrollment[];
+}
+
+export interface ReviewResponse {
+  reviews: Review[];
+}
+
+export interface CreateReviewRequest {
+  rating: number;
+  comment?: string;
+  courseId: string;
+}
+
+export interface CreateEnrollmentRequest {
+  courseId: string;
+  semester: number;
+}
+
+export interface UpdateScheduleRequest {
+  courseId: string;
+  semester: number;
+  period: number;
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Course, FilterState } from '@/types/types';
+import { InfiniteResponse } from '@/types/api';
 
 interface UseInfiniteCoursesParams {
   search?: string;
@@ -15,14 +16,6 @@ interface UseInfiniteCoursesParams {
   sortOrder?: string;
   limit?: number;
   filters?: FilterState;
-}
-
-interface CourseResponse {
-  items: Course[];
-  nextCursor: string | null;
-  hasNextPage: boolean;
-  totalCount: number | null;
-  count: number;
 }
 
 interface UseInfiniteCoursesReturn {
@@ -158,19 +151,27 @@ export function useInfiniteCourses(
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data: CourseResponse = await response.json();
+        const result: InfiniteResponse<Course> = await response.json();
+
+        // Handle API error response
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch courses');
+        }
+
+        // Extract data from the standardized response
+        const data = result.data || [];
 
         if (isLoadMore) {
-          setCourses((prev) => [...prev, ...data.items]);
+          setCourses((prev) => [...prev, ...data]);
         } else {
-          setCourses(data.items);
-          if (data.totalCount !== null) {
-            setTotalCount(data.totalCount);
+          setCourses(data);
+          if (result.totalCount !== null && result.totalCount !== undefined) {
+            setTotalCount(result.totalCount);
           }
         }
 
-        setNextCursor(data.nextCursor);
-        setHasNextPage(data.hasNextPage);
+        setNextCursor(result.nextCursor || null);
+        setHasNextPage(result.hasNextPage);
         setError(null);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {

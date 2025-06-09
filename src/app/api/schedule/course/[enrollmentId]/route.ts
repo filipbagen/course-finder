@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { getAuthenticatedUser } from '@/lib/auth';
+import {
+  createSuccessResponse,
+  badRequest,
+  notFound,
+  internalServerError,
+} from '@/lib/errors';
+import type { ApiResponse } from '@/types/api';
 
 /**
  * DELETE /api/schedule/course/[enrollmentId]
@@ -9,23 +16,13 @@ import { prisma } from '@/lib/prisma';
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ enrollmentId: string }> }
-) {
+): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
   try {
     const { enrollmentId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getAuthenticatedUser();
 
     if (!enrollmentId) {
-      return NextResponse.json(
-        { error: 'Enrollment ID is required' },
-        { status: 400 }
-      );
+      return badRequest('Enrollment ID is required');
     }
 
     // Verify enrollment belongs to the user
@@ -37,10 +34,7 @@ export async function DELETE(
     });
 
     if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Enrollment not found' },
-        { status: 404 }
-      );
+      return notFound('Enrollment not found');
     }
 
     // Delete the enrollment
@@ -50,12 +44,9 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ success: true });
+    return createSuccessResponse({ success: true });
   } catch (error) {
     console.error('Error removing course from schedule:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to remove course from schedule');
   }
 }

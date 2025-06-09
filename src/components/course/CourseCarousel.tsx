@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import CourseCard from './CourseCard';
 import { SkeletonCard } from '@/components/shared/SkeletonComponent';
 import { Course as FullCourse } from '@/types/types';
+import { ApiResponse } from '@/types/api';
 
 interface Course {
   id: string;
@@ -40,8 +41,14 @@ export function CourseCarousel() {
           throw new Error('Failed to fetch courses');
         }
 
-        const data = await response.json();
-        setCourses(data);
+        const result: ApiResponse<Course[]> = await response.json();
+
+        // Handle the new standardized API response format
+        if (result.success && result.data) {
+          setCourses(result.data);
+        } else {
+          throw new Error(result.error || 'Failed to fetch courses');
+        }
       } catch (err) {
         console.error('Error fetching courses:', err);
         setError('Failed to load courses');

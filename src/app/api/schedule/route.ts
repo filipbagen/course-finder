@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { handleApiError, createSuccessResponse } from '@/lib/errors';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { ScheduleResponse } from '@/types/types';
 
 /**
  * GET /api/schedule
@@ -8,21 +10,14 @@ import { prisma } from '@/lib/prisma';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authenticatedUser = await getAuthenticatedUser();
 
     // Get userId from query params for viewing other users' schedules
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get('userId');
 
     // Use target user ID if provided, otherwise use authenticated user
-    const userId = targetUserId || user.id;
+    const userId = targetUserId || authenticatedUser.id;
 
     // Fetch user's enrollments with course data
     const enrollments = await prisma.enrollment.findMany({
@@ -43,7 +38,7 @@ export async function GET(request: NextRequest) {
       orderBy: [{ semester: 'asc' }, { course: { name: 'asc' } }],
     });
 
-    return NextResponse.json({
+    const scheduleData = {
       enrollments: enrollments.map((enrollment) => ({
         id: enrollment.id,
         semester: enrollment.semester,
@@ -74,12 +69,10 @@ export async function GET(request: NextRequest) {
           examinations: enrollment.course.examinations,
         },
       })),
-    });
+    };
+
+    return createSuccessResponse(scheduleData, 'Schedule fetched successfully');
   } catch (error) {
-    console.error('Error fetching schedule:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

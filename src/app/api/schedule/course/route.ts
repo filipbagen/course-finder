@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { getAuthenticatedUser } from '@/lib/auth';
+import {
+  createSuccessResponse,
+  badRequest,
+  notFound,
+  conflict,
+  internalServerError,
+} from '@/lib/errors';
+import { UpdateScheduleSchema, validateRequest } from '@/lib/validation';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import type { ApiResponse } from '@/types/api';
 
 // Type for enrollment with course included
 type EnrollmentWithCourse = Prisma.EnrollmentGetPayload<{
@@ -19,26 +28,15 @@ type EnrollmentWithCourse = Prisma.EnrollmentGetPayload<{
  * PUT /api/schedule/course
  * Update course placement in schedule
  */
-export async function PUT(request: NextRequest) {
+export async function PUT(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<any>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getAuthenticatedUser();
 
     const body = await request.json();
-    const { courseId, semester } = body;
-
-    if (!courseId || !semester) {
-      return NextResponse.json(
-        { error: 'Missing required fields: courseId, semester' },
-        { status: 400 }
-      );
-    }
+    const validatedData = validateRequest(body, UpdateScheduleSchema);
+    const { courseId, semester } = validatedData;
 
     // Find the enrollment to update
     const enrollment = await prisma.enrollment.findFirst({
@@ -56,10 +54,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!enrollment) {
-      return NextResponse.json(
-        { error: 'Enrollment not found' },
-        { status: 404 }
-      );
+      return notFound('Enrollment not found for this course');
     }
 
     // Update the enrollment
@@ -79,7 +74,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    return createSuccessResponse({
       id: updatedEnrollment.course.id,
       code: updatedEnrollment.course.code,
       name: updatedEnrollment.course.name,
@@ -112,10 +107,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating course schedule:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to update course schedule');
   }
 }
 
@@ -123,26 +115,15 @@ export async function PUT(request: NextRequest) {
  * POST /api/schedule/course
  * Add course to schedule
  */
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<any>>> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getAuthenticatedUser();
 
     const body = await request.json();
-    const { courseId, semester } = body;
-
-    if (!courseId || !semester) {
-      return NextResponse.json(
-        { error: 'Missing required fields: courseId, semester' },
-        { status: 400 }
-      );
-    }
+    const validatedData = validateRequest(body, UpdateScheduleSchema);
+    const { courseId, semester } = validatedData;
 
     // Check if enrollment already exists
     const existingEnrollment = await prisma.enrollment.findFirst({
@@ -154,10 +135,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingEnrollment) {
-      return NextResponse.json(
-        { error: 'Already enrolled in this course for this semester' },
-        { status: 400 }
-      );
+      return conflict('Already enrolled in this course for this semester');
     }
 
     // Create new enrollment
@@ -177,7 +155,7 @@ export async function POST(request: NextRequest) {
       },
     })) as EnrollmentWithCourse;
 
-    return NextResponse.json({
+    return createSuccessResponse({
       id: enrollment.course.id,
       code: enrollment.course.code,
       name: enrollment.course.name,
@@ -209,9 +187,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error adding course to schedule:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return internalServerError('Failed to add course to schedule');
   }
 }

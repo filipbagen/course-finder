@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { handleApiError, createSuccessResponse } from '@/lib/errors';
+import { Course } from '@/types/types';
 
 /**
  * GET /api/courses/random
@@ -29,18 +31,17 @@ export async function GET(request: NextRequest) {
     });
 
     if (courses.length === 0) {
-      return NextResponse.json([]);
+      return createSuccessResponse<Course[]>([], 'No courses found');
     }
 
     // Randomly shuffle and take the requested count
     const shuffled = courses.sort(() => Math.random() - 0.5).slice(0, count);
 
-    return NextResponse.json(shuffled);
-  } catch (error) {
-    console.error('Error fetching random courses:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch courses' },
-      { status: 500 }
+    return createSuccessResponse<Course[]>(
+      shuffled as Course[],
+      'Random courses fetched successfully'
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }

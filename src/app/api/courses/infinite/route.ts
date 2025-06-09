@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createSuccessResponse, infiniteError, badRequest } from '@/lib/errors';
+import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
+import type { ApiResponse, InfiniteResponse } from '@/types/api';
 import { Course } from '@/types/types';
 
 export const dynamic = 'force-dynamic';
@@ -20,26 +23,28 @@ interface SearchParams {
   sortOrder?: string;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse<InfiniteResponse<Course>>> {
   try {
     const { searchParams } = new URL(request.url);
 
-    const cursor = searchParams.get('cursor');
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
-    const search = searchParams.get('search');
-    const campus = searchParams.get('campus');
-    const mainFieldOfStudy = searchParams.get('mainFieldOfStudy');
-    const semester = searchParams.get('semester');
-    const period = searchParams.get('period');
-    const block = searchParams.get('block');
-    const studyPace = searchParams.get('studyPace');
-    const courseLevel = searchParams.get('courseLevel');
-    const examinations = searchParams.get('examinations');
-    const sortBy = searchParams.get('sortBy') || 'code';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
+    // Validate query parameters
+    const params = validateQueryParams(searchParams, CourseSearchSchema);
 
-    // Validate limit (max 50 for performance)
-    const validLimit = Math.min(Math.max(limit, 1), 50);
+    const cursor = params.cursor;
+    const limit = Math.min(Math.max(params.limit || 20, 1), 50);
+    const search = params.search;
+    const campus = params.campus;
+    const mainFieldOfStudy = params.mainFieldOfStudy;
+    const semester = params.semester;
+    const period = params.period;
+    const block = params.block;
+    const studyPace = params.studyPace;
+    const courseLevel = params.courseLevel;
+    const examinations = params.examinations;
+    const sortBy = params.sortBy || 'code';
+    const sortOrder = params.sortOrder || 'asc';
 
     // Build where conditions
     const whereConditions: any = {};
@@ -173,7 +178,7 @@ export async function GET(request: NextRequest) {
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
-      take: validLimit + 1, // Take one extra to check if there's a next page
+      take: limit + 1, // Take one extra to check if there's a next page
       select: {
         id: true,
         code: true,
@@ -209,8 +214,8 @@ export async function GET(request: NextRequest) {
     const courses = await prisma.course.findMany(queryOptions);
 
     // Check if there are more items
-    const hasNextPage = courses.length > validLimit;
-    const items = hasNextPage ? courses.slice(0, validLimit) : courses;
+    const hasNextPage = courses.length > limit;
+    const items = hasNextPage ? courses.slice(0, limit) : courses;
 
     // Get next cursor
     const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
@@ -229,17 +234,15 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      items: items as Course[],
+      success: true,
+      data: items as Course[],
       nextCursor,
       hasNextPage,
       totalCount,
       count: items.length,
-    });
+    } as InfiniteResponse<Course>);
   } catch (error) {
     console.error('Error fetching courses:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch courses' },
-      { status: 500 }
-    );
+    return infiniteError('Failed to fetch courses');
   }
 }
