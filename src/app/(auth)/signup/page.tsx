@@ -8,10 +8,8 @@ interface SignupPageProps {
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
-
   // Await searchParams before using it
   const params = await searchParams;
-
 
   const supabase = await createClient();
 
@@ -21,9 +19,9 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
     error,
   } = await supabase.auth.getUser();
 
-  // Redirect authenticated users to private page
+  // Redirect authenticated users to courses page
   if (user && !error) {
-    redirect('/private');
+    redirect('/courses');
   }
 
   // Error messages mapping
@@ -79,9 +77,8 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-red-800">
-                  {errorMessages[
-                    params.error as keyof typeof errorMessages
-                  ] || 'An error occurred. Please try again.'}
+                  {errorMessages[params.error as keyof typeof errorMessages] ||
+                    'An error occurred. Please try again.'}
                 </p>
               </div>
             </div>

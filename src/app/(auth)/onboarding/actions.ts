@@ -1,24 +1,27 @@
-'use server'
+'use server';
 
-import { createClient } from '@/lib/supabase/server'
-import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function updateUserProfile(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Verify authentication
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const name = formData.get('name') as string
-  const program = formData.get('program') as string
-  const colorScheme = formData.get('colorScheme') as string
-  const isPublic = formData.get('isPublic') === 'on'
-  const avatarUrl = formData.get('avatarUrl') as string
+  const name = formData.get('name') as string;
+  const program = formData.get('program') as string;
+  const colorScheme = formData.get('colorScheme') as string;
+  const isPublic = formData.get('isPublic') === 'on';
+  const avatarUrl = formData.get('avatarUrl') as string;
 
   console.log('Creating/updating user profile:', {
     userId: user.id,
@@ -27,7 +30,7 @@ export async function updateUserProfile(formData: FormData) {
     colorScheme,
     isPublic,
     avatarUrl,
-  })
+  });
 
   try {
     // Use upsert to create or update user profile
@@ -49,22 +52,22 @@ export async function updateUserProfile(formData: FormData) {
         isPublic,
         image: avatarUrl || null,
       },
-    })
+    });
 
-    console.log('Profile created/updated successfully:', result)
+    console.log('Profile created/updated successfully:', result);
   } catch (error) {
-    console.error('Error creating/updating profile with Prisma:', error)
-    
+    console.error('Error creating/updating profile with Prisma:', error);
+
     // Check if it's a permissions error
     if (error instanceof Error && error.message.includes('permission denied')) {
-      throw new Error('Database permission error - please check RLS policies')
+      throw new Error('Database permission error - please check RLS policies');
     }
-    
-    throw new Error('Failed to update profile')
+
+    throw new Error('Failed to update profile');
   }
 
   // Redirect OUTSIDE of try/catch block
-  console.log('Redirecting to private page...')
-  revalidatePath('/', 'layout')
-  redirect('/private')
+  console.log('Redirecting to courses page...');
+  revalidatePath('/', 'layout');
+  redirect('/courses');
 }

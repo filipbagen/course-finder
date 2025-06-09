@@ -22,9 +22,9 @@ export default async function OnboardingPage() {
     .eq('id', user.id)
     .single();
 
-  // If user already has name and program, redirect to private
+  // If user already has name and program, redirect to courses
   if (userData?.name && userData?.program) {
-    redirect('/private');
+    redirect('/courses');
   }
 
   return (

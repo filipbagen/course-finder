@@ -28,9 +28,9 @@ export default async function Home() {
     error,
   } = await supabase.auth.getUser();
 
-  // Redirect authenticated users to the private page
+  // Redirect authenticated users to the courses page
   if (user && !error) {
-    redirect('/private');
+    redirect('/courses');
   }
 
   return (
@@ -299,10 +299,10 @@ export default async function Home() {
 //     data: { session },
 //   } = await supabase.auth.getSession();
 
-//   // redirect the user to the /private page if they are logged in
+//   // redirect the user to the /courses page if they are logged in
 //   console.log('supabase', supabase);
 //   if (session) {
-//     redirect('/private');
+//     redirect('/courses');
 //   }
 
 // }
