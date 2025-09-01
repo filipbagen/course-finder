@@ -15,22 +15,38 @@ export interface Course {
   code: string;
   name: string;
   credits: number;
-  scheduledHours: number | null;
-  selfStudyHours: number | null;
+  campus: string;
   mainFieldOfStudy: string[];
   advanced: boolean;
-  semester: number[];
+  courseType?: string;
+  examiner?: string;
+  exclusions: string[];
+  scheduledHours: number | null;
+  selfStudyHours: number | null;
   period: number[];
   block: number[];
-  campus?: string;
-  exclusions: string[];
+  learningOutcomes?: { paragraph: string | null; list_items: string[] };
+  content?: { paragraph: string | null; list_items: string[] };
+  teachingMethods?: { paragraph: string | null; list_items: string[] };
+  prerequisites?: { paragraph: string | null; list_items: string[] };
+  recommendedPrerequisites?: { paragraph: string | null; list_items: string[] };
   offeredFor: string[];
-  prerequisites: string;
-  recommendedPrerequisites: string;
-  learningOutcomes: string;
-  content: string;
-  teachingMethods: string;
-  examinations?: Examination[]; // Ensure this is included
+  examination?: {
+    code: string;
+    name: string;
+    credits: number;
+    gradingScale: string;
+  }[];
+  programInfo?: {
+    programCode: string;
+    programName: string;
+    semester: number;
+    period: number[];
+    block: number[];
+    language: string;
+    campus: string;
+    vof: string;
+  }[];
 }
 
 export interface Enrollment {
@@ -44,6 +60,7 @@ export interface Enrollment {
 
 export interface CourseWithEnrollment extends Course {
   enrollment: Enrollment;
+  semester?: number; // Add this field to be compatible with old code that references course.semester
 }
 
 export const isCourseWithEnrollment = (

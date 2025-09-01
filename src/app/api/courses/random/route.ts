@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
         credits: true,
         mainFieldOfStudy: true,
         advanced: true,
-        semester: true,
         period: true,
         block: true,
         campus: true,
@@ -34,11 +33,21 @@ export async function GET(request: NextRequest) {
       return createSuccessResponse<Course[]>([], 'No courses found');
     }
 
+    // Transform BigInt to number for JSON serialization
+    const transformedCourses = courses.map((course) => ({
+      ...course,
+      credits: Number(course.credits),
+      period: course.period.map((p) => Number(p)),
+      block: course.block.map((b) => Number(b)),
+    }));
+
     // Randomly shuffle and take the requested count
-    const shuffled = courses.sort(() => Math.random() - 0.5).slice(0, count);
+    const shuffled = transformedCourses
+      .sort(() => Math.random() - 0.5)
+      .slice(0, count);
 
     return createSuccessResponse<Course[]>(
-      shuffled as Course[],
+      shuffled as unknown as Course[],
       'Random courses fetched successfully'
     );
   } catch (error) {

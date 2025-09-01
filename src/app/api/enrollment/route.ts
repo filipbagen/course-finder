@@ -97,11 +97,24 @@ export async function GET(
       },
     });
 
-    const coursesWithEnrollmentData = enrollments.map((enrollment) => ({
-      ...enrollment.course,
-      semester: enrollment.semester,
-      enrollmentId: enrollment.id,
-    }));
+    // Transform BigInt to number for JSON serialization
+    const coursesWithEnrollmentData = enrollments.map((enrollment) => {
+      const course = enrollment.course;
+      return {
+        ...course,
+        credits: Number(course.credits),
+        scheduledHours: course.scheduledHours
+          ? Number(course.scheduledHours)
+          : null,
+        selfStudyHours: course.selfStudyHours
+          ? Number(course.selfStudyHours)
+          : null,
+        period: course.period.map((p) => Number(p)),
+        block: course.block.map((b) => Number(b)),
+        semester: enrollment.semester,
+        enrollmentId: enrollment.id,
+      };
+    });
 
     return createSuccessResponse({ courses: coursesWithEnrollmentData });
   } catch (error) {

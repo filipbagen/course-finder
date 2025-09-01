@@ -53,7 +53,6 @@ export async function GET(
       whereConditions.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { code: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -79,21 +78,8 @@ export async function GET(
       }
     }
 
-    if (semester) {
-      const semesterValues = semester.split(',').map((s) => parseInt(s));
-      if (semesterValues.length > 1) {
-        whereConditions.semester = {
-          hasSome: semesterValues,
-        };
-      } else {
-        whereConditions.semester = {
-          has: semesterValues[0],
-        };
-      }
-    }
-
     if (period) {
-      const periodValues = period.split(',').map((p) => parseInt(p));
+      const periodValues = period.split(',').map((p) => BigInt(parseInt(p)));
       if (periodValues.length > 1) {
         whereConditions.period = {
           hasSome: periodValues,
@@ -106,7 +92,7 @@ export async function GET(
     }
 
     if (block) {
-      const blockValues = block.split(',').map((b) => parseInt(b));
+      const blockValues = block.split(',').map((b) => BigInt(parseInt(b)));
       if (blockValues.length > 1) {
         whereConditions.block = {
           hasSome: blockValues,
@@ -146,14 +132,11 @@ export async function GET(
         // Half-time: period length = 2 and credits = 6
         whereConditions.AND = whereConditions.AND || [];
         whereConditions.AND.push({
-          period: { hasEvery: [1, 2] },
+          period: { hasEvery: [BigInt(1), BigInt(2)] },
           credits: 6,
         });
       }
     }
-
-    // Note: examinations filter would require a join with examinations table
-    // For now, we'll skip this as it's more complex and may not be in current schema
 
     // Build orderBy
     const orderBy: any = {};
@@ -186,7 +169,6 @@ export async function GET(
         credits: true,
         mainFieldOfStudy: true,
         advanced: true,
-        semester: true,
         period: true,
         block: true,
         campus: true,
@@ -199,6 +181,10 @@ export async function GET(
         recommendedPrerequisites: true,
         learningOutcomes: true,
         teachingMethods: true,
+        courseType: true,
+        examiner: true,
+        examination: true,
+        programInfo: true,
       },
     };
 
@@ -213,9 +199,25 @@ export async function GET(
     // Execute query
     const courses = await prisma.course.findMany(queryOptions);
 
+    // Transform BigInt to number for JSON serialization
+    const transformedCourses = courses.map((course) => ({
+      ...course,
+      credits: Number(course.credits),
+      scheduledHours: course.scheduledHours
+        ? Number(course.scheduledHours)
+        : null,
+      selfStudyHours: course.selfStudyHours
+        ? Number(course.selfStudyHours)
+        : null,
+      period: course.period.map((p) => Number(p)),
+      block: course.block.map((b) => Number(b)),
+    }));
+
     // Check if there are more items
-    const hasNextPage = courses.length > limit;
-    const items = hasNextPage ? courses.slice(0, limit) : courses;
+    const hasNextPage = transformedCourses.length > limit;
+    const items = hasNextPage
+      ? transformedCourses.slice(0, limit)
+      : transformedCourses;
 
     // Get next cursor
     const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
@@ -235,7 +237,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: items as Course[],
+      data: items as unknown as Course[],
       nextCursor,
       hasNextPage,
       totalCount,

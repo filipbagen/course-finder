@@ -61,20 +61,43 @@ const CourseCard = ({
   );
 
   // Format display text
+  const getSemesters = () => {
+    if (course.programInfo && course.programInfo.length > 0) {
+      // Extract unique semesters from programInfo
+      const uniqueSemesters = [
+        ...new Set(course.programInfo.map((info) => info.semester)),
+      ];
+      return uniqueSemesters;
+    }
+    // Fallback for CourseWithEnrollment which might have semester directly
+    return (course as any).semester || [];
+  };
+
+  const semesters = getSemesters();
   const semesterText =
-    course.semester.length > 1
-      ? `T${course.semester.join(', ')}`
-      : `T${course.semester[0]}`;
+    semesters.length > 1
+      ? `T${semesters.join(', ')}`
+      : semesters.length === 1
+      ? `T${semesters[0]}`
+      : 'T?';
   const periodText =
-    course.period.length > 1
+    course.period && course.period.length > 1
       ? `P${course.period.join('+')}`
-      : `P${course.period[0]}`;
-  const blockText = `Block ${course.block.join(', ')}`;
+      : course.period && course.period.length === 1
+      ? `P${course.period[0]}`
+      : 'P?';
+
+  const blockText =
+    course.block && course.block.length > 0
+      ? `Block ${course.block.join(', ')}`
+      : 'Block ?';
 
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number) => {
     if (!addToEnrollment) return;
-    const targetSemester = semester || course.semester[0];
+    const semesters = getSemesters();
+    const targetSemester =
+      semester || (semesters.length > 0 ? semesters[0] : 1);
     addToEnrollment(course.id, targetSemester);
   };
 
@@ -87,6 +110,8 @@ const CourseCard = ({
 
   // Enrollment Button Component
   const EnrollmentButton = () => {
+    const semesters = getSemesters();
+
     if (!isAuthenticated) {
       return (
         <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
@@ -97,11 +122,11 @@ const CourseCard = ({
       );
     }
 
-    if (course.semester.length === 1) {
+    if (semesters.length === 1) {
       return (
         <Button
           size="sm"
-          onClick={() => handleEnrollment()}
+          onClick={() => handleEnrollment(semesters[0])}
           className="h-8 w-8 p-0"
         >
           <Plus className="h-4 w-4" />
@@ -117,7 +142,7 @@ const CourseCard = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40">
-          {course.semester.map((semester) => (
+          {semesters.map((semester: number) => (
             <DropdownMenuItem
               key={semester}
               onClick={() => handleEnrollment(semester)}

@@ -11,45 +11,74 @@ datasource db {
 
 model User {
   id          String       @id @db.Uuid
-  name        String
+  name        String?
   email       String       @unique
   colorScheme String       @default("theme-blue")
   isPublic    Boolean      @default(true)
-  program     String?      // Make optional for onboarding
+  program     String?
   image       String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  
-  // Relations
   enrollments Enrollment[]
   reviews     Review[]
 }
 
-model Course {
-  id                       String   @id @db.Uuid
-  code                     String   @unique
+model Enrollment {
+  id       String @id @db.Uuid
+  semester Int
+  userId   String @db.Uuid
+  courseId String @db.Uuid
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, semester])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Review {
+  id        String   @id @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @db.Uuid
+  courseId  String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model course {
+  id                       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                     String       @unique
   name                     String
-  credits                  Int
-  scheduledHours           Int?
-  selfStudyHours           Int?
+  credits                  BigInt
+  campus                   String
   mainFieldOfStudy         String[]
   advanced                 Boolean
-  semester                 Int[]
-  period                   Int[]
-  block                    Int[]
-  campus                   String
+  courseType               String?
+  examiner                 String?
   exclusions               String[]
+  scheduledHours           BigInt?
+  selfStudyHours           BigInt?
+  period                   BigInt[]
+  block                    BigInt[]
+  learningOutcomes         Json?
+  content                  Json?
+  teachingMethods          Json?
+  prerequisites            Json?
+  recommendedPrerequisites Json?
   offeredFor               String[]
-  prerequisites            String
-  recommendedPrerequisites String
-  learningOutcomes         String
-  content                  String
-  teachingMethods          String
-
-  // Relations
-  examinations Examination[]
-  enrollments  Enrollment[]
-  reviews      Review[]
+  examination              Json[]
+  programInfo              Json[]
+  enrollments              Enrollment[]
+  reviews                  Review[]
 
   // Search optimization indexes
   @@index([code])                    // Fast lookup by course code
@@ -59,54 +88,4 @@ model Course {
   @@index([campus])                  // Filter by campus
   @@index([credits])                 // Sort by credits
   @@index([code, name])              // Compound index for search
-}
-
-model Examination {
-  id           String  @id @db.Uuid
-  courseId     String  @db.Uuid      // ✅ This should be UUID!
-  code         String
-  name         String
-  credits      Int
-  gradingScale String
-  
-  // Relations
-  course       Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  @@index([courseId])  // Fast lookup of exams by course
-}
-
-model Enrollment {
-  id       String @id @db.Uuid
-  semester Int
-  userId   String @db.Uuid          // ✅ This should be UUID!
-  courseId String @db.Uuid          // ✅ This should be UUID!
-  
-  // Relations
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  // Prevent duplicate enrollments
-  @@unique([userId, courseId, semester])
-  @@index([userId])    // Fast lookup of user's enrollments
-  @@index([courseId])  // Fast lookup of course enrollments
-}
-
-model Review {
-  id        String   @id @db.Uuid
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String   @db.Uuid        // ✅ This should be UUID!
-  courseId  String   @db.Uuid        // ✅ This should be UUID!
-  
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  // One review per user per course
-  @@unique([userId, courseId])
-  @@index([courseId])          // Fast lookup of course reviews
-  @@index([rating])            // Sort by rating
-  @@index([createdAt])         // Sort by newest
 }
