@@ -99,10 +99,8 @@ export async function PUT(
       enrollment: {
         id: updatedEnrollment.id,
         semester: updatedEnrollment.semester,
-        period: 1, // Default since not in schema
-        status: 'enrolled', // Default since not in schema
-        grade: null, // Not in schema
-        enrolledAt: new Date(), // Default since not in schema
+        userId: updatedEnrollment.userId,
+        courseId: updatedEnrollment.courseId,
       },
     });
   } catch (error) {
@@ -179,10 +177,8 @@ export async function POST(
       enrollment: {
         id: enrollment.id,
         semester: enrollment.semester,
-        period: 1, // Default since not in schema
-        status: 'enrolled', // Default since not in schema
-        grade: null, // Not in schema
-        enrolledAt: new Date(), // Default since not in schema
+        userId: enrollment.userId,
+        courseId: enrollment.courseId,
       },
     });
   } catch (error) {

@@ -61,7 +61,7 @@ const CourseDetails = ({
         </div>
         <div className="flex gap-4">
           <div>
-            <p>Termin {course.semester.join(', ')}</p>
+            <p>Termin {course.semester}</p>
           </div>
           <div>
             <p>Period {course.period.join(', ')}</p>

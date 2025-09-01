@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         block: true,
         campus: true,
         content: true,
+        semester: true, // Add semester to the select
       },
       take: Math.min(count * 3, 100), // Fetch 3x more than needed, max 100
     });
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
       credits: Number(course.credits),
       period: course.period.map((p) => Number(p)),
       block: course.block.map((b) => Number(b)),
+      semester: Number(course.semester), // Convert semester BigInt to number
     }));
 
     // Randomly shuffle and take the requested count

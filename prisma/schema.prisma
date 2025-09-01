@@ -29,7 +29,6 @@ model Enrollment {
   userId   String @db.Uuid
   courseId String @db.Uuid
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId, semester])
   @@index([userId])
@@ -45,7 +44,6 @@ model Review {
   userId    String   @db.Uuid
   courseId  String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([courseId])
@@ -55,8 +53,8 @@ model Review {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model course {
-  id                       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code                     String       @unique
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                     String   @unique
   name                     String
   credits                  BigInt
   campus                   String
@@ -77,15 +75,5 @@ model course {
   offeredFor               String[]
   examination              Json[]
   programInfo              Json[]
-  enrollments              Enrollment[]
-  reviews                  Review[]
-
-  // Search optimization indexes
-  @@index([code])                    // Fast lookup by course code
-  @@index([name])                    // Fast search by name
-  @@index([mainFieldOfStudy])        // Filter by field of study
-  @@index([advanced])                // Filter basic vs advanced
-  @@index([campus])                  // Filter by campus
-  @@index([credits])                 // Sort by credits
-  @@index([code, name])              // Compound index for search
+  semester                 BigInt
 }

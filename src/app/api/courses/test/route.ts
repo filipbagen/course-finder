@@ -8,13 +8,20 @@ export async function GET() {
       select: {
         code: true,
         name: true,
+        semester: true, // Add semester to the selection
       },
       take: 5,
     });
 
+    // Transform BigInt to number for JSON serialization
+    const transformedCourses = courses.map((course) => ({
+      ...course,
+      semester: Number(course.semester), // Convert semester BigInt to number
+    }));
+
     return NextResponse.json({
       message: 'Successfully connected to course table',
-      courses,
+      courses: transformedCourses,
     });
   } catch (error) {
     console.error('Unexpected error:', error);

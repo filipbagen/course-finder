@@ -61,25 +61,8 @@ const CourseCard = ({
   );
 
   // Format display text
-  const getSemesters = () => {
-    if (course.programInfo && course.programInfo.length > 0) {
-      // Extract unique semesters from programInfo
-      const uniqueSemesters = [
-        ...new Set(course.programInfo.map((info) => info.semester)),
-      ];
-      return uniqueSemesters;
-    }
-    // Fallback for CourseWithEnrollment which might have semester directly
-    return (course as any).semester || [];
-  };
+  const semesterText = course.semester ? `T${course.semester}` : 'T?';
 
-  const semesters = getSemesters();
-  const semesterText =
-    semesters.length > 1
-      ? `T${semesters.join(', ')}`
-      : semesters.length === 1
-      ? `T${semesters[0]}`
-      : 'T?';
   const periodText =
     course.period && course.period.length > 1
       ? `P${course.period.join('+')}`
@@ -95,9 +78,7 @@ const CourseCard = ({
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number) => {
     if (!addToEnrollment) return;
-    const semesters = getSemesters();
-    const targetSemester =
-      semester || (semesters.length > 0 ? semesters[0] : 1);
+    const targetSemester = semester || course.semester || 1;
     addToEnrollment(course.id, targetSemester);
   };
 
@@ -110,8 +91,6 @@ const CourseCard = ({
 
   // Enrollment Button Component
   const EnrollmentButton = () => {
-    const semesters = getSemesters();
-
     if (!isAuthenticated) {
       return (
         <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
@@ -122,36 +101,14 @@ const CourseCard = ({
       );
     }
 
-    if (semesters.length === 1) {
-      return (
-        <Button
-          size="sm"
-          onClick={() => handleEnrollment(semesters[0])}
-          className="h-8 w-8 p-0"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      );
-    }
-
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="sm" className="h-8 w-8 p-0">
-            <Plus className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-40">
-          {semesters.map((semester: number) => (
-            <DropdownMenuItem
-              key={semester}
-              onClick={() => handleEnrollment(semester)}
-            >
-              Termin {semester}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button
+        size="sm"
+        onClick={() => handleEnrollment(course.semester)}
+        className="h-8 w-8 p-0"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
     );
   };
 

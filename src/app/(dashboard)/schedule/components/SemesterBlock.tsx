@@ -174,7 +174,7 @@ function isValidDropTarget(
   targetPeriod: number
 ): boolean {
   // Rule 1: Course must be offered in the target semester
-  if (!course.semester.includes(targetSemester)) {
+  if (course.semester !== targetSemester) {
     return false;
   }
 

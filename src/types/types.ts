@@ -23,6 +23,7 @@ export interface Course {
   exclusions: string[];
   scheduledHours: number | null;
   selfStudyHours: number | null;
+  semester: number;
   period: number[];
   block: number[];
   learningOutcomes?: { paragraph: string | null; list_items: string[] };
@@ -52,15 +53,12 @@ export interface Course {
 export interface Enrollment {
   id: string;
   semester: number;
-  period: number;
-  status: string;
-  grade: string | null;
-  enrolledAt: Date;
+  userId: string;
+  courseId: string;
 }
 
 export interface CourseWithEnrollment extends Course {
   enrollment: Enrollment;
-  semester?: number; // Add this field to be compatible with old code that references course.semester
 }
 
 export const isCourseWithEnrollment = (
@@ -137,10 +135,6 @@ export interface ScheduleResponse {
   enrollments: Array<{
     id: string;
     semester: number;
-    period: number;
-    status: string;
-    grade: string | null;
-    enrolledAt: Date;
     course: Course;
   }>;
 }

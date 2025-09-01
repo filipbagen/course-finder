@@ -25,10 +25,7 @@ export const EnrollmentButton: React.FC<EnrollmentButtonProps> = ({
 }) => {
   const handleEnrollment = useCallback(() => {
     if (!addToEnrollment) return;
-    const semesters = course.semester;
-    if (semesters.length === 1) {
-      addToEnrollment(course.id, semesters[0]);
-    }
+    addToEnrollment(course.id, course.semester);
   }, [course, addToEnrollment]);
 
   // Show login button for unauthenticated users
@@ -43,31 +40,15 @@ export const EnrollmentButton: React.FC<EnrollmentButtonProps> = ({
     );
   }
 
-  // Show enrollment dropdown for authenticated users
+  // Show enrollment button for authenticated users
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="sm"
-          aria-label={`Add ${course.name} to your schedule`}
-          onClick={course.semester.length === 1 ? handleEnrollment : undefined}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Lägg till
-        </Button>
-      </DropdownMenuTrigger>
-      {course.semester.length > 1 && (
-        <DropdownMenuContent className="w-56">
-          {course.semester.map((semester) => (
-            <DropdownMenuItem
-              key={semester}
-              onClick={() => addToEnrollment?.(course.id, semester)}
-            >
-              Termin {semester}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      )}
-    </DropdownMenu>
+    <Button
+      size="sm"
+      aria-label={`Add ${course.name} to your schedule`}
+      onClick={handleEnrollment}
+    >
+      <Plus className="h-4 w-4 mr-2" />
+      Lägg till
+    </Button>
   );
 };

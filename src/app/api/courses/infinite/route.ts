@@ -211,6 +211,7 @@ export async function GET(
         : null,
       period: course.period.map((p) => Number(p)),
       block: course.block.map((b) => Number(b)),
+      semester: Number(course.semester), // Convert semester BigInt to number
     }));
 
     // Check if there are more items

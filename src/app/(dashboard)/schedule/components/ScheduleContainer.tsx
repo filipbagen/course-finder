@@ -101,7 +101,7 @@ export function ScheduleContainer({
     targetPeriod: number
   ): boolean => {
     // Rule 1: Course must be offered in the target semester
-    if (!course.semester.includes(targetSemester)) {
+    if (course.semester !== targetSemester) {
       return false;
     }
 
@@ -180,7 +180,7 @@ export function ScheduleContainer({
         course: activeCourse.code,
         from: currentPosition,
         to: { semester: targetSemester, period: targetPeriod },
-        availableSemesters: activeCourse.semester,
+        availableSemesters: [activeCourse.semester],
         availablePeriods: activeCourse.period,
       });
       return;
