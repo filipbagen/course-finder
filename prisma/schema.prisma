@@ -9,6 +9,35 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Enrollment {
+  id       String @id @db.Uuid
+  semester Int
+  userId   String @db.Uuid
+  courseId String @db.Uuid
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, semester])
+  @@index([courseId])
+  @@index([userId])
+}
+
+model Review {
+  id        String   @id @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    String   @db.Uuid
+  courseId  String   @db.Uuid
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([createdAt])
+  @@index([rating])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model User {
   id          String       @id @db.Uuid
   name        String?
@@ -18,37 +47,9 @@ model User {
   program     String?
   image       String?
   createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  enrollments Enrollment[]
-  reviews     Review[]
-}
-
-model Enrollment {
-  id       String @id @db.Uuid
-  semester Int
-  userId   String @db.Uuid
-  courseId String @db.Uuid
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId, semester])
-  @@index([userId])
-  @@index([courseId])
-}
-
-model Review {
-  id        String   @id @db.Uuid
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String   @db.Uuid
-  courseId  String   @db.Uuid
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([courseId])
-  @@index([rating])
-  @@index([createdAt])
+  updatedAt   DateTime
+  Enrollment  Enrollment[]
+  Review      Review[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -63,17 +64,17 @@ model course {
   courseType               String?
   examiner                 String?
   exclusions               String[]
-  scheduledHours           BigInt?
-  selfStudyHours           BigInt?
+  scheduledHours           BigInt
+  selfStudyHours           BigInt
   period                   BigInt[]
   block                    BigInt[]
-  learningOutcomes         Json?
-  content                  Json?
-  teachingMethods          Json?
-  prerequisites            Json?
-  recommendedPrerequisites Json?
+  learningOutcomes         Json
+  content                  Json
+  teachingMethods          Json
+  prerequisites            Json
+  recommendedPrerequisites Json
   offeredFor               String[]
   examination              Json[]
   programInfo              Json[]
-  semester                 BigInt
+  semester                 BigInt[]
 }

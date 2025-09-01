@@ -111,7 +111,9 @@ export async function GET(
           : null,
         period: course.period.map((p) => Number(p)),
         block: course.block.map((b) => Number(b)),
-        semester: Number(course.semester), // Convert course semester from BigInt to number
+        semester: Array.isArray(course.semester)
+          ? course.semester.map((s: any) => Number(s))
+          : [Number(course.semester)], // Convert semester to array of numbers
         enrollment: {
           id: enrollment.id,
           semester: enrollment.semester, // This is already a number in the database

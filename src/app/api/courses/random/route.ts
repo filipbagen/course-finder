@@ -40,7 +40,9 @@ export async function GET(request: NextRequest) {
       credits: Number(course.credits),
       period: course.period.map((p) => Number(p)),
       block: course.block.map((b) => Number(b)),
-      semester: Number(course.semester), // Convert semester BigInt to number
+      semester: Array.isArray(course.semester)
+        ? course.semester.map((s: any) => Number(s))
+        : null, // Convert semester array to numbers if it exists
     }));
 
     // Randomly shuffle and take the requested count

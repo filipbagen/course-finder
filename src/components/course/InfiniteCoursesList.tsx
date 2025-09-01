@@ -135,6 +135,8 @@ export function InfiniteCoursesList({
     limit: 20,
   });
 
+  console.log('Course data:', courses);
+
   const coursesDisplay = useMemo(() => {
     return courses.map((course) => (
       <CourseCard

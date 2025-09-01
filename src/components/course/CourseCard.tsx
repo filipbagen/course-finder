@@ -61,7 +61,12 @@ const CourseCard = ({
   );
 
   // Format display text
-  const semesterText = course.semester ? `T${course.semester}` : 'T?';
+  const semesterText =
+    course.semester && course.semester.length > 0
+      ? course.semester.length > 1
+        ? `T${course.semester.join('+')}`
+        : `T${course.semester[0]}`
+      : 'T?';
 
   const periodText =
     course.period && course.period.length > 1
@@ -76,9 +81,30 @@ const CourseCard = ({
       : 'Block ?';
 
   // Handle enrollment for authenticated users
-  const handleEnrollment = (semester?: number) => {
+  const handleEnrollment = (semester?: number | number[]) => {
     if (!addToEnrollment) return;
-    const targetSemester = semester || course.semester || 1;
+
+    // Extract a usable semester value from the semester array
+    let targetSemester: number;
+
+    if (Array.isArray(semester) && semester.length > 0) {
+      // Use the first semester from the array
+      targetSemester = semester[0];
+    } else if (typeof semester === 'number') {
+      // If it's already a number, use it directly
+      targetSemester = semester;
+    } else if (
+      course.semester &&
+      Array.isArray(course.semester) &&
+      course.semester.length > 0
+    ) {
+      // Fallback to the course's first semester
+      targetSemester = course.semester[0];
+    } else {
+      // Default fallback
+      targetSemester = 1;
+    }
+
     addToEnrollment(course.id, targetSemester);
   };
 

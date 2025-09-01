@@ -13,7 +13,7 @@ interface Course {
   credits: number;
   mainFieldOfStudy: string[];
   advanced: boolean;
-  semester: number[];
+  semester: number;
   period: number[];
   block: number[];
   campus: string;

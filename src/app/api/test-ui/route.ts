@@ -24,10 +24,7 @@ export async function GET() {
     });
 
     if (!course) {
-      return NextResponse.json(
-        { error: 'No courses found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No courses found' }, { status: 404 });
     }
 
     // Transform BigInt to number for JSON serialization

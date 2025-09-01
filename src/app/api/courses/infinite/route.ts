@@ -185,6 +185,7 @@ export async function GET(
         examiner: true,
         examination: true,
         programInfo: true,
+        semester: true, // Add semester field to select
       },
     };
 
@@ -211,7 +212,9 @@ export async function GET(
         : null,
       period: course.period.map((p) => Number(p)),
       block: course.block.map((b) => Number(b)),
-      semester: Number(course.semester), // Convert semester BigInt to number
+      semester: Array.isArray(course.semester)
+        ? course.semester.map((s: any) => Number(s))
+        : null, // Convert semester array to numbers if it exists
     }));
 
     // Check if there are more items

@@ -25,7 +25,16 @@ export const EnrollmentButton: React.FC<EnrollmentButtonProps> = ({
 }) => {
   const handleEnrollment = useCallback(() => {
     if (!addToEnrollment) return;
-    addToEnrollment(course.id, course.semester);
+
+    // Extract first semester from array
+    let targetSemester: number;
+    if (Array.isArray(course.semester) && course.semester.length > 0) {
+      targetSemester = course.semester[0];
+    } else {
+      targetSemester = 1; // fallback
+    }
+
+    addToEnrollment(course.id, targetSemester);
   }, [course, addToEnrollment]);
 
   // Show login button for unauthenticated users

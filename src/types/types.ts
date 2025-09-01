@@ -23,7 +23,7 @@ export interface Course {
   exclusions: string[];
   scheduledHours: number | null;
   selfStudyHours: number | null;
-  semester: number;
+  semester: number[];
   period: number[];
   block: number[];
   learningOutcomes?: { paragraph: string | null; list_items: string[] };
@@ -57,8 +57,9 @@ export interface Enrollment {
   courseId: string;
 }
 
-export interface CourseWithEnrollment extends Course {
+export interface CourseWithEnrollment extends Omit<Course, 'semester'> {
   enrollment: Enrollment;
+  semester: number[]; // Keeping the same type as Course for consistency
 }
 
 export const isCourseWithEnrollment = (
