@@ -41,7 +41,7 @@ export const CourseSearchSchema = z.object({
   examinations: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
   cursor: z.string().optional(),
 });
 
@@ -76,13 +76,24 @@ export function validateQueryParams<T>(
   const params: Record<string, any> = {};
 
   for (const [key, value] of searchParams.entries()) {
-    // Convert numeric strings to numbers
-    if (/^\d+$/.test(value)) {
-      params[key] = parseInt(value, 10);
+    // Handle multiple values for the same key (like filter arrays)
+    if (params[key]) {
+      // If we already have this key, append values
+      if (Array.isArray(params[key])) {
+        params[key].push(value);
+      } else {
+        // Convert to array with both values
+        params[key] = [params[key], value];
+      }
     } else {
       params[key] = value;
     }
   }
 
-  return validateRequest(params, schema);
+  try {
+    return validateRequest(params, schema);
+  } catch (error) {
+    console.error('Validation error:', error);
+    throw error;
+  }
 }

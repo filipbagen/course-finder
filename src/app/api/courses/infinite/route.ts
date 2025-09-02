@@ -29,9 +29,13 @@ export async function GET(
 ): Promise<NextResponse<InfiniteResponse<Course>>> {
   try {
     const { searchParams } = new URL(request.url);
+    
+    console.log('Received search params:', Object.fromEntries(searchParams.entries()));
 
     // Validate query parameters
     const params = validateQueryParams(searchParams, CourseSearchSchema);
+    
+    console.log('Validated params:', params);
 
     const cursor = params.cursor;
     const limit = Math.min(Math.max(params.limit || 20, 1), 50);
@@ -79,29 +83,78 @@ export async function GET(
       }
     }
 
+    if (semester) {
+      try {
+        const semesterValues = semester.split(',').map(s => {
+          const parsed = parseInt(s, 10);
+          if (isNaN(parsed)) {
+            throw new Error(`Invalid semester value: ${s}`);
+          }
+          return BigInt(parsed);
+        });
+        
+        if (semesterValues.length > 1) {
+          whereConditions.semester = {
+            hasSome: semesterValues,
+          };
+        } else {
+          whereConditions.semester = {
+            has: semesterValues[0],
+          };
+        }
+      } catch (error) {
+        console.error('Error parsing semester values:', error);
+        throw new Error(`Invalid semester parameter: ${semester}`);
+      }
+    }
+
     if (period) {
-      const periodValues = period.split(',').map((p) => BigInt(parseInt(p)));
-      if (periodValues.length > 1) {
-        whereConditions.period = {
-          hasSome: periodValues,
-        };
-      } else {
-        whereConditions.period = {
-          has: periodValues[0],
-        };
+      try {
+        const periodValues = period.split(',').map(p => {
+          const parsed = parseInt(p, 10);
+          if (isNaN(parsed)) {
+            throw new Error(`Invalid period value: ${p}`);
+          }
+          return BigInt(parsed);
+        });
+        
+        if (periodValues.length > 1) {
+          whereConditions.period = {
+            hasSome: periodValues,
+          };
+        } else {
+          whereConditions.period = {
+            has: periodValues[0],
+          };
+        }
+      } catch (error) {
+        console.error('Error parsing period values:', error);
+        throw new Error(`Invalid period parameter: ${period}`);
       }
     }
 
     if (block) {
-      const blockValues = block.split(',').map((b) => BigInt(parseInt(b)));
-      if (blockValues.length > 1) {
-        whereConditions.block = {
-          hasSome: blockValues,
-        };
-      } else {
-        whereConditions.block = {
-          has: blockValues[0],
-        };
+      try {
+        const blockValues = block.split(',').map(b => {
+          const parsed = parseInt(b, 10);
+          if (isNaN(parsed)) {
+            throw new Error(`Invalid block value: ${b}`);
+          }
+          return BigInt(parsed);
+        });
+        
+        if (blockValues.length > 1) {
+          whereConditions.block = {
+            hasSome: blockValues,
+          };
+        } else {
+          whereConditions.block = {
+            has: blockValues[0],
+          };
+        }
+      } catch (error) {
+        console.error('Error parsing block values:', error);
+        throw new Error(`Invalid block parameter: ${block}`);
       }
     }
 
@@ -117,6 +170,21 @@ export async function GET(
       } else if (levelValues.includes('Avancerad nivå')) {
         whereConditions.advanced = true;
       }
+    }
+
+    if (examinations) {
+      const examinationValues = examinations.split(',');
+      whereConditions.OR = whereConditions.OR || [];
+      
+      examinationValues.forEach(examValue => {
+        whereConditions.OR.push({
+          examination: {
+            array_contains: [{
+              gradingScale: { contains: examValue, mode: 'insensitive' }
+            }]
+          }
+        });
+      });
     }
 
     if (studyPace) {
@@ -199,6 +267,9 @@ export async function GET(
     }
 
     // Execute query
+    console.log('Query options:', JSON.stringify(queryOptions, (key, value) => 
+      typeof value === 'bigint' ? value.toString() : value, 2));
+      
     const courses = await prisma.course.findMany(queryOptions);
 
     // Transform data with our utility function
@@ -236,6 +307,15 @@ export async function GET(
     } as InfiniteResponse<Course>);
   } catch (error) {
     console.error('Error fetching courses:', error);
-    return infiniteError('Failed to fetch courses');
+    
+    // Include more detailed error information
+    let errorMessage = 'Failed to fetch courses';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      console.error('Error stack:', error.stack);
+    }
+    
+    // Return a more informative error response
+    return infiniteError(errorMessage);
   }
 }
