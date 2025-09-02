@@ -2,8 +2,15 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import OnboardingForm from './onboarding-form';
 
-export default async function OnboardingPage() {
+interface OnboardingPageProps {
+  searchParams: { name?: string };
+}
+
+export default async function OnboardingPage({
+  searchParams,
+}: OnboardingPageProps) {
   const supabase = await createClient();
+  const { name } = searchParams;
 
   const {
     data: { user },
@@ -41,7 +48,11 @@ export default async function OnboardingPage() {
               </p>
             </div>
 
-            <OnboardingForm userId={user.id} userEmail={user.email!} />
+            <OnboardingForm
+              userId={user.id}
+              userEmail={user.email!}
+              initialName={name || ''}
+            />
           </div>
         </div>
       </div>

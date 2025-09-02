@@ -7,6 +7,7 @@ import Avatar from '@/components/shared/avatar';
 interface OnboardingFormProps {
   userId: string;
   userEmail: string;
+  initialName?: string;
 }
 
 const colorSchemes = [
@@ -31,6 +32,7 @@ const programs = [
 export default function OnboardingForm({
   userId,
   userEmail,
+  initialName = '',
 }: OnboardingFormProps) {
   const [selectedColorScheme, setSelectedColorScheme] = useState('theme-blue');
   const [isPublic, setIsPublic] = useState(true);
@@ -75,6 +77,7 @@ export default function OnboardingForm({
             required
             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Enter your full name"
+            defaultValue={initialName}
           />
         </div>
       </div>

@@ -7,6 +7,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Users } from 'lucide-react';
 
+// Import the type we need
+interface UserSearchResult {
+  id: string;
+  name: string;
+  email: string;
+  program: string | null;
+  image: string | null;
+  _count: {
+    enrollments: number;
+    reviews: number;
+  };
+}
+
 async function getUsers(
   searchQuery?: string,
   programFilter?: string,
@@ -57,7 +70,11 @@ async function getUsers(
       take: 50, // Limit results for performance
     });
 
-    return users;
+    // The schema has been updated to make name required, so we can safely assert the type
+    return users.map((user) => ({
+      ...user,
+      name: user.name!, // Type assertion - we know name is non-null
+    })) as UserSearchResult[];
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];

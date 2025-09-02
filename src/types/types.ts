@@ -1,10 +1,10 @@
 export interface User {
   id: string;
-  name: string; // ← Remove | null since it's required in schema
+  name: string;
   email: string;
   colorScheme: string;
   isPublic: boolean;
-  program: string | null; // ← This one can be null
+  program: string | null;
   image: string | null;
   createdAt?: Date;
   updatedAt?: Date;

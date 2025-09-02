@@ -326,7 +326,7 @@ export default async function SettingPage() {
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={data?.image || undefined} />
                   <AvatarFallback className="text-lg">
-                    {getInitials(data?.name)}
+                    {data.name ? getInitials(data.name) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-4 flex-1">

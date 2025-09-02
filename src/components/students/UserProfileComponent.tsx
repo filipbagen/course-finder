@@ -12,9 +12,16 @@ interface UserProfileData {
   program: string | null;
   image: string | null;
   createdAt: Date;
+  updatedAt: Date;
+  colorScheme: string;
+  isPublic: boolean;
   totalCredits: number;
   coursesBySemester: Record<number, any[]>;
-  enrollments: any[];
+  enrollments: {
+    id: string;
+    semester: number;
+    course: any;
+  }[];
   reviews: any[];
   _count: {
     enrollments: number;
@@ -121,7 +128,7 @@ export function UserProfileComponent({
               <Avatar className="h-32 w-32 ring-4 ring-white shadow-xl">
                 <AvatarImage
                   src={userProfile.image || undefined}
-                  alt={userProfile.name}
+                  alt={userProfile.name || 'Anonymous User'}
                   className="object-cover"
                 />
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-3xl font-semibold">
@@ -134,7 +141,7 @@ export function UserProfileComponent({
             <div className="flex-1 text-center md:text-left space-y-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {userProfile.name}
+                  {userProfile.name || 'Anonymous User'}
                 </h2>
                 {userProfile.program && (
                   <Badge

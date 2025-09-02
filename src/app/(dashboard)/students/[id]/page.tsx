@@ -5,43 +5,38 @@ import { UserProfileComponent } from '@/components/students/UserProfileComponent
 import { Separator } from '@/components/ui/separator';
 import { User } from 'lucide-react';
 
-async function getUserProfile(userId: string) {
+// Define an explicit type for the user profile
+interface UserProfileWithDetails {
+  id: string;
+  name: string;
+  email: string;
+  colorScheme: string;
+  isPublic: boolean;
+  program: string | null;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  _count: {
+    enrollments: number;
+    reviews: number;
+  };
+  totalCredits: number;
+  coursesBySemester: Record<number, any[]>;
+  enrollments: any[];
+  reviews: any[];
+}
+
+async function getUserProfile(
+  userId: string
+): Promise<UserProfileWithDetails | null> {
   try {
+    // First fetch the user with basic data
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
         isPublic: true, // Only show public profiles
       },
       include: {
-        enrollments: {
-          include: {
-            course: {
-              include: {
-                examinations: true,
-              },
-            },
-          },
-          orderBy: {
-            course: {
-              name: 'asc',
-            },
-          },
-        },
-        reviews: {
-          include: {
-            course: {
-              select: {
-                id: true,
-                name: true,
-                code: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 10, // Limit to recent reviews
-        },
         _count: {
           select: {
             enrollments: true,
@@ -51,30 +46,99 @@ async function getUserProfile(userId: string) {
       },
     });
 
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
+
+    // Fetch enrollments separately
+    const enrollments = await prisma.enrollment.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        semester: 'asc',
+      },
+    });
+
+    // Fetch courses for the enrollments
+    const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+    const courses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: courseIds,
+        },
+      },
+    });
+
+    // Join enrollments with courses
+    const enrollmentsWithCourses = enrollments.map((enrollment) => {
+      const course = courses.find((c) => c.id === enrollment.courseId);
+      return {
+        ...enrollment,
+        course,
+      };
+    });
+
+    // Fetch reviews separately
+    const reviews = await prisma.review.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
+
+    // Fetch courses for the reviews
+    const reviewCourseIds = reviews.map((review) => review.courseId);
+    const reviewCourses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: reviewCourseIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+      },
+    });
+
+    // Join reviews with courses
+    const reviewsWithCourses = reviews.map((review) => {
+      const course = reviewCourses.find((c) => c.id === review.courseId);
+      return {
+        ...review,
+        course,
+      };
+    });
 
     // Calculate total credits
-    const totalCredits = user.enrollments.reduce((sum, enrollment) => {
-      return sum + enrollment.course.credits;
+    const totalCredits = enrollments.reduce((sum: number, enrollment: any) => {
+      return sum + Number(enrollment.course.credits);
     }, 0);
 
     // Group courses by semester
-    const coursesBySemester = user.enrollments.reduce((acc, enrollment) => {
-      const semester = enrollment.semester;
-      if (!acc[semester]) {
-        acc[semester] = [];
-      }
-      acc[semester].push(enrollment.course);
-      return acc;
-    }, {} as Record<number, any[]>);
+    const coursesBySemester = enrollments.reduce(
+      (acc: Record<number, any[]>, enrollment: any) => {
+        const semester = enrollment.semester;
+        if (!acc[semester]) {
+          acc[semester] = [];
+        }
+        acc[semester].push(enrollment.course);
+        return acc;
+      },
+      {}
+    );
 
+    // Since we've updated our schema to make name required, we can safely assert it's non-null
     return {
       ...user,
+      name: user.name!, // Assert name is non-null
+      enrollments: enrollmentsWithCourses,
+      reviews: reviewsWithCourses,
       totalCredits,
       coursesBySemester,
-    };
+    } as UserProfileWithDetails;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
