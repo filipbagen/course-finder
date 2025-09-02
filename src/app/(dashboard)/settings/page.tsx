@@ -306,7 +306,7 @@ export default async function SettingPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 mx-auto px-4">
+    <div className="flex flex-col gap-8 mx-auto">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

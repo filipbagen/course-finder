@@ -66,7 +66,7 @@ export default async function CoursesPage({
   const isAuthenticated = !!user;
 
   return (
-    <div className="flex flex-col gap-8 mx-auto px-4">
+    <div className="flex flex-col gap-8 mx-auto">
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
