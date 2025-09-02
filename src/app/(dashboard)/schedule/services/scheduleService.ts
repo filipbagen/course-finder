@@ -22,13 +22,20 @@ export class ScheduleService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
+        console.error(
+          'Schedule API error:',
+          response.status,
+          response.statusText
+        );
         throw new Error(`Failed to fetch schedule: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('Schedule API response:', data);
 
       // Transform the data to match our ScheduleData interface
       return this.transformApiResponse(data);
@@ -50,10 +57,16 @@ export class ScheduleService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(update),
       });
 
       if (!response.ok) {
+        console.error(
+          'Update course error:',
+          response.status,
+          response.statusText
+        );
         throw new Error(`Failed to update course: ${response.statusText}`);
       }
 
@@ -78,6 +91,7 @@ export class ScheduleService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           courseId,
           semester,
@@ -86,6 +100,11 @@ export class ScheduleService {
       });
 
       if (!response.ok) {
+        console.error(
+          'Add course error:',
+          response.status,
+          response.statusText
+        );
         throw new Error(`Failed to add course: ${response.statusText}`);
       }
 
@@ -106,9 +125,15 @@ export class ScheduleService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
+        console.error(
+          'Remove course error:',
+          response.status,
+          response.statusText
+        );
         throw new Error(`Failed to remove course: ${response.statusText}`);
       }
     } catch (error) {
@@ -128,16 +153,31 @@ export class ScheduleService {
     };
 
     // Group courses by semester and period
-    if (data.enrollments && Array.isArray(data.enrollments)) {
-      data.enrollments.forEach((enrollmentData: any) => {
+    if (
+      data &&
+      data.data &&
+      data.data.enrollments &&
+      Array.isArray(data.data.enrollments)
+    ) {
+      data.data.enrollments.forEach((enrollmentData: any) => {
+        if (!enrollmentData || !enrollmentData.course) {
+          console.warn(
+            'Missing course data in enrollment:',
+            enrollmentData?.id
+          );
+          return;
+        }
+
         const course = enrollmentData.course;
         const enrollment = {
           id: enrollmentData.id,
           semester: enrollmentData.semester,
-          period: enrollmentData.period,
-          status: enrollmentData.status,
-          grade: enrollmentData.grade,
-          enrolledAt: enrollmentData.enrolledAt,
+          period: enrollmentData.period || 1,
+          userId: enrollmentData.userId,
+          courseId: enrollmentData.course.id,
+          status: enrollmentData.status || 'enrolled',
+          grade: enrollmentData.grade || null,
+          enrolledAt: enrollmentData.enrolledAt || new Date(),
         };
 
         const semester = enrollment.semester;
@@ -171,11 +211,12 @@ export class ScheduleService {
           }
         }
       });
+    } else {
+      console.warn('Invalid API response format:', data);
     }
 
     return schedule;
   }
-
   /**
    * Calculate schedule statistics
    */

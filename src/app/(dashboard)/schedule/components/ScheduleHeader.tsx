@@ -2,14 +2,6 @@
 
 import React from 'react';
 import { useSchedule } from './ScheduleProvider';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -40,11 +32,10 @@ interface ScheduleHeaderProps {
 /**
  * Schedule Header Component
  *
- * Displays the page header with breadcrumbs, title, and actions.
+ * Displays the page header with title, and actions.
  * Provides context-aware actions based on readonly state.
  *
  * Features:
- * - Breadcrumb navigation
  * - Schedule actions (export, share, settings)
  * - Loading state handling
  * - User context for viewing other schedules
@@ -59,39 +50,12 @@ export function ScheduleHeader({
 
   return (
     <div className="space-y-4">
-      {/* Breadcrumbs */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          {readonly && viewingUserName ? (
-            <>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/students">
-                  Studenter
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{viewingUserName}s schema</BreadcrumbPage>
-              </BreadcrumbItem>
-            </>
-          ) : (
-            <BreadcrumbItem>
-              <BreadcrumbPage>Mitt schema</BreadcrumbPage>
-            </BreadcrumbItem>
-          )}
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Header Content */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-primary" />
-            <div>
+            {/* <Calendar className="h-8 w-8 text-primary" /> */}
+            <div className="px-2">
               <h1 className="text-3xl font-bold tracking-tight">
                 {readonly && viewingUserName
                   ? `${viewingUserName}s schema`

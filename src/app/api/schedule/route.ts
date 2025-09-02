@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { ScheduleResponse } from '@/types/types';
+import { transformCourse } from '@/lib/transformers';
 
 /**
  * GET /api/schedule
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Use target user ID if provided, otherwise use authenticated user
     const userId = targetUserId || authenticatedUser.id;
 
-    // Fetch user's enrollments with course data
+    // First, fetch enrollments
     const enrollments = await prisma.enrollment.findMany({
       where: {
         userId: userId,
@@ -28,50 +29,49 @@ export async function GET(request: NextRequest) {
           in: [7, 8, 9],
         },
       },
-      include: {
-        course: {
-          include: {
-            examinations: true,
-          },
-        },
-      },
-      orderBy: [{ semester: 'asc' }, { course: { name: 'asc' } }],
+      orderBy: [{ semester: 'asc' }],
     });
 
-    const scheduleData = {
-      enrollments: enrollments.map((enrollment) => ({
-        id: enrollment.id,
-        semester: enrollment.semester,
-        period: 1, // Default period since it's not in the schema
-        status: 'enrolled', // Default status since it's not in the schema
-        grade: null, // No grade field in schema
-        enrolledAt: new Date(), // Default date since it's not in the schema
-        course: {
-          id: enrollment.course.id,
-          code: enrollment.course.code,
-          name: enrollment.course.name,
-          content: enrollment.course.content,
-          credits: enrollment.course.credits,
-          scheduledHours: enrollment.course.scheduledHours,
-          selfStudyHours: enrollment.course.selfStudyHours,
-          mainFieldOfStudy: enrollment.course.mainFieldOfStudy,
-          advanced: enrollment.course.advanced,
-          semester: enrollment.course.semester,
-          period: enrollment.course.period,
-          block: enrollment.course.block,
-          campus: enrollment.course.campus,
-          exclusions: enrollment.course.exclusions,
-          offeredFor: enrollment.course.offeredFor,
-          prerequisites: enrollment.course.prerequisites,
-          recommendedPrerequisites: enrollment.course.recommendedPrerequisites,
-          learningOutcomes: enrollment.course.learningOutcomes,
-          teachingMethods: enrollment.course.teachingMethods,
-          examinations: enrollment.course.examinations,
-        },
-      })),
-    };
+    // Get all course IDs from enrollments
+    const courseIds = enrollments.map((enrollment) => enrollment.courseId);
 
-    return createSuccessResponse(scheduleData, 'Schedule fetched successfully');
+    // Fetch courses separately
+    const courses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: courseIds,
+        },
+      },
+    });
+
+    // Transform courses
+    const transformedCourses = courses.map((course) => transformCourse(course));
+
+    // Match enrollments with courses
+    const enrollmentsWithCourses = enrollments
+      .map((enrollment) => {
+        const course = transformedCourses.find(
+          (c) => c?.id === enrollment.courseId
+        );
+
+        return {
+          id: enrollment.id,
+          semester: enrollment.semester,
+          // Use period 1 as default since we don't have it in the schema
+          period: 1,
+          // Default values for backward compatibility
+          status: 'enrolled',
+          grade: null,
+          enrolledAt: new Date(),
+          course: course || null,
+        };
+      })
+      .filter((item) => item.course !== null);
+
+    return createSuccessResponse(
+      { enrollments: enrollmentsWithCourses },
+      'Schedule fetched successfully'
+    );
   } catch (error) {
     return handleApiError(error);
   }

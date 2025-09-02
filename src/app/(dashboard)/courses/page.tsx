@@ -4,16 +4,6 @@ import { Suspense } from 'react';
 // components
 import { CoursesPageClient } from '@/components/course/CoursesPageClient';
 
-// shadcn
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-
 // auth
 import { getOptionalUser } from '@/lib/auth';
 
@@ -54,19 +44,6 @@ export default async function CoursesPage({
 
   return (
     <div className="flex flex-col gap-8 mx-auto">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Kurser</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="grid items-start gap-8">
         {/* Header */}
         <div className="flex items-center justify-between px-2">

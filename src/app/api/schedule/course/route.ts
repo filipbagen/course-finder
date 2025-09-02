@@ -9,20 +9,9 @@ import {
   internalServerError,
 } from '@/lib/errors';
 import { UpdateScheduleSchema, validateRequest } from '@/lib/validation';
-import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import type { ApiResponse } from '@/types/api';
-
-// Type for enrollment with course included
-type EnrollmentWithCourse = Prisma.EnrollmentGetPayload<{
-  include: {
-    course: {
-      include: {
-        examinations: true;
-      };
-    };
-  };
-}>;
+import { transformCourse } from '@/lib/transformers';
 
 /**
  * PUT /api/schedule/course
@@ -44,13 +33,6 @@ export async function PUT(
         userId: user.id,
         courseId: courseId,
       },
-      include: {
-        course: {
-          include: {
-            examinations: true,
-          },
-        },
-      },
     });
 
     if (!enrollment) {
@@ -65,37 +47,25 @@ export async function PUT(
       data: {
         semester,
       },
-      include: {
-        course: {
-          include: {
-            examinations: true,
-          },
-        },
+    });
+
+    // Fetch the course separately
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
       },
     });
 
+    if (!course) {
+      return notFound('Course not found');
+    }
+
+    // Transform the course
+    const transformedCourse = transformCourse(course);
+
+    // Create the response with enrollment data
     return createSuccessResponse({
-      id: updatedEnrollment.course.id,
-      code: updatedEnrollment.course.code,
-      name: updatedEnrollment.course.name,
-      content: updatedEnrollment.course.content,
-      credits: updatedEnrollment.course.credits,
-      scheduledHours: updatedEnrollment.course.scheduledHours,
-      selfStudyHours: updatedEnrollment.course.selfStudyHours,
-      mainFieldOfStudy: updatedEnrollment.course.mainFieldOfStudy,
-      advanced: updatedEnrollment.course.advanced,
-      semester: updatedEnrollment.course.semester,
-      period: updatedEnrollment.course.period,
-      block: updatedEnrollment.course.block,
-      campus: updatedEnrollment.course.campus,
-      exclusions: updatedEnrollment.course.exclusions,
-      offeredFor: updatedEnrollment.course.offeredFor,
-      prerequisites: updatedEnrollment.course.prerequisites,
-      recommendedPrerequisites:
-        updatedEnrollment.course.recommendedPrerequisites,
-      learningOutcomes: updatedEnrollment.course.learningOutcomes,
-      teachingMethods: updatedEnrollment.course.teachingMethods,
-      examinations: updatedEnrollment.course.examinations,
+      ...transformedCourse,
       enrollment: {
         id: updatedEnrollment.id,
         semester: updatedEnrollment.semester,
@@ -137,43 +107,32 @@ export async function POST(
     }
 
     // Create new enrollment
-    const enrollment = (await prisma.enrollment.create({
+    const enrollment = await prisma.enrollment.create({
       data: {
         id: randomUUID(),
         userId: user.id,
         courseId,
         semester,
       },
-      include: {
-        course: {
-          include: {
-            examinations: true,
-          },
-        },
-      },
-    })) as EnrollmentWithCourse;
+    });
 
+    // Fetch the course separately
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+
+    if (!course) {
+      return notFound('Course not found');
+    }
+
+    // Transform the course
+    const transformedCourse = transformCourse(course);
+
+    // Create the response with enrollment data
     return createSuccessResponse({
-      id: enrollment.course.id,
-      code: enrollment.course.code,
-      name: enrollment.course.name,
-      content: enrollment.course.content,
-      credits: enrollment.course.credits,
-      scheduledHours: enrollment.course.scheduledHours,
-      selfStudyHours: enrollment.course.selfStudyHours,
-      mainFieldOfStudy: enrollment.course.mainFieldOfStudy,
-      advanced: enrollment.course.advanced,
-      semester: enrollment.course.semester,
-      period: enrollment.course.period,
-      block: enrollment.course.block,
-      campus: enrollment.course.campus,
-      exclusions: enrollment.course.exclusions,
-      offeredFor: enrollment.course.offeredFor,
-      prerequisites: enrollment.course.prerequisites,
-      recommendedPrerequisites: enrollment.course.recommendedPrerequisites,
-      learningOutcomes: enrollment.course.learningOutcomes,
-      teachingMethods: enrollment.course.teachingMethods,
-      examinations: enrollment.course.examinations,
+      ...transformedCourse,
       enrollment: {
         id: enrollment.id,
         semester: enrollment.semester,
