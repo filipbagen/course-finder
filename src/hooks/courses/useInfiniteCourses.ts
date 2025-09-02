@@ -144,7 +144,7 @@ export function useInfiniteCourses(
 
         const queryParams = buildQueryParams(cursor);
         console.log(`Fetching courses with params: ${queryParams}`);
-        
+
         const response = await fetch(`/api/courses/infinite?${queryParams}`, {
           signal: abortControllerRef.current.signal,
         });
@@ -158,9 +158,11 @@ export function useInfiniteCourses(
           } catch (e) {
             // If parsing fails, continue with the status error
           }
-          
+
           throw new Error(
-            `HTTP error! status: ${response.status}${errorDetails ? ` - ${errorDetails}` : ''}`
+            `HTTP error! status: ${response.status}${
+              errorDetails ? ` - ${errorDetails}` : ''
+            }`
           );
         }
 
@@ -193,7 +195,8 @@ export function useInfiniteCourses(
         }
 
         console.error('Error fetching courses:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch courses';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to fetch courses';
         console.log('Setting error state:', errorMessage);
         setError(errorMessage);
       } finally {

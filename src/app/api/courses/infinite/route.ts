@@ -29,12 +29,15 @@ export async function GET(
 ): Promise<NextResponse<InfiniteResponse<Course>>> {
   try {
     const { searchParams } = new URL(request.url);
-    
-    console.log('Received search params:', Object.fromEntries(searchParams.entries()));
+
+    console.log(
+      'Received search params:',
+      Object.fromEntries(searchParams.entries())
+    );
 
     // Validate query parameters
     const params = validateQueryParams(searchParams, CourseSearchSchema);
-    
+
     console.log('Validated params:', params);
 
     const cursor = params.cursor;
@@ -85,14 +88,14 @@ export async function GET(
 
     if (semester) {
       try {
-        const semesterValues = semester.split(',').map(s => {
+        const semesterValues = semester.split(',').map((s) => {
           const parsed = parseInt(s, 10);
           if (isNaN(parsed)) {
             throw new Error(`Invalid semester value: ${s}`);
           }
           return BigInt(parsed);
         });
-        
+
         if (semesterValues.length > 1) {
           whereConditions.semester = {
             hasSome: semesterValues,
@@ -110,14 +113,14 @@ export async function GET(
 
     if (period) {
       try {
-        const periodValues = period.split(',').map(p => {
+        const periodValues = period.split(',').map((p) => {
           const parsed = parseInt(p, 10);
           if (isNaN(parsed)) {
             throw new Error(`Invalid period value: ${p}`);
           }
           return BigInt(parsed);
         });
-        
+
         if (periodValues.length > 1) {
           whereConditions.period = {
             hasSome: periodValues,
@@ -135,14 +138,14 @@ export async function GET(
 
     if (block) {
       try {
-        const blockValues = block.split(',').map(b => {
+        const blockValues = block.split(',').map((b) => {
           const parsed = parseInt(b, 10);
           if (isNaN(parsed)) {
             throw new Error(`Invalid block value: ${b}`);
           }
           return BigInt(parsed);
         });
-        
+
         if (blockValues.length > 1) {
           whereConditions.block = {
             hasSome: blockValues,
@@ -175,14 +178,16 @@ export async function GET(
     if (examinations) {
       const examinationValues = examinations.split(',');
       whereConditions.OR = whereConditions.OR || [];
-      
-      examinationValues.forEach(examValue => {
+
+      examinationValues.forEach((examValue) => {
         whereConditions.OR.push({
           examination: {
-            array_contains: [{
-              gradingScale: { contains: examValue, mode: 'insensitive' }
-            }]
-          }
+            array_contains: [
+              {
+                gradingScale: { contains: examValue, mode: 'insensitive' },
+              },
+            ],
+          },
         });
       });
     }
@@ -192,17 +197,24 @@ export async function GET(
       if (paceValues.includes('Helfart') && paceValues.includes('Halvfart')) {
         // Both paces selected, no filter needed
       } else if (paceValues.includes('Helfart')) {
-        // Full-time: period length = 1 and credits > 6, or period length = 2 and credits > 6
+        // Full-time: course runs in only one period
+        // We create a JSON query to check the length of the period array
         whereConditions.OR = whereConditions.OR || [];
         whereConditions.OR.push({
-          AND: [{ period: { isEmpty: false } }, { credits: { gt: 6 } }],
+          OR: [
+            // Either it only has period 1
+            { period: { equals: [BigInt(1)] } },
+            // Or it only has period 2
+            { period: { equals: [BigInt(2)] } },
+          ],
         });
       } else if (paceValues.includes('Halvfart')) {
-        // Half-time: period length = 2 and credits = 6
+        // Half-time: course runs in two periods (period array contains both 1 and 2)
         whereConditions.AND = whereConditions.AND || [];
+
+        // It must have exactly two periods, containing both 1 and 2
         whereConditions.AND.push({
-          period: { hasEvery: [BigInt(1), BigInt(2)] },
-          credits: 6,
+          AND: [{ period: { has: BigInt(1) } }, { period: { has: BigInt(2) } }],
         });
       }
     }
@@ -267,9 +279,15 @@ export async function GET(
     }
 
     // Execute query
-    console.log('Query options:', JSON.stringify(queryOptions, (key, value) => 
-      typeof value === 'bigint' ? value.toString() : value, 2));
-      
+    console.log(
+      'Query options:',
+      JSON.stringify(
+        queryOptions,
+        (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+        2
+      )
+    );
+
     const courses = await prisma.course.findMany(queryOptions);
 
     // Transform data with our utility function
@@ -307,14 +325,14 @@ export async function GET(
     } as InfiniteResponse<Course>);
   } catch (error) {
     console.error('Error fetching courses:', error);
-    
+
     // Include more detailed error information
     let errorMessage = 'Failed to fetch courses';
     if (error instanceof Error) {
       errorMessage = error.message;
       console.error('Error stack:', error.stack);
     }
-    
+
     // Return a more informative error response
     return infiniteError(errorMessage);
   }
