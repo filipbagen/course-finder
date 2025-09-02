@@ -14,21 +14,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-// supabase
-import { createClient } from '@/lib/supabase/server';
-
-async function getAuthenticatedUser() {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  } catch (error) {
-    console.error('Error getting user:', error);
-    return null;
-  }
-}
+// auth
+import { getOptionalUser } from '@/lib/auth';
 
 export default async function CoursesPage({
   searchParams,
@@ -62,7 +49,7 @@ export default async function CoursesPage({
       ? resolvedSearchParams.sortOrder
       : undefined;
 
-  const user = await getAuthenticatedUser();
+  const user = await getOptionalUser();
   const isAuthenticated = !!user;
 
   return (
