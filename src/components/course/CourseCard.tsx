@@ -13,10 +13,11 @@ import {
 import {
   GripVertical,
   Trash2,
-  MapPin,
+  Blocks,
+  School,
   Calendar,
   Clock,
-  BookOpen,
+  SignpostBig,
   Plus,
   LogIn,
 } from 'lucide-react';
@@ -64,7 +65,7 @@ const CourseCard = ({
   const semesterText =
     course.semester && course.semester.length > 0
       ? course.semester.length > 1
-        ? `T${course.semester.join('+')}`
+        ? `T${course.semester.join(', ')}`
         : `T${course.semester[0]}`
       : 'T?';
 
@@ -195,7 +196,7 @@ const CourseCard = ({
       <CardContent className="pt-0 space-y-3">
         {/* Main Field of Study */}
         <div className="flex items-start gap-2">
-          <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+          <SignpostBig className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
           <div className="flex flex-wrap gap-1">
             {course.mainFieldOfStudy.length === 0 ? (
               <Badge variant="outline" className="text-xs">
@@ -214,7 +215,7 @@ const CourseCard = ({
         {/* Location - Not shown in schedule variant for space efficiency */}
         {variant !== 'schedule' && course.campus && (
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <School className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-sm text-muted-foreground">
               {course.campus}
             </span>
@@ -222,7 +223,7 @@ const CourseCard = ({
         )}
 
         {/* Schedule Information */}
-        <div className="flex items-center justify-between pt-2 border-t border-border">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -237,7 +238,11 @@ const CourseCard = ({
               </span>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground">{blockText}</div>
+          {/* <div className="text-xs text-muted-foreground">{blockText}</div> */}
+          <div className="flex items-center gap-1">
+            <Blocks className="h-3 w-3 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">{blockText}</span>
+          </div>
         </div>
       </CardContent>
     </Card>

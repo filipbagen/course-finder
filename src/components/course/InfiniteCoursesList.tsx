@@ -144,6 +144,7 @@ export function InfiniteCoursesList({
         course={course}
         isAuthenticated={isAuthenticated}
         variant="default"
+        className="flex flex-col h-full justify-between"
       />
     ));
   }, [courses, isAuthenticated]);

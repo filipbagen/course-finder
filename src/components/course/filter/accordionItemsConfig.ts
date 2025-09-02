@@ -1,6 +1,6 @@
 import { FilterState } from '@/types/types';
 import {
-  BetweenHorizontalStart,
+  Calendar,
   AlignVerticalJustifyCenter,
   Blocks,
   Gauge,
@@ -26,7 +26,7 @@ export const accordionItems: AccordionItemProps[] = [
     filterType: 'semester',
     options: ['7', '8', '9'],
     displayValue: (semester) => `Termin ${semester}`,
-    icon: BetweenHorizontalStart,
+    icon: Calendar,
   },
   {
     value: 'period',
