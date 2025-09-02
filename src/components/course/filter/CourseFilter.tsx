@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -18,8 +18,10 @@ import {
 import { FilterX } from 'lucide-react';
 
 import CheckboxItem from './CheckboxItem';
-import { accordionItems } from './accordionItemsConfig';
+import { accordionItems as staticAccordionItems } from './accordionItemsConfig';
 import { FilterState, FilterProps } from '@/types/types';
+import { useFields } from '@/hooks/courses/useFields';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Advanced Course Filter Component
@@ -41,6 +43,8 @@ const CourseFilter: React.FC<FilterProps> = ({
   onFilterChange,
   currentFilters,
 }) => {
+  const { mainFieldOfStudy, loading: fieldsLoading } = useFields();
+
   const resetFilters = () => {
     Object.keys(currentFilters).forEach((filterType) => {
       currentFilters[filterType as keyof FilterState].forEach((value) => {
@@ -54,6 +58,22 @@ const CourseFilter: React.FC<FilterProps> = ({
     (total, filterArray) => total + filterArray.length,
     0
   );
+
+  // Dynamically update the accordionItems with fetched fields
+  const accordionItems = useMemo(() => {
+    return staticAccordionItems.map((item) => {
+      // Replace mainFieldOfStudy options with dynamic data
+      if (item.filterType === 'mainFieldOfStudy') {
+        return {
+          ...item,
+          // Use dynamic data if available, otherwise fall back to static options
+          options:
+            mainFieldOfStudy.length > 0 ? mainFieldOfStudy : item.options,
+        };
+      }
+      return item;
+    });
+  }, [mainFieldOfStudy]);
 
   return (
     <Card
@@ -120,31 +140,40 @@ const CourseFilter: React.FC<FilterProps> = ({
 
                 <AccordionContent className="pb-4">
                   <div className="flex flex-col gap-3 pl-7">
-                    {item.options.map((option) => {
-                      const optionString = option.toString();
-                      const displayValue = item.displayValue(optionString);
-                      const isChecked =
-                        currentFilters[
-                          item.filterType as keyof FilterState
-                        ].includes(optionString);
+                    {item.filterType === 'mainFieldOfStudy' && fieldsLoading
+                      ? // Show loading state for mainFieldOfStudy
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-4 w-32" />
+                          </div>
+                        ))
+                      : // Render options when available
+                        item.options.map((option) => {
+                          const optionString = option.toString();
+                          const displayValue = item.displayValue(optionString);
+                          const isChecked =
+                            currentFilters[
+                              item.filterType as keyof FilterState
+                            ].includes(optionString);
 
-                      return (
-                        <CheckboxItem
-                          key={optionString}
-                          filterType={item.filterType as keyof FilterState}
-                          displayValue={displayValue}
-                          value={optionString}
-                          onChange={(checked) =>
-                            onFilterChange(
-                              item.filterType as keyof FilterState,
-                              optionString,
-                              checked
-                            )
-                          }
-                          checked={isChecked}
-                        />
-                      );
-                    })}
+                          return (
+                            <CheckboxItem
+                              key={optionString}
+                              filterType={item.filterType as keyof FilterState}
+                              displayValue={displayValue}
+                              value={optionString}
+                              onChange={(checked) =>
+                                onFilterChange(
+                                  item.filterType as keyof FilterState,
+                                  optionString,
+                                  checked
+                                )
+                              }
+                              checked={isChecked}
+                            />
+                          );
+                        })}
                   </div>
                 </AccordionContent>
               </AccordionItem>
