@@ -4,6 +4,7 @@ import { createSuccessResponse, infiniteError, badRequest } from '@/lib/errors';
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
 import type { ApiResponse, InfiniteResponse } from '@/types/api';
 import { Course } from '@/types/types';
+import { transformCourses } from '@/lib/transformers';
 
 export const dynamic = 'force-dynamic';
 
@@ -200,22 +201,8 @@ export async function GET(
     // Execute query
     const courses = await prisma.course.findMany(queryOptions);
 
-    // Transform BigInt to number for JSON serialization
-    const transformedCourses = courses.map((course) => ({
-      ...course,
-      credits: Number(course.credits),
-      scheduledHours: course.scheduledHours
-        ? Number(course.scheduledHours)
-        : null,
-      selfStudyHours: course.selfStudyHours
-        ? Number(course.selfStudyHours)
-        : null,
-      period: course.period.map((p) => Number(p)),
-      block: course.block.map((b) => Number(b)),
-      semester: Array.isArray(course.semester)
-        ? course.semester.map((s: any) => Number(s))
-        : null, // Convert semester array to numbers if it exists
-    }));
+    // Transform data with our utility function
+    const transformedCourses = transformCourses(courses);
 
     // Check if there are more items
     const hasNextPage = transformedCourses.length > limit;

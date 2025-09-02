@@ -13,6 +13,7 @@ import {
   enrollmentCreateSchema,
   enrollmentUpdateSchema,
 } from '@/lib/validation';
+import { transformCourse } from '@/lib/transformers';
 import type { ApiResponse } from '@/types/api';
 
 export async function POST(
@@ -86,40 +87,40 @@ export async function GET(
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId') || user.id;
 
+    // First get all enrollments
     const enrollments = await prisma.enrollment.findMany({
       where: {
         userId: userId,
       },
-      select: {
-        id: true,
-        semester: true,
-        course: true,
+    });
+
+    // Then get all courses for these enrollments
+    const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+    const courses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: courseIds,
+        },
       },
     });
 
-    // Transform BigInt to number for JSON serialization
-    const coursesWithEnrollmentData = enrollments.map((enrollment) => {
-      const course = enrollment.course;
-      return {
-        ...course,
-        credits: Number(course.credits),
-        scheduledHours: course.scheduledHours
-          ? Number(course.scheduledHours)
-          : null,
-        selfStudyHours: course.selfStudyHours
-          ? Number(course.selfStudyHours)
-          : null,
-        period: course.period.map((p) => Number(p)),
-        block: course.block.map((b) => Number(b)),
-        semester: Array.isArray(course.semester)
-          ? course.semester.map((s: any) => Number(s))
-          : [Number(course.semester)], // Convert semester to array of numbers
-        enrollment: {
-          id: enrollment.id,
-          semester: enrollment.semester, // This is already a number in the database
-        },
-      };
-    });
+    // Transform and merge the data
+    const coursesWithEnrollmentData = enrollments
+      .map((enrollment) => {
+        const course = courses.find((c) => c.id === enrollment.courseId);
+        if (!course) return null;
+
+        const transformedCourse = transformCourse(course);
+
+        return {
+          ...transformedCourse,
+          enrollment: {
+            id: enrollment.id,
+            semester: enrollment.semester,
+          },
+        };
+      })
+      .filter(Boolean); // Remove any null entries
 
     return createSuccessResponse({ courses: coursesWithEnrollmentData });
   } catch (error) {

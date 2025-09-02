@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { Course } from '@/types/types';
+import { transformCourses } from '@/lib/transformers';
 
 /**
  * GET /api/courses/random
@@ -34,18 +35,8 @@ export async function GET(request: NextRequest) {
       return createSuccessResponse<Course[]>([], 'No courses found');
     }
 
-    // Transform BigInt to number for JSON serialization
-    const transformedCourses = courses.map((course) => ({
-      ...course,
-      credits: Number(course.credits),
-      period: course.period.map((p) => Number(p)),
-      block: course.block.map((b) => Number(b)),
-      semester: Array.isArray(course.semester)
-        ? course.semester.map((s: any) => Number(s))
-        : null, // Convert semester array to numbers if it exists
-    }));
-
-    // Randomly shuffle and take the requested count
+    // Transform the courses and shuffle them
+    const transformedCourses = transformCourses(courses);
     const shuffled = transformedCourses
       .sort(() => Math.random() - 0.5)
       .slice(0, count);

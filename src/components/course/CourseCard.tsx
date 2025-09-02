@@ -5,12 +5,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   GripVertical,
   Trash2,
   Blocks,
@@ -238,7 +232,6 @@ const CourseCard = ({
               </span>
             </div>
           </div>
-          {/* <div className="text-xs text-muted-foreground">{blockText}</div> */}
           <div className="flex items-center gap-1">
             <Blocks className="h-3 w-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{blockText}</span>
