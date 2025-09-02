@@ -59,7 +59,7 @@ const CourseFilter: React.FC<FilterProps> = ({
     <Card
       className={`${
         screen === 'desktop'
-          ? 'sticky top-6 overflow-y-auto h-fit max-h-[calc(100vh-120px)]'
+          ? 'sticky top-6 overflow-y-auto h-fit max-h-[calc(100vh-48px)]'
           : 'w-full'
       } border border-border m-0`}
     >

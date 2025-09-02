@@ -10,7 +10,7 @@ import {
   Blocks,
   School,
   Calendar,
-  Clock,
+  AlignVerticalJustifyCenter,
   SignpostBig,
   Plus,
   LogIn,
@@ -226,7 +226,7 @@ const CourseCard = ({
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 text-muted-foreground" />
+              <AlignVerticalJustifyCenter className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
                 {periodText}
               </span>
