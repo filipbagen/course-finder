@@ -61,7 +61,7 @@ export function SemesterBlock({
   };
 
   const style: React.CSSProperties = {};
-  if (isDragging) {
+  if (isDragging && isOver) {
     style.borderColor = isValidDrop ? '#22c55e' : '#ef4444'; // green-500 and red-500 hex codes
   }
 
