@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { createSuccessResponse, infiniteError, badRequest } from '@/lib/errors';
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
 import type { ApiResponse, InfiniteResponse } from '@/types/api';
@@ -175,20 +176,60 @@ export async function GET(
       }
     }
 
+    let hasExaminationFilter = false;
+    let examinationCodes: string[] = [];
+
     if (examinations) {
+      hasExaminationFilter = true;
       const examinationValues = examinations.split(',');
-      whereConditions.OR = whereConditions.OR || [];
 
       examinationValues.forEach((examValue) => {
-        whereConditions.OR.push({
-          examination: {
-            array_contains: [
-              {
-                gradingScale: { contains: examValue, mode: 'insensitive' },
-              },
-            ],
-          },
-        });
+        // Map the user-friendly examination names to the actual examination codes
+        switch (examValue) {
+          case 'Inlämningsuppgift':
+            examinationCodes.push('UPG');
+            break;
+          case 'Skriftlig tentamen':
+            examinationCodes.push('TEN');
+            examinationCodes.push('TENA');
+            break;
+          case 'Projektarbete':
+            examinationCodes.push('PRA');
+            examinationCodes.push('PROJ');
+            break;
+          case 'Laborationsarbete':
+            examinationCodes.push('LAB');
+            examinationCodes.push('LABA');
+            break;
+          case 'Digital tentamen':
+            examinationCodes.push('DIT');
+            break;
+          case 'Muntlig examination':
+            examinationCodes.push('MUN');
+            break;
+          case 'Kontrollskrivning':
+            examinationCodes.push('KTR');
+            break;
+          case 'Basgruppsarbete':
+            examinationCodes.push('BAS');
+            break;
+          case 'Hemtentamen':
+            examinationCodes.push('HEM');
+            break;
+          case 'Övrigt':
+            examinationCodes.push('DAK');
+            examinationCodes.push('MOM');
+            examinationCodes.push('ANN');
+            break;
+          case 'Seminarium':
+            examinationCodes.push('SEM');
+            break;
+          case 'Datorexamination':
+            examinationCodes.push('DAT');
+            break;
+          default:
+            examinationCodes.push(examValue); // Fallback to using the value as-is
+        }
       });
     }
 
@@ -238,11 +279,11 @@ export async function GET(
     }
     orderByArray.push({ id: 'asc' }); // Final tie-breaker
 
-    // Build query options
+    // Build query options to fetch all courses matching the base filters
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
-      take: limit + 1, // Take one extra to check if there's a next page
+      // No limit or cursor here; we fetch all and paginate in memory
       select: {
         id: true,
         code: true,
@@ -266,21 +307,12 @@ export async function GET(
         examiner: true,
         examination: true,
         programInfo: true,
-        semester: true, // Add semester field to select
+        semester: true,
       },
     };
 
-    // Add cursor-based pagination
-    if (cursor) {
-      queryOptions.cursor = {
-        id: cursor,
-      };
-      queryOptions.skip = 1; // Skip the cursor item
-    }
-
-    // Execute query
     console.log(
-      'Query options:',
+      'Fetching all courses with options:',
       JSON.stringify(
         queryOptions,
         (key, value) => (typeof value === 'bigint' ? value.toString() : value),
@@ -288,36 +320,66 @@ export async function GET(
       )
     );
 
-    const courses = await prisma.course.findMany(queryOptions);
+    const allCourses = await prisma.course.findMany(queryOptions);
 
     // Transform data with our utility function
-    const transformedCourses = transformCourses(courses);
+    let filteredCourses = transformCourses(allCourses) as unknown as Course[];
 
-    // Check if there are more items
-    const hasNextPage = transformedCourses.length > limit;
-    const items = hasNextPage
-      ? transformedCourses.slice(0, limit)
-      : transformedCourses;
+    // Apply post-query examination filtering if needed
+    if (hasExaminationFilter && examinationCodes.length > 0) {
+      console.log(
+        'Applying in-memory examination filtering with codes:',
+        examinationCodes
+      );
+      filteredCourses = filteredCourses.filter((course) => {
+        if (
+          !course.examination ||
+          !Array.isArray(course.examination) ||
+          course.examination.length === 0
+        ) {
+          return false;
+        }
 
-    // Get next cursor
-    const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
+        for (const exam of course.examination) {
+          if (!exam || typeof exam !== 'object') continue;
 
-    // Calculate total count for UI feedback (cached for performance)
-    let totalCount = null;
-    if (!cursor) {
-      // Only count on first request to avoid expensive operations
-      try {
-        totalCount = await prisma.course.count({
-          where: whereConditions,
-        });
-      } catch (error) {
-        console.warn('Failed to get total count:', error);
+          const examObj = exam as { code?: string };
+          const examCode = examObj.code ? String(examObj.code) : '';
+
+          if (!examCode) continue;
+
+          for (const searchCode of examinationCodes) {
+            if (examCode.toUpperCase().startsWith(searchCode.toUpperCase())) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      });
+      console.log(
+        `Found ${filteredCourses.length} courses after examination filtering.`
+      );
+    }
+
+    // Now, apply pagination to the fully filtered and sorted list
+    const totalCount = filteredCourses.length;
+    let paginatedCourses = filteredCourses;
+
+    if (cursor) {
+      const cursorIndex = paginatedCourses.findIndex((c) => c.id === cursor);
+      if (cursorIndex !== -1) {
+        paginatedCourses = paginatedCourses.slice(cursorIndex + 1);
       }
     }
 
+    const items = paginatedCourses.slice(0, limit);
+    const hasNextPage = paginatedCourses.length > limit;
+    const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
+
     return NextResponse.json({
       success: true,
-      data: items as unknown as Course[],
+      data: items,
       nextCursor,
       hasNextPage,
       totalCount,
