@@ -100,20 +100,24 @@ export function ScheduleContainer({
     targetSemester: number,
     targetPeriod: number
   ): boolean => {
-    // Rule 1: Course must be offered in the target semester
-    if (course.semester !== targetSemester) {
+    const currentSemester = course.enrollment.semester;
+    const isSemester7or9 = (sem: number) => sem === 7 || sem === 9;
+
+    // A course in semester 7 or 9 can be moved to either 7 or 9
+    const isInterchangeableMove =
+      isSemester7or9(currentSemester) && isSemester7or9(targetSemester);
+
+    // A course in other semesters can only be moved within the same semester
+    const isSameSemesterMove = currentSemester === targetSemester;
+
+    if (!isInterchangeableMove && !isSameSemesterMove) {
       return false;
     }
 
-    // Rule 2: Course cannot be moved between different periods
     // The course must be offered in the target period
     if (!course.period.includes(targetPeriod)) {
       return false;
     }
-
-    // Rule 3: Single semester courses cannot be moved at all
-    // This is handled by Rule 1 above - if only offered in one semester,
-    // it can't be moved to another
 
     return true;
   };
