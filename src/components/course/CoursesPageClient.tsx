@@ -46,13 +46,24 @@ export function CoursesPageClient({
     applyMobileFilters,
     resetMobileFilters,
     hasActiveFilters,
+    syncMobileFilters,
   } = useFilters();
 
   // Count active mobile filters
-  const activeMobileFilterCount = Object.values(mobileFilters).reduce(
-    (count, filterArray) => count + filterArray.length,
-    0
-  );
+  const activeMobileFilterCount = (
+    Object.keys(mobileFilters) as Array<keyof typeof mobileFilters>
+  ).reduce((total, key) => {
+    const filter = mobileFilters[key];
+    if (key === 'examinations') {
+      return (
+        total +
+        Object.values(filter as Record<string, TriState>).filter(
+          (state) => state !== 'unchecked'
+        ).length
+      );
+    }
+    return total + (filter as string[]).length;
+  }, 0);
 
   return (
     <div className="flex gap-6">
@@ -83,13 +94,11 @@ export function CoursesPageClient({
           <InfiniteCoursesList
             isAuthenticated={isAuthenticated}
             search={search}
-            campus={initialCampus}
-            mainFieldOfStudy={initialField}
-            semester={initialSemester}
-            sortBy={initialSortBy}
-            sortOrder={initialSortOrder}
             filters={filters}
-            onMobileFilterOpen={() => setMobileFiltersOpen(true)}
+            onMobileFilterOpen={() => {
+              syncMobileFilters();
+              setMobileFiltersOpen(true);
+            }}
           />
         </div>
       </div>

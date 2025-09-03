@@ -60,6 +60,10 @@ export function useFilters() {
     setFilters(mobileFilters);
   }, [mobileFilters]);
 
+  const syncMobileFilters = useCallback(() => {
+    setMobileFilters(filters);
+  }, [filters]);
+
   const resetMobileFilters = useCallback(() => {
     setMobileFilters(filters);
   }, [filters]);
@@ -84,5 +88,6 @@ export function useFilters() {
     resetMobileFilters,
     resetAllFilters,
     hasActiveFilters,
+    syncMobileFilters,
   };
 }
