@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Course, FilterState } from '@/types/types';
+import { Course, FilterState, TriState } from '@/types/types';
 import { InfiniteResponse } from '@/types/api';
 
 interface UseInfiniteCoursesParams {
@@ -90,8 +90,16 @@ export function useInfiniteCourses(
         if (filters.courseLevel.length > 0) {
           params.set('courseLevel', filters.courseLevel.join(','));
         }
-        if (filters.examinations.length > 0) {
-          params.set('examinations', filters.examinations.join(','));
+
+        const activeExaminationFilters = Object.entries(filters.examinations)
+          .filter(([, state]) => state !== 'unchecked')
+          .reduce((acc, [key, state]) => {
+            acc[key] = state;
+            return acc;
+          }, {} as Record<string, TriState>);
+
+        if (Object.keys(activeExaminationFilters).length > 0) {
+          params.set('examinations', JSON.stringify(activeExaminationFilters));
         }
       } else {
         // Legacy individual parameter support

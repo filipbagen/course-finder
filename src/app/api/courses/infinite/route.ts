@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { infiniteError } from '@/lib/errors';
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
 import type { InfiniteResponse } from '@/types/api';
-import { Course } from '@/types/types';
+import { Course, TriState } from '@/types/types';
 import { transformCourses } from '@/lib/transformers';
 
 export const dynamic = 'force-dynamic';
@@ -100,27 +100,42 @@ export async function GET(
       }
     }
 
-    let examinationCodes: string[] = [];
-    if (examinations) {
-      const examinationMap: Record<string, string[]> = {
-        Inlämningsuppgift: ['UPG'],
-        'Skriftlig tentamen': ['TEN', 'TENA'],
-        Projektarbete: ['PRA', 'PROJ'],
-        Laborationsarbete: ['LAB', 'LABA'],
-        'Digital tentamen': ['DIT'],
-        'Muntlig examination': ['MUN'],
-        Kontrollskrivning: ['KTR'],
-        Basgruppsarbete: ['BAS'],
-        Hemtentamen: ['HEM'],
-        Övrigt: ['DAK', 'MOM', 'ANN'],
-        Seminarium: ['SEM'],
-        Datorexamination: ['DAT'],
-      };
+    // --- Examination Filter Logic ---
+    const examinationMap: Record<string, string[]> = {
+      Inlämningsuppgift: ['UPG'],
+      'Skriftlig tentamen': ['TEN', 'TENA'],
+      Projektarbete: ['PRA', 'PROJ'],
+      Laborationsarbete: ['LAB', 'LABA'],
+      'Digital tentamen': ['DIT'],
+      'Muntlig examination': ['MUN'],
+      Kontrollskrivning: ['KTR'],
+      Basgruppsarbete: ['BAS'],
+      Hemtentamen: ['HEM'],
+      Övrigt: ['DAK', 'MOM', 'ANN'],
+      Seminarium: ['SEM'],
+      Datorexamination: ['DAT'],
+    };
 
-      const examinationValues = examinations.split(',');
-      examinationCodes = examinationValues.flatMap(
-        (val) => examinationMap[val] || [val]
-      );
+    let includeExaminationCodes: string[] = [];
+    let excludeExaminationCodes: string[] = [];
+
+    if (examinations) {
+      try {
+        const examinationState = JSON.parse(examinations) as Record<
+          string,
+          TriState
+        >;
+        for (const [key, value] of Object.entries(examinationState)) {
+          const codes = examinationMap[key] || [key];
+          if (value === 'checked') {
+            includeExaminationCodes.push(...codes);
+          } else if (value === 'indeterminate') {
+            excludeExaminationCodes.push(...codes);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse examinations filter:', e);
+      }
     }
 
     if (studyPace) {
@@ -173,17 +188,44 @@ export async function GET(
     // Transform data and apply post-query examination filtering if needed
     let filteredCourses = transformCourses(allCourses) as unknown as Course[];
 
-    if (examinations && examinationCodes.length > 0) {
+    if (
+      includeExaminationCodes.length > 0 ||
+      excludeExaminationCodes.length > 0
+    ) {
       filteredCourses = filteredCourses.filter((course) => {
         if (!course.examination || course.examination.length === 0) {
-          return false;
+          return includeExaminationCodes.length === 0; // Keep if no include filters, otherwise false
         }
-        return course.examination.some((exam: any) => {
-          const examCode = exam?.code ? String(exam.code) : '';
-          return examinationCodes.some((searchCode) =>
-            examCode.toUpperCase().startsWith(searchCode.toUpperCase())
+
+        const courseExamCodes = course.examination.map((exam: any) =>
+          exam?.code ? String(exam.code).toUpperCase() : ''
+        );
+
+        // Exclusion logic: course must not have any of the excluded exam codes
+        if (excludeExaminationCodes.length > 0) {
+          const hasExcludedExam = courseExamCodes.some((courseCode) =>
+            excludeExaminationCodes.some((excludedCode) =>
+              courseCode.startsWith(excludedCode.toUpperCase())
+            )
           );
-        });
+          if (hasExcludedExam) {
+            return false; // Exclude this course
+          }
+        }
+
+        // Inclusion logic: course must have at least one of the included exam codes
+        if (includeExaminationCodes.length > 0) {
+          const hasIncludedExam = courseExamCodes.some((courseCode) =>
+            includeExaminationCodes.some((includedCode) =>
+              courseCode.startsWith(includedCode.toUpperCase())
+            )
+          );
+          if (!hasIncludedExam) {
+            return false; // Exclude this course as it's missing a required exam
+          }
+        }
+
+        return true; // Pass if it meets all conditions
       });
     }
 

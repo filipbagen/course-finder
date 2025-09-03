@@ -78,22 +78,24 @@ export interface Examination {
   course: Course;
 }
 
-export interface FilterState {
+export type TriState = 'checked' | 'unchecked' | 'indeterminate';
+
+export type FilterState = {
   semester: string[];
   period: string[];
   block: string[];
   studyPace: string[];
   courseLevel: string[];
   mainFieldOfStudy: string[];
-  examinations: string[];
+  examinations: Record<string, TriState>;
   campus: string[];
-}
+};
 
 export interface FilterProps {
   onFilterChange: (
     filterType: keyof FilterState,
     value: string,
-    isChecked: boolean
+    newState: TriState | boolean
   ) => void;
   currentFilters: FilterState;
   screen: 'desktop' | 'mobile';

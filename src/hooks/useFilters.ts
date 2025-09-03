@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { FilterState } from '@/types/types';
+import { FilterState, TriState } from '@/types/types';
 
 const initialFilterState: FilterState = {
   semester: [],
@@ -10,7 +10,7 @@ const initialFilterState: FilterState = {
   studyPace: [],
   courseLevel: [],
   mainFieldOfStudy: [],
-  examinations: [],
+  examinations: {},
   campus: [],
 };
 
@@ -23,15 +23,28 @@ export function useFilters() {
     (
       filterType: keyof FilterState,
       value: string,
-      isChecked: boolean,
+      newState: TriState,
       isMobile: boolean = false
     ) => {
       const updateFilters = (prev: FilterState) => {
-        const updatedValues = isChecked
-          ? [...prev[filterType], value]
-          : prev[filterType].filter((v) => v !== value);
+        const newFilters = { ...prev };
 
-        return { ...prev, [filterType]: updatedValues };
+        if (filterType === 'examinations') {
+          const newExaminations = { ...newFilters.examinations };
+          if (newState === 'unchecked') {
+            delete newExaminations[value];
+          } else {
+            newExaminations[value] = newState;
+          }
+          return { ...newFilters, examinations: newExaminations };
+        } else {
+          const currentValues = newFilters[filterType] as string[];
+          const updatedValues =
+            newState === 'checked'
+              ? [...currentValues, value]
+              : currentValues.filter((v) => v !== value);
+          return { ...newFilters, [filterType]: updatedValues };
+        }
       };
 
       if (isMobile) {
@@ -56,9 +69,12 @@ export function useFilters() {
     setMobileFilters(initialFilterState);
   }, []);
 
-  const hasActiveFilters = Object.values(filters).some(
-    (filterArray) => filterArray.length > 0
-  );
+  const hasActiveFilters =
+    Object.values(filters).some(
+      (filterValue) =>
+        (Array.isArray(filterValue) && filterValue.length > 0) ||
+        (typeof filterValue === 'object' && Object.keys(filterValue).length > 0)
+    ) || Object.keys(filters.examinations).length > 0;
 
   return {
     filters,

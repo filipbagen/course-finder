@@ -19,7 +19,7 @@ import { FilterX } from 'lucide-react';
 
 import CheckboxItem from './CheckboxItem';
 import { accordionItems as staticAccordionItems } from './accordionItemsConfig';
-import { FilterState, FilterProps } from '@/types/types';
+import { FilterState, FilterProps, TriState } from '@/types/types';
 import { useFields } from '@/hooks/courses/useFields';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -152,10 +152,22 @@ const CourseFilter: React.FC<FilterProps> = ({
                         item.options.map((option) => {
                           const optionString = option.toString();
                           const displayValue = item.displayValue(optionString);
-                          const isChecked =
-                            currentFilters[
+                          const isTriState = item.filterType === 'examinations';
+
+                          let state: 'checked' | 'unchecked' | 'indeterminate' =
+                            'unchecked';
+                          if (isTriState) {
+                            state =
+                              currentFilters.examinations[optionString] ||
+                              'unchecked';
+                          } else {
+                            const currentValues = currentFilters[
                               item.filterType as keyof FilterState
-                            ].includes(optionString);
+                            ] as string[];
+                            state = currentValues.includes(optionString)
+                              ? 'checked'
+                              : 'unchecked';
+                          }
 
                           return (
                             <CheckboxItem
@@ -163,14 +175,15 @@ const CourseFilter: React.FC<FilterProps> = ({
                               filterType={item.filterType as keyof FilterState}
                               displayValue={displayValue}
                               value={optionString}
-                              onChange={(checked) =>
+                              onChange={(newState) =>
                                 onFilterChange(
                                   item.filterType as keyof FilterState,
                                   optionString,
-                                  checked
+                                  newState as TriState
                                 )
                               }
-                              checked={isChecked}
+                              state={state}
+                              isTriState={isTriState}
                             />
                           );
                         })}

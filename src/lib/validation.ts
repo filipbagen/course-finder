@@ -30,6 +30,8 @@ export const CreateReviewSchema = z.object({
 });
 
 export const CourseSearchSchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
   search: z.string().optional(),
   campus: z.string().optional(),
   mainFieldOfStudy: z.string().optional(),
@@ -38,11 +40,9 @@ export const CourseSearchSchema = z.object({
   block: z.string().optional(),
   studyPace: z.string().optional(),
   courseLevel: z.string().optional(),
-  examinations: z.string().optional(),
+  examinations: z.string().optional(), // Keep as string, parse in route
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
-  limit: z.coerce.number().int().min(1).max(100).optional(),
-  cursor: z.string().optional(),
 });
 
 /**
