@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { TriState } from '@/types/types';
 
 interface CoursesPageClientProps {
   isAuthenticated: boolean;

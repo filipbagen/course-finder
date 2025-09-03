@@ -23,26 +23,27 @@ export function useFilters() {
     (
       filterType: keyof FilterState,
       value: string,
-      newState: TriState,
+      newState: TriState | boolean,
       isMobile: boolean = false
     ) => {
-      const updateFilters = (prev: FilterState) => {
+      const updateFilters = (prev: FilterState): FilterState => {
         const newFilters = { ...prev };
 
         if (filterType === 'examinations') {
           const newExaminations = { ...newFilters.examinations };
-          if (newState === 'unchecked') {
-            delete newExaminations[value];
-          } else {
+          // Ensure newState is a valid TriState for examinations
+          if (newState === 'checked' || newState === 'indeterminate') {
             newExaminations[value] = newState;
+          } else {
+            delete newExaminations[value]; // Treat false or 'unchecked' as removal
           }
           return { ...newFilters, examinations: newExaminations };
         } else {
           const currentValues = newFilters[filterType] as string[];
-          const updatedValues =
-            newState === 'checked'
-              ? [...currentValues, value]
-              : currentValues.filter((v) => v !== value);
+          const isChecked = newState === 'checked' || newState === true;
+          const updatedValues = isChecked
+            ? [...currentValues, value]
+            : currentValues.filter((v) => v !== value);
           return { ...newFilters, [filterType]: updatedValues };
         }
       };
