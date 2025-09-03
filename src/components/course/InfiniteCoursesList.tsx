@@ -26,7 +26,7 @@ interface InfiniteCoursesListProps {
   onMobileFilterOpen?: () => void;
 }
 
-type SortOption = 'code' | 'name' | 'credits' | 'semester';
+type SortOption = 'code' | 'name';
 
 const CourseCardSkeleton = () => (
   <div className="space-y-3">
@@ -340,8 +340,6 @@ export function InfiniteCoursesList({
               <SelectContent>
                 <SelectItem value="code">Kurskod</SelectItem>
                 <SelectItem value="name">Namn</SelectItem>
-                <SelectItem value="credits">Poäng</SelectItem>
-                <SelectItem value="semester">Termin</SelectItem>
               </SelectContent>
             </Select>
 
