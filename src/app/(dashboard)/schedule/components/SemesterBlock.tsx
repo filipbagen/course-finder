@@ -60,22 +60,24 @@ export function SemesterBlock({
     });
   };
 
+  const borderClass = isDragging
+    ? isValidDrop
+      ? 'border-green-500'
+      : 'border-red-500'
+    : 'border-border';
+
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        'min-h-48 p-4 rounded-lg border-2 border-dashed transition-all duration-200',
-        'bg-card hover:bg-accent/5',
+        'min-h-48 p-4 rounded-lg border-2 transition-all duration-200 relative bg-card',
+        borderClass,
         {
-          // Default state
-          'border-border': !isDragging,
-
-          // Drag states
-          'border-primary bg-primary/5': isOver && isValidDrop,
-          'border-destructive bg-destructive/5': isOver && !isValidDrop,
-          'border-muted-foreground/50': isDragging && !isOver,
-
-          // Readonly state
+          'border-dashed': !isOver,
+          'border-solid': isOver,
+          'hover:bg-accent/5': !isDragging,
+          'bg-green-50 dark:bg-green-950/20': isOver && isValidDrop,
+          'bg-red-50 dark:bg-red-950/20': isOver && !isValidDrop,
           'cursor-not-allowed opacity-60': readonly,
         }
       )}
@@ -109,58 +111,28 @@ export function SemesterBlock({
 
       {/* Empty State */}
       {courses.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-32 text-center">
-          {isDragging && isOver ? (
-            <div className="space-y-2">
-              {isValidDrop ? (
-                <>
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Plus className="h-4 w-4 text-primary" />
-                  </div>
-                  <p className="text-sm text-primary font-medium">
-                    Släpp kurs här
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center">
-                    <Plus className="h-4 w-4 text-destructive" />
-                  </div>
-                  <p className="text-sm text-destructive font-medium">
-                    Kan inte placera kurs här
-                  </p>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3 flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">
-                  Inga kurser inlagda
-                </p>
-              </div>
-            </div>
+        <div
+          className={cn(
+            'flex flex-col items-center justify-center h-32 text-center transition-opacity duration-200',
+            {
+              'opacity-0': isOver,
+            }
           )}
+        >
+          <div className="space-y-3 flex flex-col items-center">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Inga kurser inlagda
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Drop feedback overlay */}
-      {isDragging && (
-        <div
-          className={cn(
-            'absolute inset-0 rounded-lg border-2 pointer-events-none transition-opacity',
-            {
-              'border-primary bg-primary/5 opacity-100': isOver && isValidDrop,
-              'border-destructive bg-destructive/5 opacity-100':
-                isOver && !isValidDrop,
-              'opacity-0': !isOver,
-            }
-          )}
-        />
-      )}
+      {/* Drop feedback is already handled with the background classes */}
     </div>
   );
 }
@@ -173,8 +145,19 @@ function isValidDropTarget(
   targetSemester: number,
   targetPeriod: number
 ): boolean {
-  // Rule 1: Course must be offered in the target semester
-  if (course.semester !== targetSemester) {
+  // Rule 1: Check if course can be moved between semesters
+  // Courses in semesters 7 and 9 can be moved between each other
+  // Courses in semester 8 can only be moved within semester 8
+  const currentSemester = course.enrollment.semester;
+  const canMove79 =
+    (currentSemester === 7 || currentSemester === 9) &&
+    (targetSemester === 7 || targetSemester === 9);
+
+  // If current semester is 8, it must stay in 8
+  const stayIn8 = currentSemester === 8 && targetSemester === 8;
+
+  // Check if either condition is true
+  if (!(canMove79 || stayIn8)) {
     return false;
   }
 
@@ -183,10 +166,6 @@ function isValidDropTarget(
   if (!course.period.includes(targetPeriod)) {
     return false;
   }
-
-  // Rule 3: Single semester courses cannot be moved at all
-  // This is handled by Rule 1 above - if only offered in one semester,
-  // it can't be moved to another
 
   return true;
 }

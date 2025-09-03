@@ -70,7 +70,7 @@ export default function ScheduleCourseCard({
       ref={setNodeRef}
       style={style}
       className={cn('transition-all duration-200', {
-        'opacity-50 scale-95': isDragging,
+        'opacity-0': isDragging && !readonly, // Hide the original when dragging (not in overlay)
         'cursor-not-allowed': readonly,
       })}
     >

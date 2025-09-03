@@ -135,6 +135,24 @@ function moveCourseInSchedule(
   const isMultiPeriod =
     course.period && Array.isArray(course.period) && course.period.length > 1;
 
+  // Verify that the move is valid for the course
+  // Courses in semester 7 and 9 can be moved between each other
+  // Courses in semester 8 can only be moved within semester 8
+  const currentSemester = course.enrollment.semester;
+  const canMove79 =
+    (currentSemester === 7 || currentSemester === 9) &&
+    (toSemester === 7 || toSemester === 9);
+  const stayIn8 = currentSemester === 8 && toSemester === 8;
+
+  if (!(canMove79 || stayIn8)) {
+    console.warn('Invalid semester move:', {
+      from: currentSemester,
+      to: toSemester,
+      rule: 'Courses from semester 7 and 9 can only be moved between 7 and 9, courses from semester 8 can only stay in 8',
+    });
+    return schedule;
+  }
+
   if (isMultiPeriod) {
     // For multi-period courses, remove from all periods in source semester
     // and add to all periods in destination semester

@@ -100,20 +100,25 @@ export function ScheduleContainer({
     targetSemester: number,
     targetPeriod: number
   ): boolean => {
+    // Rule 1: Course must be offered in the target semester
+    // We need to check if the course can be moved between semesters 7, 9
+    // Courses in semester 8 can only be moved within semester 8
+
+    // First, check if the source semester is either 7 or 9
     const currentSemester = course.enrollment.semester;
-    const isSemester7or9 = (sem: number) => sem === 7 || sem === 9;
+    const canMove79 =
+      (currentSemester === 7 || currentSemester === 9) &&
+      (targetSemester === 7 || targetSemester === 9);
 
-    // A course in semester 7 or 9 can be moved to either 7 or 9
-    const isInterchangeableMove =
-      isSemester7or9(currentSemester) && isSemester7or9(targetSemester);
+    // If current semester is 8, it must stay in 8
+    const stayIn8 = currentSemester === 8 && targetSemester === 8;
 
-    // A course in other semesters can only be moved within the same semester
-    const isSameSemesterMove = currentSemester === targetSemester;
-
-    if (!isInterchangeableMove && !isSameSemesterMove) {
+    // Check if either condition is true
+    if (!(canMove79 || stayIn8)) {
       return false;
     }
 
+    // Rule 2: Course cannot be moved between different periods
     // The course must be offered in the target period
     if (!course.period.includes(targetPeriod)) {
       return false;
@@ -271,9 +276,16 @@ export function ScheduleContainer({
     >
       <div className="w-full">{children}</div>
 
-      <DragOverlay>
+      <DragOverlay
+        dropAnimation={{
+          duration: 200,
+          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+        }}
+      >
         {activeCourse ? (
-          <ScheduleCourseCard course={activeCourse} readonly={true} />
+          <div className="transform-gpu scale-105 opacity-90 pointer-events-none">
+            <ScheduleCourseCard course={activeCourse} readonly={true} />
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>
