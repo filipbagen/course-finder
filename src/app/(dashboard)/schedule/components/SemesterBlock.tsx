@@ -60,21 +60,21 @@ export function SemesterBlock({
     });
   };
 
-  const borderClass = isDragging
-    ? isValidDrop
-      ? 'border-green-500'
-      : 'border-red-500'
-    : 'border-border';
+  const style: React.CSSProperties = {};
+  if (isDragging) {
+    style.borderColor = isValidDrop ? '#22c55e' : '#ef4444'; // green-500 and red-500 hex codes
+  }
 
   return (
     <div
       ref={setNodeRef}
+      style={style}
       className={cn(
         'min-h-48 p-4 rounded-lg border-2 transition-all duration-200 relative bg-card',
-        borderClass,
         {
-          'border-dashed': !isOver,
-          'border-solid': isOver,
+          'border-dashed border-border': !isDragging,
+          'border-dashed': isDragging && !isOver,
+          'border-solid': isDragging && isOver,
           'hover:bg-accent/5': !isDragging,
           'bg-green-50 dark:bg-green-950/20': isOver && isValidDrop,
           'bg-red-50 dark:bg-red-950/20': isOver && !isValidDrop,
