@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import CourseCard from '@/components/course/CourseCard';
 import { useInfiniteCourses } from '@/hooks/courses/useInfiniteCourses';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { FilterState } from '@/types/types';
+import { FilterState, TriState } from '@/types/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,6 @@ import { RefreshCw, Loader2, Filter } from 'lucide-react';
 interface InfiniteCoursesListProps {
   isAuthenticated: boolean;
   search?: string;
-  campus?: string;
-  mainFieldOfStudy?: string;
-  semester?: string;
   sortBy?: string;
   sortOrder?: string;
   filters?: FilterState;
@@ -100,14 +97,12 @@ const LoadMoreTrigger = ({
 export function InfiniteCoursesList({
   isAuthenticated,
   search,
-  campus,
-  mainFieldOfStudy,
-  semester,
   sortBy,
   sortOrder,
   filters,
   onMobileFilterOpen,
 }: InfiniteCoursesListProps) {
+  const [totalCoursesInDb, setTotalCoursesInDb] = useState<number | null>(null);
   const [currentSortBy, setCurrentSortBy] = useState<SortOption>(
     (sortBy as SortOption) || 'code'
   );
@@ -126,16 +121,26 @@ export function InfiniteCoursesList({
     isLoadingMore,
   } = useInfiniteCourses({
     search,
-    campus,
-    mainFieldOfStudy,
-    semester,
     sortBy: currentSortBy,
     sortOrder: currentSortOrder,
     filters,
     limit: 20,
   });
 
-  console.log('Course data:', courses);
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        const response = await fetch('/api/courses/count');
+        const data = await response.json();
+        if (data.success) {
+          setTotalCoursesInDb(data.totalCount);
+        }
+      } catch (error) {
+        console.error('Failed to fetch total course count:', error);
+      }
+    };
+    fetchTotalCount();
+  }, []);
 
   const coursesDisplay = useMemo(() => {
     return courses.map((course) => (
@@ -152,14 +157,19 @@ export function InfiniteCoursesList({
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     if (search) return true;
-    if (campus || mainFieldOfStudy || semester) return true;
     if (filters) {
-      return Object.values(filters).some(
-        (filterArray: string[]) => filterArray.length > 0
-      );
+      return (Object.keys(filters) as Array<keyof FilterState>).some((key) => {
+        const filterValue = filters[key];
+        if (key === 'examinations') {
+          return Object.values(filterValue).some(
+            (state) => state !== 'unchecked'
+          );
+        }
+        return Array.isArray(filterValue) && filterValue.length > 0;
+      });
     }
     return false;
-  }, [search, campus, mainFieldOfStudy, semester, filters]);
+  }, [search, filters]);
 
   // Loading state for initial load
   if (loading && courses.length === 0) {
@@ -168,7 +178,10 @@ export function InfiniteCoursesList({
         {/* Results summary with sorting and view controls */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Laddar kurser...</span>
+            <span>
+              Visar {totalCount ?? '...'}
+              {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -282,8 +295,8 @@ export function InfiniteCoursesList({
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span>
-            Visar {courses.length}
-            {totalCount !== null && ` av ${totalCount}`} kurser
+            Visar {totalCount ?? courses.length}
+            {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
           </span>
         </div>
 
@@ -361,7 +374,9 @@ export function InfiniteCoursesList({
         <div className="text-center py-8 text-muted-foreground">
           <p>Du har nått slutet av kurslistan</p>
           {totalCount !== null && (
-            <p className="text-sm mt-1">Totalt {totalCount} kurser visade</p>
+            <p className="text-sm mt-1">
+              Totalt {totalCount} av {totalCoursesInDb} kurser visade
+            </p>
           )}
         </div>
       )}
