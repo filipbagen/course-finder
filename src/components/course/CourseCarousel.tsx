@@ -13,11 +13,11 @@ interface Course {
   credits: number;
   mainFieldOfStudy: string[];
   advanced: boolean;
-  semester: number;
+  semester: number[];
   period: number[];
   block: number[];
   campus: string;
-  content?: string;
+  content?: { paragraph: string | null; list_items: string[] };
 }
 
 /**
@@ -107,11 +107,11 @@ export function CourseCarousel() {
             selfStudyHours: null,
             exclusions: [],
             offeredFor: [],
-            prerequisites: '',
-            recommendedPrerequisites: '',
-            learningOutcomes: '',
-            teachingMethods: '',
-            content: course.content || '',
+            prerequisites: { paragraph: null, list_items: [] },
+            recommendedPrerequisites: { paragraph: null, list_items: [] },
+            learningOutcomes: { paragraph: null, list_items: [] },
+            teachingMethods: { paragraph: null, list_items: [] },
+            content: course.content || { paragraph: null, list_items: [] },
           };
 
           return (
