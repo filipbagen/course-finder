@@ -70,7 +70,7 @@ export function useInfiniteCourses(
       // Use filters object if provided, otherwise fall back to individual params
       if (filters) {
         if (filters.campus.length > 0) {
-          params.set('campus', filters.campus.join(','));
+          params.set('campus', filters.campus.join('|'));
         }
         if (filters.mainFieldOfStudy.length > 0) {
           params.set('mainFieldOfStudy', filters.mainFieldOfStudy.join(','));

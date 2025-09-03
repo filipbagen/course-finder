@@ -1,59 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
-import { createSuccessResponse, infiniteError, badRequest } from '@/lib/errors';
+import { infiniteError } from '@/lib/errors';
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
-import type { ApiResponse, InfiniteResponse } from '@/types/api';
+import type { InfiniteResponse } from '@/types/api';
 import { Course } from '@/types/types';
 import { transformCourses } from '@/lib/transformers';
 
 export const dynamic = 'force-dynamic';
-
-interface SearchParams {
-  cursor?: string;
-  limit?: string;
-  search?: string;
-  campus?: string;
-  mainFieldOfStudy?: string;
-  semester?: string;
-  period?: string;
-  block?: string;
-  studyPace?: string;
-  courseLevel?: string;
-  examinations?: string;
-  sortBy?: string;
-  sortOrder?: string;
-}
 
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<InfiniteResponse<Course>>> {
   try {
     const { searchParams } = new URL(request.url);
-
-    console.log(
-      'Received search params:',
-      Object.fromEntries(searchParams.entries())
-    );
-
-    // Validate query parameters
     const params = validateQueryParams(searchParams, CourseSearchSchema);
 
-    console.log('Validated params:', params);
+    const {
+      cursor,
+      limit: rawLimit,
+      search,
+      campus,
+      mainFieldOfStudy,
+      semester,
+      period,
+      block,
+      studyPace,
+      courseLevel,
+      examinations,
+      sortBy = 'code',
+      sortOrder = 'asc',
+    } = params;
 
-    const cursor = params.cursor;
-    const limit = Math.min(Math.max(params.limit || 20, 1), 50);
-    const search = params.search;
-    const campus = params.campus;
-    const mainFieldOfStudy = params.mainFieldOfStudy;
-    const semester = params.semester;
-    const period = params.period;
-    const block = params.block;
-    const studyPace = params.studyPace;
-    const courseLevel = params.courseLevel;
-    const examinations = params.examinations;
-    const sortBy = params.sortBy || 'code';
-    const sortOrder = params.sortOrder || 'asc';
+    const limit = Math.min(Math.max(rawLimit || 20, 1), 50);
 
     // Build where conditions
     const whereConditions: any = {};
@@ -66,213 +44,105 @@ export async function GET(
     }
 
     if (campus) {
-      const campusValues = campus.split(',');
-      if (campusValues.length > 1) {
-        whereConditions.campus = { in: campusValues };
-      } else {
-        whereConditions.campus = campus;
-      }
+      const campusValues = campus.split('|');
+      whereConditions.campus =
+        campusValues.length > 1 ? { in: campusValues } : campus;
     }
 
     if (mainFieldOfStudy) {
       const fieldValues = mainFieldOfStudy.split(',');
-      if (fieldValues.length > 1) {
-        whereConditions.mainFieldOfStudy = {
-          hasSome: fieldValues,
-        };
-      } else {
-        whereConditions.mainFieldOfStudy = {
-          has: mainFieldOfStudy,
-        };
-      }
+      whereConditions.mainFieldOfStudy =
+        fieldValues.length > 1
+          ? { hasSome: fieldValues }
+          : { has: mainFieldOfStudy };
     }
 
     if (semester) {
-      try {
-        const semesterValues = semester.split(',').map((s) => {
-          const parsed = parseInt(s, 10);
-          if (isNaN(parsed)) {
-            throw new Error(`Invalid semester value: ${s}`);
-          }
-          return BigInt(parsed);
-        });
-
-        if (semesterValues.length > 1) {
-          whereConditions.semester = {
-            hasSome: semesterValues,
-          };
-        } else {
-          whereConditions.semester = {
-            has: semesterValues[0],
-          };
-        }
-      } catch (error) {
-        console.error('Error parsing semester values:', error);
-        throw new Error(`Invalid semester parameter: ${semester}`);
-      }
+      const semesterValues = semester
+        .split(',')
+        .map((s) => BigInt(parseInt(s, 10)));
+      whereConditions.semester =
+        semesterValues.length > 1
+          ? { hasSome: semesterValues }
+          : { has: semesterValues[0] };
     }
 
     if (period) {
-      try {
-        const periodValues = period.split(',').map((p) => {
-          const parsed = parseInt(p, 10);
-          if (isNaN(parsed)) {
-            throw new Error(`Invalid period value: ${p}`);
-          }
-          return BigInt(parsed);
-        });
-
-        if (periodValues.length > 1) {
-          whereConditions.period = {
-            hasSome: periodValues,
-          };
-        } else {
-          whereConditions.period = {
-            has: periodValues[0],
-          };
-        }
-      } catch (error) {
-        console.error('Error parsing period values:', error);
-        throw new Error(`Invalid period parameter: ${period}`);
-      }
+      const periodValues = period
+        .split(',')
+        .map((p) => BigInt(parseInt(p, 10)));
+      whereConditions.period =
+        periodValues.length > 1
+          ? { hasSome: periodValues }
+          : { has: periodValues[0] };
     }
 
     if (block) {
-      try {
-        const blockValues = block.split(',').map((b) => {
-          const parsed = parseInt(b, 10);
-          if (isNaN(parsed)) {
-            throw new Error(`Invalid block value: ${b}`);
-          }
-          return BigInt(parsed);
-        });
-
-        if (blockValues.length > 1) {
-          whereConditions.block = {
-            hasSome: blockValues,
-          };
-        } else {
-          whereConditions.block = {
-            has: blockValues[0],
-          };
-        }
-      } catch (error) {
-        console.error('Error parsing block values:', error);
-        throw new Error(`Invalid block parameter: ${block}`);
-      }
+      const blockValues = block.split(',').map((b) => BigInt(parseInt(b, 10)));
+      whereConditions.block =
+        blockValues.length > 1
+          ? { hasSome: blockValues }
+          : { has: blockValues[0] };
     }
 
     if (courseLevel) {
       const levelValues = courseLevel.split(',');
       if (
         levelValues.includes('Grundnivå') &&
+        !levelValues.includes('Avancerad nivå')
+      ) {
+        whereConditions.advanced = false;
+      } else if (
+        !levelValues.includes('Grundnivå') &&
         levelValues.includes('Avancerad nivå')
       ) {
-        // Both levels selected, no filter needed
-      } else if (levelValues.includes('Grundnivå')) {
-        whereConditions.advanced = false;
-      } else if (levelValues.includes('Avancerad nivå')) {
         whereConditions.advanced = true;
       }
     }
 
-    let hasExaminationFilter = false;
     let examinationCodes: string[] = [];
-
     if (examinations) {
-      hasExaminationFilter = true;
-      const examinationValues = examinations.split(',');
+      const examinationMap: Record<string, string[]> = {
+        Inlämningsuppgift: ['UPG'],
+        'Skriftlig tentamen': ['TEN', 'TENA'],
+        Projektarbete: ['PRA', 'PROJ'],
+        Laborationsarbete: ['LAB', 'LABA'],
+        'Digital tentamen': ['DIT'],
+        'Muntlig examination': ['MUN'],
+        Kontrollskrivning: ['KTR'],
+        Basgruppsarbete: ['BAS'],
+        Hemtentamen: ['HEM'],
+        Övrigt: ['DAK', 'MOM', 'ANN'],
+        Seminarium: ['SEM'],
+        Datorexamination: ['DAT'],
+      };
 
-      examinationValues.forEach((examValue) => {
-        // Map the user-friendly examination names to the actual examination codes
-        switch (examValue) {
-          case 'Inlämningsuppgift':
-            examinationCodes.push('UPG');
-            break;
-          case 'Skriftlig tentamen':
-            examinationCodes.push('TEN');
-            examinationCodes.push('TENA');
-            break;
-          case 'Projektarbete':
-            examinationCodes.push('PRA');
-            examinationCodes.push('PROJ');
-            break;
-          case 'Laborationsarbete':
-            examinationCodes.push('LAB');
-            examinationCodes.push('LABA');
-            break;
-          case 'Digital tentamen':
-            examinationCodes.push('DIT');
-            break;
-          case 'Muntlig examination':
-            examinationCodes.push('MUN');
-            break;
-          case 'Kontrollskrivning':
-            examinationCodes.push('KTR');
-            break;
-          case 'Basgruppsarbete':
-            examinationCodes.push('BAS');
-            break;
-          case 'Hemtentamen':
-            examinationCodes.push('HEM');
-            break;
-          case 'Övrigt':
-            examinationCodes.push('DAK');
-            examinationCodes.push('MOM');
-            examinationCodes.push('ANN');
-            break;
-          case 'Seminarium':
-            examinationCodes.push('SEM');
-            break;
-          case 'Datorexamination':
-            examinationCodes.push('DAT');
-            break;
-          default:
-            examinationCodes.push(examValue); // Fallback to using the value as-is
-        }
-      });
+      const examinationValues = examinations.split(',');
+      examinationCodes = examinationValues.flatMap(
+        (val) => examinationMap[val] || [val]
+      );
     }
 
     if (studyPace) {
       const paceValues = studyPace.split(',');
-      if (paceValues.includes('Helfart') && paceValues.includes('Halvfart')) {
-        // Both paces selected, no filter needed
-      } else if (paceValues.includes('Helfart')) {
-        // Full-time: course runs in only one period
-        // We create a JSON query to check the length of the period array
-        whereConditions.OR = whereConditions.OR || [];
-        whereConditions.OR.push({
-          OR: [
-            // Either it only has period 1
-            { period: { equals: [BigInt(1)] } },
-            // Or it only has period 2
-            { period: { equals: [BigInt(2)] } },
-          ],
-        });
-      } else if (paceValues.includes('Halvfart')) {
-        // Half-time: course runs in two periods (period array contains both 1 and 2)
-        whereConditions.AND = whereConditions.AND || [];
-
-        // It must have exactly two periods, containing both 1 and 2
-        whereConditions.AND.push({
-          AND: [{ period: { has: BigInt(1) } }, { period: { has: BigInt(2) } }],
-        });
+      if (paceValues.includes('Helfart') && !paceValues.includes('Halvfart')) {
+        whereConditions.OR = [
+          { period: { equals: [BigInt(1)] } },
+          { period: { equals: [BigInt(2)] } },
+        ];
+      } else if (
+        !paceValues.includes('Helfart') &&
+        paceValues.includes('Halvfart')
+      ) {
+        whereConditions.AND = [
+          { period: { has: BigInt(1) } },
+          { period: { has: BigInt(2) } },
+        ];
       }
     }
 
     // Build orderBy
-    const orderBy: any = {};
-    if (sortBy === 'name') {
-      orderBy.name = sortOrder;
-    } else if (sortBy === 'credits') {
-      orderBy.credits = sortOrder;
-    } else if (sortBy === 'campus') {
-      orderBy.campus = sortOrder;
-    } else {
-      orderBy.code = sortOrder;
-    }
-
-    // Add secondary sort for consistency
+    const orderBy: any = { [sortBy]: sortOrder };
     const orderByArray = [orderBy];
     if (sortBy !== 'code') {
       orderByArray.push({ code: 'asc' });
@@ -283,7 +153,6 @@ export async function GET(
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
-      // No limit or cursor here; we fetch all and paginate in memory
       select: {
         id: true,
         code: true,
@@ -294,72 +163,28 @@ export async function GET(
         period: true,
         block: true,
         campus: true,
-        content: true,
-        scheduledHours: true,
-        selfStudyHours: true,
-        exclusions: true,
-        offeredFor: true,
-        prerequisites: true,
-        recommendedPrerequisites: true,
-        learningOutcomes: true,
-        teachingMethods: true,
-        courseType: true,
-        examiner: true,
         examination: true,
-        programInfo: true,
         semester: true,
       },
     };
 
-    console.log(
-      'Fetching all courses with options:',
-      JSON.stringify(
-        queryOptions,
-        (key, value) => (typeof value === 'bigint' ? value.toString() : value),
-        2
-      )
-    );
-
     const allCourses = await prisma.course.findMany(queryOptions);
 
-    // Transform data with our utility function
+    // Transform data and apply post-query examination filtering if needed
     let filteredCourses = transformCourses(allCourses) as unknown as Course[];
 
-    // Apply post-query examination filtering if needed
-    if (hasExaminationFilter && examinationCodes.length > 0) {
-      console.log(
-        'Applying in-memory examination filtering with codes:',
-        examinationCodes
-      );
+    if (examinations && examinationCodes.length > 0) {
       filteredCourses = filteredCourses.filter((course) => {
-        if (
-          !course.examination ||
-          !Array.isArray(course.examination) ||
-          course.examination.length === 0
-        ) {
+        if (!course.examination || course.examination.length === 0) {
           return false;
         }
-
-        for (const exam of course.examination) {
-          if (!exam || typeof exam !== 'object') continue;
-
-          const examObj = exam as { code?: string };
-          const examCode = examObj.code ? String(examObj.code) : '';
-
-          if (!examCode) continue;
-
-          for (const searchCode of examinationCodes) {
-            if (examCode.toUpperCase().startsWith(searchCode.toUpperCase())) {
-              return true;
-            }
-          }
-        }
-
-        return false;
+        return course.examination.some((exam: any) => {
+          const examCode = exam?.code ? String(exam.code) : '';
+          return examinationCodes.some((searchCode) =>
+            examCode.toUpperCase().startsWith(searchCode.toUpperCase())
+          );
+        });
       });
-      console.log(
-        `Found ${filteredCourses.length} courses after examination filtering.`
-      );
     }
 
     // Now, apply pagination to the fully filtered and sorted list
@@ -387,15 +212,8 @@ export async function GET(
     } as InfiniteResponse<Course>);
   } catch (error) {
     console.error('Error fetching courses:', error);
-
-    // Include more detailed error information
-    let errorMessage = 'Failed to fetch courses';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      console.error('Error stack:', error.stack);
-    }
-
-    // Return a more informative error response
+    let errorMessage =
+      error instanceof Error ? error.message : 'An unknown error occurred';
     return infiniteError(errorMessage);
   }
 }

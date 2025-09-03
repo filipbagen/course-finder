@@ -121,7 +121,7 @@ export const accordionItems: AccordionItemProps[] = [
     value: 'campus',
     title: 'Campus',
     filterType: 'campus',
-    options: ['Norrköping', 'Linköping'],
+    options: ['Linköping, Valla', 'Linköping, US', 'Norrköping'],
     displayValue: (campus) => campus,
     icon: School,
   },
