@@ -46,27 +46,43 @@ const CourseFilter: React.FC<FilterProps> = ({
   const { mainFieldOfStudy, loading: fieldsLoading } = useFields();
 
   const resetFilters = () => {
-    Object.keys(currentFilters).forEach((filterType) => {
-      currentFilters[filterType as keyof FilterState].forEach((value) => {
-        onFilterChange(filterType as keyof FilterState, String(value), false);
+    // Reset array-based filters
+    (Object.keys(currentFilters) as Array<keyof FilterState>)
+      .filter((key) => key !== 'examinations')
+      .forEach((filterType) => {
+        (currentFilters[filterType] as string[]).forEach((value) => {
+          onFilterChange(filterType, value, false);
+        });
       });
+
+    // Reset examinations tri-state filter
+    Object.keys(currentFilters.examinations).forEach((value) => {
+      onFilterChange('examinations', value, 'unchecked');
     });
   };
 
-  // Count total active filters
-  const activeFilterCount = Object.values(currentFilters).reduce(
-    (total, filterArray) => total + filterArray.length,
-    0
-  );
+  // Count total active filters, handling both array and object filter types
+  const activeFilterCount = (
+    Object.keys(currentFilters) as Array<keyof FilterState>
+  ).reduce((total, key) => {
+    const filter = currentFilters[key];
+    if (key === 'examinations') {
+      return (
+        total +
+        Object.values(filter as Record<string, TriState>).filter(
+          (state) => state !== 'unchecked'
+        ).length
+      );
+    }
+    return total + (filter as string[]).length;
+  }, 0);
 
   // Dynamically update the accordionItems with fetched fields
   const accordionItems = useMemo(() => {
     return staticAccordionItems.map((item) => {
-      // Replace mainFieldOfStudy options with dynamic data
       if (item.filterType === 'mainFieldOfStudy') {
         return {
           ...item,
-          // Use dynamic data if available, otherwise fall back to static options
           options:
             mainFieldOfStudy.length > 0 ? mainFieldOfStudy : item.options,
         };
@@ -103,8 +119,16 @@ const CourseFilter: React.FC<FilterProps> = ({
           className="w-full"
         >
           {accordionItems.map((item) => {
-            const isAnyOptionChecked =
-              currentFilters[item.filterType as keyof FilterState].length > 0;
+            const isTriState = item.filterType === 'examinations';
+            const isAnyOptionChecked = isTriState
+              ? Object.values(currentFilters.examinations).some(
+                  (state) => state !== 'unchecked'
+                )
+              : (
+                  currentFilters[
+                    item.filterType as keyof FilterState
+                  ] as string[]
+                ).length > 0;
 
             return (
               <AccordionItem
@@ -152,10 +176,8 @@ const CourseFilter: React.FC<FilterProps> = ({
                         item.options.map((option) => {
                           const optionString = option.toString();
                           const displayValue = item.displayValue(optionString);
-                          const isTriState = item.filterType === 'examinations';
 
-                          let state: 'checked' | 'unchecked' | 'indeterminate' =
-                            'unchecked';
+                          let state: TriState = 'unchecked';
                           if (isTriState) {
                             state =
                               currentFilters.examinations[optionString] ||

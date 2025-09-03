@@ -4,14 +4,6 @@ import { InfiniteResponse } from '@/types/api';
 
 interface UseInfiniteCoursesParams {
   search?: string;
-  campus?: string;
-  mainFieldOfStudy?: string;
-  semester?: string;
-  period?: string;
-  block?: string;
-  studyPace?: string;
-  courseLevel?: string;
-  examinations?: string;
   sortBy?: string;
   sortOrder?: string;
   limit?: number;
@@ -43,14 +35,6 @@ export function useInfiniteCourses(
 
   const {
     search,
-    campus,
-    mainFieldOfStudy,
-    semester,
-    period,
-    block,
-    studyPace,
-    courseLevel,
-    examinations,
     sortBy = 'code',
     sortOrder = 'asc',
     limit = 20,
@@ -67,7 +51,6 @@ export function useInfiniteCourses(
       if (sortBy) params.set('sortBy', sortBy);
       if (sortOrder) params.set('sortOrder', sortOrder);
 
-      // Use filters object if provided, otherwise fall back to individual params
       if (filters) {
         if (filters.campus.length > 0) {
           params.set('campus', filters.campus.join('|'));
@@ -101,72 +84,41 @@ export function useInfiniteCourses(
         if (Object.keys(activeExaminationFilters).length > 0) {
           params.set('examinations', JSON.stringify(activeExaminationFilters));
         }
-      } else {
-        // Legacy individual parameter support
-        if (campus) params.set('campus', campus);
-        if (mainFieldOfStudy) params.set('mainFieldOfStudy', mainFieldOfStudy);
-        if (semester) params.set('semester', semester);
-        if (period) params.set('period', period);
-        if (block) params.set('block', block);
-        if (studyPace) params.set('studyPace', studyPace);
-        if (courseLevel) params.set('courseLevel', courseLevel);
-        if (examinations) params.set('examinations', examinations);
       }
 
       return params.toString();
     },
-    [
-      search,
-      campus,
-      mainFieldOfStudy,
-      semester,
-      period,
-      block,
-      studyPace,
-      courseLevel,
-      examinations,
-      sortBy,
-      sortOrder,
-      limit,
-      filters,
-    ]
+    [search, sortBy, sortOrder, limit, filters]
   );
 
   const fetchCourses = useCallback(
     async (cursor?: string | null, isLoadMore = false) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      if (!isLoadMore) {
+        setLoading(true);
+        setError(null);
+      } else {
+        setIsLoadingMore(true);
+      }
+
       try {
-        // Cancel previous request
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-
-        // Create new abort controller
-        abortControllerRef.current = new AbortController();
-
-        if (!isLoadMore) {
-          setLoading(true);
-          setError(null);
-        } else {
-          setIsLoadingMore(true);
-        }
-
         const queryParams = buildQueryParams(cursor);
-        console.log(`Fetching courses with params: ${queryParams}`);
-
         const response = await fetch(`/api/courses/infinite?${queryParams}`, {
           signal: abortControllerRef.current.signal,
         });
 
         if (!response.ok) {
-          // Try to get the error message from the response body
           let errorDetails = '';
           try {
             const errorResponse = await response.json();
             errorDetails = errorResponse.error || errorResponse.message || '';
           } catch (e) {
-            // If parsing fails, continue with the status error
+            // Ignore if parsing fails
           }
-
           throw new Error(
             `HTTP error! status: ${response.status}${
               errorDetails ? ` - ${errorDetails}` : ''
@@ -175,15 +127,11 @@ export function useInfiniteCourses(
         }
 
         const result: InfiniteResponse<Course> = await response.json();
-
-        // Handle API error response
         if (!result.success) {
           throw new Error(result.error || 'Failed to fetch courses');
         }
 
-        // Extract data from the standardized response
         const data = result.data || [];
-
         if (isLoadMore) {
           setCourses((prev) => [...prev, ...data]);
         } else {
@@ -198,14 +146,10 @@ export function useInfiniteCourses(
         setError(null);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
-          // Request was aborted, ignore
-          return;
+          return; // Request was aborted, ignore
         }
-
-        console.error('Error fetching courses:', err);
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to fetch courses';
-        console.log('Setting error state:', errorMessage);
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -229,26 +173,10 @@ export function useInfiniteCourses(
     fetchCourses(null, false);
   }, [fetchCourses]);
 
-  // Initial fetch and refetch when parameters change
   useEffect(() => {
     refresh();
-  }, [
-    search,
-    campus,
-    mainFieldOfStudy,
-    semester,
-    period,
-    block,
-    studyPace,
-    courseLevel,
-    examinations,
-    sortBy,
-    sortOrder,
-    limit,
-    filters,
-  ]);
+  }, [search, sortBy, sortOrder, limit, filters]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
