@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { SubmitButton } from '../../../components/shared/SubmitButtons';
 import { DeleteImageButton } from '@/components/shared/DeleteImageButton';
 import { SettingsForm } from '@/app/(dashboard)/settings/SettingsForm';
+import { programs } from '@/lib/programs';
 
 // shadcn
 import {
@@ -30,8 +31,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Upload, X } from 'lucide-react';
 
 // supabase
 import { createClient } from '@/lib/supabase/server';
@@ -350,9 +349,7 @@ export default async function SettingPage() {
                   </div>
                 </div>
               </div>
-
               <Separator />
-
               {/* Name and Email */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -377,8 +374,6 @@ export default async function SettingPage() {
                   />
                 </div>
               </div>
-
-              {/* Program Selection */}
               <div className="space-y-2">
                 <Label htmlFor="program">Program</Label>
                 <Select name="program" defaultValue={data?.program || ''}>
@@ -388,60 +383,11 @@ export default async function SettingPage() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Civilingenjörsprogram</SelectLabel>
-                      <SelectItem value="Datadriven utveckling">
-                        Datadriven utveckling
-                      </SelectItem>
-                      <SelectItem value="Datateknik">Datateknik</SelectItem>
-                      <SelectItem value="Design och produktutveckling">
-                        Design och produktutveckling
-                      </SelectItem>
-                      <SelectItem value="Elektronik och systemdesign">
-                        Elektronik och systemdesign
-                      </SelectItem>
-                      <SelectItem value="Elektronikdesign">
-                        Elektronikdesign
-                      </SelectItem>
-                      <SelectItem value="Energi - miljö - management">
-                        Energi - miljö - management
-                      </SelectItem>
-                      <SelectItem value="Industriell ekonomi">
-                        Industriell ekonomi
-                      </SelectItem>
-                      <SelectItem value="Industriell ekonomi - internationell">
-                        Industriell ekonomi - internationell
-                      </SelectItem>
-                      <SelectItem value="Informationsteknologi">
-                        Informationsteknologi
-                      </SelectItem>
-                      <SelectItem value="Kemisk biologi">
-                        Kemisk biologi
-                      </SelectItem>
-                      <SelectItem value="Kommunikation, transport och samhälle">
-                        Kommunikation, transport och samhälle
-                      </SelectItem>
-                      <SelectItem value="Maskinteknik">Maskinteknik</SelectItem>
-                      <SelectItem value="Medieteknik">Medieteknik</SelectItem>
-                      <SelectItem value="Medieteknik och AI">
-                        Medieteknik och AI
-                      </SelectItem>
-                      <SelectItem value="Medicinsk teknik">
-                        Medicinsk teknik
-                      </SelectItem>
-                      <SelectItem value="Mjukvaruteknik">
-                        Mjukvaruteknik
-                      </SelectItem>
-                      <SelectItem value="Teknisk biologi">
-                        Teknisk biologi
-                      </SelectItem>
-                      <SelectItem value="Teknisk fysik och elektroteknik">
-                        Teknisk fysik och elektroteknik
-                      </SelectItem>
-                      <SelectItem value="Teknisk fysik och elektroteknik - internationell">
-                        Teknisk fysik och elektroteknik - internationell
-                      </SelectItem>
-                      <SelectItem value="Teknisk matematik">
-                        Teknisk matematik
-                      </SelectItem>
+                      {programs.map((program) => (
+                        <SelectItem key={program} value={program}>
+                          {program}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

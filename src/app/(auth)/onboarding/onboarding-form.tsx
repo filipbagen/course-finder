@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateUserProfile } from './actions';
 import Avatar from '@/components/shared/avatar';
+import { programs } from '@/lib/programs';
 
 interface OnboardingFormProps {
   userId: string;
@@ -15,18 +16,6 @@ const colorSchemes = [
   { value: 'theme-green', label: 'Green', color: 'bg-green-500' },
   { value: 'theme-purple', label: 'Purple', color: 'bg-purple-500' },
   { value: 'theme-orange', label: 'Orange', color: 'bg-orange-500' },
-];
-
-const programs = [
-  'Computer Science',
-  'Engineering',
-  'Business',
-  'Mathematics',
-  'Physics',
-  'Chemistry',
-  'Biology',
-  'Psychology',
-  'Other',
 ];
 
 export default function OnboardingForm({

@@ -20,6 +20,8 @@ interface UserSearchResult {
   };
 }
 
+import { programs } from '@/lib/programs';
+
 async function getUsers(
   searchQuery?: string,
   programFilter?: string,
@@ -86,30 +88,8 @@ async function getUsers(
 }
 
 async function getAvailablePrograms() {
-  try {
-    const programs = await prisma.user.findMany({
-      where: {
-        isPublic: true,
-        program: {
-          not: null,
-        },
-      },
-      select: {
-        program: true,
-      },
-      distinct: ['program'],
-      orderBy: {
-        program: 'asc',
-      },
-    });
-
-    return programs
-      .map((p) => p.program)
-      .filter((program): program is string => program !== null);
-  } catch (error) {
-    console.error('Error fetching programs:', error);
-    return [];
-  }
+  // Return the static list of all available programs
+  return Promise.resolve(programs);
 }
 
 export default async function StudentsPage({
@@ -137,11 +117,11 @@ export default async function StudentsPage({
   ]);
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 px-2">
-          <div>
+    <div className="flex flex-col gap-8 mx-auto">
+      <div className="grid items-start gap-8">
+        {/* Header */}
+        <div className="flex items-center justify-between px-2">
+          <div className="grid gap-1">
             <h1 className="text-3xl font-bold tracking-tight">
               Hitta studenter
             </h1>
@@ -151,31 +131,29 @@ export default async function StudentsPage({
             </p>
           </div>
         </div>
-      </div>
 
-      <Separator />
-
-      {/* Search and Results */}
-      <Suspense
-        fallback={
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-full max-w-md mx-auto" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-48 w-full rounded-xl" />
-              ))}
+        {/* Search and Results */}
+        <Suspense
+          fallback={
+            <div className="space-y-6">
+              <Skeleton className="h-10 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                ))}
+              </div>
             </div>
-          </div>
-        }
-      >
-        <UserSearchComponent
-          initialUsers={users}
-          initialQuery={searchQuery}
-          availablePrograms={availablePrograms}
-          initialProgramFilter={programFilter}
-          initialSortBy={sortBy}
-        />
-      </Suspense>
+          }
+        >
+          <UserSearchComponent
+            initialUsers={users}
+            initialQuery={searchQuery}
+            availablePrograms={availablePrograms}
+            initialProgramFilter={programFilter}
+            initialSortBy={sortBy}
+          />
+        </Suspense>
+      </div>
     </div>
   );
 }
