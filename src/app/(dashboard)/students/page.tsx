@@ -46,9 +46,9 @@ async function getUsers(
     // Determine sort order
     let orderBy: any = { name: 'asc' }; // Default sort
     if (sortBy === 'reviews') {
-      orderBy = { reviews: { _count: 'desc' } };
+      orderBy = { Review: { _count: 'desc' } };
     } else if (sortBy === 'enrollments') {
-      orderBy = { enrollments: { _count: 'desc' } };
+      orderBy = { Enrollment: { _count: 'desc' } };
     }
 
     const users = await prisma.user.findMany({
@@ -61,8 +61,8 @@ async function getUsers(
         image: true,
         _count: {
           select: {
-            enrollments: true,
-            reviews: true,
+            Enrollment: true,
+            Review: true,
           },
         },
       },
@@ -74,6 +74,10 @@ async function getUsers(
     return users.map((user) => ({
       ...user,
       name: user.name!, // Type assertion - we know name is non-null
+      _count: {
+        enrollments: user._count.Enrollment,
+        reviews: user._count.Review,
+      },
     })) as UserSearchResult[];
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -136,8 +140,7 @@ export default async function StudentsPage({
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <Users className="h-8 w-8 text-primary" />
+        <div className="flex items-center gap-3 px-2">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               Hitta studenter
