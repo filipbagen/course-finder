@@ -49,7 +49,7 @@ async function getUserProfile(
 
     if (!user) return null;
 
-    // Fetch enrollments separately
+    // Fetch enrollments with course data
     const enrollments = await prisma.enrollment.findMany({
       where: {
         userId: userId,
@@ -57,12 +57,25 @@ async function getUserProfile(
       orderBy: {
         semester: 'asc',
       },
-      include: {
-        course: true,
+    });
+
+    // Fetch courses for enrollments
+    const courseIds = enrollments.map((e) => e.courseId);
+    const courses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: courseIds,
+        },
       },
     });
 
-    // Fetch reviews separately
+    // Combine enrollments with course data
+    const enrollmentsWithCourses = enrollments.map((enrollment) => ({
+      ...enrollment,
+      course: courses.find((c) => c.id === enrollment.courseId)!,
+    }));
+
+    // Fetch reviews with course data
     const reviews = await prisma.review.findMany({
       where: {
         userId: userId,
@@ -71,24 +84,36 @@ async function getUserProfile(
         createdAt: 'desc',
       },
       take: 10,
-      include: {
-        course: {
-          select: {
-            id: true,
-            name: true,
-            code: true,
-          },
+    });
+
+    // Fetch courses for reviews
+    const reviewCourseIds = reviews.map((r) => r.courseId);
+    const reviewCourses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: reviewCourseIds,
         },
+      },
+      select: {
+        id: true,
+        name: true,
+        code: true,
       },
     });
 
+    // Combine reviews with course data
+    const reviewsWithCourses = reviews.map((review) => ({
+      ...review,
+      course: reviewCourses.find((c) => c.id === review.courseId)!,
+    }));
+
     // Calculate total credits
-    const totalCredits = enrollments.reduce((sum, enrollment) => {
+    const totalCredits = enrollmentsWithCourses.reduce((sum, enrollment) => {
       return sum + Number(enrollment.course.credits);
     }, 0);
 
     // Group courses by semester
-    const coursesBySemester = enrollments.reduce(
+    const coursesBySemester = enrollmentsWithCourses.reduce(
       (acc: Record<number, Course[]>, enrollment) => {
         const semester = enrollment.semester;
         if (!acc[semester]) {
@@ -104,8 +129,8 @@ async function getUserProfile(
     return {
       ...user,
       name: user.name!, // Assert name is non-null
-      enrollments: enrollments,
-      reviews: reviews,
+      enrollments: enrollmentsWithCourses,
+      reviews: reviewsWithCourses,
       totalCredits,
       coursesBySemester,
       _count: {
