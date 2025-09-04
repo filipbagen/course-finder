@@ -15,6 +15,7 @@ model Enrollment {
   userId   String @db.Uuid
   courseId String @db.Uuid
   User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId, semester])
   @@index([courseId])
@@ -30,6 +31,7 @@ model Review {
   userId    String   @db.Uuid
   courseId  String   @db.Uuid
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([courseId])
@@ -77,4 +79,6 @@ model course {
   examination              Json[]
   programInfo              Json[]
   semester                 BigInt[]
+  Enrollment               Enrollment[]
+  Review                   Review[]
 }

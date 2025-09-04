@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import { UserProfileComponent } from '@/components/students/UserProfileComponent';
 import { Separator } from '@/components/ui/separator';
 import { User } from 'lucide-react';
+import { course as Course, Enrollment, Review } from '@prisma/client';
 
 // Define an explicit type for the user profile
 interface UserProfileWithDetails {
@@ -21,9 +22,9 @@ interface UserProfileWithDetails {
     reviews: number;
   };
   totalCredits: number;
-  coursesBySemester: Record<number, any[]>;
-  enrollments: any[];
-  reviews: any[];
+  coursesBySemester: Record<number, Course[]>;
+  enrollments: (Enrollment & { course: Course })[];
+  reviews: (Review & { course: { id: string; name: string; code: string } })[];
 }
 
 async function getUserProfile(
@@ -39,8 +40,8 @@ async function getUserProfile(
       include: {
         _count: {
           select: {
-            enrollments: true,
-            reviews: true,
+            Enrollment: true,
+            Review: true,
           },
         },
       },
@@ -56,25 +57,9 @@ async function getUserProfile(
       orderBy: {
         semester: 'asc',
       },
-    });
-
-    // Fetch courses for the enrollments
-    const courseIds = enrollments.map((enrollment) => enrollment.courseId);
-    const courses = await prisma.course.findMany({
-      where: {
-        id: {
-          in: courseIds,
-        },
+      include: {
+        course: true,
       },
-    });
-
-    // Join enrollments with courses
-    const enrollmentsWithCourses = enrollments.map((enrollment) => {
-      const course = courses.find((c) => c.id === enrollment.courseId);
-      return {
-        ...enrollment,
-        course,
-      };
     });
 
     // Fetch reviews separately
@@ -86,40 +71,25 @@ async function getUserProfile(
         createdAt: 'desc',
       },
       take: 10,
-    });
-
-    // Fetch courses for the reviews
-    const reviewCourseIds = reviews.map((review) => review.courseId);
-    const reviewCourses = await prisma.course.findMany({
-      where: {
-        id: {
-          in: reviewCourseIds,
+      include: {
+        course: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        code: true,
-      },
-    });
-
-    // Join reviews with courses
-    const reviewsWithCourses = reviews.map((review) => {
-      const course = reviewCourses.find((c) => c.id === review.courseId);
-      return {
-        ...review,
-        course,
-      };
     });
 
     // Calculate total credits
-    const totalCredits = enrollments.reduce((sum: number, enrollment: any) => {
+    const totalCredits = enrollments.reduce((sum, enrollment) => {
       return sum + Number(enrollment.course.credits);
     }, 0);
 
     // Group courses by semester
     const coursesBySemester = enrollments.reduce(
-      (acc: Record<number, any[]>, enrollment: any) => {
+      (acc: Record<number, Course[]>, enrollment) => {
         const semester = enrollment.semester;
         if (!acc[semester]) {
           acc[semester] = [];
@@ -134,10 +104,14 @@ async function getUserProfile(
     return {
       ...user,
       name: user.name!, // Assert name is non-null
-      enrollments: enrollmentsWithCourses,
-      reviews: reviewsWithCourses,
+      enrollments: enrollments,
+      reviews: reviews,
       totalCredits,
       coursesBySemester,
+      _count: {
+        enrollments: user._count.Enrollment,
+        reviews: user._count.Review,
+      },
     } as UserProfileWithDetails;
   } catch (error) {
     console.error('Error fetching user profile:', error);

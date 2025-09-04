@@ -172,7 +172,7 @@ export function UserSearchComponent({
               <Card
                 key={user.id}
                 className="group cursor-pointer transition-all duration-200 hover:shadow-md"
-                onClick={() => router.push(`/schedule/${user.id}`)}
+                onClick={() => router.push(`/students/${user.id}`)}
               >
                 <CardContent className="p-4 flex items-center gap-4">
                   <Avatar className="h-12 w-12">
