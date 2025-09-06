@@ -152,8 +152,11 @@ export function useInfiniteCourses(
           err instanceof Error ? err.message : 'Failed to fetch courses';
         setError(errorMessage);
       } finally {
-        setLoading(false);
-        setIsLoadingMore(false);
+        // Small delay before setting loading to false to ensure UI transitions smoothly
+        setTimeout(() => {
+          setLoading(false);
+          setIsLoadingMore(false);
+        }, 300);
       }
     },
     [buildQueryParams]

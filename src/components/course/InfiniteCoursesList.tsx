@@ -60,10 +60,10 @@ const CourseCardSkeleton = () => (
 );
 
 const LoadingSpinner = () => (
-  <div className="flex justify-center items-center py-8">
+  <div className="flex justify-center items-center py-4">
     <div className="flex items-center gap-2 text-muted-foreground">
       <Loader2 className="h-5 w-5 animate-spin" />
-      <span>Laddar kurser...</span>
+      <span>Laddar fler kurser...</span>
     </div>
   </div>
 );
@@ -171,17 +171,33 @@ export function InfiniteCoursesList({
     return false;
   }, [search, filters]);
 
-  // Loading state for initial load
-  if (loading && courses.length === 0) {
+  // Also add a delay after loading to prevent flickering of the empty state
+  const [showEmptyState, setShowEmptyState] = useState(false);
+
+  // When loading changes, add a delay before showing empty state
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (!loading && !isLoadingMore && courses.length === 0 && !error) {
+      timer = setTimeout(() => {
+        setShowEmptyState(true);
+      }, 500); // Half-second delay
+    } else {
+      setShowEmptyState(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading, isLoadingMore, courses.length, error]);
+
+  // Always show skeletons if this is the initial load and we have no courses yet
+  if (
+    ((loading || isLoadingMore) && courses.length === 0) ||
+    (!loading && !isLoadingMore && courses.length === 0 && !showEmptyState)
+  ) {
     return (
       <div className="space-y-6">
         {/* Results summary with sorting and view controls */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              Visar {totalCount ?? '...'}
-              {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
-            </span>
+            <span>Laddar kurser...</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -267,24 +283,96 @@ export function InfiniteCoursesList({
     );
   }
 
-  // Empty state
-  if (!loading && courses.length === 0) {
+  // Empty state - only show when we've confirmed there are no courses after loading
+  if (
+    !loading &&
+    !isLoadingMore &&
+    courses.length === 0 &&
+    !error &&
+    showEmptyState
+  ) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Inga kurser hittades
-        </h3>
-        <p className="text-muted-foreground mb-4">
-          {hasActiveFilters
-            ? 'Inga kurser matchar dina filterkriterier.'
-            : 'Det verkar som att det inte finns några kurser att visa just nu.'}
-        </p>
-        {hasActiveFilters && (
-          <Button onClick={refresh} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Rensa filter
-          </Button>
-        )}
+      <div className="space-y-6">
+        {/* Results summary with sorting and view controls */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>
+              Visar 0{totalCoursesInDb !== null && ` av ${totalCoursesInDb}`}{' '}
+              kurser
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Mobile Filter Button - only show on mobile */}
+            {onMobileFilterOpen && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onMobileFilterOpen}
+                className="lg:hidden h-8 px-3 gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+                {hasActiveFilters && (
+                  <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                    •
+                  </span>
+                )}
+              </Button>
+            )}
+
+            {/* Sorting Controls */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-xs text-muted-foreground">
+                Sortera efter:
+              </span>
+              <Select
+                value={currentSortBy}
+                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
+              >
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="code">Kurskod</SelectItem>
+                  <SelectItem value="name">Namn</SelectItem>
+                  <SelectItem value="credits">Poäng</SelectItem>
+                  <SelectItem value="semester">Termin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setCurrentSortOrder(
+                    currentSortOrder === 'asc' ? 'desc' : 'asc'
+                  )
+                }
+                className="h-8 px-2 text-xs"
+              >
+                {currentSortOrder === 'asc' ? '↑' : '↓'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center py-8">
+          <h3 className="text-lg font-medium text-foreground mb-2">
+            Inga kurser hittades
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            {hasActiveFilters
+              ? 'Inga kurser matchar dina filterkriterier.'
+              : 'Det verkar som att det inte finns några kurser att visa just nu.'}
+          </p>
+          {hasActiveFilters && (
+            <Button onClick={refresh} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Rensa filter
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
