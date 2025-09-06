@@ -1,9 +1,10 @@
 'use client';
 
-import { BookOpen, Calendar, GraduationCap } from 'lucide-react';
+import { BookOpen, Calendar, GraduationCap, Plus } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface UserProfileData {
   id: string;
@@ -231,7 +232,7 @@ export function UserProfileComponent({
                   return (
                     <Card
                       key={`${semester}-${period}`}
-                      className="min-h-[200px] bg-background/50 backdrop-blur-sm border-2 border-dashed border-border hover:border-primary/50 transition-all duration-200"
+                      className="min-h-[200px] bg-background/50 backdrop-blur-sm border-2 border-dashed border-border"
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
@@ -293,7 +294,15 @@ export function UserProfileComponent({
                                 </div>
 
                                 {/* Credits */}
-                                <div className="flex items-center justify-end pt-2 border-t border-border">
+                                <div className="flex items-center justify-between pt-2 border-t border-border">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs"
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Lägg till
+                                  </Button>
                                   <Badge
                                     variant="secondary"
                                     className="text-xs"
