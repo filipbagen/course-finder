@@ -1,6 +1,14 @@
 'use client';
 
-import { BookOpen, Calendar, GraduationCap, Plus } from 'lucide-react';
+import {
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  Plus,
+  Star,
+  Award,
+  TrendingUp,
+} from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -124,64 +132,84 @@ export function UserProfileComponent({
       {/* User Profile Card */}
       <Card className="bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-2xl overflow-hidden">
         <CardContent className="p-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+          <div className="flex items-center gap-8">
             {/* Avatar */}
-            <div className="relative">
-              <Avatar className="h-32 w-32 ring-4 ring-white shadow-xl">
+            <div className="relative flex-shrink-0">
+              <Avatar className="h-24 w-24 ring-4 ring-white shadow-xl">
                 <AvatarImage
                   src={userProfile.image || undefined}
                   alt={userProfile.name || 'Anonymous User'}
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-3xl font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-semibold">
                   {getInitials(userProfile.name)}
                 </AvatarFallback>
               </Avatar>
             </div>
 
-            {/* User Info */}
-            <div className="flex-1 text-center md:text-left space-y-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {userProfile.name || 'Anonymous User'}
-                </h2>
-                {userProfile.program && (
-                  <Badge
-                    variant="secondary"
-                    className={`${getColorFromProgram(
-                      userProfile.program
-                    )} text-sm px-4 py-2 rounded-full font-medium`}
-                  >
-                    <GraduationCap className="h-4 w-4 mr-2" />
-                    {userProfile.program}
-                  </Badge>
-                )}
-              </div>
-
-              {/* Stats Grid - Centered */}
-              <div className="flex justify-center pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <BookOpen className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {userProfile._count.enrollments}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      Kurser
-                    </div>
+            {/* User Info and Stats in one row */}
+            <div className="flex-1">
+              <div className="flex items-center gap-8">
+                {/* Name and Program */}
+                <div className="flex-shrink-0">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                      {userProfile.name || 'Anonymous User'}
+                    </h2>
+                    {userProfile.program && (
+                      <Badge
+                        variant="secondary"
+                        className={`${getColorFromProgram(
+                          userProfile.program
+                        )} text-sm px-3 py-1 rounded-full font-medium shadow-sm`}
+                      >
+                        <GraduationCap className="h-3 w-3 mr-1" />
+                        {userProfile.program}
+                      </Badge>
+                    )}
                   </div>
+                </div>
 
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <GraduationCap className="h-5 w-5 text-purple-600" />
+                {/* Statistics Row */}
+                <div className="flex-1">
+                  <div className="flex gap-3">
+                    {/* Courses */}
+                    <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-3 text-center border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-center mb-1">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                        {userProfile._count.enrollments}
+                      </div>
+                      <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                        Kurser
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {userProfile.program || 'Ej angivet'}
+
+                    {/* Total Credits */}
+                    <div className="flex-1 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-3 text-center border border-green-200 dark:border-green-800">
+                      <div className="flex items-center justify-center mb-1">
+                        <Award className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div className="text-lg font-bold text-green-900 dark:text-green-100">
+                        {userProfile.totalCredits}
+                      </div>
+                      <div className="text-xs text-green-700 dark:text-green-300 font-medium">
+                        HP Totalt
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      Huvudområde
+
+                    {/* Reviews */}
+                    <div className="flex-1 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-3 text-center border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center justify-center mb-1">
+                        <Star className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                        {userProfile._count.reviews}
+                      </div>
+                      <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">
+                        Recensioner
+                      </div>
                     </div>
                   </div>
                 </div>

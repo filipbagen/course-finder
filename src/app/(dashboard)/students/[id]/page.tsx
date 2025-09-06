@@ -173,13 +173,9 @@ export default async function UserProfilePage({ params }: PageProps) {
       <div className="space-y-2 px-2">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {userProfile.name}
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">Studentprofil</h1>
             <p className="text-muted-foreground">
-              {currentUser.id === id
-                ? 'Din profil och akademiska framsteg'
-                : 'Studentprofil och akademiska framsteg'}
+              Utforska andra studenters profiler och deras akademiska framsteg
             </p>
           </div>
         </div>
