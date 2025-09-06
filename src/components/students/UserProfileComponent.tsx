@@ -98,9 +98,10 @@ export function UserProfileComponent({
         // Handle multi-period courses: if course.period includes multiple periods,
         // show the course in all those periods
         if (course.period && Array.isArray(course.period)) {
-          course.period.forEach((coursePeriod: number) => {
-            if (coursePeriod === 1 || coursePeriod === 2) {
-              const periodKey = `period${coursePeriod}`;
+          course.period.forEach((coursePeriod: bigint) => {
+            const period = Number(coursePeriod);
+            if (period === 1 || period === 2) {
+              const periodKey = `period${period}`;
               if (schedule[semesterKey] && schedule[semesterKey][periodKey]) {
                 schedule[semesterKey][periodKey].push(course);
               }

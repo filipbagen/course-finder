@@ -170,9 +170,8 @@ export default async function UserProfilePage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="space-y-2">
+      <div className="space-y-2 px-2">
         <div className="flex items-center gap-3">
-          <User className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               {userProfile.name}
