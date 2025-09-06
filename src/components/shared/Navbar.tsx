@@ -146,12 +146,12 @@ export async function Navbar() {
                     <DropdownMenuSeparator className="bg-white/30" />
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
-                        href="/profile"
+                        href={user ? `/students/${user.id}` : '/login'}
                         className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Profile
+                          Min profil
                         </span>
                       </Link>
                     </DropdownMenuItem>
@@ -272,12 +272,12 @@ export async function Navbar() {
                     <DropdownMenuSeparator className="bg-white/30" />
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
-                        href="/profile"
+                        href={user ? `/students/${user.id}` : '/login'}
                         className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Profile
+                          Min profil
                         </span>
                       </Link>
                     </DropdownMenuItem>
