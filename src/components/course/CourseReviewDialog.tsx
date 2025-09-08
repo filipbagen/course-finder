@@ -60,7 +60,10 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         )}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto"
+        aria-describedby="course-review-description"
+      >
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
           {/* Use a div instead of DialogDescription to avoid nesting issues */}
@@ -82,6 +85,16 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                 </span>
               </div>
             )}
+          </div>
+
+          {/* Hidden description for screen readers */}
+          <div id="course-review-description" className="sr-only">
+            Recensioner för {course.name}, kurskod {course.code}.
+            {reviewsData.count > 0
+              ? `Genomsnittligt betyg ${reviewsData.averageRating.toFixed(
+                  1
+                )} av 5 baserat på ${reviewsData.count} recensioner.`
+              : 'Inga recensioner ännu.'}
           </div>
         </DialogHeader>
 
