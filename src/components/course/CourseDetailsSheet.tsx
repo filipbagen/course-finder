@@ -129,41 +129,6 @@ const JsonContent = ({ data }: { data: any }) => {
 const CourseDetails = ({ course }: { course: Course }) => {
   const { enrolledCourses, loading } = useUserEnrollments();
 
-  useEffect(() => {
-    if (loading || !course || !enrolledCourses) return;
-
-    console.log('--- Conflict Check Debug ---');
-    console.log('Viewed Course:', {
-      code: course.code,
-      exclusions: course.exclusions,
-    });
-    console.log(
-      'Enrolled Courses:',
-      enrolledCourses.map((c) => ({ code: c.code, exclusions: c.exclusions }))
-    );
-
-    const conflicting = enrolledCourses.find((enrolled) => {
-      const viewedExcludesEnrolled = course.exclusions?.includes(enrolled.code);
-      const enrolledExcludesViewed = enrolled.exclusions?.includes(course.code);
-
-      console.log(`Checking enrolled course: ${enrolled.code}`);
-      console.log(
-        `  - Does viewed (${course.code}) exclude enrolled (${enrolled.code})? -> ${viewedExcludesEnrolled}`
-      );
-      console.log(
-        `  - Does enrolled (${enrolled.code}) exclude viewed (${course.code})? -> ${enrolledExcludesViewed}`
-      );
-
-      return viewedExcludesEnrolled || enrolledExcludesViewed;
-    });
-
-    if (conflicting) {
-      console.log('✅ Conflict FOUND with:', conflicting.code);
-    } else {
-      console.log('❌ No conflict found.');
-    }
-  }, [loading, course, enrolledCourses]);
-
   const conflictingCourse =
     !loading &&
     enrolledCourses &&
