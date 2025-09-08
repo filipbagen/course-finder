@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -9,6 +9,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
+import { useCourseDetails } from '@/hooks/useCourseDetails';
 import { Course } from '@/types/types';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -400,7 +401,70 @@ const CourseDetails = ({ course }: { course: Course }) => {
 };
 
 export const CourseDetailsSheet = () => {
-  const { isOpen, onClose, course } = useCourseDetailsSheet();
+  const {
+    isOpen,
+    onClose,
+    course,
+    courseId,
+    loading: storeLoading,
+    error: storeError,
+    setLoading,
+    setError,
+    setCourse,
+  } = useCourseDetailsSheet();
+
+  const {
+    fetchCourseDetails,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useCourseDetails();
+
+  const loading = storeLoading || fetchLoading;
+  const error = storeError || fetchError;
+
+  useEffect(() => {
+    // If the sheet is open and we have a courseId, fetch detailed course info
+    if (isOpen && courseId && course) {
+      const loadDetailedCourseInfo = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+          // We can look for a detailed field like learningOutcomes to check if we need to fetch details
+          if (!course.learningOutcomes || !course.examination) {
+            console.log('Fetching detailed course info for:', courseId);
+            const detailedCourse = await fetchCourseDetails(courseId);
+            if (detailedCourse) {
+              setCourse(detailedCourse);
+            }
+          } else {
+            // We already have the detailed course information
+            console.log('Already have detailed course info');
+            setLoading(false);
+          }
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : 'Failed to load course details';
+          setError(errorMessage);
+          console.error('Error loading course details:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadDetailedCourseInfo();
+    }
+  }, [
+    isOpen,
+    courseId,
+    course,
+    fetchCourseDetails,
+    setLoading,
+    setError,
+    setCourse,
+  ]);
 
   if (!course) {
     return null;
@@ -430,7 +494,69 @@ export const CourseDetailsSheet = () => {
         </div>
 
         <div className="px-6 pb-12">
-          <CourseDetails course={course} />
+          {loading ? (
+            // Show skeleton loading state
+            <div className="space-y-6">
+              <div className="rounded-2xl bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 p-5 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse">
+                <div className="grid grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i}>
+                      <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                      <div className="h-5 w-24 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl bg-neutral-50/50 dark:bg-slate-800/30 p-4 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    </div>
+                    <div className="pl-11 space-y-2">
+                      <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
+
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-gray-300 dark:bg-gray-600 rounded"></div>
+
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl bg-neutral-50/50 dark:bg-slate-800/30 p-4 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    </div>
+                    <div className="pl-11 space-y-2">
+                      <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : error ? (
+            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300">
+              <p>Det gick inte att ladda kursdetaljerna. Försök igen senare.</p>
+              <p className="text-xs mt-2">{error}</p>
+            </div>
+          ) : (
+            <CourseDetails course={course} />
+          )}
         </div>
       </SheetContent>
     </Sheet>

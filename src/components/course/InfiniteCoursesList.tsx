@@ -174,13 +174,13 @@ export function InfiniteCoursesList({
   // Also add a delay after loading to prevent flickering of the empty state
   const [showEmptyState, setShowEmptyState] = useState(false);
 
-  // When loading changes, add a delay before showing empty state
+  // When loading changes, add a longer delay before showing empty state
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (!loading && !isLoadingMore && courses.length === 0 && !error) {
       timer = setTimeout(() => {
         setShowEmptyState(true);
-      }, 500); // Half-second delay
+      }, 2000); // Increase to 2 seconds to give more time for data to load
     } else {
       setShowEmptyState(false);
     }

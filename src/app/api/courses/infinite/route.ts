@@ -164,7 +164,7 @@ export async function GET(
     }
     orderByArray.push({ id: 'asc' }); // Final tie-breaker
 
-    // Build query options to fetch all courses matching the base filters
+    // Build query options to fetch only essential course data for the list
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
@@ -176,70 +176,35 @@ export async function GET(
         campus: true,
         mainFieldOfStudy: true,
         advanced: true,
-        courseType: true,
-        examiner: true,
-        exclusions: true,
-        scheduledHours: true,
-        selfStudyHours: true,
         period: true,
         block: true,
-        learningOutcomes: true,
-        content: true,
-        teachingMethods: true,
-        prerequisites: true,
-        recommendedPrerequisites: true,
-        offeredFor: true,
-        examination: true,
-        programInfo: true,
         semester: true,
+        courseType: true,
+        offeredFor: true,
+        // Only include these minimal fields needed for the course cards
+        // Detailed data will be loaded on demand:
+        // - learningOutcomes
+        // - content
+        // - teachingMethods
+        // - prerequisites
+        // - recommendedPrerequisites
+        // - examination
+        // - examiner
+        // - exclusions
+        // - scheduledHours
+        // - selfStudyHours
+        // - programInfo
       },
     };
 
     const allCourses = await prisma.course.findMany(queryOptions);
 
-    // Transform data and apply post-query examination filtering if needed
+    // Transform data
     let filteredCourses = transformCourses(allCourses) as unknown as Course[];
 
-    if (
-      includeExaminationCodes.length > 0 ||
-      excludeExaminationCodes.length > 0
-    ) {
-      filteredCourses = filteredCourses.filter((course) => {
-        if (!course.examination || course.examination.length === 0) {
-          return includeExaminationCodes.length === 0; // Keep if no include filters, otherwise false
-        }
-
-        const courseExamCodes = course.examination.map((exam: any) =>
-          exam?.code ? String(exam.code).toUpperCase() : ''
-        );
-
-        // Exclusion logic: course must not have any of the excluded exam codes
-        if (excludeExaminationCodes.length > 0) {
-          const hasExcludedExam = courseExamCodes.some((courseCode) =>
-            excludeExaminationCodes.some((excludedCode) =>
-              courseCode.startsWith(excludedCode.toUpperCase())
-            )
-          );
-          if (hasExcludedExam) {
-            return false; // Exclude this course
-          }
-        }
-
-        // Inclusion logic: course must have at least one of the included exam codes
-        if (includeExaminationCodes.length > 0) {
-          const hasIncludedExam = courseExamCodes.some((courseCode) =>
-            includeExaminationCodes.some((includedCode) =>
-              courseCode.startsWith(includedCode.toUpperCase())
-            )
-          );
-          if (!hasIncludedExam) {
-            return false; // Exclude this course as it's missing a required exam
-          }
-        }
-
-        return true; // Pass if it meets all conditions
-      });
-    }
+    // Skip examination filtering in the initial course list for performance
+    // If examination filters are needed, implement a separate filtering API
+    // or include minimal examination data in the initial query
 
     // Now, apply pagination to the fully filtered and sorted list
     const totalCount = filteredCourses.length;
