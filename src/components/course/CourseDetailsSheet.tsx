@@ -49,19 +49,27 @@ const DetailSection = ({
   </div>
 );
 
-const JsonContent = ({ data, title }: { data: any; title: string }) => {
-  if (!data) return <p>Information saknas.</p>;
+const JsonContent = ({ data }: { data: any }) => {
+  if (!data || typeof data !== 'object') return null;
 
-  // Assuming data is an object with a 'description' property
-  if (typeof data === 'object' && data !== null && 'description' in data) {
-    return <p>{(data as { description: string }).description}</p>;
-  }
+  const { paragraph, list_items } = data;
+  const hasParagraph =
+    paragraph && typeof paragraph === 'string' && paragraph.trim().length > 0;
+  const hasList = Array.isArray(list_items) && list_items.length > 0;
 
-  // Fallback for other structures
+  if (!hasParagraph && !hasList) return null;
+
   return (
-    <pre className="whitespace-pre-wrap font-sans text-sm">
-      {JSON.stringify(data, null, 2)}
-    </pre>
+    <>
+      {hasParagraph && <p>{paragraph}</p>}
+      {hasList && (
+        <ul className="list-disc ml-6">
+          {list_items.map((item, idx) => (
+            <li key={idx}>{item}</li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 };
 
@@ -162,40 +170,80 @@ const CourseDetails = ({ course }: { course: Course }) => {
         </div>
       </DetailSection>
 
-      <DetailSection icon={<Target className="h-5 w-5" />} title="Lärandemål">
-        <JsonContent data={course.learningOutcomes} title="Lärandemål" />
-      </DetailSection>
+      {/* Lärandemål */}
+      {(() => {
+        const content = <JsonContent data={course.learningOutcomes} />;
+        return (
+          content && (
+            <DetailSection
+              icon={<Target className="h-5 w-5" />}
+              title="Lärandemål"
+            >
+              {content}
+            </DetailSection>
+          )
+        );
+      })()}
 
-      <DetailSection
-        icon={<BookOpen className="h-5 w-5" />}
-        title="Kursinnehåll"
-      >
-        <JsonContent data={course.content} title="Kursinnehåll" />
-      </DetailSection>
+      {/* Kursinnehåll */}
+      {(() => {
+        const content = <JsonContent data={course.content} />;
+        return (
+          content && (
+            <DetailSection
+              icon={<BookOpen className="h-5 w-5" />}
+              title="Kursinnehåll"
+            >
+              {content}
+            </DetailSection>
+          )
+        );
+      })()}
 
-      <DetailSection
-        icon={<Lightbulb className="h-5 w-5" />}
-        title="Undervisningsformer"
-      >
-        <JsonContent
-          data={course.teachingMethods}
-          title="Undervisningsformer"
-        />
-      </DetailSection>
+      {/* Undervisningsformer */}
+      {(() => {
+        const content = <JsonContent data={course.teachingMethods} />;
+        return (
+          content && (
+            <DetailSection
+              icon={<Lightbulb className="h-5 w-5" />}
+              title="Undervisningsformer"
+            >
+              {content}
+            </DetailSection>
+          )
+        );
+      })()}
 
-      <DetailSection icon={<Book className="h-5 w-5" />} title="Förkunskaper">
-        <JsonContent data={course.prerequisites} title="Förkunskaper" />
-      </DetailSection>
+      {/* Förkunskaper */}
+      {(() => {
+        const content = <JsonContent data={course.prerequisites} />;
+        return (
+          content && (
+            <DetailSection
+              icon={<Book className="h-5 w-5" />}
+              title="Förkunskaper"
+            >
+              {content}
+            </DetailSection>
+          )
+        );
+      })()}
 
-      <DetailSection
-        icon={<BarChart className="h-5 w-5" />}
-        title="Rekommenderade förkunskaper"
-      >
-        <JsonContent
-          data={course.recommendedPrerequisites}
-          title="Rekommenderade förkunskaper"
-        />
-      </DetailSection>
+      {/* Rekommenderade förkunskaper */}
+      {(() => {
+        const content = <JsonContent data={course.recommendedPrerequisites} />;
+        return (
+          content && (
+            <DetailSection
+              icon={<BarChart className="h-5 w-5" />}
+              title="Rekommenderade förkunskaper"
+            >
+              {content}
+            </DetailSection>
+          )
+        );
+      })()}
 
       <DetailSection
         icon={<ClipboardList className="h-5 w-5" />}
@@ -231,12 +279,12 @@ const CourseDetails = ({ course }: { course: Course }) => {
 
       <DetailSection icon={<FileText className="h-5 w-5" />} title="Kursplan">
         <a
-          href={`https://www.kth.se/student/kurser/kurs/${course.code}`}
+          href={`https://studieinfo.liu.se/kurs/${course.code}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-primary hover:underline"
         >
-          Se kursplan på KTH.se <ExternalLink className="h-4 w-4" />
+          Se kursplan på LiU.se <ExternalLink className="h-4 w-4" />
         </a>
       </DetailSection>
     </div>
@@ -252,14 +300,12 @@ export const CourseDetailsSheet = () => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[600px] sm:w-[700px] overflow-y-auto max-h-[100vh]">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-2xl font-bold">{course.name}</SheetTitle>
           <SheetDescription>{course.code}</SheetDescription>
         </SheetHeader>
-        <div className="overflow-y-auto max-h-[calc(100vh-5rem)]">
-          <CourseDetails course={course} />
-        </div>
+        <CourseDetails course={course} />
       </SheetContent>
     </Sheet>
   );
