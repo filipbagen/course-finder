@@ -7,12 +7,19 @@ import { Review } from '@/types/types';
 
 type ReviewFormProps = {
   courseId: string;
-  addReview: (review: Review) => void;
+  onReviewSubmitted: () => void;
+  existingRating?: number;
+  existingComment?: string;
 };
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+const ReviewForm: React.FC<ReviewFormProps> = ({
+  courseId,
+  onReviewSubmitted,
+  existingRating = 0,
+  existingComment = '',
+}) => {
+  const [rating, setRating] = useState(existingRating);
+  const [comment, setComment] = useState(existingComment);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,10 +29,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (rating === 0) {
+      setError('Please select a rating');
+      return;
+    }
+
     setLoading(true);
+    setError('');
 
     try {
-      const response = await fetch('/api/review', {
+      const response = await fetch('/api/courses/review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,27 +51,33 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to post review');
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to post review');
       }
 
-      const newReview: Review = await response.json();
+      // Notify parent component that a review was submitted
+      onReviewSubmitted();
 
-      // Update the parent state
-      addReview(newReview);
-
-      setRating(0);
-      setComment('');
-      setError('');
-    } catch (error) {
-      setError('Failed to post review.');
+      // Only reset form if this is a new review (not editing)
+      if (!existingRating && !existingComment) {
+        setRating(0);
+        setComment('');
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to post review');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 p-4 bg-muted/30 rounded-lg"
+    >
+      <h3 className="text-lg font-medium">Skriv en recension</h3>
       <div className="flex items-center gap-2">
         <label>Betyg</label>
         <ReactStars
@@ -65,7 +85,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
           value={rating}
           onChange={handleRatingChange}
           size={24}
-          isHalf={true}
+          isHalf={false}
           activeColor="#ffd700"
         />
       </div>
@@ -74,10 +94,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ courseId, addReview }) => {
           value={comment}
           placeholder="Skriv vad du tycker om kursen..."
           onChange={(e) => setComment(e.target.value)}
+          className="min-h-[100px]"
         />
       </div>
-      <SubmitReviewButton loading={loading} />
-      {error && <p className="text-red-500">{error}</p>}
+      <div className="flex justify-end">
+        <SubmitReviewButton loading={loading} />
+      </div>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
     </form>
   );
 };

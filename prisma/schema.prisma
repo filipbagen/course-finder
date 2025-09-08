@@ -14,29 +14,12 @@ model Enrollment {
   semester Int
   userId   String @db.Uuid
   courseId String @db.Uuid
-  User     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   course   @relation("EnrollmentToCourse", fields: [courseId], references: [id], onDelete: Cascade)
+  course   course @relation("EnrollmentToCourse", fields: [courseId], references: [id], onDelete: Cascade)
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId, semester])
   @@index([courseId])
   @@index([userId])
-}
-
-model Review {
-  id        String   @id @db.Uuid
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  userId    String   @db.Uuid
-  courseId  String   @db.Uuid
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    course   @relation("ReviewToCourse", fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([courseId])
-  @@index([createdAt])
-  @@index([rating])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -51,13 +34,13 @@ model User {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime
   Enrollment  Enrollment[]
-  Review      Review[]
+  review      review[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model course {
-  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code                     String   @unique
+  id                       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                     String       @unique
   name                     String
   credits                  BigInt
   campus                   String
@@ -80,5 +63,22 @@ model course {
   programInfo              Json[]
   semester                 BigInt[]
   Enrollment               Enrollment[] @relation("EnrollmentToCourse")
-  Review                   Review[]     @relation("ReviewToCourse")
+  review                   review[]
+}
+
+model review {
+  id        String   @id(map: "Review_pkey") @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    String   @db.Uuid
+  courseId  String   @db.Uuid
+  course    course   @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "Review_courseId_fkey")
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
+
+  @@unique([userId, courseId], map: "Review_userId_courseId_key")
+  @@index([courseId], map: "Review_courseId_idx")
+  @@index([createdAt], map: "Review_createdAt_idx")
+  @@index([rating], map: "Review_rating_idx")
 }

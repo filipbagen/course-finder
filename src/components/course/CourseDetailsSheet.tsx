@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useUserEnrollments } from '@/hooks/useUserEnrollments';
+import CourseReviews from './CourseReviews';
 import {
   BookOpen,
   Target,
@@ -510,7 +511,17 @@ export const CourseDetailsSheet = () => {
 
         {loading && <p>Laddar kursinformation...</p>}
         {error && <p className="text-red-500">{error}</p>}
-        {!loading && !error && course && <CourseDetails course={course} />}
+        {!loading && !error && course && (
+          <div className="space-y-8">
+            <CourseDetails course={course} />
+
+            {/* Add the reviews section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Recensioner</h2>
+              <CourseReviews courseId={course.id} />
+            </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
