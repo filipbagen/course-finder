@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/shared/theme-provider';
 import { MaxWidthWrapper } from '@/components/shared/MaxWidthWrapper';
 import { Navbar } from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
+import { SheetProvider } from '@/components/providers/sheet-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
@@ -67,6 +68,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <MaxWidthWrapper className="min-h-screen flex flex-col">
+            <SheetProvider />
             <Navbar />
             <main className="flex-1 pt-6">{children}</main>
             <Footer />

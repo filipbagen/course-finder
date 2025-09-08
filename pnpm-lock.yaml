@@ -196,7 +196,7 @@ dependencies:
     specifier: ^9.0.1
     version: 9.0.1
   vaul:
-    specifier: ^0.9.1
+    specifier: ^0.9.9
     version: 0.9.9(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0)
   zod:
     specifier: ^3.25.42

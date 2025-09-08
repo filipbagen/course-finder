@@ -20,6 +20,7 @@ import {
   CourseWithEnrollment,
   isCourseWithEnrollment,
 } from '@/types/types';
+import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { useEnrollment } from '@/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -50,10 +51,26 @@ const CourseCard = ({
   onRemove,
   className,
 }: CourseCardProps) => {
+  const { onOpen } = useCourseDetailsSheet();
   const { addToEnrollment, deleteEnrollment } = useEnrollment(
     course.name,
     onRemove
   );
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent click from triggering when interacting with buttons or links
+    if (
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('a')
+    ) {
+      return;
+    }
+
+    // Open sheet only for default and landing variants
+    if (variant === 'default' || variant === 'landing') {
+      onOpen(course as Course);
+    }
+  };
 
   // Format display text
   const semesterText =
@@ -135,6 +152,7 @@ const CourseCard = ({
 
   return (
     <Card
+      onClick={handleCardClick}
       className={cn(
         'transition-all duration-200 group',
         {
