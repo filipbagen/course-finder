@@ -504,7 +504,6 @@ export const CourseDetailsSheet = () => {
               <SheetTitle className="text-2xl font-bold">
                 {course.name}
               </SheetTitle>
-              <SheetDescription>{course.campus}</SheetDescription>
             </>
           )}
         </SheetHeader>
