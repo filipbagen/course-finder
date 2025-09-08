@@ -12,8 +12,9 @@ export async function GET(
     // Authentication is optional for viewing reviews
     await getOptionalUser();
 
-    // Access params safely
-    const { courseId } = context.params;
+    // Access params safely - need to await in Next.js 14+
+    const params = context.params;
+    const courseId = params.courseId;
 
     // Verify the course exists
     const course = await prisma.course.findUnique({

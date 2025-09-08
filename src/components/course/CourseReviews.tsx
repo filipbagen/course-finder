@@ -17,17 +17,38 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   courseId,
   onReviewDataUpdate,
 }) => {
-  const { user } = useAuth();
-  const { enrolledCourses } = useUserEnrollments();
+  const { user, loading: authLoading } = useAuth();
+  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userReview, setUserReview] = useState<Review | null>(null);
 
+  // For debugging
+  useEffect(() => {
+    console.log('Auth state:', {
+      user: user,
+      userExists: !!user,
+      userIsNull: user === null,
+      authLoading,
+    });
+    console.log('Enrollments state:', {
+      enrolledCourses,
+      courseIsEnrolled: enrolledCourses?.some(
+        (course) => course.id === courseId
+      ),
+      enrollmentsLoading,
+      courseId,
+    });
+  }, [user, authLoading, enrolledCourses, enrollmentsLoading, courseId]);
+
   // Check if the user is enrolled in this course
   const isUserEnrolled =
-    enrolledCourses?.some((course) => course.id === courseId) || false;
+    !enrollmentsLoading &&
+    enrolledCourses &&
+    Array.isArray(enrolledCourses) &&
+    enrolledCourses.some((course) => course.id === courseId);
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -81,9 +102,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   };
 
   const getReviewSubmitInfo = () => {
-    if (!user) {
+    // Don't show any messages while authentication or enrollments are loading
+    if (authLoading || enrollmentsLoading) {
+      return null;
+    }
+
+    // Check if the user is null and authentication is not loading anymore
+    if (user === null && !authLoading) {
       return 'Du måste vara inloggad för att recensera kursen.';
-    } else if (!isUserEnrolled) {
+    } else if (user && !isUserEnrolled && !enrollmentsLoading) {
       return 'Du måste lägga till kursen i ditt schema för att kunna recensera den.';
     } else {
       return null;
@@ -141,19 +168,22 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           </div>
 
           {/* Review form for enrolled users */}
-          {user && isUserEnrolled && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="text-lg font-semibold mb-4">
-                {userReview ? 'Redigera din recension' : 'Skriv en recension'}
-              </h3>
-              <ReviewForm
-                courseId={courseId}
-                onReviewSubmitted={handleReviewSubmitted}
-                existingRating={userReview?.rating}
-                existingComment={userReview?.comment}
-              />
-            </div>
-          )}
+          {user !== null &&
+            isUserEnrolled &&
+            !authLoading &&
+            !enrollmentsLoading && (
+              <div className="pt-6 border-t border-border">
+                <h3 className="text-lg font-semibold mb-4">
+                  {userReview ? 'Redigera din recension' : 'Skriv en recension'}
+                </h3>
+                <ReviewForm
+                  courseId={courseId}
+                  onReviewSubmitted={handleReviewSubmitted}
+                  existingRating={userReview?.rating}
+                  existingComment={userReview?.comment}
+                />
+              </div>
+            )}
 
           {/* Message for users who can't review */}
           {reviewSubmitInfo && (

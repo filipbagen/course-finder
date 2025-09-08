@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 import CourseReviews from './CourseReviews';
+import StarRatings from 'react-star-ratings';
 import {
   BookOpen,
   Target,
@@ -129,7 +130,16 @@ const JsonContent = ({ data }: { data: any }) => {
   );
 };
 
-const CourseDetails = ({ course }: { course: Course }) => {
+const CourseDetails = ({
+  course,
+  reviewsData,
+}: {
+  course: Course;
+  reviewsData?: {
+    averageRating: number;
+    count: number;
+  };
+}) => {
   const { enrolledCourses, loading } = useUserEnrollments();
 
   const conflictingCourse =
@@ -177,6 +187,30 @@ const CourseDetails = ({ course }: { course: Course }) => {
               {course.courseType || 'Information saknas'}
             </p>
           </div>
+
+          {/* Rating information if available */}
+          {reviewsData && reviewsData.count > 0 && (
+            <div className="col-span-2 mt-2 pt-3 border-t border-neutral-200 dark:border-slate-700/50">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                Betyg från studenter
+              </p>
+              <div className="flex items-center gap-2">
+                <StarRatings
+                  rating={reviewsData.averageRating}
+                  starRatedColor="#ffd700"
+                  numberOfStars={5}
+                  starDimension="20px"
+                  starSpacing="2px"
+                  name="details-rating"
+                  halfStarEnabled={true}
+                />
+                <span className="font-medium ml-2">
+                  {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
+                  {reviewsData.count === 1 ? 'recension' : 'recensioner'})
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -511,6 +545,29 @@ export const CourseDetailsSheet = () => {
     setReviewsData({ averageRating, count });
   };
 
+  // This effect fetches the review data when the course changes
+  useEffect(() => {
+    if (course?.id) {
+      const fetchReviewData = async () => {
+        try {
+          const response = await fetch(`/api/courses/${course.id}/reviews`);
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            setReviewsData({
+              averageRating: result.data.averageRating,
+              count: result.data.reviews.length,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching course reviews:', error);
+        }
+      };
+
+      fetchReviewData();
+    }
+  }, [course?.id]);
+
   return (
     <Sheet open={isOpen} onOpenChange={handleClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
@@ -520,25 +577,35 @@ export const CourseDetailsSheet = () => {
               <SheetTitle className="text-2xl font-bold">
                 {course.name}
               </SheetTitle>
-              {!loading && reviewsData.count > 0 && (
+              {!loading && (
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={
-                          i < Math.round(reviewsData.averageRating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
-                    {reviewsData.count === 1 ? 'recension' : 'recensioner'})
-                  </span>
+                  {reviewsData.count > 0 ? (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <StarRatings
+                          rating={reviewsData.averageRating}
+                          starRatedColor="#ffd700"
+                          numberOfStars={5}
+                          starDimension="18px"
+                          starSpacing="2px"
+                          name="sheet-header-rating"
+                          halfStarEnabled={true}
+                        />
+                        <span className="text-sm text-muted-foreground ml-2">
+                          {reviewsData.averageRating.toFixed(1)} (
+                          {reviewsData.count}{' '}
+                          {reviewsData.count === 1
+                            ? 'recension'
+                            : 'recensioner'}
+                          )
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Inga recensioner ännu
+                    </span>
+                  )}
                 </div>
               )}
             </>
@@ -557,7 +624,7 @@ export const CourseDetailsSheet = () => {
             </TabsList>
 
             <TabsContent value="info" className="space-y-8">
-              <CourseDetails course={course} />
+              <CourseDetails course={course} reviewsData={reviewsData} />
             </TabsContent>
 
             <TabsContent value="reviews">
