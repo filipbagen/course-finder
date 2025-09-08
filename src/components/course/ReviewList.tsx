@@ -1,8 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Star, MessageSquare, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
+import StarRatings from 'react-star-ratings';
 
 interface ReviewUser {
   id: string;
@@ -107,18 +108,16 @@ const ReviewList: React.FC<ReviewListProps> = ({
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={
-                        i < review.rating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }
-                    />
-                  ))}
+                <div className="flex items-center">
+                  <StarRatings
+                    rating={review.rating}
+                    starRatedColor="#ffd700"
+                    numberOfStars={5}
+                    starDimension="16px"
+                    starSpacing="1px"
+                    name={`rating-${review.id}`}
+                    halfStarEnabled={true}
+                  />
                 </div>
 
                 {/* Comment */}

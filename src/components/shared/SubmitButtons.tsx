@@ -25,9 +25,10 @@ export function SubmitButton() {
 
 type SubmitReviewButtonProps = {
   loading: boolean;
+  text?: string;
 };
 
-export function SubmitReviewButton({ loading }: SubmitReviewButtonProps) {
+export function SubmitReviewButton({ loading, text = 'Skicka recension' }: SubmitReviewButtonProps) {
   return (
     <>
       {loading ? (
@@ -37,7 +38,7 @@ export function SubmitReviewButton({ loading }: SubmitReviewButtonProps) {
         </Button>
       ) : (
         <Button type="submit" className="w-fit">
-          Skicka recension
+          {text}
         </Button>
       )}
     </>

@@ -12,7 +12,8 @@ export async function GET(
     // Authentication is optional for viewing reviews
     await getOptionalUser();
 
-    const courseId = context.params.courseId;
+    // Access params safely
+    const { courseId } = context.params;
 
     // Verify the course exists
     const course = await prisma.course.findUnique({

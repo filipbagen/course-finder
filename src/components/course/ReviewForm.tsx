@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
-import ReactStars from 'react-rating-stars-component';
+import StarRatings from 'react-star-ratings';
 import { SubmitReviewButton } from '@/components/shared/SubmitButtons';
 import { Review } from '@/types/types';
 
@@ -77,16 +77,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 p-4 bg-muted/30 rounded-lg"
     >
-      <h3 className="text-lg font-medium">Skriv en recension</h3>
+      <h3 className="text-lg font-medium">
+        {existingRating ? 'Redigera din recension' : 'Skriv en recension'}
+      </h3>
       <div className="flex items-center gap-2">
         <label>Betyg</label>
-        <ReactStars
-          count={5}
-          value={rating}
-          onChange={handleRatingChange}
-          size={24}
-          isHalf={false}
-          activeColor="#ffd700"
+        <StarRatings
+          rating={rating}
+          starRatedColor="#ffd700"
+          changeRating={handleRatingChange}
+          numberOfStars={5}
+          name="rating"
+          starDimension="24px"
+          starSpacing="2px"
+          starHoverColor="#ffd700"
+          starEmptyColor="#e4e5e9"
+          halfStarEnabled={true}
         />
       </div>
       <div className="flex gap-2">
@@ -98,7 +104,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         />
       </div>
       <div className="flex justify-end">
-        <SubmitReviewButton loading={loading} />
+        <SubmitReviewButton loading={loading} text={existingRating ? 'Uppdatera recension' : 'Skicka recension'} />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
     </form>

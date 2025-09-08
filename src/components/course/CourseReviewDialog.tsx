@@ -8,10 +8,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Star, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { Course, CourseWithEnrollment } from '@/types/types';
 import CourseReviews from './CourseReviews';
 import { useAuth } from '@/components/providers/AuthProvider';
+import StarRatings from 'react-star-ratings';
 
 interface CourseReviewDialogProps {
   course: Course | CourseWithEnrollment;
@@ -40,7 +41,14 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2">
-            <Star className="h-4 w-4" />
+            <StarRatings
+              rating={reviewsData.count > 0 ? reviewsData.averageRating : 0}
+              starRatedColor="#ffd700"
+              numberOfStars={1}
+              starDimension="16px"
+              starSpacing="0px"
+              name="trigger-rating"
+            />
             <span>
               {reviewsData.count > 0
                 ? `${reviewsData.averageRating.toFixed(1)} (${
@@ -55,17 +63,26 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
       <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
-          <DialogDescription className="flex items-center gap-2">
+          {/* Use a div instead of DialogDescription to avoid nesting issues */}
+          <div className="text-sm text-muted-foreground mt-1.5 flex items-center gap-2">
             <span className="font-mono text-xs">{course.code}</span>
             {reviewsData.count > 0 && (
               <div className="flex items-center gap-1 ml-2">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs">
+                <StarRatings
+                  rating={reviewsData.averageRating}
+                  starRatedColor="#ffd700"
+                  numberOfStars={5}
+                  starDimension="14px"
+                  starSpacing="1px"
+                  name="dialog-rating"
+                  halfStarEnabled={true}
+                />
+                <span className="text-xs ml-1">
                   {reviewsData.averageRating.toFixed(1)} ({reviewsData.count})
                 </span>
               </div>
             )}
-          </DialogDescription>
+          </div>
         </DialogHeader>
 
         <CourseReviews

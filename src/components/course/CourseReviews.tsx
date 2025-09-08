@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
-import { Star, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 import { Review } from '@/types/types';
+import StarRatings from 'react-star-ratings';
 
 interface CourseReviewsProps {
   courseId: string;
@@ -107,8 +108,16 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium text-lg">
+                <StarRatings
+                  rating={averageRating}
+                  starRatedColor="#ffd700"
+                  numberOfStars={5}
+                  starDimension="20px"
+                  starSpacing="2px"
+                  name="average-rating"
+                  halfStarEnabled={true}
+                />
+                <span className="font-medium ml-2">
                   {averageRating.toFixed(1)}
                 </span>
               </div>
