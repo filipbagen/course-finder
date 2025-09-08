@@ -11,6 +11,8 @@ import {
 import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { Course } from '@/types/types';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import {
   BookOpen,
   Target,
@@ -27,23 +29,33 @@ import {
   BarChart,
   FileText,
   ExternalLink,
+  X,
 } from 'lucide-react';
 
 const DetailSection = ({
   icon,
   title,
   children,
+  className,
 }: {
   icon: React.ReactNode;
   title: string;
   children: React.ReactNode;
+  className?: string;
 }) => (
-  <div className="py-4 border-b border-border">
-    <div className="flex items-center gap-3 mb-2">
-      {icon}
-      <h3 className="text-lg font-semibold">{title}</h3>
+  <div
+    className={cn(
+      'rounded-xl bg-neutral-50 dark:bg-slate-800/50 p-4 transition-all hover:bg-neutral-100 dark:hover:bg-slate-800/80 border border-neutral-200 dark:border-slate-700/50',
+      className
+    )}
+  >
+    <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <h3 className="text-base font-semibold">{title}</h3>
     </div>
-    <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+    <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground pl-11">
       {children}
     </div>
   </div>
@@ -75,218 +87,263 @@ const JsonContent = ({ data }: { data: any }) => {
 
 const CourseDetails = ({ course }: { course: Course }) => {
   return (
-    <div className="divide-y divide-border">
-      <DetailSection icon={<Info className="h-5 w-5" />} title="Grunddata">
+    <div className="space-y-6">
+      {/* Course Header Info */}
+      <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-5 border border-neutral-200 dark:border-slate-700/50">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="font-medium text-foreground">Kurskod</p>
-            <p>{course.code}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Kurskod
+            </p>
+            <p className="font-medium text-lg">{course.code}</p>
           </div>
           <div>
-            <p className="font-medium text-foreground">Poäng</p>
-            <p>{Number(course.credits)} hp</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Poäng
+            </p>
+            <p className="font-medium text-lg">{Number(course.credits)} hp</p>
           </div>
           <div>
-            <p className="font-medium text-foreground">Nivå</p>
-            <p>{course.advanced ? 'Avancerad' : 'Grundnivå'}</p>
-          </div>
-          <div>
-            <p className="font-medium text-foreground">Kurstyp</p>
-            <p>{course.courseType || 'Information saknas'}</p>
-          </div>
-        </div>
-      </DetailSection>
-
-      <DetailSection
-        icon={<GraduationCap className="h-5 w-5" />}
-        title="Huvudområden"
-      >
-        <div className="flex flex-wrap gap-2">
-          {course.mainFieldOfStudy && course.mainFieldOfStudy.length > 0 ? (
-            course.mainFieldOfStudy.map((field) => (
-              <Badge key={field} variant="secondary">
-                {field}
-              </Badge>
-            ))
-          ) : (
-            <p>Inget huvudområde specificerat.</p>
-          )}
-        </div>
-      </DetailSection>
-
-      <DetailSection icon={<Building className="h-5 w-5" />} title="Campus">
-        <p>{course.campus || 'Information saknas'}</p>
-      </DetailSection>
-
-      <DetailSection icon={<User className="h-5 w-5" />} title="Examinator">
-        <p>{course.examiner || 'Information saknas'}</p>
-      </DetailSection>
-
-      <DetailSection icon={<Calendar className="h-5 w-5" />} title="Schema">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-medium text-foreground">Termin</p>
-            <p>
-              {course.semester?.length > 0
-                ? `T${course.semester.join(', ')}`
-                : 'T?'}
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Nivå
+            </p>
+            <p className="font-medium">
+              {course.advanced ? 'Avancerad' : 'Grundnivå'}
             </p>
           </div>
           <div>
-            <p className="font-medium text-foreground">Period</p>
-            <p>
-              {course.period?.length > 0 ? `P${course.period.join('+')}` : 'P?'}
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Kurstyp
             </p>
-          </div>
-          <div>
-            <p className="font-medium text-foreground">Block</p>
-            <p>
-              {course.block?.length > 0
-                ? `Block ${course.block.join(', ')}`
-                : 'Block ?'}
+            <p className="font-medium">
+              {course.courseType || 'Information saknas'}
             </p>
           </div>
         </div>
-      </DetailSection>
+      </div>
 
-      <DetailSection icon={<Clock className="h-5 w-5" />} title="Tidsåtgång">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-medium text-foreground">Schemalagd tid</p>
-            <p>
-              {course.scheduledHours
-                ? `${Number(course.scheduledHours)} timmar`
-                : 'Okänt'}
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Course Main Fields */}
+        <DetailSection
+          icon={<GraduationCap className="h-4 w-4" />}
+          title="Huvudområden"
+        >
+          <div className="flex flex-wrap gap-2">
+            {course.mainFieldOfStudy && course.mainFieldOfStudy.length > 0 ? (
+              course.mainFieldOfStudy.map((field) => (
+                <Badge key={field} variant="secondary" className="rounded-full">
+                  {field}
+                </Badge>
+              ))
+            ) : (
+              <p>Inget huvudområde specificerat.</p>
+            )}
           </div>
-          <div>
-            <p className="font-medium text-foreground">Självstudier</p>
-            <p>
-              {course.selfStudyHours
-                ? `${Number(course.selfStudyHours)} timmar`
-                : 'Okänt'}
-            </p>
+        </DetailSection>
+
+        {/* Campus Info */}
+        <DetailSection icon={<Building className="h-4 w-4" />} title="Campus">
+          <p>{course.campus || 'Information saknas'}</p>
+        </DetailSection>
+
+        {/* Examiner Info */}
+        <DetailSection icon={<User className="h-4 w-4" />} title="Examinator">
+          <p>{course.examiner || 'Information saknas'}</p>
+        </DetailSection>
+
+        {/* Time Info */}
+        <DetailSection icon={<Clock className="h-4 w-4" />} title="Tidsåtgång">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Schemalagd tid</p>
+              <p className="font-medium">
+                {course.scheduledHours
+                  ? `${Number(course.scheduledHours)} timmar`
+                  : 'Okänt'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Självstudier</p>
+              <p className="font-medium">
+                {course.selfStudyHours
+                  ? `${Number(course.selfStudyHours)} timmar`
+                  : 'Okänt'}
+              </p>
+            </div>
           </div>
-        </div>
-      </DetailSection>
+        </DetailSection>
 
-      {/* Lärandemål */}
-      {(() => {
-        const content = <JsonContent data={course.learningOutcomes} />;
-        return (
-          content && (
-            <DetailSection
-              icon={<Target className="h-5 w-5" />}
-              title="Lärandemål"
-            >
-              {content}
-            </DetailSection>
-          )
-        );
-      })()}
+        {/* Schedule Info */}
+        <DetailSection
+          icon={<Calendar className="h-4 w-4" />}
+          title="Schema"
+          className="md:col-span-2"
+        >
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Termin</p>
+              <p className="font-medium">
+                {course.semester?.length > 0
+                  ? `T${course.semester.join(', ')}`
+                  : 'T?'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Period</p>
+              <p className="font-medium">
+                {course.period?.length > 0
+                  ? `P${course.period.join('+')}`
+                  : 'P?'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Block</p>
+              <p className="font-medium">
+                {course.block?.length > 0
+                  ? `Block ${course.block.join(', ')}`
+                  : 'Block ?'}
+              </p>
+            </div>
+          </div>
+        </DetailSection>
+      </div>
 
-      {/* Kursinnehåll */}
-      {(() => {
-        const content = <JsonContent data={course.content} />;
-        return (
-          content && (
-            <DetailSection
-              icon={<BookOpen className="h-5 w-5" />}
-              title="Kursinnehåll"
-            >
-              {content}
-            </DetailSection>
-          )
-        );
-      })()}
+      <Separator className="bg-neutral-200 dark:bg-slate-700" />
 
-      {/* Undervisningsformer */}
-      {(() => {
-        const content = <JsonContent data={course.teachingMethods} />;
-        return (
-          content && (
-            <DetailSection
-              icon={<Lightbulb className="h-5 w-5" />}
-              title="Undervisningsformer"
-            >
-              {content}
-            </DetailSection>
-          )
-        );
-      })()}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold">Detaljer</h2>
 
-      {/* Förkunskaper */}
-      {(() => {
-        const content = <JsonContent data={course.prerequisites} />;
-        return (
-          content && (
-            <DetailSection
-              icon={<Book className="h-5 w-5" />}
-              title="Förkunskaper"
-            >
-              {content}
-            </DetailSection>
-          )
-        );
-      })()}
+        {/* Lärandemål */}
+        {(() => {
+          const content = <JsonContent data={course.learningOutcomes} />;
+          return (
+            content && (
+              <DetailSection
+                icon={<Target className="h-4 w-4" />}
+                title="Lärandemål"
+              >
+                {content}
+              </DetailSection>
+            )
+          );
+        })()}
 
-      {/* Rekommenderade förkunskaper */}
-      {(() => {
-        const content = <JsonContent data={course.recommendedPrerequisites} />;
-        return (
-          content && (
-            <DetailSection
-              icon={<BarChart className="h-5 w-5" />}
-              title="Rekommenderade förkunskaper"
-            >
-              {content}
-            </DetailSection>
-          )
-        );
-      })()}
+        {/* Kursinnehåll */}
+        {(() => {
+          const content = <JsonContent data={course.content} />;
+          return (
+            content && (
+              <DetailSection
+                icon={<BookOpen className="h-4 w-4" />}
+                title="Kursinnehåll"
+              >
+                {content}
+              </DetailSection>
+            )
+          );
+        })()}
 
-      <DetailSection
-        icon={<ClipboardList className="h-5 w-5" />}
-        title="Examination"
-      >
-        {Array.isArray(course.examination) && course.examination.length > 0 ? (
-          <ul className="space-y-2">
-            {course.examination.map((exam, index) => (
-              <li key={index} className="text-sm">
-                <strong>{exam.name}</strong> ({exam.credits} hp) - Betygsskala:{' '}
-                {exam.gradingScale}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Information saknas.</p>
-        )}
-      </DetailSection>
+        {/* Undervisningsformer */}
+        {(() => {
+          const content = <JsonContent data={course.teachingMethods} />;
+          return (
+            content && (
+              <DetailSection
+                icon={<Lightbulb className="h-4 w-4" />}
+                title="Undervisningsformer"
+              >
+                {content}
+              </DetailSection>
+            )
+          );
+        })()}
 
-      <DetailSection icon={<Users className="h-5 w-5" />} title="Ges för">
-        <div className="flex flex-wrap gap-2">
-          {course.offeredFor && course.offeredFor.length > 0 ? (
-            course.offeredFor.map((program) => (
-              <Badge key={program} variant="outline">
-                {program}
-              </Badge>
-            ))
+        {/* Förkunskaper */}
+        {(() => {
+          const content = <JsonContent data={course.prerequisites} />;
+          return (
+            content && (
+              <DetailSection
+                icon={<Book className="h-4 w-4" />}
+                title="Förkunskaper"
+              >
+                {content}
+              </DetailSection>
+            )
+          );
+        })()}
+
+        {/* Rekommenderade förkunskaper */}
+        {(() => {
+          const content = (
+            <JsonContent data={course.recommendedPrerequisites} />
+          );
+          return (
+            content && (
+              <DetailSection
+                icon={<BarChart className="h-4 w-4" />}
+                title="Rekommenderade förkunskaper"
+              >
+                {content}
+              </DetailSection>
+            )
+          );
+        })()}
+
+        {/* Examination */}
+        <DetailSection
+          icon={<ClipboardList className="h-4 w-4" />}
+          title="Examination"
+        >
+          {Array.isArray(course.examination) &&
+          course.examination.length > 0 ? (
+            <ul className="space-y-2">
+              {course.examination.map((exam, index) => (
+                <li key={index} className="text-sm p-2 bg-white/5 rounded-lg">
+                  <div className="font-medium">{exam.name}</div>
+                  <div className="flex justify-between text-xs mt-1">
+                    <span>{exam.credits} hp</span>
+                    <span>Betygsskala: {exam.gradingScale}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
             <p>Information saknas.</p>
           )}
-        </div>
-      </DetailSection>
+        </DetailSection>
 
-      <DetailSection icon={<FileText className="h-5 w-5" />} title="Kursplan">
-        <a
-          href={`https://studieinfo.liu.se/kurs/${course.code}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-primary hover:underline"
-        >
-          Se kursplan på LiU.se <ExternalLink className="h-4 w-4" />
-        </a>
-      </DetailSection>
+        {/* Ges för */}
+        <DetailSection icon={<Users className="h-4 w-4" />} title="Ges för">
+          <div className="flex flex-wrap gap-2">
+            {course.offeredFor && course.offeredFor.length > 0 ? (
+              course.offeredFor.map((program) => (
+                <Badge
+                  key={program}
+                  variant="outline"
+                  className="rounded-full bg-white/5"
+                >
+                  {program}
+                </Badge>
+              ))
+            ) : (
+              <p>Information saknas.</p>
+            )}
+          </div>
+        </DetailSection>
+
+        {/* Kursplan Link */}
+        <DetailSection icon={<FileText className="h-4 w-4" />} title="Kursplan">
+          <a
+            href={`https://studieinfo.liu.se/kurs/${course.code}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-primary hover:underline bg-primary/5 p-2 rounded-lg transition-colors hover:bg-primary/10"
+          >
+            Se kursplan på LiU.se <ExternalLink className="h-4 w-4" />
+          </a>
+        </DetailSection>
+      </div>
     </div>
   );
 };
@@ -300,12 +357,30 @@ export const CourseDetailsSheet = () => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[600px] sm:w-[700px] overflow-y-auto max-h-[100vh]">
-        <SheetHeader className="mb-6">
-          <SheetTitle className="text-2xl font-bold">{course.name}</SheetTitle>
-          <SheetDescription>{course.code}</SheetDescription>
-        </SheetHeader>
-        <CourseDetails course={course} />
+      <SheetContent
+        side="right"
+        className="!w-[95%] !max-w-[840px] sm:!max-w-[840px] sm:!w-[840px] overflow-y-auto max-h-[100vh] p-0 border-l border-neutral-200 bg-white dark:bg-slate-900 shadow-xl"
+      >
+        <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-neutral-200 dark:border-slate-800 mb-6 p-6 pt-8">
+          <button
+            onClick={() => onClose()}
+            className="absolute right-6 top-6 rounded-full p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <SheetHeader className="text-left">
+            <SheetTitle className="text-2xl font-bold text-foreground">
+              {course.name}
+            </SheetTitle>
+            <SheetDescription className="text-muted-foreground">
+              {course.code}
+            </SheetDescription>
+          </SheetHeader>
+        </div>
+
+        <div className="px-6 pb-12">
+          <CourseDetails course={course} />
+        </div>
       </SheetContent>
     </Sheet>
   );
