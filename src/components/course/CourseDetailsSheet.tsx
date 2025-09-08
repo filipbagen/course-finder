@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -14,12 +14,12 @@ import { Course } from '@/types/types';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 import {
   BookOpen,
   Target,
   Users,
   NotebookPen,
-  Info,
   Calendar,
   Clock,
   User,
@@ -30,8 +30,31 @@ import {
   BarChart,
   FileText,
   ExternalLink,
-  X,
+  AlertTriangle,
 } from 'lucide-react';
+
+const ConflictWarning = ({
+  conflictingCourse,
+}: {
+  conflictingCourse: Course;
+}) => (
+  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
+    <div className="flex items-start gap-3">
+      <AlertTriangle className="h-5 w-5 text-amber-500" />
+      <div>
+        <h4 className="font-semibold">Kurskonflikt</h4>
+        <p className="text-sm">
+          Du kan inte lägga till den här kursen eftersom den krockar med en kurs
+          du redan har i din planering:{' '}
+          <strong>
+            {conflictingCourse.name} ({conflictingCourse.code})
+          </strong>
+          .
+        </p>
+      </div>
+    </div>
+  </div>
+);
 
 const DetailSection = ({
   icon,
@@ -68,8 +91,6 @@ const JsonContent = ({ data }: { data: any }) => {
     try {
       parsedData = JSON.parse(data);
     } catch (e) {
-      // If parsing fails, it might be a plain string.
-      // Treat it as a paragraph.
       parsedData = { paragraph: data, list_items: [] };
     }
   }
@@ -106,8 +127,57 @@ const JsonContent = ({ data }: { data: any }) => {
 };
 
 const CourseDetails = ({ course }: { course: Course }) => {
+  const { enrolledCourses, loading } = useUserEnrollments();
+
+  useEffect(() => {
+    if (loading || !course || !enrolledCourses) return;
+
+    console.log('--- Conflict Check Debug ---');
+    console.log('Viewed Course:', {
+      code: course.code,
+      exclusions: course.exclusions,
+    });
+    console.log(
+      'Enrolled Courses:',
+      enrolledCourses.map((c) => ({ code: c.code, exclusions: c.exclusions }))
+    );
+
+    const conflicting = enrolledCourses.find((enrolled) => {
+      const viewedExcludesEnrolled = course.exclusions?.includes(enrolled.code);
+      const enrolledExcludesViewed = enrolled.exclusions?.includes(course.code);
+
+      console.log(`Checking enrolled course: ${enrolled.code}`);
+      console.log(
+        `  - Does viewed (${course.code}) exclude enrolled (${enrolled.code})? -> ${viewedExcludesEnrolled}`
+      );
+      console.log(
+        `  - Does enrolled (${enrolled.code}) exclude viewed (${course.code})? -> ${enrolledExcludesViewed}`
+      );
+
+      return viewedExcludesEnrolled || enrolledExcludesViewed;
+    });
+
+    if (conflicting) {
+      console.log('✅ Conflict FOUND with:', conflicting.code);
+    } else {
+      console.log('❌ No conflict found.');
+    }
+  }, [loading, course, enrolledCourses]);
+
+  const conflictingCourse =
+    !loading &&
+    enrolledCourses &&
+    enrolledCourses.find(
+      (enrolled) =>
+        (course.exclusions && course.exclusions.includes(enrolled.code)) ||
+        (enrolled.exclusions && enrolled.exclusions.includes(course.code))
+    );
+
   return (
     <div className="space-y-6">
+      {conflictingCourse && (
+        <ConflictWarning conflictingCourse={conflictingCourse} />
+      )}
       {/* Course Header Info */}
       <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 p-5 border border-neutral-200 dark:border-slate-700/50">
         <div className="grid grid-cols-2 gap-4">
@@ -423,32 +493,22 @@ export const CourseDetailsSheet = () => {
   const error = storeError || fetchError;
 
   useEffect(() => {
-    // If the sheet is open and we have a courseId, fetch detailed course info
     if (isOpen && courseId && course) {
       const loadDetailedCourseInfo = async () => {
         setLoading(true);
         setError(null);
 
         try {
-          // We can look for a detailed field like learningOutcomes to check if we need to fetch details
           if (!course.learningOutcomes || !course.examination) {
             console.log('Fetching detailed course info for:', courseId);
             const detailedCourse = await fetchCourseDetails(courseId);
             if (detailedCourse) {
               setCourse(detailedCourse);
             }
-          } else {
-            // We already have the detailed course information
-            console.log('Already have detailed course info');
-            setLoading(false);
           }
         } catch (err) {
-          const errorMessage =
-            err instanceof Error
-              ? err.message
-              : 'Failed to load course details';
-          setError(errorMessage);
-          console.error('Error loading course details:', err);
+          setError('Kunde inte ladda kursinformation.');
+          console.error(err);
         } finally {
           setLoading(false);
         }
@@ -461,103 +521,32 @@ export const CourseDetailsSheet = () => {
     courseId,
     course,
     fetchCourseDetails,
+    setCourse,
     setLoading,
     setError,
-    setCourse,
   ]);
 
-  if (!course) {
-    return null;
-  }
+  const handleClose = () => {
+    onClose();
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent
-        side="right"
-        className="!w-[95%] !max-w-[610px] sm:!max-w-[610px] sm:!w-[610px] overflow-y-auto max-h-[100vh] p-0 border-l border-neutral-200 bg-white dark:bg-slate-900 shadow-xl"
-      >
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-slate-800 mb-6 p-6 pt-8">
-          <button
-            onClick={() => onClose()}
-            className="absolute right-6 top-6 rounded-full p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <SheetHeader className="text-left">
-            <SheetTitle className="text-2xl font-bold text-foreground">
-              {course.name}
-            </SheetTitle>
-            <SheetDescription className="text-muted-foreground">
-              {course.code}
-            </SheetDescription>
-          </SheetHeader>
-        </div>
-
-        <div className="px-6 pb-12">
-          {loading ? (
-            // Show skeleton loading state
-            <div className="space-y-6">
-              <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/5 dark:to-primary/10 p-5 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse">
-                <div className="grid grid-cols-2 gap-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i}>
-                      <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                      <div className="h-5 w-24 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl bg-neutral-50/50 dark:bg-slate-800/30 p-4 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                    </div>
-                    <div className="pl-11 space-y-2">
-                      <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
-
-              <div className="space-y-4">
-                <div className="h-6 w-40 bg-gray-300 dark:bg-gray-600 rounded"></div>
-
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl bg-neutral-50/50 dark:bg-slate-800/30 p-4 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                      <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                    </div>
-                    <div className="pl-11 space-y-2">
-                      <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : error ? (
-            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300">
-              <p>Det gick inte att ladda kursdetaljerna. Försök igen senare.</p>
-              <p className="text-xs mt-2">{error}</p>
-            </div>
-          ) : (
-            <CourseDetails course={course} />
+    <Sheet open={isOpen} onOpenChange={handleClose}>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader className="mb-6">
+          {course && (
+            <>
+              <SheetTitle className="text-2xl font-bold">
+                {course.name}
+              </SheetTitle>
+              <SheetDescription>{course.campus}</SheetDescription>
+            </>
           )}
-        </div>
+        </SheetHeader>
+
+        {loading && <p>Laddar kursinformation...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {!loading && !error && course && <CourseDetails course={course} />}
       </SheetContent>
     </Sheet>
   );

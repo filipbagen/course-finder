@@ -15,6 +15,7 @@ import {
 import { scheduleReducer, initialScheduleState } from './scheduleReducer';
 import { ScheduleService } from '../services/scheduleService';
 import { toast } from 'sonner';
+import { useEnrolledCoursesStore } from '@/hooks/useEnrolledCoursesStore';
 
 const ScheduleContext = createContext<ScheduleContextType | null>(null);
 
@@ -42,12 +43,15 @@ export function ScheduleProvider({
     ...initialScheduleState,
     readonly,
   });
+  const { setEnrolledCourses, setLoading, setError } =
+    useEnrolledCoursesStore();
 
   /**
    * Load schedule data from API
    */
   const loadScheduleData = useCallback(async () => {
     dispatch({ type: ScheduleActions.FETCH_SCHEDULE_START });
+    setLoading(true);
 
     try {
       const scheduleData = await ScheduleService.fetchSchedule(userId);
@@ -55,6 +59,16 @@ export function ScheduleProvider({
         type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
         payload: scheduleData,
       });
+      const allCourses = [
+        ...scheduleData.semester7.period1,
+        ...scheduleData.semester7.period2,
+        ...scheduleData.semester8.period1,
+        ...scheduleData.semester8.period2,
+        ...scheduleData.semester9.period1,
+        ...scheduleData.semester9.period2,
+      ];
+      setEnrolledCourses(allCourses);
+      setLoading(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load schedule';
@@ -62,9 +76,11 @@ export function ScheduleProvider({
         type: ScheduleActions.FETCH_SCHEDULE_ERROR,
         payload: errorMessage,
       });
+      setError(errorMessage);
+      setLoading(false);
       toast.error(errorMessage);
     }
-  }, [userId]);
+  }, [userId, setEnrolledCourses, setLoading, setError]);
 
   /**
    * Handle course movement with optimistic updates
