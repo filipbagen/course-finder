@@ -24,11 +24,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (rating < 1 || rating > 5) {
+    // Check if the rating is a valid number with up to one decimal place (0.5 increments)
+    const ratingValue = parseFloat(rating.toString());
+    if (
+      isNaN(ratingValue) ||
+      ratingValue < 1 ||
+      ratingValue > 5 ||
+      (ratingValue * 10) % 5 !== 0 // Ensures only 0.5 increments
+    ) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Rating must be between 1 and 5',
+          error: 'Rating must be between 1 and 5 with 0.5 increments',
         },
         { status: 400 }
       );

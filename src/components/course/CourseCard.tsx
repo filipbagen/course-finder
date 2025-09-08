@@ -26,7 +26,7 @@ import { useEnrollment } from '@/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import CourseReviewDialog from './CourseReviewDialog';
-import StarRatings from 'react-star-ratings';
+import { StarRating } from './StarRating';
 
 interface CourseCardProps {
   course: Course | CourseWithEnrollment;
@@ -302,15 +302,16 @@ const CourseCard = ({
           </div>
           <div className="flex items-center gap-3">
             {courseRating.count > 0 && (
-              <div className="flex items-center gap-1">
-                <StarRatings
-                  rating={courseRating.averageRating}
-                  starRatedColor="#ffd700"
-                  numberOfStars={1}
-                  starDimension="12px"
-                  starSpacing="0px"
-                  name={`card-rating-${course.id}`}
-                  halfStarEnabled={true}
+              <div className="flex items-center gap-1 flex-row">
+                <StarRating
+                  initialValue={courseRating.averageRating}
+                  size={12}
+                  allowFraction
+                  readonly
+                  fillColor="#ffd700"
+                  emptyColor="#e4e5e9"
+                  className="flex-shrink-0"
+                  iconsCount={1}
                 />
                 <span className="text-xs font-medium">
                   {courseRating.averageRating.toFixed(1)}

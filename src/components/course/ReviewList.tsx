@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import StarRatings from 'react-star-ratings';
+import { StarRating } from './StarRating';
 
 interface ReviewUser {
   id: string;
@@ -108,16 +108,19 @@ const ReviewList: React.FC<ReviewListProps> = ({
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center">
-                  <StarRatings
-                    rating={review.rating}
-                    starRatedColor="#ffd700"
-                    numberOfStars={5}
-                    starDimension="16px"
-                    starSpacing="1px"
-                    name={`rating-${review.id}`}
-                    halfStarEnabled={true}
+                <div className="flex items-center gap-1 flex-row">
+                  <StarRating
+                    initialValue={review.rating}
+                    size={16}
+                    allowFraction
+                    readonly
+                    fillColor="#ffd700"
+                    emptyColor="#e4e5e9"
+                    className="flex-shrink-0"
                   />
+                  <span className="text-sm text-muted-foreground ml-1">
+                    {review.rating.toFixed(1)}
+                  </span>
                 </div>
 
                 {/* Comment */}

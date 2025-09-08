@@ -1,0 +1,17 @@
+.ratingContainer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: auto !important;
+}
+
+.ratingContainer > div {
+  display: flex !important;
+  flex-direction: row !important;
+  width: auto !important;
+}
+
+.ratingContainer svg {
+  display: inline-block !important;
+  margin-right: 2px !important;
+}

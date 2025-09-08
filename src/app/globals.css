@@ -667,8 +667,6 @@
   animation: skewScroll 20s linear infinite;
 }
 
-
-
 @layer base {
   * {
     @apply border-border;

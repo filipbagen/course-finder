@@ -8,11 +8,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Star } from 'lucide-react';
 import { Course, CourseWithEnrollment } from '@/types/types';
 import CourseReviews from './CourseReviews';
-import { useAuth } from '@/components/providers/AuthProvider';
-import StarRatings from 'react-star-ratings';
 
 interface CourseReviewDialogProps {
   course: Course | CourseWithEnrollment;
@@ -41,14 +39,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2">
-            <StarRatings
-              rating={reviewsData.count > 0 ? reviewsData.averageRating : 0}
-              starRatedColor="#ffd700"
-              numberOfStars={1}
-              starDimension="16px"
-              starSpacing="0px"
-              name="trigger-rating"
-            />
+            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
             <span>
               {reviewsData.count > 0
                 ? `${reviewsData.averageRating.toFixed(1)} (${
@@ -69,22 +60,6 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           {/* Use a div instead of DialogDescription to avoid nesting issues */}
           <div className="text-sm text-muted-foreground mt-1.5 flex items-center gap-2">
             <span className="font-mono text-xs">{course.code}</span>
-            {reviewsData.count > 0 && (
-              <div className="flex items-center gap-1 ml-2">
-                <StarRatings
-                  rating={reviewsData.averageRating}
-                  starRatedColor="#ffd700"
-                  numberOfStars={5}
-                  starDimension="14px"
-                  starSpacing="1px"
-                  name="dialog-rating"
-                  halfStarEnabled={true}
-                />
-                <span className="text-xs ml-1">
-                  {reviewsData.averageRating.toFixed(1)} ({reviewsData.count})
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Hidden description for screen readers */}

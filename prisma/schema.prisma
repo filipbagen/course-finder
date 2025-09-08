@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -68,7 +67,7 @@ model course {
 
 model review {
   id        String   @id(map: "Review_pkey") @db.Uuid
-  rating    Int
+  rating    Float    @db.Real
   comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime

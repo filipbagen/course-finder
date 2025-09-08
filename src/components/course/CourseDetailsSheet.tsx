@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 import CourseReviews from './CourseReviews';
-import StarRatings from 'react-star-ratings';
+import { StarRating } from './StarRating';
 import {
   BookOpen,
   Target,
@@ -194,15 +194,15 @@ const CourseDetails = ({
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
                 Betyg från studenter
               </p>
-              <div className="flex items-center gap-2">
-                <StarRatings
-                  rating={reviewsData.averageRating}
-                  starRatedColor="#ffd700"
-                  numberOfStars={5}
-                  starDimension="20px"
-                  starSpacing="2px"
-                  name="details-rating"
-                  halfStarEnabled={true}
+              <div className="flex items-center gap-2 flex-row">
+                <StarRating
+                  initialValue={reviewsData.averageRating}
+                  size={20}
+                  allowFraction
+                  readonly
+                  fillColor="#ffd700"
+                  emptyColor="#e4e5e9"
+                  className="flex-shrink-0"
                 />
                 <span className="font-medium ml-2">
                   {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
@@ -581,15 +581,15 @@ export const CourseDetailsSheet = () => {
                 <div className="flex items-center gap-2 mt-2">
                   {reviewsData.count > 0 ? (
                     <>
-                      <div className="flex items-center gap-1">
-                        <StarRatings
-                          rating={reviewsData.averageRating}
-                          starRatedColor="#ffd700"
-                          numberOfStars={5}
-                          starDimension="18px"
-                          starSpacing="2px"
-                          name="sheet-header-rating"
-                          halfStarEnabled={true}
+                      <div className="flex items-center gap-1 flex-row">
+                        <StarRating
+                          initialValue={reviewsData.averageRating}
+                          size={18}
+                          allowFraction
+                          readonly
+                          fillColor="#ffd700"
+                          emptyColor="#e4e5e9"
+                          className="flex-shrink-0"
                         />
                         <span className="text-sm text-muted-foreground ml-2">
                           {reviewsData.averageRating.toFixed(1)} (

@@ -6,7 +6,7 @@ import { MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 import { Review } from '@/types/types';
-import StarRatings from 'react-star-ratings';
+import { StarRating } from './StarRating';
 
 interface CourseReviewsProps {
   courseId: string;
@@ -134,15 +134,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           {/* Review stats */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <StarRatings
-                  rating={averageRating}
-                  starRatedColor="#ffd700"
-                  numberOfStars={5}
-                  starDimension="20px"
-                  starSpacing="2px"
-                  name="average-rating"
-                  halfStarEnabled={true}
+              <div className="flex items-center gap-1 flex-row">
+                <StarRating
+                  initialValue={averageRating}
+                  size={20}
+                  allowFraction
+                  readonly
+                  fillColor="#ffd700"
+                  emptyColor="#e4e5e9"
+                  className="flex-shrink-0"
                 />
                 <span className="font-medium ml-2">
                   {averageRating.toFixed(1)}

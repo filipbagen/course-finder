@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
-import StarRatings from 'react-star-ratings';
+import { useState, useEffect } from 'react';
 import { SubmitReviewButton } from '@/components/shared/SubmitButtons';
 import { Review } from '@/types/types';
+import { StarRating } from './StarRating';
 
 type ReviewFormProps = {
   courseId: string;
@@ -18,12 +18,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   existingRating = 0,
   existingComment = '',
 }) => {
-  const [rating, setRating] = useState(existingRating);
+  const [rating, setRating] = useState<number>(existingRating);
   const [comment, setComment] = useState(existingComment);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    console.log('Current rating state:', rating);
+  }, [rating]);
+
   const handleRatingChange = (newRating: number) => {
+    console.log(`handleRatingChange called with rating: ${newRating}`);
     setRating(newRating);
   };
 
@@ -31,9 +36,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     e.preventDefault();
 
     if (rating === 0) {
-      setError('Please select a rating');
+      setError('Vänligen välj ett betyg');
       return;
     }
+
+    console.log('Submitting review with rating:', rating);
 
     setLoading(true);
     setError('');
@@ -71,30 +78,34 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       setLoading(false);
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 p-4 bg-muted/30 rounded-lg"
     >
-      <h3 className="text-lg font-medium">
-        {existingRating ? 'Redigera din recension' : 'Skriv en recension'}
-      </h3>
-      <div className="flex items-center gap-2">
-        <label>Betyg</label>
-        <StarRatings
-          rating={rating}
-          starRatedColor="#ffd700"
-          changeRating={handleRatingChange}
-          numberOfStars={5}
-          name="rating"
-          starDimension="24px"
-          starSpacing="2px"
-          starHoverColor="#ffd700"
-          starEmptyColor="#e4e5e9"
-          halfStarEnabled={true}
-        />
+      <div className="flex flex-col gap-1 mb-2">
+        <div className="flex items-center gap-2 flex-row">
+          <label>Betyg</label>
+          <StarRating
+            onClick={handleRatingChange}
+            initialValue={rating}
+            size={30}
+            allowFraction
+            fillColor="#ffd700"
+            emptyColor="#e4e5e9"
+            className="flex-shrink-0"
+          />
+          {rating > 0 && (
+            <span className="text-sm ml-2 font-medium">
+              {rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-1 ml-12">
+          Klicka på en stjärna eller mellan stjärnor för en halvstjärna
+        </p>
       </div>
+
       <div className="flex gap-2">
         <Textarea
           value={comment}

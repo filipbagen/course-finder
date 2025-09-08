@@ -25,7 +25,17 @@ export const UpdateScheduleSchema = z.object({
 
 export const CreateReviewSchema = z.object({
   courseId: z.string().min(1, 'Course ID is required'),
-  rating: z.number().min(1).max(5, 'Rating must be between 1 and 5'),
+  rating: z
+    .number()
+    .min(1)
+    .max(5)
+    .refine(
+      (val) => {
+        // Check if the value has only 0.5 increments
+        return (val * 10) % 5 === 0;
+      },
+      { message: 'Rating must be between 1 and 5 with 0.5 increments' }
+    ),
   comment: z.string().optional(),
 });
 
