@@ -17,13 +17,13 @@ import {
   BookOpen,
   Target,
   Users,
-  ClipboardList,
+  NotebookPen,
   Info,
   Calendar,
   Clock,
   User,
-  Building,
-  GraduationCap,
+  School,
+  SignpostBig,
   Lightbulb,
   Book,
   BarChart,
@@ -62,12 +62,27 @@ const DetailSection = ({
 );
 
 const JsonContent = ({ data }: { data: any }) => {
-  if (!data || typeof data !== 'object') return null;
+  let parsedData = data;
+  if (typeof data === 'string') {
+    try {
+      parsedData = JSON.parse(data);
+    } catch (e) {
+      // If parsing fails, it might be a plain string.
+      // Treat it as a paragraph.
+      parsedData = { paragraph: data, list_items: [] };
+    }
+  }
 
-  const { paragraph, list_items } = data;
+  if (!parsedData || typeof parsedData !== 'object') return null;
+
+  const { paragraph, list_items } = parsedData;
   const hasParagraph =
     paragraph && typeof paragraph === 'string' && paragraph.trim().length > 0;
-  const hasList = Array.isArray(list_items) && list_items.length > 0;
+  const hasList =
+    Array.isArray(list_items) &&
+    list_items.some(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    );
 
   if (!hasParagraph && !hasList) return null;
 
@@ -76,9 +91,13 @@ const JsonContent = ({ data }: { data: any }) => {
       {hasParagraph && <p>{paragraph}</p>}
       {hasList && (
         <ul className="list-disc ml-6">
-          {list_items.map((item, idx) => (
-            <li key={idx}>{item}</li>
-          ))}
+          {list_items
+            .filter(
+              (item) => typeof item === 'string' && item.trim().length > 0
+            )
+            .map((item, idx) => (
+              <li key={idx}>{item}</li>
+            ))}
         </ul>
       )}
     </>
@@ -125,13 +144,13 @@ const CourseDetails = ({ course }: { course: Course }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Course Main Fields */}
         <DetailSection
-          icon={<GraduationCap className="h-4 w-4" />}
+          icon={<SignpostBig className="h-4 w-4" />}
           title="Huvudområden"
         >
           <div className="flex flex-wrap gap-2">
             {course.mainFieldOfStudy && course.mainFieldOfStudy.length > 0 ? (
               course.mainFieldOfStudy.map((field) => (
-                <Badge key={field} variant="secondary" className="rounded-full">
+                <Badge key={field} variant="default" className="rounded-full">
                   {field}
                 </Badge>
               ))
@@ -142,7 +161,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
         </DetailSection>
 
         {/* Campus Info */}
-        <DetailSection icon={<Building className="h-4 w-4" />} title="Campus">
+        <DetailSection icon={<School className="h-4 w-4" />} title="Campus">
           <p>{course.campus || 'Information saknas'}</p>
         </DetailSection>
 
@@ -158,7 +177,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
               <p className="text-xs text-muted-foreground">Schemalagd tid</p>
               <p className="font-medium">
                 {course.scheduledHours
-                  ? `${Number(course.scheduledHours)} timmar`
+                  ? `${Number(course.scheduledHours)}h`
                   : 'Okänt'}
               </p>
             </div>
@@ -166,7 +185,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
               <p className="text-xs text-muted-foreground">Självstudier</p>
               <p className="font-medium">
                 {course.selfStudyHours
-                  ? `${Number(course.selfStudyHours)} timmar`
+                  ? `${Number(course.selfStudyHours)}h`
                   : 'Okänt'}
               </p>
             </div>
@@ -184,7 +203,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
               <p className="text-xs text-muted-foreground">Termin</p>
               <p className="font-medium">
                 {course.semester?.length > 0
-                  ? `T${course.semester.join(', ')}`
+                  ? `${course.semester.join(', ')}`
                   : 'T?'}
               </p>
             </div>
@@ -192,7 +211,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
               <p className="text-xs text-muted-foreground">Period</p>
               <p className="font-medium">
                 {course.period?.length > 0
-                  ? `P${course.period.join('+')}`
+                  ? `${course.period.join('+')}`
                   : 'P?'}
               </p>
             </div>
@@ -200,7 +219,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
               <p className="text-xs text-muted-foreground">Block</p>
               <p className="font-medium">
                 {course.block?.length > 0
-                  ? `Block ${course.block.join(', ')}`
+                  ? `${course.block.join(', ')}`
                   : 'Block ?'}
               </p>
             </div>
@@ -260,16 +279,52 @@ const CourseDetails = ({ course }: { course: Course }) => {
 
         {/* Förkunskaper */}
         {(() => {
-          const content = <JsonContent data={course.prerequisites} />;
+          let parsedData: { paragraph: string | null; list_items: string[] } = {
+            paragraph: null,
+            list_items: [],
+          };
+          if (typeof course.prerequisites === 'string') {
+            try {
+              const parsed = JSON.parse(course.prerequisites);
+              parsedData = {
+                paragraph:
+                  typeof parsed.paragraph === 'string'
+                    ? parsed.paragraph
+                    : null,
+                list_items: Array.isArray(parsed.list_items)
+                  ? parsed.list_items
+                  : [],
+              };
+            } catch (e) {
+              parsedData = { paragraph: course.prerequisites, list_items: [] };
+            }
+          } else if (
+            typeof course.prerequisites === 'object' &&
+            course.prerequisites !== null
+          ) {
+            parsedData = {
+              paragraph:
+                typeof course.prerequisites.paragraph === 'string'
+                  ? course.prerequisites.paragraph
+                  : null,
+              list_items: Array.isArray(course.prerequisites.list_items)
+                ? course.prerequisites.list_items
+                : [],
+            };
+          }
+          const hasParagraph =
+            parsedData.paragraph && parsedData.paragraph.trim().length > 0;
+          const hasList = parsedData.list_items.some(
+            (item: any) => typeof item === 'string' && item.trim().length > 0
+          );
+          if (!hasParagraph && !hasList) return null;
           return (
-            content && (
-              <DetailSection
-                icon={<Book className="h-4 w-4" />}
-                title="Förkunskaper"
-              >
-                {content}
-              </DetailSection>
-            )
+            <DetailSection
+              icon={<Book className="h-4 w-4" />}
+              title="Förkunskaper"
+            >
+              <JsonContent data={parsedData} />
+            </DetailSection>
           );
         })()}
 
@@ -292,7 +347,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
 
         {/* Examination */}
         <DetailSection
-          icon={<ClipboardList className="h-4 w-4" />}
+          icon={<NotebookPen className="h-4 w-4" />}
           title="Examination"
         >
           {Array.isArray(course.examination) &&
@@ -318,11 +373,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
           <div className="flex flex-wrap gap-2">
             {course.offeredFor && course.offeredFor.length > 0 ? (
               course.offeredFor.map((program) => (
-                <Badge
-                  key={program}
-                  variant="outline"
-                  className="rounded-full bg-white/5"
-                >
+                <Badge key={program} variant="default" className="rounded-full">
                   {program}
                 </Badge>
               ))
@@ -359,9 +410,9 @@ export const CourseDetailsSheet = () => {
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="!w-[95%] !max-w-[840px] sm:!max-w-[840px] sm:!w-[840px] overflow-y-auto max-h-[100vh] p-0 border-l border-neutral-200 bg-white dark:bg-slate-900 shadow-xl"
+        className="!w-[95%] !max-w-[610px] sm:!max-w-[610px] sm:!w-[610px] overflow-y-auto max-h-[100vh] p-0 border-l border-neutral-200 bg-white dark:bg-slate-900 shadow-xl"
       >
-        <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-neutral-200 dark:border-slate-800 mb-6 p-6 pt-8">
+        <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-slate-800 mb-6 p-6 pt-8">
           <button
             onClick={() => onClose()}
             className="absolute right-6 top-6 rounded-full p-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"

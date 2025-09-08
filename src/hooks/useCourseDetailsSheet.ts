@@ -14,5 +14,5 @@ export const useCourseDetailsSheet = create<CourseDetailsSheetState>((set) => ({
   isOpen: false,
   course: null,
   onOpen: (course) => set({ isOpen: true, course }),
-  onClose: () => set({ isOpen: false, course: null }),
+  onClose: () => set({ isOpen: false }),
 }));
