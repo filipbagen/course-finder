@@ -15,11 +15,16 @@ interface ReviewData {
   id: string;
   rating: number;
   comment: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   userId: string;
   courseId: string;
-  User: ReviewUser;
+  User?: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+  };
 }
 
 interface ReviewListProps {
@@ -76,19 +81,21 @@ const ReviewList: React.FC<ReviewListProps> = ({
                 {/* User info and date */}
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
-                    {review.User.image ? (
+                    {review.User?.image ? (
                       <AvatarImage
                         src={review.User.image}
                         alt={review.User.name}
                       />
                     ) : (
                       <AvatarFallback>
-                        {review.User.name.charAt(0).toUpperCase()}
+                        {review.User?.name?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div className="flex flex-col gap-0">
-                    <span className="font-medium">{review.User.name}</span>
+                    <span className="font-medium">
+                      {review.User?.name || 'Anonymous'}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(review.createdAt).toLocaleDateString('sv-SE', {
                         year: 'numeric',

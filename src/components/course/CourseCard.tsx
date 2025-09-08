@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   SignpostBig,
   Plus,
   LogIn,
+  Star,
 } from 'lucide-react';
 import {
   Course,
@@ -24,6 +25,7 @@ import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { useEnrollment } from '@/hooks/useEnrollment';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import CourseReviewDialog from './CourseReviewDialog';
 
 interface CourseCardProps {
   course: Course | CourseWithEnrollment;
@@ -91,6 +93,36 @@ const CourseCard = ({
     course.block && course.block.length > 0
       ? `Block ${course.block.join(', ')}`
       : 'Block ?';
+
+  // Fetch course rating and reviews count
+  const [courseRating, setCourseRating] = useState<{
+    averageRating: number;
+    count: number;
+  }>({
+    averageRating: 0,
+    count: 0,
+  });
+
+  useEffect(() => {
+    const fetchCourseRating = async () => {
+      try {
+        const response = await fetch(`/api/courses/${course.id}/reviews`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setCourseRating({
+              averageRating: data.data.averageRating,
+              count: data.data.reviews.length,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching course rating:', error);
+      }
+    };
+
+    fetchCourseRating();
+  }, [course.id]);
 
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number | number[]) => {
@@ -192,14 +224,31 @@ const CourseCard = ({
             {variant === 'default' && <EnrollmentButton />}
 
             {variant === 'schedule' && isCourseWithEnrollment(course) && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleRemoveCourse}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleRemoveCourse}
+                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+
+                {/* Review button for enrolled courses */}
+                <CourseReviewDialog
+                  course={course}
+                  trigger={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700 hover:bg-amber-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Star className="h-4 w-4" />
+                    </Button>
+                  }
+                />
+              </>
             )}
           </div>
         </div>
@@ -250,9 +299,19 @@ const CourseCard = ({
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Blocks className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">{blockText}</span>
+          <div className="flex items-center gap-3">
+            {courseRating.count > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs font-medium">
+                  {courseRating.averageRating.toFixed(1)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <Blocks className="h-3 w-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">{blockText}</span>
+            </div>
           </div>
         </div>
       </CardContent>

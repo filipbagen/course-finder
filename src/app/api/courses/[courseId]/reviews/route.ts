@@ -1,30 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getOptionalUser } from '@/lib/auth';
 import { ApiResponse } from '@/types/api';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET /api/courses/{courseId}/reviews - Get all reviews for a course
 export async function GET(
   request: NextRequest,
-  { params }: { params: { courseId: string } }
+  context: { params: { courseId: string } }
 ) {
   try {
     // Authentication is optional for viewing reviews
     await getOptionalUser();
 
-    const courseId = params.courseId;
-
-    if (!courseId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Course ID is required',
-        },
-        { status: 400 }
-      );
-    }
+    const courseId = context.params.courseId;
 
     // Verify the course exists
     const course = await prisma.course.findUnique({

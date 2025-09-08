@@ -7,16 +7,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { courseId: string } }
+  context: { params: { courseId: string } }
 ): Promise<NextResponse> {
-  const courseId = params.courseId;
-
-  if (!courseId) {
-    return NextResponse.json(
-      { success: false, error: 'Course ID is required' },
-      { status: 400 }
-    );
-  }
+  const courseId = context.params.courseId;
 
   try {
     // Fetch the course with all its details

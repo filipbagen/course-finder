@@ -2,12 +2,18 @@
 
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Trash2, Calendar, BookOpen } from 'lucide-react';
+import { GripVertical, Trash2, Calendar, BookOpen, Star } from 'lucide-react';
 import { CourseWithEnrollment } from '@/types/types';
 import { cn } from '@/lib/utils';
+import CourseReviewDialog from '@/components/course/CourseReviewDialog';
 
 interface ScheduleCourseCardProps {
   course: CourseWithEnrollment;
@@ -152,6 +158,23 @@ export default function ScheduleCourseCard({
             </Badge>
           </div>
         </CardContent>
+
+        {/* Card Footer with Review Button */}
+        <CardFooter className="pt-0 px-6 pb-4">
+          <CourseReviewDialog
+            course={course}
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full gap-1 text-xs hover:bg-muted"
+              >
+                <Star className="h-3 w-3" />
+                <span>Recensera kurs</span>
+              </Button>
+            }
+          />
+        </CardFooter>
       </Card>
     </div>
   );

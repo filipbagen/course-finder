@@ -113,8 +113,16 @@ export interface Review {
   id: string;
   rating: number;
   comment: string;
+  userId: string;
+  courseId: string;
   createdAt: string;
-  user: User;
+  updatedAt: string;
+  User?: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+  };
 }
 
 // Re-export API types for convenience
@@ -152,6 +160,7 @@ export interface EnrollmentResponse {
 
 export interface ReviewResponse {
   reviews: Review[];
+  averageRating: number;
 }
 
 export interface CreateReviewRequest {

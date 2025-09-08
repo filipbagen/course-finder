@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { useCourseDetails } from '@/hooks/useCourseDetails';
 import { Course } from '@/types/types';
@@ -32,6 +33,7 @@ import {
   FileText,
   ExternalLink,
   AlertTriangle,
+  Star,
 } from 'lucide-react';
 
 const ConflictWarning = ({
@@ -496,6 +498,19 @@ export const CourseDetailsSheet = () => {
     onClose();
   };
 
+  const [reviewsData, setReviewsData] = useState<{
+    averageRating: number;
+    count: number;
+  }>({
+    averageRating: 0,
+    count: 0,
+  });
+
+  // Function to update review data
+  const updateReviewData = (averageRating: number, count: number) => {
+    setReviewsData({ averageRating, count });
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={handleClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
@@ -505,6 +520,27 @@ export const CourseDetailsSheet = () => {
               <SheetTitle className="text-2xl font-bold">
                 {course.name}
               </SheetTitle>
+              {!loading && reviewsData.count > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < Math.round(reviewsData.averageRating)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
+                    {reviewsData.count === 1 ? 'recension' : 'recensioner'})
+                  </span>
+                </div>
+              )}
             </>
           )}
         </SheetHeader>
@@ -512,15 +548,25 @@ export const CourseDetailsSheet = () => {
         {loading && <p>Laddar kursinformation...</p>}
         {error && <p className="text-red-500">{error}</p>}
         {!loading && !error && course && (
-          <div className="space-y-8">
-            <CourseDetails course={course} />
+          <Tabs defaultValue="info" className="w-full">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="info">Kursinformation</TabsTrigger>
+              <TabsTrigger value="reviews">
+                Recensioner {reviewsData.count > 0 && `(${reviewsData.count})`}
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Add the reviews section */}
-            <div>
-              <h2 className="text-xl font-bold mb-4">Recensioner</h2>
-              <CourseReviews courseId={course.id} />
-            </div>
-          </div>
+            <TabsContent value="info" className="space-y-8">
+              <CourseDetails course={course} />
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <CourseReviews
+                courseId={course.id}
+                onReviewDataUpdate={updateReviewData}
+              />
+            </TabsContent>
+          </Tabs>
         )}
       </SheetContent>
     </Sheet>

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { ApiResponse } from '@/types/api';
 import { CreateReviewRequest } from '@/types/types';
 import { v4 as uuidv4 } from 'uuid';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // POST /api/courses/review - Create or update a review
 export async function POST(request: NextRequest) {
