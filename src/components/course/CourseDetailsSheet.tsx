@@ -109,7 +109,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
   return (
     <div className="space-y-6">
       {/* Course Header Info */}
-      <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-5 border border-neutral-200 dark:border-slate-700/50">
+      <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 p-5 border border-neutral-200 dark:border-slate-700/50">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
@@ -497,7 +497,7 @@ export const CourseDetailsSheet = () => {
           {loading ? (
             // Show skeleton loading state
             <div className="space-y-6">
-              <div className="rounded-2xl bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 p-5 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse">
+              <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/5 dark:to-primary/10 p-5 border border-neutral-200/50 dark:border-slate-700/30 animate-pulse">
                 <div className="grid grid-cols-2 gap-4">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i}>
