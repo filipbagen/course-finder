@@ -104,7 +104,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         />
       </div>
       <div className="flex justify-end">
-        <SubmitReviewButton loading={loading} text={existingRating ? 'Uppdatera recension' : 'Skicka recension'} />
+        <SubmitReviewButton
+          loading={loading}
+          text={existingRating ? 'Uppdatera recension' : 'Skicka recension'}
+        />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
     </form>

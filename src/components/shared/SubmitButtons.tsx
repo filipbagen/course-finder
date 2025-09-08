@@ -28,7 +28,10 @@ type SubmitReviewButtonProps = {
   text?: string;
 };
 
-export function SubmitReviewButton({ loading, text = 'Skicka recension' }: SubmitReviewButtonProps) {
+export function SubmitReviewButton({
+  loading,
+  text = 'Skicka recension',
+}: SubmitReviewButtonProps) {
   return (
     <>
       {loading ? (
