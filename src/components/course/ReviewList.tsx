@@ -125,9 +125,9 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
                 {/* Comment */}
                 {review.comment && (
-                  <p className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
                     {review.comment}
-                  </p>
+                  </div>
                 )}
               </div>
 
