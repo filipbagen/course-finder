@@ -162,10 +162,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
         </div>
       </DetailSection>
 
-      <DetailSection
-        icon={<Target className="h-5 w-5" />}
-        title="Lärandemål"
-      >
+      <DetailSection icon={<Target className="h-5 w-5" />} title="Lärandemål">
         <JsonContent data={course.learningOutcomes} title="Lärandemål" />
       </DetailSection>
 
@@ -180,13 +177,13 @@ const CourseDetails = ({ course }: { course: Course }) => {
         icon={<Lightbulb className="h-5 w-5" />}
         title="Undervisningsformer"
       >
-        <JsonContent data={course.teachingMethods} title="Undervisningsformer" />
+        <JsonContent
+          data={course.teachingMethods}
+          title="Undervisningsformer"
+        />
       </DetailSection>
 
-      <DetailSection
-        icon={<Book className="h-5 w-5" />}
-        title="Förkunskaper"
-      >
+      <DetailSection icon={<Book className="h-5 w-5" />} title="Förkunskaper">
         <JsonContent data={course.prerequisites} title="Förkunskaper" />
       </DetailSection>
 
@@ -232,10 +229,7 @@ const CourseDetails = ({ course }: { course: Course }) => {
         </div>
       </DetailSection>
 
-      <DetailSection
-        icon={<FileText className="h-5 w-5" />}
-        title="Kursplan"
-      >
+      <DetailSection icon={<FileText className="h-5 w-5" />} title="Kursplan">
         <a
           href={`https://www.kth.se/student/kurser/kurs/${course.code}`}
           target="_blank"
