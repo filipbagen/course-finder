@@ -65,10 +65,28 @@ export default function ScheduleCourseCard({
       : `Block ${course.block[0]}`;
 
   // Handle course removal
-  const handleRemove = () => {
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (course.enrollment?.id && onRemove) {
       onRemove(course.enrollment.id);
     }
+  };
+
+  // Reference for dialog trigger button
+  const dialogTriggerRef = React.useRef<HTMLButtonElement>(null);
+
+  // Handle card click to open review dialog
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent dialog from opening when clicking on buttons or drag handle
+    if (
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('[data-drag-handle="true"]')
+    ) {
+      return;
+    }
+
+    // Programmatically click the dialog trigger
+    dialogTriggerRef.current?.click();
   };
 
   return (
@@ -81,9 +99,10 @@ export default function ScheduleCourseCard({
       })}
     >
       <Card
+        onClick={handleCardClick}
         className={cn('transition-all duration-200 group', {
           'hover:shadow-md': !isDragging && !readonly,
-          'cursor-grab': !readonly && !isDragging,
+          'cursor-pointer': !readonly && !isDragging,
           'cursor-grabbing': !readonly && isDragging,
           'border-primary shadow-lg': isDragging,
         })}
@@ -95,8 +114,10 @@ export default function ScheduleCourseCard({
               <div
                 {...attributes}
                 {...listeners}
+                data-drag-handle="true"
                 className="mt-1 cursor-grab hover:text-primary transition-colors"
                 aria-label={`Drag ${course.name}`}
+                onClick={(e) => e.stopPropagation()}
               >
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -158,24 +179,15 @@ export default function ScheduleCourseCard({
             </Badge>
           </div>
         </CardContent>
-
-        {/* Card Footer with Review Button */}
-        <CardFooter className="pt-0 px-6 pb-4">
-          <CourseReviewDialog
-            course={course}
-            trigger={
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full gap-1 text-xs hover:bg-muted"
-              >
-                <Star className="h-3 w-3" />
-                <span>Recensera kurs</span>
-              </Button>
-            }
-          />
-        </CardFooter>
       </Card>
+
+      {/* Hidden dialog trigger button */}
+      <div className="hidden">
+        <CourseReviewDialog
+          course={course}
+          trigger={<button ref={dialogTriggerRef} type="button" />}
+        />
+      </div>
     </div>
   );
 }
