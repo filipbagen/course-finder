@@ -8,6 +8,63 @@ import { transformCourses } from '@/lib/transformers';
 
 export const dynamic = 'force-dynamic';
 
+// Simple in-memory cache for search results
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  ttl: number; // Time to live in milliseconds
+}
+
+const searchCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCacheKey(params: any): string {
+  // Create a cache key from search parameters
+  const keyParts = [
+    params.search || '',
+    params.campus || '',
+    params.mainFieldOfStudy || '',
+    params.semester || '',
+    params.period || '',
+    params.block || '',
+    params.studyPace || '',
+    params.courseLevel || '',
+    params.sortBy || 'code',
+    params.sortOrder || 'asc',
+    params.limit || 20,
+    params.cursor || '',
+  ];
+  return keyParts.join('|');
+}
+
+function getCachedResult(cacheKey: string): any | null {
+  const entry = searchCache.get(cacheKey);
+  if (!entry) return null;
+
+  if (Date.now() - entry.timestamp > entry.ttl) {
+    searchCache.delete(cacheKey);
+    return null;
+  }
+
+  return entry.data;
+}
+
+function setCachedResult(cacheKey: string, data: any, ttl = CACHE_TTL): void {
+  // Limit cache size to prevent memory issues
+  if (searchCache.size >= 100) {
+    const firstKey = searchCache.keys().next().value;
+    if (firstKey) {
+      searchCache.delete(firstKey);
+    }
+  }
+
+  searchCache.set(cacheKey, {
+    data,
+    timestamp: Date.now(),
+    ttl,
+  });
+}
+
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<InfiniteResponse<Course>>> {
@@ -33,16 +90,35 @@ export async function GET(
 
     const limit = Math.min(Math.max(rawLimit || 20, 1), 50);
 
+    // Check cache for non-cursor requests (cursor requests are paginated and less cacheable)
+    if (!cursor) {
+      const cacheKey = getCacheKey(params);
+      const cachedResult = getCachedResult(cacheKey);
+      if (cachedResult) {
+        return NextResponse.json(cachedResult);
+      }
+    }
+
     // Build where conditions
     const whereConditions: any = {};
 
     if (search) {
-      // Optimize search by using more efficient patterns
+      // Optimize search by using more efficient patterns and trimming input
       const searchTerm = search.trim();
       if (searchTerm.length > 0) {
+        // Use starts_with for better index utilization when possible
+        const usePrefixSearch = searchTerm.length <= 3; // Use prefix for short terms
         whereConditions.OR = [
-          { name: { contains: searchTerm, mode: 'insensitive' } },
-          { code: { contains: searchTerm, mode: 'insensitive' } },
+          {
+            name: usePrefixSearch
+              ? { startsWith: searchTerm, mode: 'insensitive' }
+              : { contains: searchTerm, mode: 'insensitive' },
+          },
+          {
+            code: usePrefixSearch
+              ? { startsWith: searchTerm, mode: 'insensitive' }
+              : { contains: searchTerm, mode: 'insensitive' },
+          },
         ];
       }
     }
@@ -168,7 +244,7 @@ export async function GET(
     }
     orderByArray.push({ id: 'asc' }); // Final tie-breaker
 
-    // Build query options with pagination from the start for better performance
+    // Build query options with ONLY the fields needed for course cards
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
@@ -176,31 +252,32 @@ export async function GET(
       skip: cursor ? 1 : 0, // Skip the cursor item if provided
       cursor: cursor ? { id: cursor } : undefined,
       select: {
+        // Essential fields for course cards and search
         id: true,
         code: true,
         name: true,
-        credits: true,
         campus: true,
         mainFieldOfStudy: true,
-        advanced: true,
         period: true,
         block: true,
         semester: true,
+        // Minimal additional fields that might be used
+        advanced: true,
         courseType: true,
         offeredFor: true,
-        // Only include these minimal fields needed for the course cards
-        // Detailed data will be loaded on demand:
-        // - learningOutcomes
-        // - content
-        // - teachingMethods
-        // - prerequisites
-        // - recommendedPrerequisites
-        // - examination
-        // - examiner
-        // - exclusions
-        // - scheduledHours
-        // - selfStudyHours
-        // - programInfo
+        credits: true,
+        // EXCLUDE heavy JSON fields that are not needed for list view:
+        // - learningOutcomes (heavy JSON)
+        // - content (heavy JSON)
+        // - teachingMethods (heavy JSON)
+        // - prerequisites (heavy JSON)
+        // - recommendedPrerequisites (heavy JSON)
+        // - examination (heavy JSON array)
+        // - programInfo (heavy JSON array)
+        // - examiner (not used in cards)
+        // - exclusions (not used in cards)
+        // - scheduledHours (not used in cards)
+        // - selfStudyHours (not used in cards)
       },
     };
 
@@ -225,14 +302,22 @@ export async function GET(
       totalCount = countQuery;
     }
 
-    return NextResponse.json({
+    const result = {
       success: true,
       data: items,
       nextCursor,
       hasNextPage,
       totalCount,
       count: items.length,
-    } as InfiniteResponse<Course>);
+    } as InfiniteResponse<Course>;
+
+    // Cache the result for non-cursor requests
+    if (!cursor) {
+      const cacheKey = getCacheKey(params);
+      setCachedResult(cacheKey, result);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching courses:', error);
     let errorMessage =

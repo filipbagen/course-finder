@@ -63,6 +63,16 @@ model course {
   semester                 BigInt[]
   Enrollment               Enrollment[] @relation("EnrollmentToCourse")
   review                   review[]
+
+  // Performance indexes for search and filtering
+  @@index([name], map: "course_name_idx")
+  @@index([code], map: "course_code_idx")
+  @@index([campus], map: "course_campus_idx")
+  @@index([advanced], map: "course_advanced_idx")
+  @@index([mainFieldOfStudy], map: "course_mainFieldOfStudy_idx")
+  @@index([semester], map: "course_semester_idx")
+  @@index([period], map: "course_period_idx")
+  @@index([block], map: "course_block_idx")
 }
 
 model review {
