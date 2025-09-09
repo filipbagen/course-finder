@@ -1,6 +1,7 @@
 // next
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 // components
 import { SubmitButton } from '../../../components/shared/SubmitButtons';
@@ -34,12 +35,122 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 // supabase
 import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@supabase/ssr';
 
 // prisma
 import { prisma } from '@/lib/prisma';
+
+const createAdminClient = async () => {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      'SUPABASE_SERVICE_ROLE_KEY is required for account deletion'
+    );
+  }
+
+  const cookieStore = await cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch (error) {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  );
+};
+
+function DeleteAccountDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="destructive" className="flex items-center gap-2">
+          <Trash2 className="h-4 w-4" />
+          Delete Account
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            Delete Account
+          </DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove all your data from our servers.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Alert className="border-destructive/50">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>What will be deleted:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Your profile and personal information</li>
+                <li>All your course enrollments and schedule</li>
+                <li>All your course reviews and ratings</li>
+                <li>Your profile picture from our storage</li>
+                <li>Your account from our authentication system</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+          <form action={deleteAccount}>
+            <div className="space-y-2">
+              <Label
+                htmlFor="delete-confirmation"
+                className="text-sm font-medium"
+              >
+                Type <strong>DELETE</strong> to confirm:
+              </Label>
+              <Input
+                id="delete-confirmation"
+                name="confirmation"
+                placeholder="Type DELETE to confirm"
+                className="border-destructive/50 focus:border-destructive"
+                required
+              />
+            </div>
+            <DialogFooter className="mt-6">
+              <DialogTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogTrigger>
+              <Button type="submit" variant="destructive">
+                Delete Account
+              </Button>
+            </DialogFooter>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 async function deleteProfileImage(userId: string) {
   'use server';
@@ -51,6 +162,19 @@ async function deleteProfileImage(userId: string) {
 
   if (!user || user.id !== userId) {
     redirect('/login');
+  }
+
+  // Check if user still exists in database
+  const userData = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!userData) {
+    console.error(
+      'User not found in database during profile image deletion, signing out'
+    );
+    await supabase.auth.signOut();
+    redirect('/');
   }
 
   try {
@@ -94,32 +218,38 @@ async function deleteProfileImage(userId: string) {
   }
 }
 
-async function deleteAccount(userId: string) {
+async function deleteAccount(formData: FormData) {
   'use server';
+
+  const confirmation = formData.get('confirmation') as string;
+
+  if (confirmation !== 'DELETE') {
+    throw new Error('Please type DELETE to confirm account deletion');
+  }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.id !== userId) {
+  if (!user) {
     redirect('/login');
   }
 
   try {
     // Delete user's enrollments
     await prisma.enrollment.deleteMany({
-      where: { userId: userId },
+      where: { userId: user.id },
     });
 
     // Delete user's reviews
     await prisma.review.deleteMany({
-      where: { userId: userId },
+      where: { userId: user.id },
     });
 
     // Delete user's profile image from storage if it exists
     const userData = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: user.id },
       select: { image: true },
     });
 
@@ -146,32 +276,31 @@ async function deleteAccount(userId: string) {
 
     // Delete user from database
     await prisma.user.delete({
-      where: { id: userId },
+      where: { id: user.id },
     });
 
-    // Try to delete from Supabase Auth (this may fail without admin privileges)
-    try {
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) {
-        console.log(
-          'Could not delete from Supabase Auth (admin privileges required):',
-          authError.message
-        );
-        console.log(
-          'User data deleted from database. Auth record may need manual deletion.'
-        );
-      } else {
-        console.log('User deleted from Supabase Auth successfully');
-      }
-    } catch (authDeleteError) {
-      console.log(
-        'Auth deletion failed (expected without admin privileges):',
-        authDeleteError
-      );
-      console.log(
-        'User data deleted from database. Auth record may need manual deletion.'
+    // Delete from Supabase Auth using admin client
+    const adminClient = await createAdminClient();
+    console.log('Attempting to delete user from Supabase Auth:', user.id);
+
+    const { data, error: authError } = await adminClient.auth.admin.deleteUser(
+      user.id,
+      false // shouldSoftDelete: false for complete deletion
+    );
+
+    if (authError) {
+      console.error('Supabase Auth deletion failed:', {
+        error: authError.message,
+        status: authError.status,
+        userId: user.id,
+      });
+      throw new Error(
+        'Failed to delete authentication account. Please contact support.'
       );
     }
+
+    console.log('✅ User completely deleted from Supabase Auth:', user.id);
+    console.log('Response data:', data);
 
     // Sign out the user BEFORE redirecting to ensure they're not authenticated
     await supabase.auth.signOut();
@@ -219,22 +348,20 @@ export default async function SettingPage() {
   // Get user data from database
   const data = await getData(user.id);
 
-  // This should never happen for authenticated users, but add a safeguard
+  // If user doesn't exist in database (e.g., account was deleted), sign out and redirect to home
   if (!data) {
-    console.error('Authenticated user not found in database:', user.id);
-    redirect('/login');
+    console.error(
+      'Authenticated user not found in database, signing out:',
+      user.id
+    );
+    await supabase.auth.signOut();
+    redirect('/');
   }
 
   // Create a bound function for deleting the profile image
   const handleDeleteImage = async () => {
     'use server';
     await deleteProfileImage(user.id);
-  };
-
-  // Create a bound function for deleting the account
-  const handleDeleteAccount = async () => {
-    'use server';
-    await deleteAccount(user.id);
   };
 
   async function postData(formData: FormData) {
@@ -249,6 +376,19 @@ export default async function SettingPage() {
 
     if (!user || error) {
       redirect('/login');
+    }
+
+    // Check if user still exists in database
+    const existingUser = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!existingUser) {
+      console.error(
+        'User not found in database during settings update, signing out'
+      );
+      await supabase.auth.signOut();
+      redirect('/');
     }
 
     const name = formData.get('name') as string;
@@ -624,16 +764,7 @@ export default async function SettingPage() {
             </Alert>
           </CardContent>
           <CardFooter>
-            <form action={handleDeleteAccount}>
-              <Button
-                type="submit"
-                variant="destructive"
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Account
-              </Button>
-            </form>
+            <DeleteAccountDialog />
           </CardFooter>
         </Card>
       </div>

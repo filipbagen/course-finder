@@ -161,6 +161,17 @@ export default async function UserProfilePage({ params }: PageProps) {
     redirect('/login');
   }
 
+  // Check if current user exists in database
+  const dbUser = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+  });
+
+  if (!dbUser) {
+    console.error('Current user not found in database, signing out');
+    await supabase.auth.signOut();
+    redirect('/');
+  }
+
   const userProfile = await getUserProfile(id);
 
   if (!userProfile) {

@@ -37,10 +37,14 @@ export default async function DashboardLayout({
       },
     });
 
-    // If user doesn't exist in database, redirect to onboarding
+    // If user doesn't exist in database, they may have been deleted
+    // Sign them out and redirect to home page
     if (!dbUser) {
-      console.log('User not found in database, redirecting to onboarding');
-      redirect('/onboarding');
+      console.log(
+        'User not found in database, signing out and redirecting to home'
+      );
+      await supabase.auth.signOut();
+      redirect('/');
     }
   } catch (error) {
     console.error('Error fetching user from database:', error);

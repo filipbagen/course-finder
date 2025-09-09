@@ -106,6 +106,17 @@ export default async function StudentsPage({
     redirect('/login');
   }
 
+  // Check if user exists in database
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+  });
+
+  if (!dbUser) {
+    console.error('User not found in database, signing out');
+    await supabase.auth.signOut();
+    redirect('/');
+  }
+
   const params = await searchParams;
   const searchQuery = params.search;
   const programFilter = params.program;
