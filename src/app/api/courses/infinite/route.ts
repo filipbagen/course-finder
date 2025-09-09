@@ -90,7 +90,7 @@ export async function GET(
 
     const limit = Math.min(Math.max(rawLimit || 20, 1), 50);
 
-    // Check cache for non-cursor requests (cursor requests are paginated and less cacheable)
+    // Check cache for non-cursor requests
     if (!cursor) {
       const cacheKey = getCacheKey(params);
       const cachedResult = getCachedResult(cacheKey);
@@ -103,11 +103,10 @@ export async function GET(
     const whereConditions: any = {};
 
     if (search) {
-      // Optimize search by using more efficient patterns and trimming input
+      // Optimize search by using prefix search for short terms
       const searchTerm = search.trim();
       if (searchTerm.length > 0) {
-        // Use starts_with for better index utilization when possible
-        const usePrefixSearch = searchTerm.length <= 3; // Use prefix for short terms
+        const usePrefixSearch = searchTerm.length <= 3;
         whereConditions.OR = [
           {
             name: usePrefixSearch
@@ -180,7 +179,7 @@ export async function GET(
       }
     }
 
-    // --- Examination Filter Logic ---
+    // Examination filter logic
     const examinationMap: Record<string, string[]> = {
       Inlämningsuppgift: ['UPG'],
       'Skriftlig tentamen': ['TEN', 'TENA'],
@@ -244,7 +243,7 @@ export async function GET(
     }
     orderByArray.push({ id: 'asc' }); // Final tie-breaker
 
-    // Build query options with ONLY the fields needed for course cards
+    // Build query options with essential fields only
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
@@ -261,12 +260,11 @@ export async function GET(
         period: true,
         block: true,
         semester: true,
-        // Minimal additional fields that might be used
         advanced: true,
         courseType: true,
         offeredFor: true,
         credits: true,
-        // Include aggregated rating data to avoid N+1 queries
+        // Include rating data to avoid N+1 queries
         _count: {
           select: {
             review: true,
@@ -277,18 +275,10 @@ export async function GET(
             rating: true,
           },
         },
-        // EXCLUDE heavy JSON fields that are not needed for list view:
-        // - learningOutcomes (heavy JSON)
-        // - content (heavy JSON)
-        // - teachingMethods (heavy JSON)
-        // - prerequisites (heavy JSON)
-        // - recommendedPrerequisites (heavy JSON)
-        // - examination (heavy JSON array)
-        // - programInfo (heavy JSON array)
-        // - examiner (not used in cards)
-        // - exclusions (not used in cards)
-        // - scheduledHours (not used in cards)
-        // - selfStudyHours (not used in cards)
+        // EXCLUDE heavy JSON fields that are not needed for list view
+        // - learningOutcomes, content, teachingMethods, prerequisites
+        // - recommendedPrerequisites, examination, programInfo
+        // - examiner, exclusions, scheduledHours, selfStudyHours
       },
     };
 

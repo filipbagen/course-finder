@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,7 +95,7 @@ const CourseCard = ({
       ? `Block ${course.block.join(', ')}`
       : 'Block ?';
 
-  // Calculate rating from pre-fetched data instead of API call
+  // Calculate rating from pre-fetched data
   const courseRating = React.useMemo(() => {
     if (course.reviews && Array.isArray(course.reviews)) {
       const ratings = course.reviews
@@ -116,28 +116,6 @@ const CourseCard = ({
       count: 0,
     };
   }, [course.reviews]);
-
-  // Remove the old useEffect that fetched ratings
-  // useEffect(() => {
-  //   const fetchCourseRating = async () => {
-  //     try {
-  //       const response = await fetch(`/api/courses/${course.id}/reviews`);
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         if (data.success && data.data) {
-  //           setCourseRating({
-  //             averageRating: data.data.averageRating,
-  //             count: data.data.reviews.length,
-  //           });
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching course rating:', error);
-  //     }
-  //   };
-  //
-  //   fetchCourseRating();
-  // }, [course.id]);
 
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number | number[]) => {
