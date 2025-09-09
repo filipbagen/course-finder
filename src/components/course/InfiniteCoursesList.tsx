@@ -145,7 +145,7 @@ export function InfiniteCoursesList({
   const coursesDisplay = useMemo(() => {
     return courses.map((course) => (
       <CourseCard
-        key={course.id}
+        key={`course-${course.id}`}
         course={course}
         isAuthenticated={isAuthenticated}
         variant="default"
