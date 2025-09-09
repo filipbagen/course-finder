@@ -79,7 +79,7 @@ export function MobileFilterDialog({
           <CourseFilter
             screen="mobile"
             onFilterChange={(filterType, value, isChecked) =>
-              onFilterChange(filterType, value, isChecked, true)
+              onFilterChange(filterType, value, isChecked === 'checked', true)
             }
             currentFilters={mobileFilters}
           />
