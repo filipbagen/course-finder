@@ -33,6 +33,7 @@ export async function signIn(formData: FormData) {
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
 
+  const name = formData.get('name') as string;
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
@@ -44,6 +45,11 @@ export async function signUp(formData: FormData) {
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        name: name, // Store name in auth metadata
+      },
+    },
   });
 
   if (authError) {
@@ -54,7 +60,7 @@ export async function signUp(formData: FormData) {
   if (authData.user) {
     if (authData.user.email_confirmed_at) {
       revalidatePath('/', 'layout');
-      redirect('/onboarding');
+      redirect(`/onboarding?name=${encodeURIComponent(name)}`);
     } else {
       redirect('/signup?message=check_email');
     }

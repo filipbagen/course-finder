@@ -32,6 +32,7 @@ async function getData(userId: string) {
       return data;
     } catch (error) {
       console.error('Error fetching user data:', error);
+      // If user data can't be fetched, return null (user might have been deleted)
       return null;
     }
   }

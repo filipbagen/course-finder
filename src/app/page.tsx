@@ -28,8 +28,24 @@ export default async function Home() {
     error,
   } = await supabase.auth.getUser();
 
-  // Redirect authenticated users to the courses page
+  // Check if authenticated user exists in database
+  let userExists = false;
   if (user && !error) {
+    try {
+      const { data: userData } = await supabase
+        .from('User')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      userExists = !!userData;
+    } catch {
+      // If we can't fetch user data, assume user doesn't exist
+      userExists = false;
+    }
+  }
+
+  // Redirect authenticated users to the courses page (only if they exist in database)
+  if (user && !error && userExists) {
     redirect('/courses');
   }
 

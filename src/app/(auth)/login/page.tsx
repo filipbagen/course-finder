@@ -2,6 +2,18 @@ import { signIn } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 interface LoginPageProps {
   searchParams: Promise<{ error?: string; message?: string }>;
@@ -29,157 +41,99 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const successMessages = {
     account_created: 'Account created successfully! Please sign in.',
+    password_updated: 'Password updated successfully! Please sign in.',
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">
             Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          </CardTitle>
+          <CardDescription className="text-center">
             Don't have an account?{' '}
             <Link
               href="/signup"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-primary hover:underline"
             >
               Create one here
             </Link>
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        {/* Error Message */}
-        {params.error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">
-                  {errorMessages[params.error as keyof typeof errorMessages] ||
-                    'An error occurred. Please try again.'}
-                </p>
-              </div>
+        <CardContent className="space-y-4">
+          {/* Error Message */}
+          {params.error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {errorMessages[params.error as keyof typeof errorMessages] ||
+                  'An error occurred. Please try again.'}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Success Message */}
+          {params.message && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                {successMessages[
+                  params.message as keyof typeof successMessages
+                ] || params.message}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <form action={signIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <Button type="submit" className="w-full">
+              Sign in
+            </Button>
+          </form>
+
+          <div className="text-center space-y-2">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary hover:underline"
+            >
+              Forgot your password?
+            </Link>
+            <div>
+              <Link
+                href="/"
+                className="text-sm text-muted-foreground hover:text-primary hover:underline"
+              >
+                ← Back to home
+              </Link>
             </div>
           </div>
-        )}
-
-        {/* Success Message */}
-        {params.message && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-green-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  {successMessages[
-                    params.message as keyof typeof successMessages
-                  ] || params.message}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Rest of your form remains the same */}
-        <div className="mt-8 space-y-6">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form action={signIn} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email address
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="Enter your password"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  Sign in
-                </button>
-              </div>
-
-              <div className="text-center mt-4">
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-            </form>
-
-            <div className="mt-6">
-              <div className="text-center">
-                <Link
-                  href="/"
-                  className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
-                >
-                  ← Back to home
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

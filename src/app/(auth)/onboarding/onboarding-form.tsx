@@ -4,6 +4,19 @@ import { useState } from 'react';
 import { updateUserProfile } from './actions';
 import Avatar from '@/components/shared/avatar';
 import { programs } from '@/lib/programs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/components/ui/card';
+import { Palette, Eye, EyeOff } from 'lucide-react';
 
 interface OnboardingFormProps {
   userId: string;
@@ -12,10 +25,18 @@ interface OnboardingFormProps {
 }
 
 const colorSchemes = [
-  { value: 'theme-blue', label: 'Blue', color: 'bg-blue-500' },
-  { value: 'theme-green', label: 'Green', color: 'bg-green-500' },
-  { value: 'theme-purple', label: 'Purple', color: 'bg-purple-500' },
-  { value: 'theme-orange', label: 'Orange', color: 'bg-orange-500' },
+  { value: 'theme-zinc', label: 'Zinc', emoji: '⚫' },
+  { value: 'theme-slate', label: 'Slate', emoji: '⚫' },
+  { value: 'theme-stone', label: 'Stone', emoji: '⚫' },
+  { value: 'theme-gray', label: 'Gray', emoji: '⚫' },
+  { value: 'theme-neutral', label: 'Neutral', emoji: '⚫' },
+  { value: 'theme-blue', label: 'Blue', emoji: '🔵' },
+  { value: 'theme-green', label: 'Green', emoji: '🟢' },
+  { value: 'theme-violet', label: 'Violet', emoji: '🟣' },
+  { value: 'theme-yellow', label: 'Yellow', emoji: '🟡' },
+  { value: 'theme-orange', label: 'Orange', emoji: '🟠' },
+  { value: 'theme-red', label: 'Red', emoji: '🔴' },
+  { value: 'theme-rose', label: 'Rose', emoji: '🌹' },
 ];
 
 export default function OnboardingForm({
@@ -33,138 +54,103 @@ export default function OnboardingForm({
       <input type="hidden" name="avatarUrl" value={avatarUrl} />
 
       {/* Profile Picture */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-4">
-          Profile Picture
-        </label>
-        <Avatar
-          uid={userId}
-          url={avatarUrl}
-          size={120}
-          onUpload={(url) => {
-            setAvatarUrl(url);
-          }}
-        />
-        <p className="mt-2 text-sm text-gray-500">
-          Upload a profile picture to help others recognize you (optional)
-        </p>
+      <div className="space-y-2">
+        <Label>Profile Picture</Label>
+        <Card className="p-4">
+          <div className="flex flex-col items-center space-y-4">
+            <Avatar
+              uid={userId}
+              url={avatarUrl}
+              size={120}
+              onUpload={(url) => {
+                setAvatarUrl(url);
+              }}
+            />
+            <p className="text-sm text-muted-foreground text-center">
+              Upload a profile picture to help others recognize you (optional)
+            </p>
+          </div>
+        </Card>
       </div>
 
-      {/* Name */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Full Name *
-        </label>
-        <div className="mt-1">
-          <input
-            type="text"
-            name="name"
-            id="name"
-            required
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Enter your full name"
-            defaultValue={initialName}
-          />
-        </div>
-      </div>
+      {/* Name - Hidden since it comes from signup */}
+      <input type="hidden" name="name" value={initialName} />
 
       {/* Program */}
-      <div>
-        <label
-          htmlFor="program"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Program/Major *
-        </label>
-        <div className="mt-1">
-          <select
-            name="program"
-            id="program"
-            required
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="">Select your program</option>
+      <div className="space-y-2">
+        <Label htmlFor="program">Program/Major *</Label>
+        <Select name="program" required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select your program" />
+          </SelectTrigger>
+          <SelectContent>
             {programs.map((program) => (
-              <option key={program} value={program}>
+              <SelectItem key={program} value={program}>
                 {program}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </div>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Color Scheme */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+      <div className="space-y-3">
+        <Label className="flex items-center gap-2">
+          <Palette className="h-4 w-4" />
           Choose Your Theme
-        </label>
-        <div className="grid grid-cols-2 gap-3">
+        </Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {colorSchemes.map((scheme) => (
-            <label
+            <Card
               key={scheme.value}
-              className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
+              className={`cursor-pointer transition-all ${
                 selectedColorScheme === scheme.value
-                  ? 'border-indigo-600 ring-2 ring-indigo-600'
-                  : 'border-gray-300'
+                  ? 'ring-2 ring-primary border-primary'
+                  : 'hover:border-primary/50'
               }`}
+              onClick={() => setSelectedColorScheme(scheme.value)}
             >
-              <input
-                type="radio"
-                name="colorScheme"
-                value={scheme.value}
-                checked={selectedColorScheme === scheme.value}
-                onChange={(e) => setSelectedColorScheme(e.target.value)}
-                className="sr-only"
-              />
-              <span className="flex flex-1">
-                <span className="flex flex-col">
-                  <span className="flex items-center">
-                    <span
-                      className={`w-4 h-4 rounded-full ${scheme.color} mr-2`}
-                    ></span>
-                    <span className="block text-sm font-medium text-gray-900">
-                      {scheme.label}
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </label>
+              <CardContent className="p-4">
+                <div className="flex flex-col items-center space-y-2">
+                  <span className="text-2xl">{scheme.emoji}</span>
+                  <span className="font-medium text-sm">{scheme.label}</span>
+                </div>
+                <input
+                  type="radio"
+                  name="colorScheme"
+                  value={scheme.value}
+                  checked={selectedColorScheme === scheme.value}
+                  onChange={(e) => setSelectedColorScheme(e.target.value)}
+                  className="sr-only"
+                />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
 
       {/* Privacy Setting */}
-      <div>
-        <div className="flex items-center">
-          <input
-            id="isPublic"
-            name="isPublic"
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-          />
-          <label
-            htmlFor="isPublic"
-            className="ml-2 block text-sm text-gray-900"
-          >
-            Make my profile public (others can see my course reviews)
-          </label>
-        </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="isPublic"
+          name="isPublic"
+          checked={isPublic}
+          onCheckedChange={(checked) => setIsPublic(checked as boolean)}
+        />
+        <Label htmlFor="isPublic" className="flex items-center gap-2">
+          {isPublic ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <EyeOff className="h-4 w-4" />
+          )}
+          Make my profile public (others can see my course reviews)
+        </Label>
       </div>
 
       {/* Submit Button */}
-      <div className="pt-4">
-        <button
-          type="submit"
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Complete Setup
-        </button>
-      </div>
+      <Button type="submit" className="w-full" size="lg">
+        Complete Setup
+      </Button>
     </form>
   );
 }

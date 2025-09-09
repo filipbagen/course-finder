@@ -1,16 +1,25 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import OnboardingForm from './onboarding-form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { GraduationCap } from 'lucide-react';
 
 interface OnboardingPageProps {
-  searchParams: { name?: string };
+  searchParams: Promise<{ name?: string }>;
 }
 
 export default async function OnboardingPage({
   searchParams,
 }: OnboardingPageProps) {
   const supabase = await createClient();
-  const { name } = searchParams;
+  const params = await searchParams;
+  const { name } = params;
 
   const {
     data: { user },
@@ -35,27 +44,28 @@ export default async function OnboardingPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
-                Welcome to Course Finder! 🎓
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Let's set up your profile to get started
-              </p>
-            </div>
-
-            <OnboardingForm
-              userId={user.id}
-              userEmail={user.email!}
-              initialName={name || ''}
-            />
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <GraduationCap className="h-12 w-12 text-primary" />
           </div>
-        </div>
-      </div>
+          <CardTitle className="text-3xl">
+            Welcome to Course Finder! 🎓
+          </CardTitle>
+          <CardDescription className="text-lg">
+            Let's set up your profile to get started
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <OnboardingForm
+            userId={user.id}
+            userEmail={user.email!}
+            initialName={name || ''}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
