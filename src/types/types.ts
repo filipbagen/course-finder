@@ -48,6 +48,10 @@ export interface Course {
     campus: string;
     vof: string;
   }[];
+  // Add reviews for rating aggregation
+  reviews?: {
+    rating: number;
+  }[];
 }
 
 export interface Enrollment {

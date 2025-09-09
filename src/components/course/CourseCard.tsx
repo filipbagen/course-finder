@@ -95,35 +95,49 @@ const CourseCard = ({
       ? `Block ${course.block.join(', ')}`
       : 'Block ?';
 
-  // Fetch course rating and reviews count
-  const [courseRating, setCourseRating] = useState<{
-    averageRating: number;
-    count: number;
-  }>({
-    averageRating: 0,
-    count: 0,
-  });
-
-  useEffect(() => {
-    const fetchCourseRating = async () => {
-      try {
-        const response = await fetch(`/api/courses/${course.id}/reviews`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            setCourseRating({
-              averageRating: data.data.averageRating,
-              count: data.data.reviews.length,
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching course rating:', error);
-      }
+  // Calculate rating from pre-fetched data instead of API call
+  const courseRating = React.useMemo(() => {
+    if (course.reviews && Array.isArray(course.reviews)) {
+      const ratings = course.reviews
+        .map((review: { rating: number }) => review.rating)
+        .filter((r: number) => r != null && !isNaN(r));
+      const averageRating =
+        ratings.length > 0
+          ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
+            ratings.length
+          : 0;
+      return {
+        averageRating,
+        count: ratings.length,
+      };
+    }
+    return {
+      averageRating: 0,
+      count: 0,
     };
+  }, [course.reviews]);
 
-    fetchCourseRating();
-  }, [course.id]);
+  // Remove the old useEffect that fetched ratings
+  // useEffect(() => {
+  //   const fetchCourseRating = async () => {
+  //     try {
+  //       const response = await fetch(`/api/courses/${course.id}/reviews`);
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         if (data.success && data.data) {
+  //           setCourseRating({
+  //             averageRating: data.data.averageRating,
+  //             count: data.data.reviews.length,
+  //           });
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching course rating:', error);
+  //     }
+  //   };
+  //
+  //   fetchCourseRating();
+  // }, [course.id]);
 
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number | number[]) => {

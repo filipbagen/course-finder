@@ -266,6 +266,17 @@ export async function GET(
         courseType: true,
         offeredFor: true,
         credits: true,
+        // Include aggregated rating data to avoid N+1 queries
+        _count: {
+          select: {
+            review: true,
+          },
+        },
+        review: {
+          select: {
+            rating: true,
+          },
+        },
         // EXCLUDE heavy JSON fields that are not needed for list view:
         // - learningOutcomes (heavy JSON)
         // - content (heavy JSON)
