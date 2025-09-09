@@ -8,13 +8,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Enrollment {
+model enrollment {
   id       String @id @db.Uuid
   semester Int
   userId   String @db.Uuid
   courseId String @db.Uuid
-  course   course @relation("EnrollmentToCourse", fields: [courseId], references: [id], onDelete: Cascade)
-  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   course @relation("enrollmentToCourse", fields: [courseId], references: [id], onDelete: Cascade)
+  user     user   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId, semester])
   @@index([courseId])
@@ -22,7 +22,7 @@ model Enrollment {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model User {
+model user {
   id          String       @id @db.Uuid
   name        String
   email       String       @unique
@@ -32,7 +32,7 @@ model User {
   image       String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime
-  Enrollment  Enrollment[]
+  enrollment  enrollment[]
   review      review[]
 }
 
@@ -61,7 +61,7 @@ model course {
   examination              Json[]
   programInfo              Json[]
   semester                 BigInt[]
-  Enrollment               Enrollment[] @relation("EnrollmentToCourse")
+  enrollment               enrollment[] @relation("enrollmentToCourse")
   review                   review[]
 
   // Performance indexes for search and filtering
@@ -84,7 +84,7 @@ model review {
   userId    String   @db.Uuid
   courseId  String   @db.Uuid
   course    course   @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "Review_courseId_fkey")
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
 
   @@unique([userId, courseId], map: "Review_userId_courseId_key")
   @@index([courseId], map: "Review_courseId_idx")
