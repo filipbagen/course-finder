@@ -577,6 +577,9 @@ export const CourseDetailsSheet = () => {
               <SheetTitle className="text-2xl font-bold">
                 {course.name}
               </SheetTitle>
+              <SheetDescription className="sr-only">
+                Kursinformation och recensioner
+              </SheetDescription>
               {!loading && (
                 <div className="flex items-center gap-2 mt-2">
                   {reviewsData.count > 0 ? (
