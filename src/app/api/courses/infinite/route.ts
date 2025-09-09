@@ -37,10 +37,14 @@ export async function GET(
     const whereConditions: any = {};
 
     if (search) {
-      whereConditions.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-      ];
+      // Optimize search by using more efficient patterns
+      const searchTerm = search.trim();
+      if (searchTerm.length > 0) {
+        whereConditions.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { code: { contains: searchTerm, mode: 'insensitive' } },
+        ];
+      }
     }
 
     if (campus) {
@@ -164,10 +168,13 @@ export async function GET(
     }
     orderByArray.push({ id: 'asc' }); // Final tie-breaker
 
-    // Build query options to fetch only essential course data for the list
+    // Build query options with pagination from the start for better performance
     const queryOptions: any = {
       where: whereConditions,
       orderBy: orderByArray,
+      take: limit + 1, // Take one extra to check if there's a next page
+      skip: cursor ? 1 : 0, // Skip the cursor item if provided
+      cursor: cursor ? { id: cursor } : undefined,
       select: {
         id: true,
         code: true,
@@ -197,29 +204,26 @@ export async function GET(
       },
     };
 
-    const allCourses = await prisma.course.findMany(queryOptions);
+    const courses = await prisma.course.findMany(queryOptions);
 
     // Transform data
-    let filteredCourses = transformCourses(allCourses) as unknown as Course[];
+    let filteredCourses = transformCourses(courses) as unknown as Course[];
 
-    // Skip examination filtering in the initial course list for performance
-    // If examination filters are needed, implement a separate filtering API
-    // or include minimal examination data in the initial query
-
-    // Now, apply pagination to the fully filtered and sorted list
-    const totalCount = filteredCourses.length;
-    let paginatedCourses = filteredCourses;
-
-    if (cursor) {
-      const cursorIndex = paginatedCourses.findIndex((c) => c.id === cursor);
-      if (cursorIndex !== -1) {
-        paginatedCourses = paginatedCourses.slice(cursorIndex + 1);
-      }
-    }
-
-    const items = paginatedCourses.slice(0, limit);
-    const hasNextPage = paginatedCourses.length > limit;
+    // Check if there's a next page
+    const hasNextPage = filteredCourses.length > limit;
+    const items = hasNextPage
+      ? filteredCourses.slice(0, limit)
+      : filteredCourses;
     const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
+
+    // Get total count for this query (only when no cursor for performance)
+    let totalCount = null;
+    if (!cursor) {
+      const countQuery = await prisma.course.count({
+        where: whereConditions,
+      });
+      totalCount = countQuery;
+    }
 
     return NextResponse.json({
       success: true,

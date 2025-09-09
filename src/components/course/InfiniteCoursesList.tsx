@@ -171,33 +171,38 @@ export function InfiniteCoursesList({
     return false;
   }, [search, filters]);
 
-  // Also add a delay after loading to prevent flickering of the empty state
-  const [showEmptyState, setShowEmptyState] = useState(false);
+  // Track if we've received a definitive response (either data or confirmed empty)
+  const [hasReceivedResponse, setHasReceivedResponse] = useState(false);
 
-  // When loading changes, add a longer delay before showing empty state
+  // Reset response state when search/filters change
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (!loading && !isLoadingMore && courses.length === 0 && !error) {
-      timer = setTimeout(() => {
-        setShowEmptyState(true);
-      }, 2000); // Increase to 2 seconds to give more time for data to load
-    } else {
-      setShowEmptyState(false);
+    setHasReceivedResponse(false);
+  }, [search, filters]);
+
+  // Mark as received response when we get data or finish loading
+  useEffect(() => {
+    if (!loading && !isLoadingMore) {
+      setHasReceivedResponse(true);
     }
-    return () => clearTimeout(timer);
-  }, [loading, isLoadingMore, courses.length, error]);
+  }, [loading, isLoadingMore]);
 
   // Always show skeletons if this is the initial load and we have no courses yet
   if (
     ((loading || isLoadingMore) && courses.length === 0) ||
-    (!loading && !isLoadingMore && courses.length === 0 && !showEmptyState)
+    (!hasReceivedResponse && courses.length === 0)
   ) {
     return (
       <div className="space-y-6">
         {/* Results summary with sorting and view controls */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Laddar kurser...</span>
+            <span>
+              {loading || isLoadingMore
+                ? search
+                  ? `Söker efter "${search}"...`
+                  : 'Laddar kurser...'
+                : 'Söker efter kurser...'}
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -262,9 +267,7 @@ export function InfiniteCoursesList({
         </div>
       </div>
     );
-  }
-
-  // Error state
+  } // Error state
   if (error && courses.length === 0) {
     return (
       <div className="space-y-4">
@@ -289,7 +292,7 @@ export function InfiniteCoursesList({
     !isLoadingMore &&
     courses.length === 0 &&
     !error &&
-    showEmptyState
+    hasReceivedResponse
   ) {
     return (
       <div className="space-y-6">

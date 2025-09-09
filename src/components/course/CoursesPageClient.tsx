@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InfiniteCoursesList } from '@/components/course/InfiniteCoursesList';
 import CourseFilter from '@/components/course/filter/CourseFilter';
 import { MobileFilterDialog } from '@/components/course/filter/MobileFilterDialog';
@@ -37,7 +37,8 @@ export function CoursesPageClient({
   initialSortBy,
   initialSortOrder,
 }: CoursesPageClientProps) {
-  const [search, setSearch] = useState(initialSearch || '');
+  const [searchInput, setSearchInput] = useState(initialSearch || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch || '');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const {
     filters,
@@ -49,6 +50,15 @@ export function CoursesPageClient({
     hasActiveFilters,
     syncMobileFilters,
   } = useFilters();
+
+  // Debounce search input to prevent excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Count active mobile filters
   const activeMobileFilterCount = (
@@ -85,8 +95,8 @@ export function CoursesPageClient({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Sök kurser..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -94,7 +104,7 @@ export function CoursesPageClient({
           {/* Courses List */}
           <InfiniteCoursesList
             isAuthenticated={isAuthenticated}
-            search={search}
+            search={debouncedSearch}
             filters={filters}
             onMobileFilterOpen={() => {
               syncMobileFilters();
