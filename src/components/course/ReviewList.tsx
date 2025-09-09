@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { StarRating } from './StarRating';
 
@@ -55,7 +55,6 @@ const ReviewList: React.FC<ReviewListProps> = ({
         throw new Error(result.error || 'Failed to delete review');
       }
 
-      // Notify parent component that a review was deleted
       onReviewDeleted();
     } catch (error) {
       console.error('Error deleting review:', error);

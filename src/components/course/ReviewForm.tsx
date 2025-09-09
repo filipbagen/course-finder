@@ -1,8 +1,6 @@
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { SubmitReviewButton } from '@/components/shared/SubmitButtons';
-import { Review } from '@/types/types';
 import { StarRating } from './StarRating';
 
 type ReviewFormProps = {
@@ -23,12 +21,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    console.log('Current rating state:', rating);
-  }, [rating]);
-
   const handleRatingChange = (newRating: number) => {
-    console.log(`handleRatingChange called with rating: ${newRating}`);
     setRating(newRating);
   };
 
@@ -39,8 +32,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       setError('Vänligen välj ett betyg');
       return;
     }
-
-    console.log('Submitting review with rating:', rating);
 
     setLoading(true);
     setError('');
@@ -103,14 +94,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-2">
-        <Textarea
-          value={comment}
-          placeholder="Skriv vad du tycker om kursen..."
-          onChange={(e) => setComment(e.target.value)}
-          className="min-h-[100px]"
-        />
-      </div>
+      <Textarea
+        value={comment}
+        placeholder="Skriv vad du tycker om kursen..."
+        onChange={(e) => setComment(e.target.value)}
+        className="min-h-[100px]"
+      />
+
       <div className="flex justify-end">
         <SubmitReviewButton
           loading={loading}

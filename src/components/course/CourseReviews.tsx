@@ -25,32 +25,6 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [userReview, setUserReview] = useState<Review | null>(null);
 
-  // For debugging
-  useEffect(() => {
-    console.log('Auth state:', {
-      user: user,
-      userExists: !!user,
-      userIsNull: user === null,
-      authLoading,
-    });
-    console.log('Enrollments state:', {
-      enrolledCourses,
-      courseIsEnrolled: enrolledCourses?.some(
-        (course) => course.id === courseId
-      ),
-      enrollmentsLoading,
-      courseId,
-      userReview,
-    });
-  }, [
-    user,
-    authLoading,
-    enrolledCourses,
-    enrollmentsLoading,
-    courseId,
-    userReview,
-  ]);
-
   // Check if the user is enrolled in this course
   const isUserEnrolled =
     (!enrollmentsLoading &&
@@ -103,15 +77,6 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     }
   }, [courseId, user]);
 
-  // Additional logging for userReview state
-  useEffect(() => {
-    console.log('User review state:', {
-      userReview,
-      hasReview: !!userReview,
-      userId: user?.id,
-    });
-  }, [userReview, user]);
-
   const handleReviewSubmitted = () => {
     fetchReviews();
   };
@@ -121,24 +86,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   };
 
   const getReviewSubmitInfo = () => {
-    // If user has already reviewed the course, don't show any message
-    if (userReview) {
-      return null;
-    }
+    if (userReview) return null;
+    if (authLoading || enrollmentsLoading) return null;
 
-    // Don't show any messages while authentication or enrollments are loading
-    if (authLoading || enrollmentsLoading) {
-      return null;
-    }
-
-    // Check if the user is null and authentication is not loading anymore
     if (user === null && !authLoading) {
       return 'Du måste vara inloggad för att recensera kursen.';
     } else if (user && !isUserEnrolled && !enrollmentsLoading) {
       return 'Du måste lägga till kursen i ditt schema för att kunna recensera den.';
-    } else {
-      return null;
     }
+    return null;
   };
 
   const reviewSubmitInfo = getReviewSubmitInfo();
@@ -183,13 +139,11 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           </div>
 
           {/* Reviews list */}
-          <div className="space-y-4">
-            <ReviewList
-              reviews={reviews}
-              currentUserId={user?.id}
-              onReviewDeleted={handleReviewDeleted}
-            />
-          </div>
+          <ReviewList
+            reviews={reviews}
+            currentUserId={user?.id}
+            onReviewDeleted={handleReviewDeleted}
+          />
 
           {/* Review form for enrolled users */}
           {user !== null && (isUserEnrolled || userReview) && !authLoading && (
