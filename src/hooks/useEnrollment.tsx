@@ -5,7 +5,6 @@ export const useEnrollment = (
   courseName: string,
   handleUpdateAfterDeletion?: (enrollmentId: string) => void
 ) => {
-
   const deleteEnrollment = useCallback(
     async (enrollmentId: string) => {
       try {
@@ -51,7 +50,22 @@ export const useEnrollment = (
           return;
         }
 
-        const enrollment = await response.json();
+        const result = await response.json();
+        console.log('Enrollment API response:', result); // Debug log
+
+        // Check if the response has the expected structure
+        if (
+          !result ||
+          !result.data ||
+          !result.data.enrollment ||
+          !result.data.enrollment.id
+        ) {
+          console.error('Invalid enrollment response structure:', result);
+          toast.success(`Added ${courseName} to schedule 🎉`);
+          return;
+        }
+
+        const enrollment = result.data;
 
         toast.success(`Added ${courseName} to schedule 🎉`, {
           action: {
@@ -60,7 +74,8 @@ export const useEnrollment = (
           },
         });
       } catch (error) {
-        console.error(error);
+        console.error('Error in addToEnrollment:', error);
+        toast.error('Failed to add course to schedule');
       }
     },
     [courseName, deleteEnrollment]
