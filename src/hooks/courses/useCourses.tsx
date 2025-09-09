@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Course, FilterState } from '@/types/types';
+import { Course, FilterState, TriState } from '@/types/types';
 
 // This is a custom hook that fetches courses from the API, based on the search query, sort order, and filters.
 export const useCourses = (
@@ -20,7 +20,15 @@ export const useCourses = (
     if (searchQuery) query.append('q', searchQuery);
     if (sortOrder) query.append('sort', sortOrder);
     Object.entries(filters).forEach(([key, values]) => {
-      if (values.length) {
+      if (key === 'examinations') {
+        // Handle examinations separately as it's a Record<string, TriState>
+        const examValues = Object.entries(values as Record<string, TriState>)
+          .filter(([, state]) => state === 'checked')
+          .map(([exam]) => exam);
+        if (examValues.length) {
+          query.append(key, examValues.join(','));
+        }
+      } else if (Array.isArray(values) && values.length) {
         query.append(key, values.join(','));
       }
     });

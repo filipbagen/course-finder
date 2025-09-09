@@ -25,8 +25,8 @@ interface UserSearchResult {
   program: string | null;
   image: string | null;
   _count: {
-    enrollments: number;
-    reviews: number;
+    enrollment: number;
+    review: number;
   };
 }
 
@@ -190,11 +190,11 @@ export function UserSearchComponent({
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <BookOpen className="h-3 w-3" />
-                        <span>{user._count.enrollments}</span>
+                        <span>{user._count.enrollment}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
-                        <span>{user._count.reviews}</span>
+                        <span>{user._count.review}</span>
                       </div>
                     </div>
                   </div>

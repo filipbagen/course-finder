@@ -83,51 +83,94 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 
           <TabsContent value="about">
             <div className="flex flex-col gap-6">
-              {course.prerequisites !== 'None' && (
+              {course.prerequisites && course.prerequisites.paragraph && (
                 <>
                   <div>
                     <h5>Förkunskaper</h5>
-                    <p>{course.prerequisites}</p>
+                    <p>{course.prerequisites.paragraph}</p>
+                    {course.prerequisites.list_items.length > 0 && (
+                      <ul className="list-disc list-inside mt-2">
+                        {course.prerequisites.list_items.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   <Separator />
                 </>
               )}
 
-              {course.recommendedPrerequisites !== 'None' && (
-                <>
-                  <div>
-                    <h5>Rekommenderade förkunskaper</h5>
-                    <p>{course.recommendedPrerequisites}</p>
-                  </div>
-                  <Separator />
-                </>
-              )}
+              {course.recommendedPrerequisites &&
+                course.recommendedPrerequisites.paragraph && (
+                  <>
+                    <div>
+                      <h5>Rekommenderade förkunskaper</h5>
+                      <p>{course.recommendedPrerequisites.paragraph}</p>
+                      {course.recommendedPrerequisites.list_items.length >
+                        0 && (
+                        <ul className="list-disc list-inside mt-2">
+                          {course.recommendedPrerequisites.list_items.map(
+                            (item, index) => (
+                              <li key={index}>{item}</li>
+                            )
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                    <Separator />
+                  </>
+                )}
 
-              {course.learningOutcomes && (
+              {course.learningOutcomes && course.learningOutcomes.paragraph && (
                 <>
                   <div>
                     <h5>Lärandemål</h5>
-                    <p>{course.learningOutcomes}</p>
+                    <p>{course.learningOutcomes.paragraph}</p>
+                    {course.learningOutcomes.list_items.length > 0 && (
+                      <ul className="list-disc list-inside mt-2">
+                        {course.learningOutcomes.list_items.map(
+                          (item, index) => (
+                            <li key={index}>{item}</li>
+                          )
+                        )}
+                      </ul>
+                    )}
                   </div>
                   <Separator />
                 </>
               )}
 
-              {course.content && (
+              {course.content && course.content.paragraph && (
                 <>
                   <div>
                     <h5>Kursinnehåll</h5>
-                    <p>{course.content}</p>
+                    <p>{course.content.paragraph}</p>
+                    {course.content.list_items.length > 0 && (
+                      <ul className="list-disc list-inside mt-2">
+                        {course.content.list_items.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   <Separator />
                 </>
               )}
 
-              {course.teachingMethods && (
+              {course.teachingMethods && course.teachingMethods.paragraph && (
                 <>
                   <div>
                     <h5>Undervisnings- och arbetsformer</h5>
-                    <p>{course.teachingMethods}</p>
+                    <p>{course.teachingMethods.paragraph}</p>
+                    {course.teachingMethods.list_items.length > 0 && (
+                      <ul className="list-disc list-inside mt-2">
+                        {course.teachingMethods.list_items.map(
+                          (item, index) => (
+                            <li key={index}>{item}</li>
+                          )
+                        )}
+                      </ul>
+                    )}
                   </div>
                   <Separator />
                 </>
@@ -151,8 +194,8 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
           <TabsContent value="examination">
             <h5>Examination</h5>
             <ul>
-              {course.examinations?.map((ex: Examination) => (
-                <li key={ex.id}>
+              {course.examination?.map((ex, index) => (
+                <li key={index}>
                   {ex.name}, {ex.code}, {ex.gradingScale}, {ex.credits}hp
                 </li>
               ))}
@@ -161,12 +204,15 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 
           <TabsContent value="reviews" className="flex flex-col gap-4">
             <h5>Skriv en recension</h5>
-            <ReviewForm courseId={course.id} addReview={addReview} />
+            <ReviewForm courseId={course.id} onReviewSubmitted={() => {}} />
             <Separator />
             {reviews.length === 0 ? (
               <p>Inga recensioner än.</p>
             ) : (
-              <ReviewListMemoized reviews={reviews} />
+              <ReviewListMemoized
+                reviews={reviews}
+                onReviewDeleted={() => {}}
+              />
             )}
           </TabsContent>
         </Tabs>

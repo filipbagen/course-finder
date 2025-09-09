@@ -51,6 +51,7 @@ export async function updateUserProfile(formData: FormData) {
         colorScheme,
         isPublic,
         image: avatarUrl || null,
+        updatedAt: new Date(),
       },
     });
 

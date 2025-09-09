@@ -4,7 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import { UserProfileComponent } from '@/components/students/UserProfileComponent';
 import { Separator } from '@/components/ui/separator';
 import { User } from 'lucide-react';
-import { course as Course, Enrollment, Review } from '@prisma/client';
+import { course as Course, enrollment, review } from '@prisma/client';
 
 // Define an explicit type for the user profile
 interface UserProfileWithDetails {
@@ -18,13 +18,13 @@ interface UserProfileWithDetails {
   createdAt: Date;
   updatedAt: Date;
   _count: {
-    enrollments: number;
-    reviews: number;
+    enrollment: number;
+    review: number;
   };
   totalCredits: number;
   coursesBySemester: Record<number, Course[]>;
-  enrollments: (Enrollment & { course: Course })[];
-  reviews: (Review & { course: { id: string; name: string; code: string } })[];
+  enrollments: (enrollment & { course: Course })[];
+  reviews: (review & { course: { id: string; name: string; code: string } })[];
 }
 
 async function getUserProfile(
@@ -40,8 +40,8 @@ async function getUserProfile(
       include: {
         _count: {
           select: {
-            Enrollment: true,
-            Review: true,
+            enrollment: true,
+            review: true,
           },
         },
       },
@@ -134,10 +134,10 @@ async function getUserProfile(
       totalCredits,
       coursesBySemester,
       _count: {
-        enrollments: user._count.Enrollment,
-        reviews: user._count.Review,
+        enrollment: enrollments.length,
+        review: reviews.length,
       },
-    } as UserProfileWithDetails;
+    };
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;

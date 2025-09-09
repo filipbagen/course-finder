@@ -33,8 +33,8 @@ interface UserProfileData {
   }[];
   reviews: any[];
   _count: {
-    enrollments: number;
-    reviews: number;
+    enrollment: number;
+    review: number;
   };
 }
 
@@ -179,7 +179,7 @@ export function UserProfileComponent({
                         <BookOpen className="h-4 w-4 text-blue-600" />
                       </div>
                       <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                        {userProfile._count.enrollments}
+                        {userProfile._count.enrollment}
                       </div>
                       <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">
                         Kurser
@@ -205,7 +205,7 @@ export function UserProfileComponent({
                         <Star className="h-4 w-4 text-purple-600" />
                       </div>
                       <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                        {userProfile._count.reviews}
+                        {userProfile._count.review}
                       </div>
                       <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">
                         Recensioner

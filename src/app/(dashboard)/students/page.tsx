@@ -15,8 +15,8 @@ interface UserSearchResult {
   program: string | null;
   image: string | null;
   _count: {
-    enrollments: number;
-    reviews: number;
+    enrollment: number;
+    review: number;
   };
 }
 
@@ -63,8 +63,8 @@ async function getUsers(
         image: true,
         _count: {
           select: {
-            Enrollment: true,
-            Review: true,
+            enrollment: true,
+            review: true,
           },
         },
       },
@@ -77,8 +77,8 @@ async function getUsers(
       ...user,
       name: user.name!, // Type assertion - we know name is non-null
       _count: {
-        enrollments: user._count.Enrollment,
-        reviews: user._count.Review,
+        enrollment: user._count.enrollment,
+        review: user._count.review,
       },
     })) as UserSearchResult[];
   } catch (error) {

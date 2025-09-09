@@ -6,14 +6,14 @@ import { prisma } from '@/lib/prisma';
 // GET /api/courses/{courseId}/reviews - Get all reviews for a course
 export async function GET(
   request: NextRequest,
-  context: { params: { courseId: string } }
+  context: { params: Promise<{ courseId: string }> }
 ) {
   try {
     // Authentication is optional for viewing reviews
     await getOptionalUser();
 
-    // Access params safely - need to await in Next.js 14+
-    const params = context.params;
+    // Access params safely - need to await in Next.js 15
+    const params = await context.params;
     const courseId = params.courseId;
 
     // Verify the course exists
@@ -35,7 +35,7 @@ export async function GET(
     const reviews = await prisma.review.findMany({
       where: { courseId },
       include: {
-        User: {
+        user: {
           select: {
             id: true,
             name: true,

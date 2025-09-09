@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date(),
         },
         include: {
-          User: {
+          user: {
             select: {
               id: true,
               name: true,
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date(),
         },
         include: {
-          User: {
+          user: {
             select: {
               id: true,
               name: true,

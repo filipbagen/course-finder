@@ -7,9 +7,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { courseId: string } }
+  context: { params: Promise<{ courseId: string }> }
 ): Promise<NextResponse> {
-  const courseId = context.params.courseId;
+  const params = await context.params;
+  const courseId = params.courseId;
 
   try {
     // Fetch the course with all its details
