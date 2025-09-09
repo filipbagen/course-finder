@@ -181,11 +181,17 @@ export default function ScheduleCourseCard({
         </CardContent>
       </Card>
 
-      {/* Hidden dialog trigger button */}
+      {/* Hidden dialog trigger button with proper accessibility */}
       <div className="hidden">
         <CourseReviewDialog
           course={course}
-          trigger={<button ref={dialogTriggerRef} type="button" />}
+          trigger={
+            <button
+              ref={dialogTriggerRef}
+              type="button"
+              aria-label={`View reviews for ${course.name}`}
+            />
+          }
         />
       </div>
     </div>
