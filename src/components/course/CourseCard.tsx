@@ -17,6 +17,12 @@ import {
   Star,
 } from 'lucide-react';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Course,
   CourseWithEnrollment,
   isCourseWithEnrollment,
@@ -61,10 +67,14 @@ const CourseCard = ({
   );
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent click from triggering when interacting with buttons or links
+    // Prevent click from triggering when interacting with buttons, links, or dropdown elements
     if (
       (e.target as HTMLElement).closest('button') ||
-      (e.target as HTMLElement).closest('a')
+      (e.target as HTMLElement).closest('a') ||
+      (e.target as HTMLElement).closest('[data-radix-collection-item]') ||
+      (e.target as HTMLElement).closest('[data-radix-menu-content]') ||
+      (e.target as HTMLElement).closest('[data-radix-dropdown-menu-content]') ||
+      (e.target as HTMLElement).closest('[role="menuitem"]')
     ) {
       return;
     }
@@ -121,15 +131,15 @@ const CourseCard = ({
   const handleEnrollment = (semester?: number | number[]) => {
     if (!addToEnrollment) return;
 
-    // Extract a usable semester value from the semester array
+    // Extract a usable semester value
     let targetSemester: number;
 
-    if (Array.isArray(semester) && semester.length > 0) {
-      // Use the first semester from the array
-      targetSemester = semester[0];
-    } else if (typeof semester === 'number') {
+    if (typeof semester === 'number') {
       // If it's already a number, use it directly
       targetSemester = semester;
+    } else if (Array.isArray(semester) && semester.length > 0) {
+      // Use the first semester from the array
+      targetSemester = semester[0];
     } else if (
       course.semester &&
       Array.isArray(course.semester) &&
@@ -164,10 +174,45 @@ const CourseCard = ({
       );
     }
 
+    // If course has multiple semesters, show dropdown
+    if (course.semester && course.semester.length > 1) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              className="h-8 w-8 p-0 cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {course.semester.map((semester) => (
+              <DropdownMenuItem
+                key={semester}
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEnrollment(semester);
+                }}
+              >
+                Lägg till i termin {semester}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    // Single semester or default case
     return (
       <Button
         size="sm"
-        onClick={() => handleEnrollment(course.semester)}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEnrollment(course.semester);
+        }}
         className="h-8 w-8 p-0"
       >
         <Plus className="h-4 w-4" />
