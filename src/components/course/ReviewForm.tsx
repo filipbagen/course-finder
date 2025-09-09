@@ -101,9 +101,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1 ml-12">
-          Klicka på en stjärna eller mellan stjärnor för en halvstjärna
-        </p>
       </div>
 
       <div className="flex gap-2">

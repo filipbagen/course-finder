@@ -40,15 +40,25 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
       ),
       enrollmentsLoading,
       courseId,
+      userReview,
     });
-  }, [user, authLoading, enrolledCourses, enrollmentsLoading, courseId]);
+  }, [
+    user,
+    authLoading,
+    enrolledCourses,
+    enrollmentsLoading,
+    courseId,
+    userReview,
+  ]);
 
   // Check if the user is enrolled in this course
   const isUserEnrolled =
-    !enrollmentsLoading &&
-    enrolledCourses &&
-    Array.isArray(enrolledCourses) &&
-    enrolledCourses.some((course) => course.id === courseId);
+    (!enrollmentsLoading &&
+      enrolledCourses &&
+      Array.isArray(enrolledCourses) &&
+      enrolledCourses.some((course) => course.id === courseId)) ||
+    // If the user has a review for this course, they must be enrolled
+    !!userReview;
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -93,6 +103,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     }
   }, [courseId, user]);
 
+  // Additional logging for userReview state
+  useEffect(() => {
+    console.log('User review state:', {
+      userReview,
+      hasReview: !!userReview,
+      userId: user?.id,
+    });
+  }, [userReview, user]);
+
   const handleReviewSubmitted = () => {
     fetchReviews();
   };
@@ -102,6 +121,11 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   };
 
   const getReviewSubmitInfo = () => {
+    // If user has already reviewed the course, don't show any message
+    if (userReview) {
+      return null;
+    }
+
     // Don't show any messages while authentication or enrollments are loading
     if (authLoading || enrollmentsLoading) {
       return null;
@@ -168,22 +192,19 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           </div>
 
           {/* Review form for enrolled users */}
-          {user !== null &&
-            isUserEnrolled &&
-            !authLoading &&
-            !enrollmentsLoading && (
-              <div className="pt-6 border-t border-border">
-                <h3 className="text-lg font-semibold mb-4">
-                  {userReview ? 'Redigera din recension' : 'Skriv en recension'}
-                </h3>
-                <ReviewForm
-                  courseId={courseId}
-                  onReviewSubmitted={handleReviewSubmitted}
-                  existingRating={userReview?.rating}
-                  existingComment={userReview?.comment}
-                />
-              </div>
-            )}
+          {user !== null && (isUserEnrolled || userReview) && !authLoading && (
+            <div className="pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold mb-4">
+                {userReview ? 'Redigera din recension' : 'Skriv en recension'}
+              </h3>
+              <ReviewForm
+                courseId={courseId}
+                onReviewSubmitted={handleReviewSubmitted}
+                existingRating={userReview?.rating}
+                existingComment={userReview?.comment}
+              />
+            </div>
+          )}
 
           {/* Message for users who can't review */}
           {reviewSubmitInfo && (
