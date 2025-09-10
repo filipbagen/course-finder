@@ -154,9 +154,8 @@ export function InfiniteCoursesList({
     ));
   }, [courses, isAuthenticated]);
 
-  // Check if any filters are active
+  // Check if any filters are active (excluding search)
   const hasActiveFilters = useMemo(() => {
-    if (search) return true;
     if (filters) {
       return (Object.keys(filters) as Array<keyof FilterState>).some((key) => {
         const filterValue = filters[key];
@@ -169,7 +168,7 @@ export function InfiniteCoursesList({
       });
     }
     return false;
-  }, [search, filters]);
+  }, [filters]);
 
   // Track if we've received a definitive response (either data or confirmed empty)
   const [hasReceivedResponse, setHasReceivedResponse] = useState(false);
@@ -193,8 +192,76 @@ export function InfiniteCoursesList({
   ) {
     return (
       <div className="space-y-6">
-        {/* Results summary with sorting and view controls */}
-        <div className="flex justify-between items-center">
+        {/* Mobile Layout - Filter/Sort buttons first, then loading text */}
+        <div className="lg:hidden space-y-4">
+          <div className="flex items-center gap-4">
+            {/* Mobile Filter Button - only show on mobile */}
+            {onMobileFilterOpen && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onMobileFilterOpen}
+                className="h-8 px-3 gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+                {hasActiveFilters && (
+                  <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                    •
+                  </span>
+                )}
+              </Button>
+            )}
+
+            {/* Sorting Controls */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-xs text-muted-foreground">
+                Sortera efter:
+              </span>
+              <Select
+                value={currentSortBy}
+                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
+              >
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="code">Kurskod</SelectItem>
+                  <SelectItem value="name">Namn</SelectItem>
+                  <SelectItem value="credits">Poäng</SelectItem>
+                  <SelectItem value="semester">Termin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setCurrentSortOrder(
+                    currentSortOrder === 'asc' ? 'desc' : 'asc'
+                  )
+                }
+                className="h-8 px-2 text-xs"
+              >
+                {currentSortOrder === 'asc' ? '↑' : '↓'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Loading text below buttons on mobile */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>
+              {loading || isLoadingMore
+                ? search
+                  ? `Söker efter "${search}"...`
+                  : 'Laddar kurser...'
+                : 'Söker efter kurser...'}
+            </span>
+          </div>
+        </div>
+
+        {/* Desktop Layout - Loading text and controls in one row */}
+        <div className="hidden lg:flex justify-between items-center">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>
               {loading || isLoadingMore
@@ -260,7 +327,8 @@ export function InfiniteCoursesList({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Skeleton cards with same responsive grid as regular cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <CourseCardSkeleton key={i} />
           ))}
@@ -382,8 +450,71 @@ export function InfiniteCoursesList({
 
   return (
     <div className="space-y-6">
-      {/* Results summary with sorting and view controls */}
-      <div className="flex justify-between items-center">
+      {/* Mobile Layout - Filter/Sort buttons first, then course count */}
+      <div className="lg:hidden space-y-4">
+        <div className="flex items-center gap-4">
+          {/* Mobile Filter Button */}
+          {onMobileFilterOpen && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onMobileFilterOpen}
+              className="h-8 px-3 gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+              {hasActiveFilters && (
+                <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                  •
+                </span>
+              )}
+            </Button>
+          )}
+
+          {/* Sorting Controls */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-xs text-muted-foreground">
+              Sortera efter:
+            </span>
+            <Select
+              value={currentSortBy}
+              onValueChange={(value: SortOption) => setCurrentSortBy(value)}
+            >
+              <SelectTrigger className="w-32 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="code">Kurskod</SelectItem>
+                <SelectItem value="name">Namn</SelectItem>
+                <SelectItem value="credits">Poäng</SelectItem>
+                <SelectItem value="semester">Termin</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                setCurrentSortOrder(currentSortOrder === 'asc' ? 'desc' : 'asc')
+              }
+              className="h-8 px-2 text-xs"
+            >
+              {currentSortOrder === 'asc' ? '↑' : '↓'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Course count below buttons on mobile */}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>
+            Visar {totalCount ?? courses.length}
+            {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
+          </span>
+        </div>
+      </div>
+
+      {/* Desktop Layout - Course count and controls in one row */}
+      <div className="hidden lg:flex justify-between items-center">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span>
             Visar {totalCount ?? courses.length}
@@ -448,8 +579,8 @@ export function InfiniteCoursesList({
         </div>
       </div>
 
-      {/* Courses display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Courses display - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
         {coursesDisplay}
       </div>
 

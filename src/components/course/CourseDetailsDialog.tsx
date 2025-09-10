@@ -1,13 +1,24 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { useCourseDetails } from '@/hooks/useCourseDetails';
@@ -472,7 +483,10 @@ const CourseDetails = ({
   );
 };
 
-export const CourseDetailsSheet = () => {
+export const CourseDetailsDialog = () => {
+  const [open, setOpen] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
   const {
     isOpen,
     onClose,
@@ -528,7 +542,12 @@ export const CourseDetailsSheet = () => {
     setError,
   ]);
 
+  useEffect(() => {
+    setOpen(isOpen);
+  }, [isOpen]);
+
   const handleClose = () => {
+    setOpen(false);
     onClose();
   };
 
@@ -568,18 +587,97 @@ export const CourseDetailsSheet = () => {
     }
   }, [course?.id]);
 
+  if (isDesktop) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="mb-6">
+            {course && (
+              <>
+                <DialogTitle className="text-2xl font-bold">
+                  {course.name}
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Kursinformation och recensioner
+                </DialogDescription>
+                {!loading && (
+                  <div className="flex items-center gap-2 mt-2">
+                    {reviewsData.count > 0 ? (
+                      <>
+                        <div className="flex items-center gap-1 flex-row">
+                          <StarRating
+                            initialValue={reviewsData.averageRating}
+                            size={18}
+                            allowFraction
+                            readonly
+                            fillColor="#ffd700"
+                            emptyColor="#e4e5e9"
+                            className="flex-shrink-0"
+                          />
+                          <span className="text-sm text-muted-foreground ml-2">
+                            {reviewsData.averageRating.toFixed(1)} (
+                            {reviewsData.count}{' '}
+                            {reviewsData.count === 1
+                              ? 'recension'
+                              : 'recensioner'}
+                            )
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Inga recensioner ännu
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto">
+            {loading && <p>Laddar kursinformation...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {!loading && !error && course && (
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="grid grid-cols-2 mb-6">
+                  <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                  <TabsTrigger value="reviews">
+                    Recensioner{' '}
+                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="info" className="space-y-8">
+                  <CourseDetails course={course} reviewsData={reviewsData} />
+                </TabsContent>
+
+                <TabsContent value="reviews">
+                  <CourseReviews
+                    courseId={course.id}
+                    onReviewDataUpdate={updateReviewData}
+                  />
+                </TabsContent>
+              </Tabs>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Sheet open={isOpen} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader className="mb-6">
+    <Drawer open={open} onOpenChange={handleClose}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="text-left">
           {course && (
             <>
-              <SheetTitle className="text-2xl font-bold">
+              <DrawerTitle className="text-xl font-bold">
                 {course.name}
-              </SheetTitle>
-              <SheetDescription className="sr-only">
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
                 Kursinformation och recensioner
-              </SheetDescription>
+              </DrawerDescription>
               {!loading && (
                 <div className="flex items-center gap-2 mt-2">
                   {reviewsData.count > 0 ? (
@@ -587,7 +685,7 @@ export const CourseDetailsSheet = () => {
                       <div className="flex items-center gap-1 flex-row">
                         <StarRating
                           initialValue={reviewsData.averageRating}
-                          size={18}
+                          size={16}
                           allowFraction
                           readonly
                           fillColor="#ffd700"
@@ -613,32 +711,35 @@ export const CourseDetailsSheet = () => {
               )}
             </>
           )}
-        </SheetHeader>
+        </DrawerHeader>
 
-        {loading && <p>Laddar kursinformation...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-        {!loading && !error && course && (
-          <Tabs defaultValue="info" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-6">
-              <TabsTrigger value="info">Kursinformation</TabsTrigger>
-              <TabsTrigger value="reviews">
-                Recensioner {reviewsData.count > 0 && `(${reviewsData.count})`}
-              </TabsTrigger>
-            </TabsList>
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          {loading && <p>Laddar kursinformation...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loading && !error && course && (
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList className="grid grid-cols-2 mb-6">
+                <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                <TabsTrigger value="reviews">
+                  Recensioner{' '}
+                  {reviewsData.count > 0 && `(${reviewsData.count})`}
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="info" className="space-y-8">
-              <CourseDetails course={course} reviewsData={reviewsData} />
-            </TabsContent>
+              <TabsContent value="info" className="space-y-6">
+                <CourseDetails course={course} reviewsData={reviewsData} />
+              </TabsContent>
 
-            <TabsContent value="reviews">
-              <CourseReviews
-                courseId={course.id}
-                onReviewDataUpdate={updateReviewData}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
-      </SheetContent>
-    </Sheet>
+              <TabsContent value="reviews">
+                <CourseReviews
+                  courseId={course.id}
+                  onReviewDataUpdate={updateReviewData}
+                />
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 };
