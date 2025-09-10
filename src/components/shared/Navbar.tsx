@@ -125,7 +125,7 @@ export async function Navbar() {
                 {/* User Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger className="ml-3">
-                    <div className="p-1 rounded-full backdrop-blur-sm transition-all duration-150">
+                    <div className="p-1 rounded-full transition-all duration-150">
                       <Avatar className="h-8 w-8">
                         <AvatarImage
                           src={userImage}
@@ -139,7 +139,7 @@ export async function Navbar() {
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-64 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl mt-2"
+                    className="w-64 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 shadow-2xl mt-2"
                     align="end"
                     forceMount
                   >
@@ -250,7 +250,7 @@ export async function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-64 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/30 shadow-2xl mt-2"
+                className="w-64 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 shadow-2xl mt-2"
                 align="end"
                 forceMount
               >
