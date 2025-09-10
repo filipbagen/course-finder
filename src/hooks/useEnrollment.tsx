@@ -69,7 +69,7 @@ export const useEnrollment = (
 
         toast.success(`Added ${courseName} to schedule 🎉`, {
           action: {
-            label: 'Undo',
+            label: 'Ångra',
             onClick: () => deleteEnrollment(enrollment.enrollment.id),
           },
         });
