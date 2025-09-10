@@ -32,6 +32,21 @@ export default async function ResetPasswordPage({
   // Await searchParams before using it
   const params = await searchParams;
 
+  // Check if user is authenticated (should be after code exchange)
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  // If not authenticated, redirect to forgot password
+  if (!user || userError) {
+    console.log(
+      'User not authenticated on reset password page, redirecting to forgot password'
+    );
+    redirect('/forgot-password?error=invalid-reset-link');
+  }
+
   async function updatePassword(formData: FormData) {
     'use server';
 
