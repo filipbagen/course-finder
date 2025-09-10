@@ -10,7 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Menu, Calendar, Users, Settings, LogOut, User, Lightbulb, Sparkles } from 'lucide-react';
+import {
+  Menu,
+  Calendar,
+  Users,
+  Settings,
+  LogOut,
+  User,
+  Lightbulb,
+  Sparkles,
+} from 'lucide-react';
 import { SignOutButton } from '@/components/shared/SignOutButton';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
