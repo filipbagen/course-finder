@@ -116,7 +116,7 @@ export function CoursesPageClient({
 
       {/* Mobile Filter Dialog */}
       <Dialog open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col mx-4 rounded-2xl">
           <DialogHeader>
             <DialogTitle>Filter kurser</DialogTitle>
             <DialogDescription>

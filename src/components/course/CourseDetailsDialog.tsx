@@ -46,7 +46,17 @@ import {
   ExternalLink,
   AlertTriangle,
   Star,
+  Plus,
+  LogIn,
 } from 'lucide-react';
+import { useEnrollment } from '@/hooks/useEnrollment';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const ConflictWarning = ({
   conflictingCourse,
@@ -508,6 +518,80 @@ export const CourseDetailsDialog = () => {
   const loading = storeLoading || fetchLoading;
   const error = storeError || fetchError;
 
+  // Enrollment Button Component
+  const EnrollmentButton = ({ course }: { course: Course }) => {
+    const { addToEnrollment } = useEnrollment(course.name);
+
+    // Handle enrollment for authenticated users
+    const handleEnrollment = (semester?: number | number[]) => {
+      if (!addToEnrollment) return;
+
+      // Extract a usable semester value
+      let targetSemester: number;
+
+      if (typeof semester === 'number') {
+        // If it's already a number, use it directly
+        targetSemester = semester;
+      } else if (Array.isArray(semester) && semester.length > 0) {
+        // Use the first semester from the array
+        targetSemester = semester[0];
+      } else if (
+        course.semester &&
+        Array.isArray(course.semester) &&
+        course.semester.length > 0
+      ) {
+        // Fallback to the course's first semester
+        targetSemester = course.semester[0];
+      } else {
+        // Default fallback
+        targetSemester = 1;
+      }
+
+      addToEnrollment(course.id, targetSemester);
+    };
+
+    // If course has multiple semesters, show dropdown
+    if (course.semester && course.semester.length > 1) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {course.semester.map((semester) => (
+              <DropdownMenuItem
+                key={semester}
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEnrollment(semester);
+                }}
+              >
+                Lägg till i termin {semester}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    // Single semester or default case
+    return (
+      <Button
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEnrollment(course.semester);
+        }}
+        className="h-8 w-8 p-0"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    );
+  };
+
   useEffect(() => {
     if (isOpen && courseId && course) {
       const loadDetailedCourseInfo = async () => {
@@ -590,47 +674,52 @@ export const CourseDetailsDialog = () => {
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="mb-6">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          <DialogHeader className="mb-6 pt-6">
             {course && (
               <>
-                <DialogTitle className="text-2xl font-bold">
-                  {course.name}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  Kursinformation och recensioner
-                </DialogDescription>
-                {!loading && (
-                  <div className="flex items-center gap-2 mt-2">
-                    {reviewsData.count > 0 ? (
-                      <>
-                        <div className="flex items-center gap-1 flex-row">
-                          <StarRating
-                            initialValue={reviewsData.averageRating}
-                            size={18}
-                            allowFraction
-                            readonly
-                            fillColor="#ffd700"
-                            emptyColor="#e4e5e9"
-                            className="flex-shrink-0"
-                          />
-                          <span className="text-sm text-muted-foreground ml-2">
-                            {reviewsData.averageRating.toFixed(1)} (
-                            {reviewsData.count}{' '}
-                            {reviewsData.count === 1
-                              ? 'recension'
-                              : 'recensioner'}
-                            )
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <DialogTitle className="text-2xl font-bold">
+                      {course.name}
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">
+                      Kursinformation och recensioner
+                    </DialogDescription>
+                    {!loading && (
+                      <div className="flex items-center gap-2 mt-2">
+                        {reviewsData.count > 0 ? (
+                          <>
+                            <div className="flex items-center gap-1 flex-row">
+                              <StarRating
+                                initialValue={reviewsData.averageRating}
+                                size={18}
+                                allowFraction
+                                readonly
+                                fillColor="#ffd700"
+                                emptyColor="#e4e5e9"
+                                className="flex-shrink-0"
+                              />
+                              <span className="text-sm text-muted-foreground ml-2">
+                                {reviewsData.averageRating.toFixed(1)} (
+                                {reviewsData.count}{' '}
+                                {reviewsData.count === 1
+                                  ? 'recension'
+                                  : 'recensioner'}
+                                )
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            Inga recensioner ännu
                           </span>
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        Inga recensioner ännu
-                      </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                  <EnrollmentButton course={course} />
+                </div>
               </>
             )}
           </DialogHeader>
@@ -668,47 +757,52 @@ export const CourseDetailsDialog = () => {
 
   return (
     <Drawer open={open} onOpenChange={handleClose}>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader className="text-left">
+      <DrawerContent className="max-h-[90vh] shadow-2xl">
+        <DrawerHeader className="text-left pt-6">
           {course && (
             <>
-              <DrawerTitle className="text-xl font-bold">
-                {course.name}
-              </DrawerTitle>
-              <DrawerDescription className="sr-only">
-                Kursinformation och recensioner
-              </DrawerDescription>
-              {!loading && (
-                <div className="flex items-center gap-2 mt-2">
-                  {reviewsData.count > 0 ? (
-                    <>
-                      <div className="flex items-center gap-1 flex-row">
-                        <StarRating
-                          initialValue={reviewsData.averageRating}
-                          size={16}
-                          allowFraction
-                          readonly
-                          fillColor="#ffd700"
-                          emptyColor="#e4e5e9"
-                          className="flex-shrink-0"
-                        />
-                        <span className="text-sm text-muted-foreground ml-2">
-                          {reviewsData.averageRating.toFixed(1)} (
-                          {reviewsData.count}{' '}
-                          {reviewsData.count === 1
-                            ? 'recension'
-                            : 'recensioner'}
-                          )
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <DrawerTitle className="text-xl font-bold">
+                    {course.name}
+                  </DrawerTitle>
+                  <DrawerDescription className="sr-only">
+                    Kursinformation och recensioner
+                  </DrawerDescription>
+                  {!loading && (
+                    <div className="flex items-center gap-2 mt-2">
+                      {reviewsData.count > 0 ? (
+                        <>
+                          <div className="flex items-center gap-1 flex-row">
+                            <StarRating
+                              initialValue={reviewsData.averageRating}
+                              size={16}
+                              allowFraction
+                              readonly
+                              fillColor="#ffd700"
+                              emptyColor="#e4e5e9"
+                              className="flex-shrink-0"
+                            />
+                            <span className="text-sm text-muted-foreground ml-2">
+                              {reviewsData.averageRating.toFixed(1)} (
+                              {reviewsData.count}{' '}
+                              {reviewsData.count === 1
+                                ? 'recension'
+                                : 'recensioner'}
+                              )
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          Inga recensioner ännu
                         </span>
-                      </div>
-                    </>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      Inga recensioner ännu
-                    </span>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
+                <EnrollmentButton course={course} />
+              </div>
             </>
           )}
         </DrawerHeader>

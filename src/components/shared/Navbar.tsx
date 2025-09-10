@@ -299,7 +299,7 @@ export async function Navbar() {
                         href="/courses"
                         className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
-                        <Calendar className="mr-3 h-4 w-4 text-gray-700" />
+                        <Telescope className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
                           Utforska
                         </span>
