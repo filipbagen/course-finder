@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Menu, Calendar, Users, Settings, LogOut, User } from 'lucide-react';
+import { Menu, Calendar, Users, Settings, LogOut, User, Lightbulb, Sparkles } from 'lucide-react';
 import { SignOutButton } from '@/components/shared/SignOutButton';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
@@ -148,7 +148,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
@@ -159,16 +159,38 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/settings"
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <Settings className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Settings
+                          Inställningar
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/feature-request"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
+                      >
+                        <Lightbulb className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Förslag på funktioner
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/updates"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
+                      >
+                        <Sparkles className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Vad är nytt
                         </span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/30" />
-                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors">
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
                     </DropdownMenuItem>
@@ -190,15 +212,15 @@ export async function Navbar() {
                 <Link href="/login">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg cursor-pointer"
                   >
-                    Sign In
+                    Logga in
                   </Button>
                 </Link>
 
                 <Link href="/signup">
-                  <Button className="text-sm font-medium rounded-xl px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150">
-                    Sign Up
+                  <Button className="text-sm font-medium rounded-xl px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150 cursor-pointer">
+                    Registrera dig
                   </Button>
                 </Link>
               </>
@@ -240,7 +262,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <Calendar className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
@@ -251,7 +273,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/schedule"
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <Calendar className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
@@ -262,7 +284,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/students"
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <Users className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
@@ -274,7 +296,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
@@ -285,16 +307,38 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/settings"
-                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <Settings className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Settings
+                          Inställningar
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/feature-request"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
+                      >
+                        <Lightbulb className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Förslag på funktioner
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
+                      <Link
+                        href="/updates"
+                        className="flex items-center w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
+                      >
+                        <Sparkles className="mr-3 h-4 w-4 text-gray-700" />
+                        <span className="font-medium text-gray-900">
+                          Vad är nytt
                         </span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/30" />
-                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors">
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
                     </DropdownMenuItem>
@@ -305,7 +349,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="w-full p-3 hover:bg-white/50 transition-colors"
+                        className="w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <span className="font-medium text-gray-900">
                           Utforska kurser
@@ -316,20 +360,20 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/login"
-                        className="w-full p-3 hover:bg-white/50 transition-colors"
+                        className="w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <span className="font-medium text-gray-900">
-                          Sign In
+                          Logga in
                         </span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/signup"
-                        className="font-semibold w-full p-3 hover:bg-white/50 transition-colors"
+                        className="font-semibold w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                          Sign Up
+                          Registrera dig
                         </span>
                       </Link>
                     </DropdownMenuItem>

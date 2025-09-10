@@ -7,7 +7,7 @@ export function SignOutButton() {
         type="submit"
         className="w-full text-left text-sm p-0 bg-transparent border-none cursor-pointer"
       >
-        Sign Out
+        Logga ut
       </button>
     </form>
   );
