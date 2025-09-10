@@ -28,25 +28,52 @@ export function ScheduleGrid() {
   if (loading) {
     return (
       <div className="w-full space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Semester headers */}
+        {/* Mobile Loading Layout */}
+        <div className="md:hidden space-y-6">
+          {/* Semester 7 Header */}
           <SkeletonCard variant="schedule" />
+
+          {/* Semester 7 Periods */}
+          <SkeletonCard variant="schedule" />
+          <SkeletonCard variant="schedule" />
+
+          {/* Semester 8 Header */}
+          <SkeletonCard variant="schedule" />
+
+          {/* Semester 8 Periods */}
+          <SkeletonCard variant="schedule" />
+          <SkeletonCard variant="schedule" />
+
+          {/* Semester 9 Header */}
+          <SkeletonCard variant="schedule" />
+
+          {/* Semester 9 Periods */}
           <SkeletonCard variant="schedule" />
           <SkeletonCard variant="schedule" />
         </div>
 
-        {/* Period 1 row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <SkeletonCard variant="schedule" />
-          <SkeletonCard variant="schedule" />
-          <SkeletonCard variant="schedule" />
-        </div>
+        {/* Desktop Loading Layout */}
+        <div className="hidden md:block">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Semester headers */}
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+          </div>
 
-        {/* Period 2 row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <SkeletonCard variant="schedule" />
-          <SkeletonCard variant="schedule" />
-          <SkeletonCard variant="schedule" />
+          {/* Period 1 row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+          </div>
+
+          {/* Period 2 row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+            <SkeletonCard variant="schedule" />
+          </div>
         </div>
       </div>
     );
@@ -67,55 +94,166 @@ export function ScheduleGrid() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Semester Headers */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {semesters.map((semester) => (
-          <div key={semester} className="text-center p-4 bg-muted rounded-lg">
-            <h3 className="text-lg font-semibold text-foreground">
-              Termin {semester}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {getSemesterDescription(semester)}
-            </p>
+      {/* Mobile Layout - Single Column */}
+      <div className="md:hidden space-y-6">
+        {/* Semester 7 Header */}
+        <div className="text-center p-4 bg-primary/10 rounded-lg">
+          <h3 className="text-lg font-semibold text-foreground">Termin 7</h3>
+          <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
+        </div>
+
+        {/* Semester 7 - Period 1 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
           </div>
-        ))}
+          <SemesterBlock
+            semester={7}
+            period={1}
+            courses={schedule?.semester7?.period1 || []}
+            dropZoneId="semester7-period1"
+          />
+        </div>
+
+        {/* Semester 7 - Period 2 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
+          </div>
+          <SemesterBlock
+            semester={7}
+            period={2}
+            courses={schedule?.semester7?.period2 || []}
+            dropZoneId="semester7-period2"
+          />
+        </div>
+
+        {/* Semester 8 Header */}
+        <div className="text-center p-4 bg-primary/10 rounded-lg">
+          <h3 className="text-lg font-semibold text-foreground">Termin 8</h3>
+          <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
+        </div>
+
+        {/* Semester 8 - Period 1 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
+          </div>
+          <SemesterBlock
+            semester={8}
+            period={1}
+            courses={schedule?.semester8?.period1 || []}
+            dropZoneId="semester8-period1"
+          />
+        </div>
+
+        {/* Semester 8 - Period 2 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
+          </div>
+          <SemesterBlock
+            semester={8}
+            period={2}
+            courses={schedule?.semester8?.period2 || []}
+            dropZoneId="semester8-period2"
+          />
+        </div>
+
+        {/* Semester 9 Header */}
+        <div className="text-center p-4 bg-primary/10 rounded-lg">
+          <h3 className="text-lg font-semibold text-foreground">Termin 9</h3>
+          <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
+        </div>
+
+        {/* Semester 9 - Period 1 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
+          </div>
+          <SemesterBlock
+            semester={9}
+            period={1}
+            courses={schedule?.semester9?.period1 || []}
+            dropZoneId="semester9-period1"
+          />
+        </div>
+
+        {/* Semester 9 - Period 2 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 bg-primary rounded-full" />
+            <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
+          </div>
+          <SemesterBlock
+            semester={9}
+            period={2}
+            courses={schedule?.semester9?.period2 || []}
+            dropZoneId="semester9-period2"
+          />
+        </div>
       </div>
 
-      {/* Schedule Grid */}
-      <div className="space-y-8">
-        {periods.map((period) => (
-          <div key={period} className="space-y-4">
-            {/* Period Header */}
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period {period}
+      {/* Desktop Layout - Original 2x3 Grid */}
+      <div className="hidden md:block">
+        {/* Semester Headers */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {semesters.map((semester) => (
+            <div
+              key={semester}
+              className="text-center p-4 bg-primary/10 rounded-lg"
+            >
+              <h3 className="text-lg font-semibold text-foreground">
+                Termin {semester}
               </h3>
-              <div className="flex-1 h-px bg-border" />
+              <p className="text-sm text-muted-foreground mt-1">
+                {getSemesterDescription(semester)}
+              </p>
             </div>
+          ))}
+        </div>
 
-            {/* Period Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {semesters.map((semester) => {
-                const semesterKey =
-                  `semester${semester}` as keyof typeof schedule;
-                const periodKey =
-                  `period${period}` as keyof (typeof schedule)[typeof semesterKey];
-                const courses = schedule?.[semesterKey]?.[periodKey] || [];
+        {/* Schedule Grid */}
+        <div className="space-y-8">
+          {periods.map((period) => (
+            <div key={period} className="space-y-4">
+              {/* Period Header */}
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-8 bg-primary rounded-full" />
+                <h3 className="text-xl font-semibold text-foreground">
+                  Period {period}
+                </h3>
+                <div className="flex-1 h-px bg-border" />
+              </div>
 
-                return (
-                  <SemesterBlock
-                    key={`${semester}-${period}`}
-                    semester={semester}
-                    period={period}
-                    courses={courses}
-                    dropZoneId={`semester${semester}-period${period}`}
-                  />
-                );
-              })}
+              {/* Period Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {semesters.map((semester) => {
+                  const semesterKey =
+                    `semester${semester}` as keyof typeof schedule;
+                  const periodKey =
+                    `period${period}` as keyof (typeof schedule)[typeof semesterKey];
+                  const courses = schedule?.[semesterKey]?.[periodKey] || [];
+
+                  return (
+                    <SemesterBlock
+                      key={`${semester}-${period}`}
+                      semester={semester}
+                      period={period}
+                      courses={courses}
+                      dropZoneId={`semester${semester}-period${period}`}
+                    />
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

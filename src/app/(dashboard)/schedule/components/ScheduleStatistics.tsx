@@ -143,37 +143,45 @@ export function ScheduleStatistics() {
     <div className="space-y-6">
       {/* Main Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        {/* Total Credits */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Totala poäng</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCredits} hp</div>
-            <p className="text-xs text-muted-foreground">
-              av {expectedTotalCredits} hp krävda
-            </p>
-            <Progress value={progressPercentage} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
+        {/* Total Credits and Advanced Credits side by side on mobile */}
+        <div className="grid grid-cols-2 gap-4 md:contents">
+          {/* Total Credits */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Totala poäng
+              </CardTitle>
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalCredits} hp</div>
+              <p className="text-xs text-muted-foreground">
+                av {expectedTotalCredits} hp krävda
+              </p>
+              <Progress value={progressPercentage} className="mt-2 h-2" />
+            </CardContent>
+          </Card>
 
-        {/* Advanced Credits */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Avancerade poäng
-            </CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{advancedCredits} hp</div>
-            <p className="text-xs text-muted-foreground">
-              av {expectedAdvancedCredits} hp krävda
-            </p>
-            <Progress value={advancedProgressPercentage} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
+          {/* Advanced Credits */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Avancerade poäng
+              </CardTitle>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{advancedCredits} hp</div>
+              <p className="text-xs text-muted-foreground">
+                av {expectedAdvancedCredits} hp krävda
+              </p>
+              <Progress
+                value={advancedProgressPercentage}
+                className="mt-2 h-2"
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Main Field of Study */}
         <Card>
