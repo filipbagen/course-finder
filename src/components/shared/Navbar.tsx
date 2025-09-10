@@ -101,9 +101,9 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 rounded-xl hover:text-primary"
                   >
-                    <Telescope className="h-4 w-4" />
+                    <Telescope className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Utforska</span>
                   </Button>
                 </Link>
@@ -111,9 +111,9 @@ export async function Navbar() {
                 <Link href="/schedule">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 rounded-xl hover:text-primary"
                   >
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Schema</span>
                   </Button>
                 </Link>
@@ -121,9 +121,9 @@ export async function Navbar() {
                 <Link href="/students">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 rounded-xl hover:text-primary"
                   >
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Studenter</span>
                   </Button>
                 </Link>
@@ -131,8 +131,8 @@ export async function Navbar() {
                 {/* User Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger>
-                    <div className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg cursor-pointer">
-                      <CircleUser className="h-4 w-4" />
+                    <div className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 cursor-pointer hover:text-primary">
+                      <CircleUser className="h-4 w-4 transition-colors" />
                       <span className="text-[10px] font-medium">Profil</span>
                     </div>
                   </DropdownMenuTrigger>
@@ -224,9 +224,9 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 rounded-xl hover:text-primary"
                   >
-                    <Telescope className="h-4 w-4" />
+                    <Telescope className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Utforska</span>
                   </Button>
                 </Link>

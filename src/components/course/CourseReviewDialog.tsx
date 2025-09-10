@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +18,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -35,15 +39,20 @@ import {
   ArrowRightLeft,
   Users,
   Calendar,
-  Award,
+  SignpostBig,
+  School,
+  Target,
+  Plus,
+  LogIn,
 } from 'lucide-react';
 import { Course, CourseWithEnrollment } from '@/types/types';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSchedule } from '@/app/(dashboard)/schedule/components/ScheduleProvider';
 import { ScheduleActions } from '@/app/(dashboard)/schedule/types/schedule.types';
 import { StarRating } from './StarRating';
 import CourseReviews from './CourseReviews';
 import { cn } from '@/lib/utils';
+import { useEnrollment } from '@/hooks/useEnrollment';
+import Link from 'next/link';
 
 interface CourseReviewDialogProps {
   course: Course | CourseWithEnrollment;
@@ -51,6 +60,35 @@ interface CourseReviewDialogProps {
   onRemove?: (enrollmentId: string) => void;
   isFromSchedule?: boolean;
 }
+
+const DetailSection = ({
+  icon,
+  title,
+  children,
+  className,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      'rounded-xl bg-neutral-50 dark:bg-slate-800/50 p-4 transition-all hover:bg-neutral-100 dark:hover:bg-slate-800/80 border border-neutral-200 dark:border-slate-700/50',
+      className
+    )}
+  >
+    <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <h3 className="text-base font-semibold">{title}</h3>
+    </div>
+    <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground pl-11">
+      {children}
+    </div>
+  </div>
+);
 
 const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   course,
@@ -60,7 +98,6 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const isMobile = useMediaQuery('(max-width: 767px)');
   const { state, dispatch } = useSchedule();
 
   const [reviewsData, setReviewsData] = useState<{
@@ -146,182 +183,255 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
   const availableSemesters = getAvailableSemesters();
 
-  // Enhanced course info component for schedule view
-  const ScheduleCourseInfo = () => (
-    <div className="space-y-6">
-      {/* Key Information Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Examination */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <NotebookPen className="h-4 w-4 text-white" />
-            </div>
-            <h3 className="font-semibold text-blue-900 dark:text-blue-100">
-              Examination
-            </h3>
-          </div>
-          <div className="space-y-2">
-            {Array.isArray(course.examination) &&
-            course.examination.length > 0 ? (
-              course.examination.map((exam, index) => (
-                <div
-                  key={index}
-                  className="bg-white/60 dark:bg-slate-800/60 p-3 rounded-lg"
-                >
-                  <div className="font-medium text-sm">{exam.name}</div>
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>{exam.credits} hp</span>
-                    <span>{exam.gradingScale}</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Information saknas
-              </p>
-            )}
-          </div>
-        </div>
+  // Enrollment Button Component
+  const EnrollmentButton = () => {
+    const { addToEnrollment } = useEnrollment(course.name);
 
-        {/* Time & Hours */}
-        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 p-4 rounded-xl border border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <Clock className="h-4 w-4 text-white" />
-            </div>
-            <h3 className="font-semibold text-green-900 dark:text-green-100">
-              Tidsåtgång
-            </h3>
+    // Handle enrollment for authenticated users
+    const handleEnrollment = (semester?: number | number[]) => {
+      if (!addToEnrollment) return;
+
+      // Extract a usable semester value
+      let targetSemester: number;
+
+      if (typeof semester === 'number') {
+        // If it's already a number, use it directly
+        targetSemester = semester;
+      } else if (Array.isArray(semester) && semester.length > 0) {
+        // Use the first semester from the array
+        targetSemester = semester[0];
+      } else if (
+        course.semester &&
+        Array.isArray(course.semester) &&
+        course.semester.length > 0
+      ) {
+        // Fallback to the course's first semester
+        targetSemester = course.semester[0];
+      } else {
+        // Default fallback
+        targetSemester = 1;
+      }
+
+      addToEnrollment(course.id, targetSemester);
+    };
+
+    // If course has multiple semesters, show dropdown
+    if (course.semester && course.semester.length > 1) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {course.semester.map((semester) => (
+              <DropdownMenuItem
+                key={semester}
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEnrollment(semester);
+                }}
+              >
+                Lägg till i termin {semester}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    // Single semester or default case
+    return (
+      <Button
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEnrollment(course.semester);
+        }}
+        className="h-8 w-8 p-0"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    );
+  };
+
+  // Simplified course info component
+  const CourseInfo = () => (
+    <div className="space-y-6">
+      {/* Course Header Info */}
+      <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 p-5 border border-neutral-200 dark:border-slate-700/50">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Kurskod
+            </p>
+            <p className="font-medium text-lg">{course.code}</p>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                Schemalagd tid
-              </span>
-              <span className="font-medium">
-                {course.scheduledHours ? `${course.scheduledHours}h` : 'Okänt'}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                Självstudier
-              </span>
-              <span className="font-medium">
-                {course.selfStudyHours ? `${course.selfStudyHours}h` : 'Okänt'}
-              </span>
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-green-200 dark:border-green-700">
-              <span className="text-sm font-medium">Totalt</span>
-              <span className="font-bold text-green-700 dark:text-green-300">
-                {course.credits} hp
-              </span>
-            </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Poäng
+            </p>
+            <p className="font-medium text-lg">{course.credits} hp</p>
           </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Nivå
+            </p>
+            <p className="font-medium">
+              {course.advanced ? 'Avancerad' : 'Grundnivå'}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Kurstyp
+            </p>
+            <p className="font-medium">
+              {course.courseType || 'Information saknas'}
+            </p>
+          </div>
+
+          {/* Rating information if available */}
+          {reviewsData.count > 0 && (
+            <div className="col-span-2 mt-2 pt-3 border-t border-neutral-200 dark:border-slate-700/50">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                Betyg från studenter
+              </p>
+              <div className="flex items-center gap-2 flex-row">
+                <StarRating
+                  initialValue={reviewsData.averageRating}
+                  size={20}
+                  allowFraction
+                  readonly
+                  fillColor="#ffd700"
+                  emptyColor="#e4e5e9"
+                  className="flex-shrink-0"
+                />
+                <span className="font-medium ml-2">
+                  {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
+                  {reviewsData.count === 1 ? 'recension' : 'recensioner'})
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Secondary Information */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Campus */}
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <MapPin className="h-4 w-4 text-white" />
-            </div>
-            <h3 className="font-semibold text-purple-900 dark:text-purple-100">
-              Campus
-            </h3>
-          </div>
-          <p className="text-lg font-medium">
-            {course.campus || 'Information saknas'}
-          </p>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Main Field of Study */}
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 p-4 rounded-xl border border-orange-200 dark:border-orange-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-              <BookOpen className="h-4 w-4 text-white" />
-            </div>
-            <h3 className="font-semibold text-orange-900 dark:text-orange-100">
-              Huvudområde
-            </h3>
-          </div>
+        <DetailSection
+          icon={<SignpostBig className="h-4 w-4" />}
+          title="Huvudområden"
+        >
           <div className="flex flex-wrap gap-2">
             {course.mainFieldOfStudy && course.mainFieldOfStudy.length > 0 ? (
               course.mainFieldOfStudy.map((field) => (
-                <Badge
-                  key={field}
-                  variant="secondary"
-                  className="bg-white/80 dark:bg-slate-700/80"
-                >
+                <Badge key={field} variant="default" className="rounded-full">
                   {field}
                 </Badge>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">
-                Inget specificerat
-              </p>
+              <p>Inget huvudområde specificerat.</p>
             )}
           </div>
+        </DetailSection>
+
+        {/* Campus Info */}
+        <DetailSection icon={<School className="h-4 w-4" />} title="Campus">
+          <p>{course.campus || 'Information saknas'}</p>
+        </DetailSection>
+
+        {/* Time and Schedule side by side */}
+        <div className="grid grid-cols-2 gap-4 md:contents">
+          {/* Time Info */}
+          <DetailSection
+            icon={<Clock className="h-4 w-4" />}
+            title="Tidsåtgång"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Schemalagd tid</p>
+                <p className="font-medium">
+                  {course.scheduledHours
+                    ? `${Number(course.scheduledHours)}h`
+                    : 'Okänt'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Självstudier</p>
+                <p className="font-medium">
+                  {course.selfStudyHours
+                    ? `${Number(course.selfStudyHours)}h`
+                    : 'Okänt'}
+                </p>
+              </div>
+            </div>
+          </DetailSection>
+
+          {/* Schedule Info */}
+          <DetailSection icon={<Calendar className="h-4 w-4" />} title="Schema">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Termin</p>
+                <p className="font-medium">
+                  {course.semester?.length > 0
+                    ? `${course.semester.join(', ')}`
+                    : 'T?'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Period</p>
+                <p className="font-medium">
+                  {course.period?.length > 0
+                    ? `${course.period.join('+')}`
+                    : 'P?'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Block</p>
+                <p className="font-medium">
+                  {course.block?.length > 0
+                    ? `${course.block.join(', ')}`
+                    : 'Block ?'}
+                </p>
+              </div>
+            </div>
+          </DetailSection>
         </div>
       </div>
 
-      {/* Schedule Info */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950/50 dark:to-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-slate-500 rounded-full flex items-center justify-center">
-            <Calendar className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-            Schema
-          </h3>
-        </div>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Termin</p>
-            <p className="font-medium">
-              {course.semester?.length > 0 ? course.semester.join(', ') : 'T?'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Period</p>
-            <p className="font-medium">
-              {course.period?.length > 0 ? course.period.join('+') : 'P?'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Block</p>
-            <p className="font-medium">
-              {course.block?.length > 0 ? course.block.join(', ') : 'Block ?'}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Examination */}
+      <DetailSection
+        icon={<NotebookPen className="h-4 w-4" />}
+        title="Examination"
+      >
+        {Array.isArray(course.examination) && course.examination.length > 0 ? (
+          <ul className="space-y-2">
+            {course.examination.map((exam, index) => (
+              <li key={index} className="text-sm p-2 bg-white/5 rounded-lg">
+                <div className="font-medium">{exam.name}</div>
+                <div className="flex justify-between text-xs mt-1">
+                  <span>{exam.credits} hp</span>
+                  <span>Betygsskala: {exam.gradingScale}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Information saknas.</p>
+        )}
+      </DetailSection>
     </div>
   );
 
-  // Fetch review data on mount
+  // Reset review data when course changes
   useEffect(() => {
     if (course?.id) {
-      const fetchReviewData = async () => {
-        try {
-          const response = await fetch(`/api/courses/${course.id}/reviews`);
-          const result = await response.json();
-
-          if (response.ok && result.success) {
-            setReviewsData({
-              averageRating: result.data.averageRating,
-              count: result.data.reviews.length,
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching course reviews:', error);
-        }
-      };
-
-      fetchReviewData();
+      setReviewsData({
+        averageRating: 0,
+        count: 0,
+      });
     }
   }, [course?.id]);
 
@@ -414,12 +524,26 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-6 p-6">
-              <ScheduleCourseInfo />
-              <Separator />
-              <CourseReviews
-                courseId={course.id}
-                onReviewDataUpdate={updateReviewData}
-              />
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="grid grid-cols-2 mb-6">
+                  <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                  <TabsTrigger value="reviews">
+                    Recensioner{' '}
+                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="info" className="space-y-8">
+                  <CourseInfo />
+                </TabsContent>
+
+                <TabsContent value="reviews">
+                  <CourseReviews
+                    courseId={course.id}
+                    onReviewDataUpdate={updateReviewData}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </DialogContent>
@@ -428,7 +552,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   }
 
   // If from schedule and mobile, use Drawer
-  if (isFromSchedule && isMobile) {
+  if (isFromSchedule && !isDesktop) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
@@ -516,12 +640,26 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <div className="space-y-6">
-              <ScheduleCourseInfo />
-              <Separator />
-              <CourseReviews
-                courseId={course.id}
-                onReviewDataUpdate={updateReviewData}
-              />
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="grid grid-cols-2 mb-6">
+                  <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                  <TabsTrigger value="reviews">
+                    Recensioner{' '}
+                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="info" className="space-y-6">
+                  <CourseInfo />
+                </TabsContent>
+
+                <TabsContent value="reviews">
+                  <CourseReviews
+                    courseId={course.id}
+                    onReviewDataUpdate={updateReviewData}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </DrawerContent>
@@ -560,10 +698,25 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <CourseReviews
-          courseId={course.id}
-          onReviewDataUpdate={updateReviewData}
-        />
+        <Tabs defaultValue="info" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-6">
+            <TabsTrigger value="info">Kursinformation</TabsTrigger>
+            <TabsTrigger value="reviews">
+              Recensioner {reviewsData.count > 0 && `(${reviewsData.count})`}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="space-y-6">
+            <CourseInfo />
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <CourseReviews
+              courseId={course.id}
+              onReviewDataUpdate={updateReviewData}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

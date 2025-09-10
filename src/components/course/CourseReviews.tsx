@@ -32,7 +32,9 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
       Array.isArray(enrolledCourses) &&
       enrolledCourses.some((course) => course.id === courseId)) ||
     // If the user has a review for this course, they must be enrolled
-    !!userReview;
+    !!userReview ||
+    // Also check if user is enrolled via schedule context
+    false; // We'll add schedule check later if needed
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
@@ -69,13 +71,25 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [courseId, user, onReviewDataUpdate]);
+  }, [courseId]); // Only depend on courseId to prevent infinite loops
 
   useEffect(() => {
     if (courseId) {
       fetchReviews();
     }
-  }, [courseId, user, fetchReviews]);
+  }, [courseId]); // Only depend on courseId
+
+  // Separate effect to update user review when user or reviews change
+  useEffect(() => {
+    if (user && reviews.length > 0) {
+      const userReview = reviews.find(
+        (review: any) => review.userId === user.id
+      );
+      setUserReview(userReview || null);
+    } else if (!user) {
+      setUserReview(null);
+    }
+  }, [user, reviews]);
 
   const handleReviewSubmitted = () => {
     fetchReviews();
