@@ -175,7 +175,7 @@ export function useInfiniteCourses(
 
   useEffect(() => {
     refresh();
-  }, [search, sortBy, sortOrder, limit, filters]);
+  }, [search, sortBy, sortOrder, limit, filters, refresh]);
 
   useEffect(() => {
     return () => {

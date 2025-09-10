@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
@@ -34,7 +34,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     // If the user has a review for this course, they must be enrolled
     !!userReview;
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -69,13 +69,13 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId, user, onReviewDataUpdate]);
 
   useEffect(() => {
     if (courseId) {
       fetchReviews();
     }
-  }, [courseId, user]);
+  }, [courseId, user, fetchReviews]);
 
   const handleReviewSubmitted = () => {
     fetchReviews();

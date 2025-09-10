@@ -293,11 +293,13 @@ export default function ScheduleCourseCard({
       <div className="hidden">
         <CourseReviewDialog
           course={course}
+          isFromSchedule={true}
+          onRemove={onRemove}
           trigger={
             <button
               ref={dialogTriggerRef}
               type="button"
-              aria-label={`View reviews for ${course.name}`}
+              aria-label={`View details for ${course.name}`}
             />
           }
         />

@@ -10,10 +10,6 @@ export const useCourses = (
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    fetchData().catch(console.error);
-  }, [searchQuery, sortOrder, filters]);
-
   // Fetch courses from the API based on the search query, sort order, and filters
   const fetchData = useCallback(async () => {
     const query = new URLSearchParams();
