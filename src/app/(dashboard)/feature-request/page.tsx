@@ -1,4 +1,7 @@
+'use client';
+
 import { Metadata } from 'next';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Send } from 'lucide-react';
+import { Lightbulb, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Förslag på funktioner | Course Finder',
@@ -18,6 +21,46 @@ export const metadata: Metadata = {
 };
 
 export default function FeatureRequestPage() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !description.trim()) return;
+
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      const response = await fetch('/api/feature-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setTitle('');
+        setDescription('');
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -45,28 +88,65 @@ export default function FeatureRequestPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Titel</Label>
-                  <Input
-                    id="title"
-                    placeholder="Kort beskrivning av din idé..."
-                    className="w-full"
-                  />
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Titel</Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Kort beskrivning av din idé..."
+                      className="w-full"
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Beskrivning</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Beskriv din idé i detalj..."
-                    className="min-h-[100px] w-full"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Beskrivning</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Beskriv din idé i detalj..."
+                      className="min-h-[100px] w-full"
+                      required
+                    />
+                  </div>
 
-                <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150">
-                  <Send className="mr-2 h-4 w-4" />
-                  Skicka förslag
-                </Button>
+                  {submitStatus === 'success' && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <CheckCircle className="h-4 w-4" />
+                      Tack för ditt förslag! Vi har mottagit det.
+                    </div>
+                  )}
+
+                  {submitStatus === 'error' && (
+                    <div className="flex items-center gap-2 text-red-600 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Något gick fel. Försök igen senare.
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={
+                      isSubmitting || !title.trim() || !description.trim()
+                    }
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-150"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                        Skickar...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Skicka förslag
+                      </>
+                    )}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
@@ -80,7 +160,6 @@ export default function FeatureRequestPage() {
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>• Var så specifik som möjligt</p>
                 <p>• Förklara varför förslaget är viktigt</p>
-                <p>• Ett förslag per gång</p>
               </CardContent>
             </Card>
           </div>
