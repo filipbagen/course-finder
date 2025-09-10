@@ -97,7 +97,7 @@ export function ScheduleGrid() {
       {/* Mobile Layout - Single Column */}
       <div className="md:hidden space-y-6">
         {/* Semester 7 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg">
+        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
           <h3 className="text-lg font-semibold text-foreground">Termin 7</h3>
           <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
         </div>
@@ -131,7 +131,7 @@ export function ScheduleGrid() {
         </div>
 
         {/* Semester 8 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg">
+        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
           <h3 className="text-lg font-semibold text-foreground">Termin 8</h3>
           <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
         </div>
@@ -165,7 +165,7 @@ export function ScheduleGrid() {
         </div>
 
         {/* Semester 9 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg">
+        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
           <h3 className="text-lg font-semibold text-foreground">Termin 9</h3>
           <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
         </div>
@@ -219,7 +219,7 @@ export function ScheduleGrid() {
         </div>
 
         {/* Schedule Grid */}
-        <div className="space-y-8">
+        <div className="space-y-8 mt-3">
           {periods.map((period) => (
             <div key={period} className="space-y-4">
               {/* Period Header */}

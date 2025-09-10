@@ -49,6 +49,8 @@ import {
   Plus,
   LogIn,
 } from 'lucide-react';
+import { useSchedule } from '@/app/(dashboard)/schedule/components/ScheduleProvider';
+import { ScheduleActions } from '@/app/(dashboard)/schedule/types/schedule.types';
 import { useEnrollment } from '@/hooks/useEnrollment';
 import { Button } from '@/components/ui/button';
 import {
@@ -524,6 +526,21 @@ export const CourseDetailsDialog = () => {
   // Enrollment Button Component
   const EnrollmentButton = ({ course }: { course: Course }) => {
     const { addToEnrollment } = useEnrollment(course.name);
+    const isMobile = useMediaQuery('(max-width: 767px)');
+
+    // Try to get schedule context, but don't fail if it's not available
+    let scheduleContext: any = null;
+    try {
+      scheduleContext = useSchedule();
+    } catch (error) {
+      // Schedule context not available, that's okay
+    }
+
+    // Check if course is already enrolled
+    const isEnrolled = 'enrollment' in course;
+    const currentSemester = isEnrolled
+      ? (course as any).enrollment.semester
+      : null;
 
     // Handle enrollment for authenticated users
     const handleEnrollment = (semester?: number | number[]) => {
@@ -553,6 +570,96 @@ export const CourseDetailsDialog = () => {
       addToEnrollment(course.id, targetSemester);
     };
 
+    // Handle moving course to different semester
+    const handleMoveCourse = (toSemester: number) => {
+      if (!isEnrolled || !currentSemester || !scheduleContext) return;
+
+      // Find the course in the current schedule to get its period
+      const findCourseInSchedule = () => {
+        const semesters = [7, 8, 9] as const;
+        const periods = [1, 2] as const;
+
+        for (const semester of semesters) {
+          for (const period of periods) {
+            const semesterKey =
+              `semester${semester}` as keyof typeof scheduleContext.state.schedule;
+            const periodKey = `period${period}` as 'period1' | 'period2';
+            const courses =
+              scheduleContext.state.schedule[semesterKey][periodKey];
+
+            const foundCourse = courses.find((c: any) => c.id === course.id);
+            if (foundCourse) {
+              return { semester, period };
+            }
+          }
+        }
+        return null;
+      };
+
+      const currentLocation = findCourseInSchedule();
+      if (!currentLocation) return;
+
+      // Dispatch move action
+      scheduleContext.dispatch({
+        type: ScheduleActions.MOVE_COURSE,
+        payload: {
+          courseId: course.id,
+          fromSemester: currentLocation.semester,
+          fromPeriod: currentLocation.period,
+          toSemester,
+          toPeriod: currentLocation.period, // Keep same period
+        },
+      });
+    };
+
+    // Get available semesters for moving (only on mobile, only for semester 7/9 courses)
+    const getAvailableSemesters = () => {
+      if (!isEnrolled || !currentSemester || !isMobile || !scheduleContext)
+        return [];
+
+      // Only allow moving courses from semester 7 and 9, and only between 7 and 9
+      if (currentSemester === 7) {
+        return [9]; // Can move from 7 to 9
+      } else if (currentSemester === 9) {
+        return [7]; // Can move from 9 to 7
+      }
+      return []; // Semester 8 courses cannot be moved
+    };
+
+    const availableSemesters = getAvailableSemesters();
+
+    // If course is already enrolled and schedule context is available, show move options (only on mobile for 7/9)
+    if (
+      isEnrolled &&
+      scheduleContext &&
+      isMobile &&
+      availableSemesters.length > 0
+    ) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {availableSemesters.map((semester) => (
+              <DropdownMenuItem
+                key={semester}
+                className="cursor-pointer"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleMoveCourse(semester);
+                }}
+              >
+                Flytta till termin {semester}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
     // If course has multiple semesters, show dropdown
     if (course.semester && course.semester.length > 1) {
       return (
@@ -567,7 +674,7 @@ export const CourseDetailsDialog = () => {
               <DropdownMenuItem
                 key={semester}
                 className="cursor-pointer"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   handleEnrollment(semester);
                 }}
@@ -584,7 +691,7 @@ export const CourseDetailsDialog = () => {
     return (
       <Button
         size="sm"
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
           handleEnrollment(course.semester);
         }}
@@ -645,6 +752,13 @@ export const CourseDetailsDialog = () => {
     averageRating: 0,
     count: 0,
   });
+
+  // Check if course is enrolled and get current semester
+  const isEnrolled = course && 'enrollment' in course;
+  const currentSemester = isEnrolled
+    ? (course as any).enrollment.semester
+    : null;
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   // Function to update review data
   const updateReviewData = (averageRating: number, count: number) => {

@@ -10,8 +10,24 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Trash2, Calendar, BookOpen, Star } from 'lucide-react';
+import {
+  GripVertical,
+  Trash2,
+  Calendar,
+  BookOpen,
+  Star,
+  ArrowRightLeft,
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useSchedule } from './ScheduleProvider';
+import { ScheduleActions } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import CourseReviewDialog from '@/components/course/CourseReviewDialog';
 
@@ -42,6 +58,8 @@ export default function ScheduleCourseCard({
   onRemove,
   readonly = false,
 }: ScheduleCourseCardProps) {
+  const { state, dispatch } = useSchedule();
+  const isMobile = useMediaQuery('(max-width: 767px)');
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: course.id,
@@ -71,6 +89,63 @@ export default function ScheduleCourseCard({
       onRemove(course.enrollment.id);
     }
   };
+
+  // Handle course movement
+  const handleMoveCourse = (toSemester: number) => {
+    if (readonly) return;
+
+    // Find the course's current location
+    const findCurrentLocation = () => {
+      const semesters = [7, 8, 9] as const;
+      const periods = [1, 2] as const;
+
+      for (const semester of semesters) {
+        for (const period of periods) {
+          const semesterKey =
+            `semester${semester}` as keyof typeof state.schedule;
+          const periodKey = `period${period}` as 'period1' | 'period2';
+          const courses = state.schedule[semesterKey][periodKey];
+
+          const foundCourse = courses.find((c) => c.id === course.id);
+          if (foundCourse) {
+            return { semester, period };
+          }
+        }
+      }
+      return null;
+    };
+
+    const currentLocation = findCurrentLocation();
+    if (!currentLocation) return;
+
+    // Dispatch move action
+    dispatch({
+      type: ScheduleActions.MOVE_COURSE,
+      payload: {
+        courseId: course.id,
+        fromSemester: currentLocation.semester,
+        fromPeriod: currentLocation.period,
+        toSemester,
+        toPeriod: currentLocation.period, // Keep same period
+      },
+    });
+  };
+
+  // Get available semesters for moving (only on mobile, only for semester 7/9 courses)
+  const getAvailableSemesters = () => {
+    const currentSemester = course.enrollment?.semester;
+    if (!currentSemester || !isMobile) return [];
+
+    // Only allow moving courses from semester 7 and 9, and only between 7 and 9
+    if (currentSemester === 7) {
+      return [9]; // Can move from 7 to 9
+    } else if (currentSemester === 9) {
+      return [7]; // Can move from 9 to 7
+    }
+    return []; // Semester 8 courses cannot be moved
+  };
+
+  const availableSemesters = getAvailableSemesters();
 
   // Reference for dialog trigger button
   const dialogTriggerRef = React.useRef<HTMLButtonElement>(null);
@@ -132,18 +207,51 @@ export default function ScheduleCourseCard({
               </p>
             </div>
 
-            {/* Remove button - only show when not readonly */}
-            {!readonly && onRemove && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleRemove}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                aria-label={`Remove ${course.name} from schedule`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <div className="flex items-center gap-1">
+              {/* Move button - only show on mobile for semester 7/9 courses */}
+              {!readonly && isMobile && availableSemesters.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                      aria-label={`Move ${course.name} to different semester`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ArrowRightLeft className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {availableSemesters.map((semester) => (
+                      <DropdownMenuItem
+                        key={semester}
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveCourse(semester);
+                        }}
+                      >
+                        Flytta till termin {semester}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Remove button - only show when not readonly */}
+              {!readonly && onRemove && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleRemove}
+                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                  aria-label={`Remove ${course.name} from schedule`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
 
@@ -168,7 +276,7 @@ export default function ScheduleCourseCard({
 
           {/* Schedule Information */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <Calendar className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">{blockText}</span>
             </div>
