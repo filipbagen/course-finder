@@ -14,8 +14,8 @@ import { createClient } from '@/lib/supabase/server';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Course Finder',
-  description: 'Find and review courses',
+  title: 'Course Finder - Hitta dina masterkurser',
+  description: 'Hitta och recensera masterkurser vid Linköpings universitet',
 };
 
 async function getData(userId: string) {
@@ -59,7 +59,7 @@ export default async function RootLayout({
   const data = await getData(user?.id as string);
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html suppressHydrationWarning lang="sv">
       <body
         className={`${inter.className} ${data?.colorScheme ?? 'theme-blue'}`}
       >

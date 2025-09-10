@@ -93,31 +93,31 @@ function DeleteAccountDialog() {
       <DialogTrigger asChild>
         <Button variant="destructive" className="flex items-center gap-2">
           <Trash2 className="h-4 w-4" />
-          Delete Account
+          Radera konto
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Delete Account
+            Radera konto
           </DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove all your data from our servers.
+            Denna åtgärd kan inte ångras. Detta kommer permanent att radera ditt
+            konto och ta bort alla dina data från våra servrar.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Alert className="border-destructive/50">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>What will be deleted:</strong>
+              <strong>Vad kommer att raderas:</strong>
               <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Your profile and personal information</li>
-                <li>All your course enrollments and schedule</li>
-                <li>All your course reviews and ratings</li>
-                <li>Your profile picture from our storage</li>
-                <li>Your account from our authentication system</li>
+                <li>Din profil och personliga information</li>
+                <li>Alla dina kursregistreringar och schema</li>
+                <li>Alla dina kursrecensioner och betyg</li>
+                <li>Din profilbild från vårt lagringsutrymme</li>
+                <li>Ditt konto från vårt autentiseringssystem</li>
               </ul>
             </AlertDescription>
           </Alert>
@@ -127,22 +127,22 @@ function DeleteAccountDialog() {
                 htmlFor="delete-confirmation"
                 className="text-sm font-medium"
               >
-                Type <strong>DELETE</strong> to confirm:
+                Type <strong>RADERA</strong> to confirm:
               </Label>
               <Input
                 id="delete-confirmation"
                 name="confirmation"
-                placeholder="Type DELETE to confirm"
+                placeholder="Skriv RADERA för att bekräfta"
                 className="border-destructive/50 focus:border-destructive"
                 required
               />
             </div>
             <DialogFooter className="mt-6">
               <DialogTrigger asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">Avbryt</Button>
               </DialogTrigger>
               <Button type="submit" variant="destructive">
-                Delete Account
+                Radera konto
               </Button>
             </DialogFooter>
           </form>
@@ -223,8 +223,8 @@ async function deleteAccount(formData: FormData) {
 
   const confirmation = formData.get('confirmation') as string;
 
-  if (confirmation !== 'DELETE') {
-    throw new Error('Please type DELETE to confirm account deletion');
+  if (confirmation !== 'RADERA') {
+    throw new Error('Skriv RADERA för att bekräfta radering av konto');
   }
 
   const supabase = await createClient();
@@ -295,7 +295,7 @@ async function deleteAccount(formData: FormData) {
         userId: user.id,
       });
       throw new Error(
-        'Failed to delete authentication account. Please contact support.'
+        'Misslyckades att radera autentiseringskonto. Kontakta support.'
       );
     }
 
@@ -309,7 +309,7 @@ async function deleteAccount(formData: FormData) {
     redirect('/');
   } catch (error) {
     console.error('Error deleting account:', error);
-    throw new Error('Failed to delete account. Please try again.');
+    throw new Error('Misslyckades att radera konto. Försök igen.');
   }
 }
 
@@ -415,7 +415,7 @@ export default async function SettingPage() {
         // Check file size (5MB limit)
         if (pictureFile.size > 5 * 1024 * 1024) {
           console.error('File too large. Maximum size is 5MB.');
-          throw new Error('File too large');
+          throw new Error('Filen är för stor');
         }
 
         const fileExt = pictureFile.name.split('.').pop();
@@ -483,15 +483,15 @@ export default async function SettingPage() {
     if (newPassword && newPassword.trim()) {
       // Validate password fields
       if (!currentPassword || !currentPassword.trim()) {
-        throw new Error('Current password is required to change password');
+        throw new Error('Nuvarande lösenord krävs för att ändra lösenord');
       }
 
       if (newPassword !== confirmPassword) {
-        throw new Error('New passwords do not match');
+        throw new Error('Nya lösenorden matchar inte');
       }
 
       if (newPassword.length < 6) {
-        throw new Error('New password must be at least 6 characters long');
+        throw new Error('Nytt lösenord måste vara minst 6 tecken långt');
       }
 
       // First verify the current password by trying to sign in
@@ -501,7 +501,7 @@ export default async function SettingPage() {
       });
 
       if (signInError) {
-        throw new Error('Current password is incorrect');
+        throw new Error('Nuvarande lösenord är felaktigt');
       }
 
       // Update the password
@@ -511,7 +511,7 @@ export default async function SettingPage() {
 
       if (updateError) {
         console.error('Password update error:', updateError);
-        throw new Error('Could not update password');
+        throw new Error('Kunde inte uppdatera lösenord');
       }
     }
 
@@ -540,9 +540,9 @@ export default async function SettingPage() {
       <div className="grid items-start gap-8">
         <div className="flex items-center justify-between px-2">
           <div className="grid gap-1">
-            <h1 className="text-3xl font-bold">Settings</h1>
+            <h1 className="text-3xl font-bold">Inställningar</h1>
             <p className="text-muted-foreground">
-              Manage your profile settings and preferences
+              Hantera dina profilinställningar och preferenser
             </p>
           </div>
         </div>
@@ -552,10 +552,10 @@ export default async function SettingPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                Profile Information
+                Profilinformation
               </CardTitle>
               <CardDescription>
-                Basic information about your profile
+                Grundläggande information om din profil
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -569,7 +569,7 @@ export default async function SettingPage() {
                 </Avatar>
                 <div className="space-y-4 flex-1">
                   <div className="space-y-2">
-                    <Label htmlFor="picture">Profile Picture</Label>
+                    <Label htmlFor="picture">Profilbild</Label>
                     <div className="flex items-center gap-3">
                       <Input
                         id="picture"
@@ -583,7 +583,7 @@ export default async function SettingPage() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Upload a profile picture (JPG, PNG, GIF - max 5MB)
+                      Ladda upp en profilbild (JPG, PNG, GIF - max 5MB)
                     </p>
                   </div>
                 </div>
@@ -592,23 +592,23 @@ export default async function SettingPage() {
               {/* Name and Email */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">Namn</Label>
                   <Input
                     name="name"
                     type="text"
                     id="name"
-                    placeholder="Your full name"
+                    placeholder="Ditt fullständiga namn"
                     defaultValue={data?.name || ''}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">E-postadress</Label>
                   <Input
                     name="email"
                     type="email"
                     id="email"
-                    placeholder="your@email.com"
+                    placeholder="din@email.com"
                     defaultValue={data?.email || user.email || ''}
                   />
                 </div>
@@ -617,11 +617,11 @@ export default async function SettingPage() {
                 <Label htmlFor="program">Program</Label>
                 <Select name="program" defaultValue={data?.program || ''}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your engineering program" />
+                    <SelectValue placeholder="Välj ditt ingenjörsprogram" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Engineering Programs</SelectLabel>
+                      <SelectLabel>Ingenjörsprogram</SelectLabel>
                       {programs.map((program) => (
                         <SelectItem key={program} value={program}>
                           {program}
@@ -637,30 +637,25 @@ export default async function SettingPage() {
           {/* Appearance & Privacy Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Appearance & Privacy</CardTitle>
+              <CardTitle>Utsende & Sekretess</CardTitle>
               <CardDescription>
-                Customize how your profile appears and functions
+                Anpassa hur din profil ser ut och fungerar
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Color Scheme */}
               <div className="space-y-2">
-                <Label htmlFor="color">Color Scheme</Label>
+                <Label htmlFor="color">Färgschema</Label>
                 <Select
                   name="color"
                   defaultValue={data?.colorScheme || 'theme-blue'}
                 >
                   <SelectTrigger className="w-full md:w-64">
-                    <SelectValue placeholder="Select color scheme" />
+                    <SelectValue placeholder="Välj färgschema" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Colors</SelectLabel>
-                      <SelectItem value="theme-zinc">⚫ Zinc</SelectItem>
-                      <SelectItem value="theme-slate">⚫ Slate</SelectItem>
-                      <SelectItem value="theme-stone">⚫ Stone</SelectItem>
-                      <SelectItem value="theme-gray">⚫ Gray</SelectItem>
-                      <SelectItem value="theme-neutral">⚫ Neutral</SelectItem>
+                      <SelectLabel>Färger</SelectLabel>
                       <SelectItem value="theme-blue">🔵 Blue</SelectItem>
                       <SelectItem value="theme-green">🟢 Green</SelectItem>
                       <SelectItem value="theme-violet">🟣 Violet</SelectItem>
@@ -679,10 +674,10 @@ export default async function SettingPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="isPublic" className="text-base">
-                    Public Schedule
+                    Offentligt schema
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Allow others to see your course schedule
+                    Tillåt andra att se ditt kursschema
                   </p>
                 </div>
                 <Switch
@@ -697,42 +692,42 @@ export default async function SettingPage() {
           {/* Password & Security Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Password & Security</CardTitle>
+              <CardTitle>Lösenord & Säkerhet</CardTitle>
               <CardDescription>
-                Manage your password and security settings
+                Hantera ditt lösenord och säkerhetsinställningar
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="current_password">Current Password</Label>
+                <Label htmlFor="current_password">Nuvarande lösenord</Label>
                 <Input
                   name="current_password"
                   type="password"
                   id="current_password"
-                  placeholder="Enter your current password"
+                  placeholder="Ange ditt nuvarande lösenord"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="new_password">New Password</Label>
+                <Label htmlFor="new_password">Nytt lösenord</Label>
                 <Input
                   name="new_password"
                   type="password"
                   id="new_password"
-                  placeholder="Enter your new password"
+                  placeholder="Ange ditt nya lösenord"
                 />
                 <p className="text-sm text-muted-foreground">
-                  Password must be at least 6 characters long
+                  Lösenord måste vara minst 6 tecken långt
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm_password">Confirm New Password</Label>
+                <Label htmlFor="confirm_password">Bekräfta nytt lösenord</Label>
                 <Input
                   name="confirm_password"
                   type="password"
                   id="confirm_password"
-                  placeholder="Confirm your new password"
+                  placeholder="Bekräfta ditt nya lösenord"
                 />
               </div>
             </CardContent>
@@ -747,19 +742,19 @@ export default async function SettingPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Danger Zone
+              Farozon
             </CardTitle>
             <CardDescription>
-              Irreversible actions that will permanently delete your data
+              Oåterkalleliga åtgärder som permanent raderar dina data
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Alert className="border-destructive/50">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Deleting your account will permanently remove all your data
-                including: your profile, course reviews, enrollments, and
-                uploaded images. This action cannot be undone.
+                Att radera ditt konto kommer permanent att ta bort alla dina
+                data inklusive: din profil, kursrecensioner, registreringar och
+                uppladdade bilder. Denna åtgärd kan inte ångras.
               </AlertDescription>
             </Alert>
           </CardContent>

@@ -25,11 +25,6 @@ interface OnboardingFormProps {
 }
 
 const colorSchemes = [
-  { value: 'theme-zinc', label: 'Zinc', emoji: '⚫' },
-  { value: 'theme-slate', label: 'Slate', emoji: '⚫' },
-  { value: 'theme-stone', label: 'Stone', emoji: '⚫' },
-  { value: 'theme-gray', label: 'Gray', emoji: '⚫' },
-  { value: 'theme-neutral', label: 'Neutral', emoji: '⚫' },
   { value: 'theme-blue', label: 'Blue', emoji: '🔵' },
   { value: 'theme-green', label: 'Green', emoji: '🟢' },
   { value: 'theme-violet', label: 'Violet', emoji: '🟣' },
