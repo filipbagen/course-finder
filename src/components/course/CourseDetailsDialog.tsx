@@ -254,15 +254,18 @@ const CourseDetails = ({
           </div>
         </DetailSection>
 
-        {/* Campus Info */}
-        <DetailSection icon={<School className="h-4 w-4" />} title="Campus">
-          <p>{course.campus || 'Information saknas'}</p>
-        </DetailSection>
+        {/* Campus and Examinator side by side on mobile */}
+        <div className="grid grid-cols-2 gap-4 md:contents">
+          {/* Campus Info */}
+          <DetailSection icon={<School className="h-4 w-4" />} title="Campus">
+            <p>{course.campus || 'Information saknas'}</p>
+          </DetailSection>
 
-        {/* Examiner Info */}
-        <DetailSection icon={<User className="h-4 w-4" />} title="Examinator">
-          <p>{course.examiner || 'Information saknas'}</p>
-        </DetailSection>
+          {/* Examiner Info */}
+          <DetailSection icon={<User className="h-4 w-4" />} title="Examinator">
+            <p>{course.examiner || 'Information saknas'}</p>
+          </DetailSection>
+        </div>
 
         {/* Time Info */}
         <DetailSection icon={<Clock className="h-4 w-4" />} title="Tidsåtgång">
