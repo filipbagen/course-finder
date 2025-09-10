@@ -117,11 +117,6 @@ export function ScheduleGrid() {
           </div>
         ))}
       </div>
-
-      {/* Mobile Layout Helper */}
-      <div className="md:hidden text-center text-sm text-muted-foreground mt-8">
-        <p>På mobil visas varje termin separat för bättre överblick.</p>
-      </div>
     </div>
   );
 }
