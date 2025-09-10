@@ -94,7 +94,7 @@ export async function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-x-2">
+          <div className="hidden sm:flex items-center gap-x-2">
             {user ? (
               // Authenticated User Navigation
               <>
@@ -250,7 +250,7 @@ export async function Navbar() {
           </div>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden flex items-center">
+          <div className="sm:hidden flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

@@ -526,7 +526,7 @@ export function InfiniteCoursesList({
       <div className="lg:hidden space-y-4">
         {/* Small screens: text below controls */}
         <div className="sm:hidden space-y-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between">
             {/* Mobile Filter Button */}
             {onMobileFilterOpen && (
               <Button
