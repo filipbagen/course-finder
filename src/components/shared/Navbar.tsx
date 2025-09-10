@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,8 @@ import {
   User,
   Lightbulb,
   Sparkles,
+  Telescope,
+  CircleUser,
 } from 'lucide-react';
 import { SignOutButton } from '@/components/shared/SignOutButton';
 import { createClient } from '@/lib/supabase/server';
@@ -91,51 +94,46 @@ export async function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center gap-x-2">
+          <div className="hidden md:flex items-center gap-x-2">
             {user ? (
               // Authenticated User Navigation
               <>
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
                   >
-                    Utforska kurser
+                    <Telescope className="h-4 w-4" />
+                    <span className="text-[10px] font-medium">Utforska</span>
                   </Button>
                 </Link>
 
                 <Link href="/schedule">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
                   >
-                    Mitt schema
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-[10px] font-medium">Schema</span>
                   </Button>
                 </Link>
 
                 <Link href="/students">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
                   >
-                    Hitta studenter
+                    <Users className="h-4 w-4" />
+                    <span className="text-[10px] font-medium">Studenter</span>
                   </Button>
                 </Link>
 
                 {/* User Dropdown */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="ml-3">
-                    <div className="p-1 rounded-full transition-all duration-150">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={userImage}
-                          alt={userName || userEmail}
-                          className="rounded-full"
-                        />
-                        <AvatarFallback className="text-xs">
-                          {getInitials(userName || userEmail)}
-                        </AvatarFallback>
-                      </Avatar>
+                  <DropdownMenuTrigger>
+                    <div className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg cursor-pointer">
+                      <CircleUser className="h-4 w-4" />
+                      <span className="text-[10px] font-medium">Profil</span>
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -144,16 +142,29 @@ export async function Navbar() {
                     forceMount
                   >
                     <DropdownMenuLabel className="p-4">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-semibold leading-none text-gray-900">
-                          {userName || 'User'}
-                        </p>
-                        <p className="text-xs leading-none text-gray-600">
-                          {userEmail}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={userImage}
+                            alt={userName || userEmail}
+                            className="rounded-full"
+                          />
+                          <AvatarFallback className="text-sm">
+                            {getInitials(userName || userEmail)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-semibold leading-none text-gray-900">
+                            {userName || 'User'}
+                          </p>
+                          <p className="text-xs leading-none text-gray-600">
+                            {userEmail}
+                          </p>
+                        </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/30" />
+                    <Separator />
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
@@ -161,7 +172,7 @@ export async function Navbar() {
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Min profil
+                          Profil
                         </span>
                       </Link>
                     </DropdownMenuItem>
@@ -199,6 +210,7 @@ export async function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/30" />
+                    <Separator />
                     <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
@@ -212,23 +224,24 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg rounded-xl"
                   >
-                    Utforska kurser
+                    <Telescope className="h-4 w-4" />
+                    <span className="text-[10px] font-medium">Utforska</span>
                   </Button>
                 </Link>
 
                 <Link href="/login">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 border border-neutral-200 backdrop-blur-sm transition-all duration-150 hover:shadow-lg cursor-pointer"
+                    className="text-[10px] font-medium rounded-xl px-3 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-150 hover:shadow-lg cursor-pointer"
                   >
                     Logga in
                   </Button>
                 </Link>
 
                 <Link href="/signup">
-                  <Button className="text-sm font-medium rounded-xl px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150 cursor-pointer">
+                  <Button className="text-[10px] font-medium rounded-xl px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-150 cursor-pointer">
                     Registrera dig
                   </Button>
                 </Link>
@@ -237,7 +250,7 @@ export async function Navbar() {
           </div>
 
           {/* Mobile Navigation */}
-          <div className="sm:hidden flex items-center">
+          <div className="md:hidden flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -258,16 +271,29 @@ export async function Navbar() {
                   // Authenticated Mobile Menu
                   <>
                     <DropdownMenuLabel className="p-4">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-semibold leading-none text-gray-900">
-                          {userName || 'User'}
-                        </p>
-                        <p className="text-xs leading-none text-gray-600">
-                          {userEmail}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={userImage}
+                            alt={userName || userEmail}
+                            className="rounded-full"
+                          />
+                          <AvatarFallback className="text-sm">
+                            {getInitials(userName || userEmail)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-semibold leading-none text-gray-900">
+                            {userName || 'User'}
+                          </p>
+                          <p className="text-xs leading-none text-gray-600">
+                            {userEmail}
+                          </p>
+                        </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/30" />
+                    <Separator className="my-4" />
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
@@ -275,7 +301,7 @@ export async function Navbar() {
                       >
                         <Calendar className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Utforska kurser
+                          Utforska
                         </span>
                       </Link>
                     </DropdownMenuItem>
@@ -286,7 +312,7 @@ export async function Navbar() {
                       >
                         <Calendar className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Mitt schema
+                          Schema
                         </span>
                       </Link>
                     </DropdownMenuItem>
@@ -297,11 +323,12 @@ export async function Navbar() {
                       >
                         <Users className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Hitta studenter
+                          Studenter
                         </span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/30" />
+                    <Separator />
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
@@ -309,7 +336,7 @@ export async function Navbar() {
                       >
                         <User className="mr-3 h-4 w-4 text-gray-700" />
                         <span className="font-medium text-gray-900">
-                          Min profil
+                          Profil
                         </span>
                       </Link>
                     </DropdownMenuItem>
@@ -347,6 +374,7 @@ export async function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/30" />
+                    <Separator />
                     <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/80 focus:bg-red-50/80 transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
@@ -361,7 +389,7 @@ export async function Navbar() {
                         className="w-full p-3 hover:bg-white/50 transition-colors cursor-pointer"
                       >
                         <span className="font-medium text-gray-900">
-                          Utforska kurser
+                          Utforska
                         </span>
                       </Link>
                     </DropdownMenuItem>
