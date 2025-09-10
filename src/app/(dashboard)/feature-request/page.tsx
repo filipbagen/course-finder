@@ -1,7 +1,7 @@
 'use client';
 
-import { Metadata } from 'next';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -13,12 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Send, CheckCircle, AlertCircle } from 'lucide-react';
-
-export const metadata: Metadata = {
-  title: 'Förslag på funktioner | Course Finder',
-  description: 'Dela dina idéer och förslag för att förbättra Course Finder',
-};
+import { Lightbulb, Send, AlertCircle } from 'lucide-react';
 
 export default function FeatureRequestPage() {
   const [title, setTitle] = useState('');
@@ -48,9 +43,13 @@ export default function FeatureRequestPage() {
       });
 
       if (response.ok) {
-        setSubmitStatus('success');
+        setSubmitStatus('idle');
         setTitle('');
         setDescription('');
+        toast.success('Tack för ditt förslag!', {
+          description:
+            'Vi har mottagit ditt förslag och kommer att granska det snart.',
+        });
       } else {
         setSubmitStatus('error');
       }
@@ -112,13 +111,6 @@ export default function FeatureRequestPage() {
                       required
                     />
                   </div>
-
-                  {submitStatus === 'success' && (
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <CheckCircle className="h-4 w-4" />
-                      Tack för ditt förslag! Vi har mottagit det.
-                    </div>
-                  )}
 
                   {submitStatus === 'error' && (
                     <div className="flex items-center gap-2 text-red-600 text-sm">
