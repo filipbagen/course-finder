@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Users, BookOpen, MessageSquare, Filter, SortAsc } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Users, BookOpen, MessageSquare, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -16,7 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface UserSearchResult {
   id: string;
@@ -46,64 +53,99 @@ export function UserSearchComponent({
   initialSortBy,
 }: UserSearchComponentProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
+  const [users, setUsers] = useState<UserSearchResult[]>(initialUsers);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState(initialQuery || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery || '');
   const [programFilter, setProgramFilter] = useState(
     initialProgramFilter || 'all'
   );
   const [sortBy, setSortBy] = useState(initialSortBy || 'name');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [mobileProgramFilter, setMobileProgramFilter] = useState(
+    initialProgramFilter || 'all'
+  );
+  const [mobileSortBy, setMobileSortBy] = useState(initialSortBy || 'name');
 
-  const handleFiltersChange = (
-    query?: string,
-    program?: string,
-    sort?: string
-  ) => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+  // Debounce search input to prevent excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300); // 300ms delay
 
-      // Handle search query
-      const finalQuery = query ?? searchQuery;
-      if (finalQuery) {
-        params.set('search', finalQuery);
-      } else {
-        params.delete('search');
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Fetch users when search parameters change
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (debouncedSearch.trim()) {
+          params.set('search', debouncedSearch.trim());
+        }
+        if (programFilter && programFilter !== 'all') {
+          params.set('program', programFilter);
+        }
+        if (sortBy && sortBy !== 'name') {
+          params.set('sortBy', sortBy);
+        }
+        params.set('limit', '50');
+
+        const response = await fetch(`/api/users?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+
+        const result = await response.json();
+        if (result.success) {
+          setUsers(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        // Keep existing users on error
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Handle program filter
-      const finalProgram = program ?? programFilter;
-      if (finalProgram && finalProgram !== 'all') {
-        params.set('program', finalProgram);
-      } else {
-        params.delete('program');
-      }
-
-      // Handle sort
-      const finalSort = sort ?? sortBy;
-      if (finalSort && finalSort !== 'name') {
-        params.set('sort', finalSort);
-      } else {
-        params.delete('sort');
-      }
-
-      router.push(`/students?${params.toString()}`);
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleFiltersChange(searchQuery);
-  };
+    fetchUsers();
+  }, [debouncedSearch, programFilter, sortBy]);
 
   const handleProgramChange = (value: string) => {
     setProgramFilter(value);
-    handleFiltersChange(undefined, value);
   };
 
   const handleSortChange = (value: string) => {
     setSortBy(value);
-    handleFiltersChange(undefined, undefined, value);
   };
+
+  const handleMobileProgramChange = (value: string) => {
+    setMobileProgramFilter(value);
+  };
+
+  const handleMobileSortChange = (value: string) => {
+    setMobileSortBy(value);
+  };
+
+  const applyMobileFilters = () => {
+    setProgramFilter(mobileProgramFilter);
+    setSortBy(mobileSortBy);
+  };
+
+  const resetMobileFilters = () => {
+    setMobileProgramFilter('all');
+    setMobileSortBy('name');
+  };
+
+  const syncMobileFilters = () => {
+    setMobileProgramFilter(programFilter);
+    setMobileSortBy(sortBy);
+  };
+
+  const activeMobileFilterCount =
+    (mobileProgramFilter !== 'all' ? 1 : 0) + (mobileSortBy !== 'name' ? 1 : 0);
 
   const getInitials = (name: string) => {
     return name
@@ -155,20 +197,41 @@ export function UserSearchComponent({
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         <div className="space-y-6">
-          {/* Search Input */}
-          <form onSubmit={handleSubmit} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Sök efter studenter eller program..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </form>
+          {/* Search Input and Mobile Filter Button */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Sök efter studenter eller program..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  syncMobileFilters();
+                  setMobileFiltersOpen(true);
+                }}
+                className="relative"
+              >
+                <Filter className="h-4 w-4" />
+                {activeMobileFilterCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {activeMobileFilterCount}
+                  </span>
+                )}
+              </Button>
+            </div>
+          </div>
 
           {/* User Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {initialUsers.map((user) => (
+            {users.map((user) => (
               <Card
                 key={user.id}
                 className="group cursor-pointer transition-all duration-200 hover:shadow-md"
@@ -204,21 +267,101 @@ export function UserSearchComponent({
           </div>
 
           {/* Empty State */}
-          {initialUsers.length === 0 && (
+          {users.length === 0 && !isLoading && (
             <div className="text-center py-16">
               <Users className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">
                 Inga studenter hittades
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                {initialQuery
-                  ? `Inga resultat för "${initialQuery}". Prova ett annat sökord.`
+                {debouncedSearch
+                  ? `Inga resultat för "${debouncedSearch}". Prova ett annat sökord.`
                   : 'Det finns inga publika studentprofiler att visa just nu.'}
               </p>
             </div>
           )}
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-16">
+              <div className="animate-spin mx-auto h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+              <p className="mt-4 text-sm text-muted-foreground">Söker...</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Filter Dialog */}
+      <Dialog open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Filter studenter</DialogTitle>
+            <DialogDescription>
+              Välj filter för att begränsa studenterna som visas
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto py-4 space-y-6">
+            <div className="space-y-4">
+              <Label>Program</Label>
+              <Select
+                value={mobileProgramFilter}
+                onValueChange={handleMobileProgramChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Välj program" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alla program</SelectItem>
+                  {availablePrograms.map((program) => (
+                    <SelectItem key={program} value={program}>
+                      {program}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-4">
+              <Label>Sortera efter</Label>
+              <Select
+                value={mobileSortBy}
+                onValueChange={handleMobileSortChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sortera efter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Namn (A-Z)</SelectItem>
+                  <SelectItem value="reviews">Flest recensioner</SelectItem>
+                  <SelectItem value="enrollments">Flest kurser</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-row gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                resetMobileFilters();
+                setMobileFiltersOpen(false);
+              }}
+              className="flex-1"
+            >
+              Avbryt
+            </Button>
+            <Button
+              onClick={() => {
+                applyMobileFilters();
+                setMobileFiltersOpen(false);
+              }}
+              className="flex-1"
+            >
+              Tillämpa ({activeMobileFilterCount})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -118,14 +118,18 @@ export default async function StudentsPage({
   }
 
   const params = await searchParams;
-  const searchQuery = params.search;
-  const programFilter = params.program;
-  const sortBy = params.sort;
+  const initialQuery = params.search;
+  const initialProgramFilter = params.program;
+  const initialSortBy = params.sort;
 
-  const [users, availablePrograms] = await Promise.all([
-    getUsers(searchQuery, programFilter, sortBy),
-    getAvailablePrograms(),
-  ]);
+  // Get initial users for SSR (limited set)
+  const initialUsers = await getUsers(
+    initialQuery,
+    initialProgramFilter,
+    initialSortBy
+  );
+
+  const availablePrograms = await getAvailablePrograms();
 
   return (
     <div className="flex flex-col gap-8 mx-auto">
@@ -157,11 +161,11 @@ export default async function StudentsPage({
           }
         >
           <UserSearchComponent
-            initialUsers={users}
-            initialQuery={searchQuery}
+            initialUsers={initialUsers}
+            initialQuery={initialQuery}
             availablePrograms={availablePrograms}
-            initialProgramFilter={programFilter}
-            initialSortBy={sortBy}
+            initialProgramFilter={initialProgramFilter}
+            initialSortBy={initialSortBy}
           />
         </Suspense>
       </div>
