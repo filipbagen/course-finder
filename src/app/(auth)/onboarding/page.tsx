@@ -51,10 +51,10 @@ export default async function OnboardingPage({
             <GraduationCap className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl">
-            Welcome to Course Finder! 🎓
+            Välkommen till Course Finder!
           </CardTitle>
           <CardDescription className="text-lg">
-            Let's set up your profile to get started
+            Låt oss konfigurera din profil för att komma igång
           </CardDescription>
         </CardHeader>
 

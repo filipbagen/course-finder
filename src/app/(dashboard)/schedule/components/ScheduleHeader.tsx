@@ -64,13 +64,7 @@ export function ScheduleHeader({
     const conflictList: Array<{
       course1: { id: string; code: string; name: string };
       course2: { id: string; code: string; name: string };
-      type: 'exclusion' | 'scheduling';
     }> = [];
-
-    // Helper function to check if two arrays have common elements
-    const hasOverlap = (arr1: number[], arr2: number[]): boolean => {
-      return arr1.some((item) => arr2.includes(item));
-    };
 
     for (let i = 0; i < enrolledCourses.length; i++) {
       for (let j = i + 1; j < enrolledCourses.length; j++) {
@@ -82,7 +76,6 @@ export function ScheduleHeader({
           conflictList.push({
             course1: { id: course1.id, code: course1.code, name: course1.name },
             course2: { id: course2.id, code: course2.code, name: course2.name },
-            type: 'exclusion',
           });
         }
         // Check if course2 excludes course1
@@ -93,19 +86,6 @@ export function ScheduleHeader({
           conflictList.push({
             course1: { id: course2.id, code: course2.code, name: course2.name },
             course2: { id: course1.id, code: course1.code, name: course1.name },
-            type: 'exclusion',
-          });
-        }
-        // Check for scheduling conflicts (same block, semester, and period)
-        else if (
-          hasOverlap(course1.semester, course2.semester) &&
-          hasOverlap(course1.period, course2.period) &&
-          hasOverlap(course1.block, course2.block)
-        ) {
-          conflictList.push({
-            course1: { id: course1.id, code: course1.code, name: course1.name },
-            course2: { id: course2.id, code: course2.code, name: course2.name },
-            type: 'scheduling',
           });
         }
       }
@@ -168,7 +148,7 @@ export function ScheduleHeader({
                   )}
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="backdrop-blur-md bg-popover border border-border rounded-lg shadow-lg">
+              <TooltipContent className="backdrop-blur-md bg-popover border border-border rounded-lg shadow-lg text-foreground">
                 {hasConflicts ? (
                   <div className="max-w-xs">
                     <p className="font-semibold mb-2">
@@ -185,12 +165,6 @@ export function ScheduleHeader({
                             {' ↔ '}
                             <span className="font-medium">
                               {conflict.course2.name} ({conflict.course2.code})
-                            </span>
-                            <br />
-                            <span className="text-xs text-muted-foreground">
-                              {conflict.type === 'exclusion'
-                                ? 'Kursuteslutning'
-                                : 'Samma block, termin och period'}
                             </span>
                           </div>
                         </li>

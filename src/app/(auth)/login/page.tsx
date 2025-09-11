@@ -111,7 +111,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+            >
               Logga in
             </Button>
           </form>

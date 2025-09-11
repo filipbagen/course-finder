@@ -25,13 +25,13 @@ interface OnboardingFormProps {
 }
 
 const colorSchemes = [
-  { value: 'theme-blue', label: 'Blue', emoji: '🔵' },
-  { value: 'theme-green', label: 'Green', emoji: '🟢' },
-  { value: 'theme-violet', label: 'Violet', emoji: '🟣' },
-  { value: 'theme-yellow', label: 'Yellow', emoji: '🟡' },
-  { value: 'theme-orange', label: 'Orange', emoji: '🟠' },
-  { value: 'theme-red', label: 'Red', emoji: '🔴' },
-  { value: 'theme-rose', label: 'Rose', emoji: '🌹' },
+  { value: 'theme-blue', label: 'Blå' },
+  { value: 'theme-green', label: 'Grön' },
+  { value: 'theme-violet', label: 'Violett' },
+  { value: 'theme-yellow', label: 'Gul' },
+  { value: 'theme-orange', label: 'Orange' },
+  { value: 'theme-red', label: 'Röd' },
+  { value: 'theme-rose', label: 'Rosa' },
 ];
 
 export default function OnboardingForm({
@@ -39,7 +39,6 @@ export default function OnboardingForm({
   userEmail,
   initialName = '',
 }: OnboardingFormProps) {
-  const [selectedColorScheme, setSelectedColorScheme] = useState('theme-blue');
   const [isPublic, setIsPublic] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
@@ -50,7 +49,7 @@ export default function OnboardingForm({
 
       {/* Profile Picture */}
       <div className="space-y-2">
-        <Label>Profile Picture</Label>
+        <Label>Profilbild</Label>
         <Card className="p-4">
           <div className="flex flex-col items-center space-y-4">
             <Avatar
@@ -62,7 +61,7 @@ export default function OnboardingForm({
               }}
             />
             <p className="text-sm text-muted-foreground text-center">
-              Upload a profile picture to help others recognize you (optional)
+              Ladda upp en profilbild så andra kan känna igen dig (valfritt)
             </p>
           </div>
         </Card>
@@ -73,10 +72,10 @@ export default function OnboardingForm({
 
       {/* Program */}
       <div className="space-y-2">
-        <Label htmlFor="program">Program/Major *</Label>
+        <Label htmlFor="program">Program/Utbildning *</Label>
         <Select name="program" required>
           <SelectTrigger>
-            <SelectValue placeholder="Select your program" />
+            <SelectValue placeholder="Välj ditt program" />
           </SelectTrigger>
           <SelectContent>
             {programs.map((program) => (
@@ -89,39 +88,23 @@ export default function OnboardingForm({
       </div>
 
       {/* Color Scheme */}
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2">
+      <div className="space-y-2">
+        <Label htmlFor="colorScheme" className="flex items-center gap-2">
           <Palette className="h-4 w-4" />
-          Choose Your Theme
+          Välj ditt tema
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {colorSchemes.map((scheme) => (
-            <Card
-              key={scheme.value}
-              className={`cursor-pointer transition-all ${
-                selectedColorScheme === scheme.value
-                  ? 'ring-2 ring-primary border-primary'
-                  : 'hover:border-primary/50'
-              }`}
-              onClick={() => setSelectedColorScheme(scheme.value)}
-            >
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center space-y-2">
-                  <span className="text-2xl">{scheme.emoji}</span>
-                  <span className="font-medium text-sm">{scheme.label}</span>
-                </div>
-                <input
-                  type="radio"
-                  name="colorScheme"
-                  value={scheme.value}
-                  checked={selectedColorScheme === scheme.value}
-                  onChange={(e) => setSelectedColorScheme(e.target.value)}
-                  className="sr-only"
-                />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Select name="colorScheme" defaultValue="theme-blue">
+          <SelectTrigger>
+            <SelectValue placeholder="Välj ett tema" />
+          </SelectTrigger>
+          <SelectContent>
+            {colorSchemes.map((scheme) => (
+              <SelectItem key={scheme.value} value={scheme.value}>
+                {scheme.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Privacy Setting */}
@@ -138,13 +121,18 @@ export default function OnboardingForm({
           ) : (
             <EyeOff className="h-4 w-4" />
           )}
-          Make my profile public (others can see my course reviews)
+          Gör min profil offentlig (andra kan se mina kursrecensioner och
+          schema)
         </Label>
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" size="lg">
-        Complete Setup
+      <Button
+        type="submit"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+        size="lg"
+      >
+        Slutför konfiguration
       </Button>
     </form>
   );

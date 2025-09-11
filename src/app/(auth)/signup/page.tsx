@@ -146,7 +146,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               />
             </div>
 
-            <Button formAction={signUp} type="submit" className="w-full">
+            <Button
+              formAction={signUp}
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Skapa konto
             </Button>
