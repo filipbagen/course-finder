@@ -1,7 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import React from 'react';
 import { ScheduleProvider } from './components/ScheduleProvider';
 import { ScheduleContainer } from './components/ScheduleContainer';
