@@ -171,9 +171,6 @@ function isValidDropTarget(
  */
 function handleAddCourse(semester: number, period: number) {
   // This would typically open a course selection modal/drawer
-  // For now, we'll just log the action
-  console.log(`Add course to Semester ${semester}, Period ${period}`);
-
   // TODO: Implement course selection modal
   // This could:
   // 1. Open a modal with available courses

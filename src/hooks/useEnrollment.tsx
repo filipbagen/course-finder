@@ -23,7 +23,7 @@ export const useEnrollment = (
           handleUpdateAfterDeletion(enrollmentId);
         }
       } catch (error) {
-        console.error(error);
+        // Silent error
       }
     },
     [courseName, handleUpdateAfterDeletion]
@@ -49,7 +49,7 @@ export const useEnrollment = (
                 duration: 6000,
               });
             } else {
-              console.log('Already added');
+              // Course already added
             }
           } else {
             throw new Error(`Error: ${response.status}`);
@@ -58,7 +58,6 @@ export const useEnrollment = (
         }
 
         const result = await response.json();
-        console.log('Enrollment API response:', result); // Debug log
 
         // Check if the response has the expected structure
         if (
@@ -67,7 +66,7 @@ export const useEnrollment = (
           !result.data.enrollment ||
           !result.data.enrollment.id
         ) {
-          console.error('Invalid enrollment response structure:', result);
+          // Fallback for unexpected response format
           toast.success(`Added ${courseName} to schedule 🎉`);
           return;
         }
@@ -81,7 +80,7 @@ export const useEnrollment = (
           },
         });
       } catch (error) {
-        console.error('Error in addToEnrollment:', error);
+        // Silent error logging
         toast.error('Failed to add course to schedule');
       }
     },

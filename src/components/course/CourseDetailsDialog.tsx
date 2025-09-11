@@ -207,7 +207,6 @@ const CourseDetails = ({
           }
         }
       } catch (error) {
-        console.error('Error checking course conflicts:', error);
         // Fallback to client-side checking
         const conflictingCourse =
           !loading &&
@@ -665,7 +664,6 @@ export const CourseDetailsDialog = () => {
 
         try {
           if (!course.learningOutcomes || !course.examination) {
-            console.log('Fetching detailed course info for:', courseId);
             const detailedCourse = await fetchCourseDetails(courseId);
             if (detailedCourse) {
               setCourse(detailedCourse);
@@ -673,7 +671,6 @@ export const CourseDetailsDialog = () => {
           }
         } catch (err) {
           setError('Kunde inte ladda kursinformation.');
-          console.error(err);
         } finally {
           setLoading(false);
         }
@@ -737,7 +734,7 @@ export const CourseDetailsDialog = () => {
             });
           }
         } catch (error) {
-          console.error('Error fetching course reviews:', error);
+          // Silent error handling
         }
       };
 

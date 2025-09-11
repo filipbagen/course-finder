@@ -13,7 +13,6 @@ export function useCourseDetails() {
       setError(null);
 
       try {
-        console.log(`Fetching details for course ${courseId}`);
         const response = await fetch(`/api/courses/${courseId}/details`);
 
         if (!response.ok) {
@@ -34,7 +33,6 @@ export function useCourseDetails() {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to fetch course details';
         setError(errorMessage);
-        console.error('Error fetching course details:', err);
         return null;
       } finally {
         setLoading(false);

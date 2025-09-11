@@ -316,7 +316,6 @@ export default async function Home() {
 //   } = await supabase.auth.getSession();
 
 //   // redirect the user to the /courses page if they are logged in
-//   console.log('supabase', supabase);
 //   if (session) {
 //     redirect('/courses');
 //   }

@@ -19,12 +19,8 @@ export async function DELETE(
 ): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
   try {
     const { enrollmentId } = await params;
-    console.log('DELETE enrollmentId:', enrollmentId);
-    console.log('EnrollmentId type:', typeof enrollmentId);
-    console.log('EnrollmentId length:', enrollmentId?.length);
 
     const user = await getAuthenticatedUser();
-    console.log('Authenticated user:', user.id);
 
     if (!enrollmentId) {
       return badRequest('Enrollment ID is required');
