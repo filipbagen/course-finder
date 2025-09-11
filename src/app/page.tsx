@@ -50,10 +50,10 @@ export default async function Home() {
   }
 
   return (
-    <div className="pt-10 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center">
+    <div className="pt-10 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center bg-background min-h-screen">
       <div className="flex flex-col gap-4 items-center">
-        <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50">
-          <p className="text-sm font-semibold text-gray-700">
+        <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-border bg-card px-7 py-2 shadow-md backdrop-blur transition-all hover:border-border/50">
+          <p className="text-sm font-semibold text-card-foreground">
             Skapa ett konto idag!
           </p>
         </div>
@@ -66,7 +66,7 @@ export default async function Home() {
           snabbt och enkelt!
         </h1>
 
-        <p className="mt-5 max-w-prose text-zinc-700 dark:text-white sm:text-lg">
+        <p className="mt-5 max-w-prose text-muted-foreground sm:text-lg">
           Hitta enkelt bland LiUs alla masterkurser och hitta den kurs som
           passar dig bäst. Sök bland kurser, filtrera och jämför för att hitta
           den bästa mastern för dig. Börja idag!
@@ -131,10 +131,10 @@ export default async function Home() {
       {/* Feature section */}
       <div className="my-6 px-6 lg:my-24 lg:px-8 ">
         <div className="mx-auto max-w-4xl sm:text-center">
-          <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+          <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
             Välj masterkurser på några minuter
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-white">
+          <p className="mt-4 text-lg text-muted-foreground">
             Course Finder innehåller alla masterkurser som erbjuds vid
             Linköpings universitet. Hitta enkelt och snabbt den kurs som passar
             dig bäst.
@@ -151,7 +151,7 @@ export default async function Home() {
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Steg 1</span>
             <span className="text-xl font-semibold">Skapa ett konto</span>
-            <span className="mt-2 text-zink-700">
+            <span className="mt-2 text-muted-foreground">
               Course Finder är helt gratis att använda. Skapa ett konto för att
               komma igång.
             </span>
@@ -161,7 +161,7 @@ export default async function Home() {
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Steg 2</span>
             <span className="text-xl font-semibold">Välj masterkurser</span>
-            <span className="mt-2 text-zink-700">
+            <span className="mt-2 text-muted-foreground">
               Lägg enkelt till en kurs till ditt schema och jämför dina kurser
               med dina vänners.
             </span>
@@ -171,7 +171,7 @@ export default async function Home() {
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Steg 3</span>
             <span className="text-xl font-semibold">Klart!</span>
-            <span className="mt-2 text-zink-700">
+            <span className="mt-2 text-muted-foreground">
               Att skapa, dela och jämföra dina masterkurser har aldrig varit
               enklare.
             </span>
@@ -231,7 +231,7 @@ export default async function Home() {
       </div>
 
       <div className="my-6 lg:my-24 flex flex-col gap-16 px-6 lg:px-8 mx-auto max-w-4xl">
-        <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+        <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
           Funktioner
         </h2>
 
@@ -239,7 +239,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <Search />
             <h5 className="text-blue-600">Sök</h5>
-            <span>
+            <span className="text-muted-foreground">
               Hitta enkelt den kurs du letar efter geneom att sök efter kurser
               baserat på kursnamn och kurskod.
             </span>
@@ -248,7 +248,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <ArrowDownWideNarrow />
             <h5 className="text-blue-600">Filter</h5>
-            <span>
+            <span className="text-muted-foreground">
               Filtrera enkelt kurser baserat på bland annat termin, studietakt,
               huvudområde och examinationsmoment.
             </span>
@@ -257,7 +257,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <LineChart />
             <h5 className="text-blue-600">Statistik</h5>
-            <span>
+            <span className="text-muted-foreground">
               Se exakt hur många högskolepoäng du har läst och hur många du
               behöver för att nå din examen.
             </span>
@@ -266,7 +266,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <Handshake />
             <h5 className="text-blue-600">Samarbete</h5>
-            <span>
+            <span className="text-muted-foreground">
               Dela dina kurser med dina vänner och se vilka kurser ni har
               gemensamt. Hjälp varandra att hitta de bästa kurserna.
             </span>
@@ -275,7 +275,7 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <Star />
             <h5 className="text-blue-600">Recension</h5>
-            <span>
+            <span className="text-muted-foreground">
               Se recensioner på kurser och lämna rekommendationer på en kurs och
               hjälp andra studenter att hitta rätt.
             </span>
@@ -286,7 +286,7 @@ export default async function Home() {
             <h5 className="text-blue-600">
               AI-rekommendationer (kommer snart)
             </h5>
-            <span>
+            <span className="text-muted-foreground">
               Få rekommendationer på kurser som passar dina intressen och
               tidigare valda kurser. Hitta nya spännande kurser att läsa.
             </span>
@@ -295,11 +295,13 @@ export default async function Home() {
       </div>
 
       <div className="my-8 lg:my-12 px-6 lg:px-8 mx-auto max-w-4xl">
-        <h2 className="mt-10 font-bold text-4xl text-gray-900 dark:text-white sm:text-5xl">
+        <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
           Kom igång
         </h2>
 
-        <p>Vad väntar du på? Skapa ett konto och börja idag!</p>
+        <p className="text-muted-foreground">
+          Vad väntar du på? Skapa ett konto och börja idag!
+        </p>
 
         <Link href="/signup" className="mt-4 inline-block">
           <Button>Skapa konto</Button>
