@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export default function NotFound() {
   return (
     <div className="text-center mt-32">

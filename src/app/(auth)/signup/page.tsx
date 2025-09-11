@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { signUp } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';

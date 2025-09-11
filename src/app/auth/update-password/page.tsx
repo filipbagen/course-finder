@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { UpdatePasswordForm } from './UpdatePasswordForm';
 
 export default function Page() {
