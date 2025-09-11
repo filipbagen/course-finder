@@ -244,6 +244,7 @@ export default async function UserProfilePage({ params }: PageProps) {
       <UserProfileComponent
         userProfile={userProfile}
         isOwnProfile={currentUser.id === id}
+        currentUserColorScheme={dbUser.colorScheme}
       />
     </div>
   );
