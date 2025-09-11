@@ -15,6 +15,7 @@ import {
   Plus,
   LogIn,
   Star,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import CourseReviewDialog from './CourseReviewDialog';
 import { StarRating } from './StarRating';
+import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 
 interface CourseCardProps {
   course: Course | CourseWithEnrollment;
@@ -65,6 +67,19 @@ const CourseCard = ({
     course.name,
     onRemove
   );
+  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
+
+  // Check for course exclusions
+  const conflictingCourse = React.useMemo(() => {
+    if (!enrollmentsLoading && enrolledCourses) {
+      return enrolledCourses.find(
+        (enrolled) =>
+          (course.exclusions && course.exclusions.includes(enrolled.code)) ||
+          (enrolled.exclusions && enrolled.exclusions.includes(course.code))
+      );
+    }
+    return null;
+  }, [enrolledCourses, enrollmentsLoading, course.exclusions, course.code]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent click from triggering when interacting with buttons, links, or dropdown elements
@@ -290,6 +305,18 @@ const CourseCard = ({
             )}
           </div>
         </div>
+
+        {/* Exclusion Warning */}
+        {conflictingCourse && variant === 'default' && (
+          <div className="mt-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-xs text-amber-700 dark:text-amber-300">
+                Konflikt med {conflictingCourse.name} ({conflictingCourse.code})
+              </span>
+            </div>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="pt-0 space-y-3">

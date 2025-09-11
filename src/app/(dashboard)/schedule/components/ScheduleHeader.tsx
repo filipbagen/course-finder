@@ -12,6 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Calendar,
   Download,
   Share2,
@@ -20,8 +26,10 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
+  CircleCheck,
+  CircleAlert,
 } from 'lucide-react';
-import { ScheduleActions } from '../types/schedule.types';
+import { useUserEnrollments } from '@/hooks/useUserEnrollments';
 
 interface ScheduleHeaderProps {
   readonly?: boolean;
@@ -47,6 +55,46 @@ export function ScheduleHeader({
 }: ScheduleHeaderProps) {
   const { state } = useSchedule();
   const { loading } = state;
+  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
+
+  // Check for course conflicts
+  const conflicts = React.useMemo(() => {
+    if (enrollmentsLoading || !enrolledCourses) return [];
+
+    const conflictList: Array<{
+      course1: { id: string; code: string; name: string };
+      course2: { id: string; code: string; name: string };
+    }> = [];
+
+    for (let i = 0; i < enrolledCourses.length; i++) {
+      for (let j = i + 1; j < enrolledCourses.length; j++) {
+        const course1 = enrolledCourses[i];
+        const course2 = enrolledCourses[j];
+
+        // Check if course1 excludes course2
+        if (course1.exclusions && course1.exclusions.includes(course2.code)) {
+          conflictList.push({
+            course1: { id: course1.id, code: course1.code, name: course1.name },
+            course2: { id: course2.id, code: course2.code, name: course2.name },
+          });
+        }
+        // Check if course2 excludes course1
+        else if (
+          course2.exclusions &&
+          course2.exclusions.includes(course1.code)
+        ) {
+          conflictList.push({
+            course1: { id: course2.id, code: course2.code, name: course2.name },
+            course2: { id: course1.id, code: course1.code, name: course1.name },
+          });
+        }
+      }
+    }
+
+    return conflictList;
+  }, [enrolledCourses, enrollmentsLoading]);
+
+  const hasConflicts = conflicts.length > 0;
 
   return (
     <div className="space-y-4">
@@ -86,6 +134,42 @@ export function ScheduleHeader({
             )}
           </div>
         </div>
+
+        {/* Schedule Status Icon */}
+        {!readonly && !enrollmentsLoading && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  {hasConflicts ? (
+                    <CircleAlert className="h-6 w-6 text-amber-500" />
+                  ) : (
+                    <CircleCheck className="h-6 w-6 text-green-500" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {hasConflicts ? (
+                  <div className="max-w-xs">
+                    <p className="font-semibold mb-2">
+                      Schema-konflikter upptäckta:
+                    </p>
+                    <ul className="space-y-1 text-sm">
+                      {conflicts.map((conflict, index) => (
+                        <li key={index}>
+                          {conflict.course1.name} ({conflict.course1.code}) ↔{' '}
+                          {conflict.course2.name} ({conflict.course2.code})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p>Inga konflikter i ditt schema</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   );

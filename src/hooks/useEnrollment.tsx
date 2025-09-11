@@ -42,8 +42,15 @@ export const useEnrollment = (
 
         if (!response.ok) {
           const errorData = await response.json();
-          if (response.status === 409 && errorData.error) {
-            console.log('Already added');
+          if (response.status === 409) {
+            if (errorData.error && errorData.error.includes('conflicts with')) {
+              // This is an exclusion conflict
+              toast.error(errorData.error, {
+                duration: 6000,
+              });
+            } else {
+              console.log('Already added');
+            }
           } else {
             throw new Error(`Error: ${response.status}`);
           }

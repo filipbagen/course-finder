@@ -64,25 +64,32 @@ import {
 const ConflictWarning = ({
   conflictingCourse,
 }: {
-  conflictingCourse: Course;
-}) => (
-  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
-    <div className="flex items-start gap-3">
-      <AlertTriangle className="h-5 w-5 text-amber-500" />
-      <div>
-        <h4 className="font-semibold">Kurskonflikt</h4>
-        <p className="text-sm">
-          Du kan inte lägga till den här kursen eftersom den krockar med en kurs
-          du redan har i din planering:{' '}
-          <strong>
-            {conflictingCourse.name} ({conflictingCourse.code})
-          </strong>
-          .
-        </p>
+  conflictingCourse: Course | { id: string; code: string; name: string } | null;
+}) => {
+  if (!conflictingCourse) return null;
+
+  const courseName = conflictingCourse.name;
+  const courseCode = conflictingCourse.code;
+
+  return (
+    <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        <div>
+          <h4 className="font-semibold">Kurskonflikt</h4>
+          <p className="text-sm">
+            Du kan inte lägga till den här kursen eftersom den krockar med en
+            kurs du redan har i din planering:{' '}
+            <strong>
+              {courseName} ({courseCode})
+            </strong>
+            .
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const DetailSection = ({
   icon,
@@ -165,15 +172,67 @@ const CourseDetails = ({
   };
 }) => {
   const { enrolledCourses, loading } = useUserEnrollments();
+  const [conflictCheck, setConflictCheck] = useState<{
+    hasConflict: boolean;
+    conflictingCourse: Course | null;
+    loading: boolean;
+  }>({
+    hasConflict: false,
+    conflictingCourse: null,
+    loading: true,
+  });
 
-  const conflictingCourse =
-    !loading &&
-    enrolledCourses &&
-    enrolledCourses.find(
-      (enrolled) =>
-        (course.exclusions && course.exclusions.includes(enrolled.code)) ||
-        (enrolled.exclusions && enrolled.exclusions.includes(course.code))
-    );
+  // Check for course conflicts using the API
+  useEffect(() => {
+    const checkConflicts = async () => {
+      try {
+        const response = await fetch('/api/test-conflict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ courseId: course.id }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setConflictCheck({
+              hasConflict: result.data.hasConflict,
+              conflictingCourse: result.data.hasConflict
+                ? result.data.conflictingCourse
+                : null,
+              loading: false,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking course conflicts:', error);
+        // Fallback to client-side checking
+        const conflictingCourse =
+          !loading &&
+          enrolledCourses &&
+          enrolledCourses.find(
+            (enrolled) =>
+              (course.exclusions &&
+                course.exclusions.includes(enrolled.code)) ||
+              (enrolled.exclusions && enrolled.exclusions.includes(course.code))
+          );
+
+        setConflictCheck({
+          hasConflict: !!conflictingCourse,
+          conflictingCourse: conflictingCourse || null,
+          loading: false,
+        });
+      }
+    };
+
+    if (course?.id) {
+      checkConflicts();
+    }
+  }, [course?.id, enrolledCourses, loading]);
+
+  const conflictingCourse = conflictCheck.conflictingCourse;
 
   return (
     <div className="space-y-6">
