@@ -73,7 +73,7 @@ export default async function Home() {
         </p>
 
         <Link href="/signup">
-          <Button className="w-min">Skapa konto</Button>
+          <Button className="bg-blue-600 text-white w-min">Skapa konto</Button>
         </Link>
       </div>
 
@@ -304,24 +304,9 @@ export default async function Home() {
         </p>
 
         <Link href="/signup" className="mt-4 inline-block">
-          <Button>Skapa konto</Button>
+          <Button className="bg-blue-600 text-white">Skapa konto</Button>
         </Link>
       </div>
     </div>
   );
 }
-
-// OLD CODE BELOW
-
-// export default async function Home() {
-//   const supabase = createClientComponentClient();
-//   const {
-//     data: { session },
-//   } = await supabase.auth.getSession();
-
-//   // redirect the user to the /courses page if they are logged in
-//   if (session) {
-//     redirect('/courses');
-//   }
-
-// }

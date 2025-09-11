@@ -101,7 +101,7 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary hover:bg-transparent"
                   >
                     <Telescope className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Utforska</span>
@@ -111,7 +111,7 @@ export async function Navbar() {
                 <Link href="/schedule">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary hover:bg-transparent"
                   >
                     <Calendar className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Schema</span>
@@ -121,7 +121,7 @@ export async function Navbar() {
                 <Link href="/students">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary hover:bg-transparent"
                   >
                     <Users className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Studenter</span>
@@ -216,7 +216,7 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-blue-600 hover:bg-transparent"
                   >
                     <Telescope className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Utforska</span>
@@ -226,7 +226,7 @@ export async function Navbar() {
                 <Link href="/login">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-blue-600 hover:bg-transparent"
                   >
                     <CircleUser className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Logga in</span>
@@ -243,7 +243,7 @@ export async function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-xl p-2 border border-border backdrop-blur-sm transition-colors duration-150"
+                  className="rounded-xl p-2 border border-border backdrop-blur-sm transition-colors duration-150 hover:bg-transparent"
                 >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
@@ -283,7 +283,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Telescope className="mr-3 h-4 w-4" />
                         <span className="font-medium">Utforska</span>
@@ -292,7 +292,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/schedule"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Calendar className="mr-3 h-4 w-4" />
                         <span className="font-medium">Schema</span>
@@ -301,7 +301,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/students"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Users className="mr-3 h-4 w-4" />
                         <span className="font-medium">Studenter</span>
@@ -311,7 +311,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <User className="mr-3 h-4 w-4" />
                         <span className="font-medium">Profil</span>
@@ -320,7 +320,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/settings"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Settings className="mr-3 h-4 w-4" />
                         <span className="font-medium">Inställningar</span>
@@ -329,7 +329,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/feature-request"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Lightbulb className="mr-3 h-4 w-4" />
                         <span className="font-medium">
@@ -340,14 +340,14 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/updates"
-                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <Sparkles className="mr-3 h-4 w-4" />
                         <span className="font-medium">Vad är nytt</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/30 focus:bg-red-50/30 transition-colors cursor-pointer">
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-transparent focus:bg-transparent transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
                     </DropdownMenuItem>
@@ -358,7 +358,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <span className="font-medium">Utforska</span>
                       </Link>
@@ -367,7 +367,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/login"
-                        className="w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
                       >
                         <CircleUser className="mr-3 h-4 w-4" />
                         <span className="font-medium">Logga in</span>
