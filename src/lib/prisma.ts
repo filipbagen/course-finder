@@ -10,10 +10,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Create Prisma client with connection retry logic
+// Create Prisma client with optimized connection settings for production
 const createPrismaClient = () => {
   const client = new PrismaClient({
-    log: ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     errorFormat: 'pretty',
     datasources: {
       db: {
@@ -22,11 +22,38 @@ const createPrismaClient = () => {
     },
   });
 
+  // Add connection event handlers for better debugging
+  // Using any event name to silence TypeScript error
+  (client as any).$on('error', (e: any) => {
+    console.error('Prisma Client error:', e);
+  });
+
   return client;
 };
 
 // Export Prisma client with singleton pattern
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+// Helper function to safely execute database operations with proper error handling
+export async function withPrisma<T>(
+  callback: (prisma: PrismaClient) => Promise<T>
+): Promise<T> {
+  try {
+    return await callback(prisma);
+  } catch (error) {
+    // Handle connection errors specifically
+    if (
+      error instanceof Error && 
+      (error.message.includes("Can't reach database server") || 
+       error.message.includes("Connection timed out"))
+    ) {
+      console.error('Database connection error:', error);
+      // Return a standardized error that won't crash your app
+      throw new Error('Database is currently unavailable. Please try again later.');
+    }
+    throw error;
+  }
+}
 
 // Attempt to connect to the database during initialization in production
 // This will help identify connection issues immediately

@@ -5,6 +5,27 @@
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/courses/*/reviews/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "env": {
+        "USE_CONNECTION_POOLING": "true"
+      }
+    },
+    "src/app/api/courses/review/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "env": {
+        "USE_CONNECTION_POOLING": "true"
+      }
+    },
+    "src/app/api/debug/connection/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "env": {
+        "USE_CONNECTION_POOLING": "true" 
+      }
     }
   },
   "env": {
