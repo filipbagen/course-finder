@@ -181,20 +181,25 @@ export default async function UserProfilePage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="space-y-2 px-2">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Studentprofil</h1>
-            <p className="text-muted-foreground">
-              Utforska andra studenters profiler och deras akademiska framsteg
-            </p>
+      <div className="space-y-4">
+        {/* Header Content */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="px-2">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  {userProfile.name}s schema
+                </h1>
+                <p className="text-muted-foreground">
+                  Visa studentens kurser och framsteg
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <Separator />
-
-      {/* Profile Content */}
+      {/* Profile Statistics */}
       <UserProfileComponent
         userProfile={userProfile}
         isOwnProfile={currentUser.id === id}

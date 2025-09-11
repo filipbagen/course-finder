@@ -239,11 +239,11 @@ export class ScheduleService {
           // Avoid counting the same course multiple times (for multi-period courses)
           if (!allCourses.some((c) => c.id === course.id)) {
             totalCourses++;
-            totalCredits += course.credits || 0;
+            totalCredits += Number(course.credits) || 0;
             allCourses.push(course);
           }
           coursesPerSemester[semester]++;
-          creditsPerSemester[semester] += course.credits || 0;
+          creditsPerSemester[semester] += Number(course.credits) || 0;
         });
       });
     });
@@ -252,7 +252,7 @@ export class ScheduleService {
     const creditCount = allCourses.reduce(
       (acc: { [key: string]: number }, course) => {
         course.mainFieldOfStudy.forEach((field) => {
-          acc[field] = (acc[field] || 0) + course.credits;
+          acc[field] = (acc[field] || 0) + Number(course.credits);
         });
         return acc;
       },

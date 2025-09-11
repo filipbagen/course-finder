@@ -457,7 +457,7 @@ const CourseDetails = ({
                 <li key={index} className="text-sm p-2 bg-white/5 rounded-lg">
                   <div className="font-medium">{exam.name}</div>
                   <div className="flex justify-between text-xs mt-1">
-                    <span>{exam.credits} hp</span>
+                    <span>{Number(exam.credits)} hp</span>
                     <span>Betygsskala: {exam.gradingScale}</span>
                   </div>
                 </li>

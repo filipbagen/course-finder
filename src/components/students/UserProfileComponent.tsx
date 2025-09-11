@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   BookOpen,
   Calendar,
@@ -8,11 +9,15 @@ import {
   Star,
   Award,
   TrendingUp,
+  Target,
+  SignpostBig,
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 
 interface UserProfileData {
   id: string;
@@ -56,6 +61,78 @@ export function UserProfileComponent({
       .slice(0, 2);
   };
 
+  // Define expected totals based on user requirements
+  const expectedTotalCredits = 90; // Total credits needed for 3 semesters
+  const expectedAdvancedCredits = 60; // Advanced credits needed
+  const requiredFieldCredits = 30; // Advanced credits needed in same field for main field
+
+  // Calculate advanced credits
+  const advancedCredits = React.useMemo(() => {
+    let total = 0;
+    let allCourses: any[] = [];
+
+    Object.values(userProfile.coursesBySemester).forEach((courses) => {
+      courses.forEach((course) => {
+        // Avoid counting the same course multiple times
+        if (!allCourses.some((c) => c.id === course.id)) {
+          if (course.advanced) {
+            total += Number(course.credits) || 0;
+          }
+          allCourses.push(course);
+        }
+      });
+    });
+
+    return total;
+  }, [userProfile.coursesBySemester]);
+
+  // Calculate advanced credits by field for main field determination
+  const advancedCreditsByField = React.useMemo(() => {
+    let allCourses: any[] = [];
+    const creditCount: { [key: string]: number } = {};
+
+    Object.values(userProfile.coursesBySemester).forEach((courses) => {
+      courses.forEach((course) => {
+        // Avoid counting the same course multiple times
+        if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
+          course.mainFieldOfStudy.forEach((field: string) => {
+            creditCount[field] = (creditCount[field] || 0) + Number(course.credits);
+          });
+          allCourses.push(course);
+        }
+      });
+    });
+
+    return creditCount;
+  }, [userProfile.coursesBySemester]);
+
+  // Determine main field of study (requires 30+ advanced credits in same field)
+  const mainFieldOfStudy = React.useMemo(() => {
+    const validFields = Object.entries(advancedCreditsByField).filter(
+      ([_, credits]) => credits >= requiredFieldCredits
+    );
+
+    if (validFields.length === 0) return null;
+
+    // Return the field with most credits
+    const sortedFields = validFields.sort((a, b) => b[1] - a[1]);
+    return {
+      field: sortedFields[0][0],
+      credits: sortedFields[0][1],
+    };
+  }, [advancedCreditsByField, requiredFieldCredits]);
+
+  const progressPercentage = React.useMemo(() => {
+    return Math.min(
+      (userProfile.totalCredits / expectedTotalCredits) * 100,
+      100
+    );
+  }, [userProfile.totalCredits, expectedTotalCredits]);
+
+  const advancedProgressPercentage = React.useMemo(() => {
+    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100);
+  }, [advancedCredits, expectedAdvancedCredits]);
+
   const getColorFromProgram = (program: string | null) => {
     if (!program) return 'bg-gray-100 text-gray-700';
 
@@ -74,6 +151,45 @@ export function UserProfileComponent({
     }, 0);
 
     return colors[Math.abs(hash) % colors.length];
+  };
+
+  // Get user's primary color for theming
+  const getUserPrimaryColor = (colorScheme: string) => {
+    switch (colorScheme) {
+      case 'blue':
+        return 'bg-blue-500';
+      case 'green':
+        return 'bg-green-500';
+      case 'purple':
+        return 'bg-purple-500';
+      case 'orange':
+        return 'bg-orange-500';
+      case 'pink':
+        return 'bg-pink-500';
+      case 'indigo':
+        return 'bg-indigo-500';
+      default:
+        return 'bg-primary';
+    }
+  };
+
+  const getUserPrimaryColorLight = (colorScheme: string) => {
+    switch (colorScheme) {
+      case 'blue':
+        return 'bg-blue-500/10';
+      case 'green':
+        return 'bg-green-500/10';
+      case 'purple':
+        return 'bg-purple-500/10';
+      case 'orange':
+        return 'bg-orange-500/10';
+      case 'pink':
+        return 'bg-pink-500/10';
+      case 'indigo':
+        return 'bg-indigo-500/10';
+      default:
+        return 'bg-primary/10';
+    }
   };
 
   const getSemesterDescription = (semester: number): string => {
@@ -129,7 +245,7 @@ export function UserProfileComponent({
 
   return (
     <div className="space-y-8">
-      {/* User Profile Card */}
+      {/* User Profile Header */}
       <Card className="bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-2xl overflow-hidden">
         <CardContent className="p-8">
           <div className="flex items-center gap-8">
@@ -147,7 +263,7 @@ export function UserProfileComponent({
               </Avatar>
             </div>
 
-            {/* User Info and Stats in one row */}
+            {/* User Info */}
             <div className="flex-1">
               <div className="flex items-center gap-8">
                 {/* Name and Program */}
@@ -169,62 +285,136 @@ export function UserProfileComponent({
                     )}
                   </div>
                 </div>
-
-                {/* Statistics Row */}
-                <div className="flex-1">
-                  <div className="flex gap-3">
-                    {/* Courses */}
-                    <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-3 text-center border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-center justify-center mb-1">
-                        <BookOpen className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                        {userProfile._count.enrollment}
-                      </div>
-                      <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">
-                        Kurser
-                      </div>
-                    </div>
-
-                    {/* Total Credits */}
-                    <div className="flex-1 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-3 text-center border border-green-200 dark:border-green-800">
-                      <div className="flex items-center justify-center mb-1">
-                        <Award className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div className="text-lg font-bold text-green-900 dark:text-green-100">
-                        {userProfile.totalCredits}
-                      </div>
-                      <div className="text-xs text-green-700 dark:text-green-300 font-medium">
-                        HP Totalt
-                      </div>
-                    </div>
-
-                    {/* Reviews */}
-                    <div className="flex-1 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-3 text-center border border-purple-200 dark:border-purple-800">
-                      <div className="flex items-center justify-center mb-1">
-                        <Star className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                        {userProfile._count.review}
-                      </div>
-                      <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">
-                        Recensioner
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Statistics Cards - Matching ScheduleStatistics Design */}
+      <div className="space-y-6">
+        {/* Main Statistics Cards */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Total Credits and Advanced Credits side by side on mobile */}
+          <div className="grid grid-cols-2 gap-4 md:contents">
+            {/* Total Credits */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Totala poäng
+                </CardTitle>
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {userProfile.totalCredits} hp
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  av {expectedTotalCredits} hp krävda
+                </p>
+                <Progress value={progressPercentage} className="mt-2 h-2" />
+              </CardContent>
+            </Card>
+
+            {/* Advanced Credits */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Avancerade poäng
+                </CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{advancedCredits} hp</div>
+                <p className="text-xs text-muted-foreground">
+                  av {expectedAdvancedCredits} hp krävda
+                </p>
+                <Progress
+                  value={advancedProgressPercentage}
+                  className="mt-2 h-2"
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Field of Study */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Huvudområde</CardTitle>
+              <SignpostBig className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {mainFieldOfStudy ? mainFieldOfStudy.field : 'Ej uppfyllt'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {mainFieldOfStudy
+                  ? `${mainFieldOfStudy.credits} hp avancerade poäng`
+                  : `Behöver ${requiredFieldCredits} hp i samma område`}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Statistics Row */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Courses */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Kurser</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {userProfile._count.enrollment}
+              </div>
+              <p className="text-xs text-muted-foreground">inlagda kurser</p>
+            </CardContent>
+          </Card>
+
+          {/* Reviews */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recensioner</CardTitle>
+              <Star className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {userProfile._count.review}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                skrivna recensioner
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Placeholder for future stats */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Framsteg</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {Math.round(progressPercentage)}%
+              </div>
+              <p className="text-xs text-muted-foreground">av examensmålet</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {/* Schedule Grid - Same layout as schedule view */}
       <div className="w-full space-y-6">
         {/* Semester Headers */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {semesters.map((semester) => (
-            <div key={semester} className="text-center p-4 bg-muted rounded-lg">
+            <div
+              key={semester}
+              className={`text-center p-4 ${getUserPrimaryColorLight(
+                userProfile.colorScheme
+              )} rounded-lg`}
+            >
               <h3 className="text-lg font-semibold text-foreground">
                 Termin {semester}
               </h3>
@@ -241,7 +431,11 @@ export function UserProfileComponent({
             <div key={period} className="space-y-4">
               {/* Period Header */}
               <div className="flex items-center gap-3">
-                <div className="w-2 h-8 bg-primary rounded-full" />
+                <div
+                  className={`w-2 h-8 ${getUserPrimaryColor(
+                    userProfile.colorScheme
+                  )} rounded-full`}
+                />
                 <h3 className="text-xl font-semibold text-foreground">
                   Period {period}
                 </h3>
@@ -296,7 +490,11 @@ export function UserProfileComponent({
                               <CardContent className="pt-0 space-y-3">
                                 {/* Main Field of Study */}
                                 <div className="flex items-start gap-2">
-                                  <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                                  <BookOpen
+                                    className={`h-4 w-4 ${getUserPrimaryColor(
+                                      userProfile.colorScheme
+                                    )} flex-shrink-0 mt-0.5`}
+                                  />
                                   <div className="flex flex-wrap gap-1">
                                     {course.mainFieldOfStudy?.length === 0 ? (
                                       <Badge
@@ -335,7 +533,7 @@ export function UserProfileComponent({
                                     variant="secondary"
                                     className="text-xs"
                                   >
-                                    {course.credits} hp
+                                    {Number(course.credits)} hp
                                   </Badge>
                                 </div>
                               </CardContent>

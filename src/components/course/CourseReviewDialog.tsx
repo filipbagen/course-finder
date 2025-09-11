@@ -278,7 +278,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
               Poäng
             </p>
-            <p className="font-medium text-lg">{course.credits} hp</p>
+            <p className="font-medium text-lg">{Number(course.credits)} hp</p>
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
@@ -314,7 +314,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   className="flex-shrink-0"
                 />
                 <span className="font-medium ml-2">
-                  {currentReviewData.averageRating.toFixed(1)} ({currentReviewData.count}{' '}
+                  {currentReviewData.averageRating.toFixed(1)} (
+                  {currentReviewData.count}{' '}
                   {currentReviewData.count === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
@@ -417,7 +418,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
               <li key={index} className="text-sm p-2 bg-white/5 rounded-lg">
                 <div className="font-medium">{exam.name}</div>
                 <div className="flex justify-between text-xs mt-1">
-                  <span>{exam.credits} hp</span>
+                  <span>{Number(exam.credits)} hp</span>
                   <span>Betygsskala: {exam.gradingScale}</span>
                 </div>
               </li>
@@ -453,7 +454,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   {course.name}
                 </DialogTitle>
                 <DialogDescription className="text-muted-foreground">
-                  {course.code} • {course.credits} hp
+                  {course.code} • {Number(course.credits)} hp
                 </DialogDescription>
 
                 {/* Rating */}
@@ -527,7 +528,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
-                    {currentReviewData.count > 0 && `(${currentReviewData.count})`}
+                    {currentReviewData.count > 0 &&
+                      `(${currentReviewData.count})`}
                   </TabsTrigger>
                 </TabsList>
 
@@ -569,7 +571,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   {course.name}
                 </DrawerTitle>
                 <DrawerDescription className="text-muted-foreground">
-                  {course.code} • {course.credits} hp
+                  {course.code} • {Number(course.credits)} hp
                 </DrawerDescription>
 
                 {/* Rating */}
@@ -643,7 +645,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
-                    {currentReviewData.count > 0 && `(${currentReviewData.count})`}
+                    {currentReviewData.count > 0 &&
+                      `(${currentReviewData.count})`}
                   </TabsTrigger>
                 </TabsList>
 
@@ -668,20 +671,21 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   // Default behavior for non-schedule contexts
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {trigger || (
-            <Button variant="outline" size="sm" className="gap-2">
-              <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-              <span>
-                {currentReviewData.count > 0
-                  ? `${currentReviewData.averageRating.toFixed(1)} (${
-                      currentReviewData.count
-                    })`
-                  : 'Recensioner'}
-              </span>
-            </Button>
-          )}
-        </DialogTrigger>      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button variant="outline" size="sm" className="gap-2">
+            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+            <span>
+              {currentReviewData.count > 0
+                ? `${currentReviewData.averageRating.toFixed(1)} (${
+                    currentReviewData.count
+                  })`
+                : 'Recensioner'}
+            </span>
+          </Button>
+        )}
+      </DialogTrigger>{' '}
+      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
           <DialogDescription>
@@ -698,7 +702,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="info">Kursinformation</TabsTrigger>
             <TabsTrigger value="reviews">
-              Recensioner {currentReviewData.count > 0 && `(${currentReviewData.count})`}
+              Recensioner{' '}
+              {currentReviewData.count > 0 && `(${currentReviewData.count})`}
             </TabsTrigger>
           </TabsList>
 

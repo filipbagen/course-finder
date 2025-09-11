@@ -296,7 +296,7 @@ export default function ScheduleCourseCard({
 
             {/* Credits */}
             <Badge variant="secondary" className="text-xs">
-              {course.credits} hp
+              {Number(course.credits)} hp
             </Badge>
           </div>
         </CardContent>

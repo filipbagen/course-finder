@@ -58,7 +58,7 @@ export function ScheduleStatistics() {
           // Avoid counting the same course multiple times
           if (!allCourses.some((c) => c.id === course.id)) {
             if (course.advanced) {
-              total += course.credits || 0;
+              total += Number(course.credits) || 0;
             }
             allCourses.push(course);
           }
@@ -82,7 +82,7 @@ export function ScheduleStatistics() {
           // Avoid counting the same course multiple times
           if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
             course.mainFieldOfStudy.forEach((field: string) => {
-              creditCount[field] = (creditCount[field] || 0) + course.credits;
+              creditCount[field] = (creditCount[field] || 0) + Number(course.credits);
             });
             allCourses.push(course);
           }
