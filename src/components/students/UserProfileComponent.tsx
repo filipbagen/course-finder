@@ -22,7 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
 import { CourseDetailsDialog } from '@/components/course/CourseDetailsDialog';
-import { useEnrollment } from '@/hooks/useEnrollment';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface UserProfileData {
   id: string;
@@ -60,24 +60,6 @@ export function UserProfileComponent({
   currentUserColorScheme = 'blue',
 }: UserProfileComponentProps) {
   const { onOpen } = useCourseDetailsSheet();
-  const { addToEnrollment } = useEnrollment('Course');
-
-  // Handle course enrollment
-  const handleAddCourse = (course: any) => {
-    if (!addToEnrollment) return;
-
-    // Extract semester from course data or use a default
-    let semester = 7; // Default semester
-    if (
-      course.semester &&
-      Array.isArray(course.semester) &&
-      course.semester.length > 0
-    ) {
-      semester = course.semester[0];
-    }
-
-    addToEnrollment(course.id, semester);
-  };
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -357,916 +339,862 @@ export function UserProfileComponent({
         </div>
       </div>
 
-      {/* Schedule Grid - Same layout as schedule view */}
-      <div className="w-full space-y-6">
-        {/* Mobile Layout - Single Column */}
-        <div className="md:hidden space-y-6">
-          {/* Semester 7 Header */}
-          <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-            <h3 className="text-lg font-semibold text-foreground">Termin 7</h3>
-            <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
-          </div>
+      <Separator />
 
-          {/* Semester 7 - Period 1 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 1
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester7?.period1?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
+      {/* Tabs for Schedule and Reviews */}
+      <Tabs defaultValue="schedule" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="schedule">Schema</TabsTrigger>
+          <TabsTrigger value="reviews">
+            Recensioner ({userProfile._count.review})
+          </TabsTrigger>
+        </TabsList>
 
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester7?.period1 ||
-                schedule.semester7.period1.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Semester 7 - Period 2 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 2
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester7?.period2?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester7?.period2 ||
-                schedule.semester7.period2.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Semester 8 Header */}
-          <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-            <h3 className="text-lg font-semibold text-foreground">Termin 8</h3>
-            <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
-          </div>
-
-          {/* Semester 8 - Period 1 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 1
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester8?.period1?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester8?.period1 ||
-                schedule.semester8.period1.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Semester 8 - Period 2 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 2
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester8?.period2?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester8?.period2 ||
-                schedule.semester8.period2.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Semester 9 Header */}
-          <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-            <h3 className="text-lg font-semibold text-foreground">Termin 9</h3>
-            <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
-          </div>
-
-          {/* Semester 9 - Period 1 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 1
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester9?.period1?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester9?.period1 ||
-                schedule.semester9.period1.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Semester 9 - Period 2 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full" />
-              <h3 className="text-xl font-semibold text-foreground">
-                Period 2
-              </h3>
-            </div>
-            <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-              <div className="space-y-3">
-                {schedule?.semester9?.period2?.map((course) => (
-                  <Card
-                    key={course.id}
-                    className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                    onClick={() => onOpen(course)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                            {course.name}
-                          </h3>
-                          <p className="text-sm font-mono text-muted-foreground mt-1">
-                            {course.code}
-                          </p>
-                        </div>
-                        {isOwnProfile && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                              userProfile.colorScheme
-                            )} hover:opacity-90`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddCourse(course);
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-3">
-                      {/* Main Field of Study */}
-                      <div className="flex items-start gap-2">
-                        <SignpostBig
-                          className="h-4 w-4 flex-shrink-0 mt-0.5"
-                          color={getUserPrimaryColorHex(currentUserColorScheme)}
-                        />
-                        <div className="flex flex-wrap gap-1">
-                          {course.mainFieldOfStudy?.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              Inget huvudområde
-                            </Badge>
-                          ) : (
-                            course.mainFieldOfStudy?.map(
-                              (field: string, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {field}
-                                </Badge>
-                              )
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Schedule Information */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Blocks className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {course.block?.length > 1
-                              ? `Block ${course.block.join(', ')}`
-                              : `Block ${course.block?.[0] || 'N/A'}`}
-                          </span>
-                        </div>
-
-                        {/* Credits */}
-                        <Badge variant="secondary" className="text-xs">
-                          {Number(course.credits)} hp
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) || []}
-              </div>
-
-              {/* Empty State */}
-              {(!schedule?.semester9?.period2 ||
-                schedule.semester9.period2.length === 0) && (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <div className="space-y-3 flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <SignpostBig className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">
-                        Inga kurser inlagda
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Layout - Original 2x3 Grid */}
-        <div className="hidden md:block">
-          {/* Semester Headers */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {semesters.map((semester) => (
-              <div
-                key={semester}
-                className="text-center p-4 bg-primary/10 rounded-lg"
-              >
+        {/* Schedule Tab */}
+        <TabsContent value="schedule" className="space-y-6 mt-6">
+          {/* Schedule Grid - Same layout as schedule view */}
+          <div className="w-full space-y-6">
+            {/* Mobile Layout - Single Column */}
+            <div className="md:hidden space-y-6">
+              {/* Semester 7 Header */}
+              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Termin {semester}
+                  Termin 7
                 </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {getSemesterDescription(semester)}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
               </div>
-            ))}
-          </div>
 
-          {/* Schedule Grid */}
-          <div className="space-y-8 mt-3">
-            {periods.map((period) => (
-              <div key={period} className="space-y-4">
-                {/* Period Header */}
+              {/* Semester 7 - Period 1 */}
+              <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-8 bg-primary rounded-full" />
                   <h3 className="text-xl font-semibold text-foreground">
-                    Period {period}
+                    Period 1
                   </h3>
-                  <div className="flex-1 h-px bg-border" />
                 </div>
-
-                {/* Period Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {semesters.map((semester) => {
-                    const semesterKey =
-                      `semester${semester}` as keyof typeof schedule;
-                    const periodKey =
-                      `period${period}` as keyof (typeof schedule)[typeof semesterKey];
-                    const courses = schedule?.[semesterKey]?.[periodKey] || [];
-
-                    return (
-                      <div
-                        key={`${semester}-${period}`}
-                        className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card"
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester7?.period1?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
                       >
-                        <div className="space-y-3">
-                          {courses.map((course) => (
-                            <Card
-                              key={course.id}
-                              className="transition-all duration-200 hover:shadow-md cursor-pointer group"
-                              onClick={() => onOpen(course)}
-                            >
-                              <CardHeader className="pb-3">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                                      {course.name}
-                                    </h3>
-                                    <p className="text-sm font-mono text-muted-foreground mt-1">
-                                      {course.code}
-                                    </p>
-                                  </div>
-                                  {isOwnProfile && (
-                                    <Button
-                                      variant="default"
-                                      size="sm"
-                                      className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                                        userProfile.colorScheme
-                                      )} hover:opacity-90`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleAddCourse(course);
-                                      }}
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </Button>
-                                  )}
-                                </div>
-                              </CardHeader>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
 
-                              <CardContent className="pt-0 space-y-3">
-                                {/* Main Field of Study */}
-                                <div className="flex items-start gap-2">
-                                  <SignpostBig
-                                    className="h-4 w-4 flex-shrink-0 mt-0.5"
-                                    color={getUserPrimaryColorHex(
-                                      currentUserColorScheme
-                                    )}
-                                  />
-                                  <div className="flex flex-wrap gap-1">
-                                    {course.mainFieldOfStudy?.length === 0 ? (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs"
-                                      >
-                                        Inget huvudområde
-                                      </Badge>
-                                    ) : (
-                                      course.mainFieldOfStudy?.map(
-                                        (field: string, index: number) => (
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester7?.period1 ||
+                    schedule.semester7.period1.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Semester 7 - Period 2 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Period 2
+                  </h3>
+                </div>
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester7?.period2?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester7?.period2 ||
+                    schedule.semester7.period2.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Semester 8 Header */}
+              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Termin 8
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
+              </div>
+
+              {/* Semester 8 - Period 1 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Period 1
+                  </h3>
+                </div>
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester8?.period1?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester8?.period1 ||
+                    schedule.semester8.period1.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Semester 8 - Period 2 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Period 2
+                  </h3>
+                </div>
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester8?.period2?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester8?.period2 ||
+                    schedule.semester8.period2.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Semester 9 Header */}
+              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Termin 9
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
+              </div>
+
+              {/* Semester 9 - Period 1 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Period 1
+                  </h3>
+                </div>
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester9?.period1?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester9?.period1 ||
+                    schedule.semester9.period1.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Semester 9 - Period 2 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Period 2
+                  </h3>
+                </div>
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
+                  <div className="space-y-3">
+                    {schedule?.semester9?.period2?.map((course) => (
+                      <Card
+                        key={course.id}
+                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        onClick={() => onOpen(course)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.name}
+                              </h3>
+                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                                {course.code}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 space-y-3">
+                          {/* Main Field of Study */}
+                          <div className="flex items-start gap-2">
+                            <SignpostBig
+                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              color={getUserPrimaryColorHex(
+                                currentUserColorScheme
+                              )}
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {course.mainFieldOfStudy?.length === 0 ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Inget huvudområde
+                                </Badge>
+                              ) : (
+                                course.mainFieldOfStudy?.map(
+                                  (field: string, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {field}
+                                    </Badge>
+                                  )
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Schedule Information */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                {course.block?.length > 1
+                                  ? `Block ${course.block.join(', ')}`
+                                  : `Block ${course.block?.[0] || 'N/A'}`}
+                              </span>
+                            </div>
+
+                            {/* Credits */}
+                            <Badge variant="secondary" className="text-xs">
+                              {Number(course.credits)} hp
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) || []}
+                  </div>
+
+                  {/* Empty State */}
+                  {(!schedule?.semester9?.period2 ||
+                    schedule.semester9.period2.length === 0) && (
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <SignpostBig className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Inga kurser inlagda
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Layout - Original 2x3 Grid */}
+            <div className="hidden md:block">
+              {/* Semester Headers */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {semesters.map((semester) => (
+                  <div
+                    key={semester}
+                    className="text-center p-4 bg-primary/10 rounded-lg"
+                  >
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Termin {semester}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {getSemesterDescription(semester)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Schedule Grid */}
+              <div className="space-y-8 mt-3">
+                {periods.map((period) => (
+                  <div key={period} className="space-y-4">
+                    {/* Period Header */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-8 bg-primary rounded-full" />
+                      <h3 className="text-xl font-semibold text-foreground">
+                        Period {period}
+                      </h3>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+
+                    {/* Period Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {semesters.map((semester) => {
+                        const semesterKey =
+                          `semester${semester}` as keyof typeof schedule;
+                        const periodKey =
+                          `period${period}` as keyof (typeof schedule)[typeof semesterKey];
+                        const courses =
+                          schedule?.[semesterKey]?.[periodKey] || [];
+
+                        return (
+                          <div
+                            key={`${semester}-${period}`}
+                            className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card"
+                          >
+                            <div className="space-y-3">
+                              {courses.map((course) => (
+                                <Card
+                                  key={course.id}
+                                  className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                                  onClick={() => onOpen(course)}
+                                >
+                                  <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                          {course.name}
+                                        </h3>
+                                        <p className="text-sm font-mono text-muted-foreground mt-1">
+                                          {course.code}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </CardHeader>
+
+                                  <CardContent className="pt-0 space-y-3">
+                                    {/* Main Field of Study */}
+                                    <div className="flex items-start gap-2">
+                                      <SignpostBig
+                                        className="h-4 w-4 flex-shrink-0 mt-0.5"
+                                        color={getUserPrimaryColorHex(
+                                          currentUserColorScheme
+                                        )}
+                                      />
+                                      <div className="flex flex-wrap gap-1">
+                                        {course.mainFieldOfStudy?.length ===
+                                        0 ? (
                                           <Badge
-                                            key={index}
                                             variant="outline"
                                             className="text-xs"
                                           >
-                                            {field}
+                                            Inget huvudområde
                                           </Badge>
-                                        )
-                                      )
-                                    )}
-                                  </div>
-                                </div>
+                                        ) : (
+                                          course.mainFieldOfStudy?.map(
+                                            (field: string, index: number) => (
+                                              <Badge
+                                                key={index}
+                                                variant="outline"
+                                                className="text-xs"
+                                              >
+                                                {field}
+                                              </Badge>
+                                            )
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
 
-                                {/* Schedule Information */}
-                                <div className="flex items-center justify-between pt-2 border-t border-border">
-                                  <div className="flex items-center gap-2">
-                                    <Blocks className="h-3 w-3 text-muted-foreground" />
-                                    <span className="text-xs text-muted-foreground">
-                                      {course.block?.length > 1
-                                        ? `Block ${course.block.join(', ')}`
-                                        : `Block ${course.block?.[0] || 'N/A'}`}
-                                    </span>
-                                  </div>
+                                    {/* Schedule Information */}
+                                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                                      <div className="flex items-center gap-2">
+                                        <Blocks className="h-3 w-3 text-muted-foreground" />
+                                        <span className="text-xs text-muted-foreground">
+                                          {course.block?.length > 1
+                                            ? `Block ${course.block.join(', ')}`
+                                            : `Block ${
+                                                course.block?.[0] || 'N/A'
+                                              }`}
+                                        </span>
+                                      </div>
 
-                                  {/* Credits */}
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {Number(course.credits)} hp
-                                  </Badge>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-
-                        {/* Empty State */}
-                        {courses.length === 0 && (
-                          <div className="flex flex-col items-center justify-center h-32 text-center">
-                            <div className="space-y-3 flex flex-col items-center">
-                              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                                <SignpostBig className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-sm text-muted-foreground">
-                                  Inga kurser inlagda
-                                </p>
-                              </div>
+                                      {/* Credits */}
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs"
+                                      >
+                                        {Number(course.credits)} hp
+                                      </Badge>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
                             </div>
+
+                            {/* Empty State */}
+                            {courses.length === 0 && (
+                              <div className="flex flex-col items-center justify-center h-32 text-center">
+                                <div className="space-y-3 flex flex-col items-center">
+                                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                                    <SignpostBig className="h-6 w-6 text-primary" />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">
+                                      Inga kurser inlagda
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Reviews Section */}
-      {userProfile.reviews.length > 0 && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Star className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Recensioner</h2>
-            <Badge variant="secondary" className="text-sm">
-              {userProfile._count.review}
-            </Badge>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {userProfile.reviews.map((review) => (
-              <Card
-                key={review.id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg leading-tight">
-                        {review.course.name}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {review.course.code}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 ml-4">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < review.rating
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-relaxed">{review.comment}</p>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    {new Date(review.createdAt).toLocaleDateString('sv-SE')}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        </TabsContent>
+
+        {/* Reviews Tab */}
+        <TabsContent value="reviews" className="space-y-6 mt-6">
+          {userProfile.reviews.length > 0 ? (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <Star className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold">Recensioner</h2>
+                <Badge variant="secondary" className="text-sm">
+                  {userProfile._count.review}
+                </Badge>
+              </div>
+
+              <div className="max-h-96 overflow-y-auto space-y-4">
+                {userProfile.reviews.map((review) => (
+                  <Card
+                    key={review.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg leading-tight">
+                            {review.course.name}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {review.course.code}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 ml-4">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed">
+                        {review.comment}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {new Date(review.createdAt).toLocaleDateString('sv-SE')}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Star className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                Inga recensioner än
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {userProfile.name} har inte skrivit några recensioner ännu.
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Course Details Dialog */}
       <CourseDetailsDialog />

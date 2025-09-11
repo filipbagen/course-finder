@@ -241,7 +241,7 @@ const CourseDetails = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Course Main Fields */}
         <DetailSection
-          icon={<SignpostBig className="h-4 w-4" />}
+          icon={<SignpostBig className="h-4 w-4 text-primary" />}
           title="Huvudområden"
         >
           <div className="flex flex-wrap gap-2">
