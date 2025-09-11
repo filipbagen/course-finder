@@ -131,6 +131,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // At this point, result.success is true and result.review is guaranteed to exist
+    if (!result.review) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to create or update review',
+        },
+        { status: 500 }
+      );
+    }
+
     // Format review with User field for frontend compatibility
     const formattedReview = {
       ...result.review,
