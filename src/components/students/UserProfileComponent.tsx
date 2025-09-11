@@ -182,44 +182,6 @@ export function UserProfileComponent({
     }
   };
 
-  const getUserPrimaryColorHex = (colorScheme: string) => {
-    switch (colorScheme) {
-      case 'blue':
-        return '#3b82f6';
-      case 'green':
-        return '#10b981';
-      case 'purple':
-        return '#8b5cf6';
-      case 'orange':
-        return '#f97316';
-      case 'pink':
-        return '#ec4899';
-      case 'indigo':
-        return '#6366f1';
-      default:
-        return '#6366f1'; // Default to indigo
-    }
-  };
-
-  const getUserPrimaryColorLight = (colorScheme: string) => {
-    switch (colorScheme) {
-      case 'blue':
-        return 'bg-blue-500/10';
-      case 'green':
-        return 'bg-green-500/10';
-      case 'purple':
-        return 'bg-purple-500/10';
-      case 'orange':
-        return 'bg-orange-500/10';
-      case 'pink':
-        return 'bg-pink-500/10';
-      case 'indigo':
-        return 'bg-indigo-500/10';
-      default:
-        return 'bg-primary/10';
-    }
-  };
-
   const getSemesterDescription = (semester: number): string => {
     switch (semester) {
       case 7:
@@ -398,9 +360,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -501,9 +461,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -604,9 +562,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -707,9 +663,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -810,9 +764,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -913,9 +865,7 @@ export function UserProfileComponent({
                           <div className="flex items-start gap-2">
                             <SignpostBig
                               className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
+                              style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
@@ -1039,9 +989,7 @@ export function UserProfileComponent({
                                     <div className="flex items-start gap-2">
                                       <SignpostBig
                                         className="h-4 w-4 flex-shrink-0 mt-0.5"
-                                        color={getUserPrimaryColorHex(
-                                          currentUserColorScheme
-                                        )}
+                                        style={{ color: 'hsl(var(--primary))' }}
                                       />
                                       <div className="flex flex-wrap gap-1">
                                         {course.mainFieldOfStudy?.length ===

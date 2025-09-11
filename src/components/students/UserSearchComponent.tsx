@@ -247,7 +247,7 @@ export function UserSearchComponent({
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-semibold line-clamp-1">{user.name}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
+                    <p className="text-sm text-muted-foreground line-clamp-1 !mt-0">
                       {user.program || 'Inget program'}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">

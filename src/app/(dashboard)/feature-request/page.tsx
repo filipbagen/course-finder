@@ -68,7 +68,7 @@ export default function FeatureRequestPage() {
           <div className="grid gap-1">
             <h1 className="text-3xl font-bold">Förslag på funktioner</h1>
             <p className="text-muted-foreground">
-              Hjälp oss förbättra Course Finder genom att dela dina idéer
+              Hjälp till att förbättra Course Finder genom att dela dina idéer
             </p>
           </div>
         </div>
@@ -150,8 +150,10 @@ export default function FeatureRequestPage() {
                 <CardTitle className="text-lg">Tips</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>• Var så specifik som möjligt</p>
-                <p>• Förklara varför förslaget är viktigt</p>
+                <ul>
+                    <li>Var så specifik som möjligt</li>
+                    <li>Förklara varför förslaget är viktigt</li>
+                </ul>
               </CardContent>
             </Card>
           </div>

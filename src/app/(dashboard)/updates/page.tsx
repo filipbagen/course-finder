@@ -91,7 +91,9 @@ export default function UpdatesPage() {
     switch (status) {
       case 'current':
         return (
-          <Badge className="bg-green-100 text-green-800">Aktuell version</Badge>
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Aktuell version
+        </Badge>
         );
       default:
         return <Badge variant="secondary">Tidigare</Badge>;
