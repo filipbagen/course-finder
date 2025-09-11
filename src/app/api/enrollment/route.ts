@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
 import {
   createSuccessResponse,
@@ -187,22 +187,35 @@ export async function PATCH(
 
     const { enrollmentId, newSemester } = validation.data;
 
-    const existingEnrollment = await prisma.enrollment.findUnique({
-      where: { id: enrollmentId },
+    // Use withPrisma for better database connection handling
+    const result = await withPrisma(async (prismaClient) => {
+      const existingEnrollment = await prismaClient.enrollment.findUnique({
+        where: { id: enrollmentId },
+      });
+  
+      if (!existingEnrollment || existingEnrollment.userId !== user.id) {
+        return { notFound: true };
+      }
+  
+      const updatedEnrollment = await prismaClient.enrollment.update({
+        where: { id: enrollmentId },
+        data: {
+          semester: newSemester,
+        },
+      });
+      
+      return { updatedEnrollment };
     });
-
-    if (!existingEnrollment || existingEnrollment.userId !== user.id) {
+    
+    if (result.notFound) {
       return notFound('Enrollment not found or access denied');
     }
 
-    const updatedEnrollment = await prisma.enrollment.update({
-      where: { id: enrollmentId },
-      data: {
-        semester: newSemester,
-      },
-    });
-
-    return createSuccessResponse({ updatedEnrollment });
+    // Add cache control headers
+    const response = createSuccessResponse({ updatedEnrollment: result.updatedEnrollment });
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    return response;
   } catch (error) {
     console.error('Failed to update enrollment:', error);
     return internalServerError('Failed to update enrollment');

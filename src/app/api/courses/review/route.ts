@@ -3,7 +3,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { ApiResponse } from '@/types/api';
 import { CreateReviewRequest } from '@/types/types';
 import { v4 as uuidv4 } from 'uuid';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 
 // POST /api/courses/review - Create or update a review
 export async function POST(request: NextRequest) {
@@ -41,87 +41,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if the user is already enrolled in this course
-    const enrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId,
-        courseId,
-      },
+    // Use withPrisma wrapper for better connection handling
+    const result = await withPrisma(async (prismaClient) => {
+      // Check if the user is already enrolled in this course
+      const enrollment = await prismaClient.enrollment.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+  
+      if (!enrollment) {
+        return { error: 'You can only review courses you are enrolled in', status: 403 };
+      }
+  
+      // Check if user has already reviewed this course
+      const existingReview = await prismaClient.review.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
+        },
+      });
+  
+      let reviewResult;
+  
+      if (existingReview) {
+        // Update existing review
+        reviewResult = await prismaClient.review.update({
+          where: {
+            id: existingReview.id,
+          },
+          data: {
+            rating,
+            comment,
+            updatedAt: new Date(),
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+        });
+      } else {
+        // Create new review
+        reviewResult = await prismaClient.review.create({
+          data: {
+            id: uuidv4(),
+            rating,
+            comment,
+            userId,
+            courseId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+        });
+      }
+      
+      return { success: true, review: reviewResult };
     });
-
-    if (!enrollment) {
+    
+    // Handle custom error returned from withPrisma
+    if (result.error) {
       return NextResponse.json(
         {
           success: false,
-          error: 'You can only review courses you are enrolled in',
+          error: result.error,
         },
-        { status: 403 }
+        { status: result.status || 500 }
       );
-    }
-
-    // Check if user has already reviewed this course
-    const existingReview = await prisma.review.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
-        },
-      },
-    });
-
-    let review;
-
-    if (existingReview) {
-      // Update existing review
-      review = await prisma.review.update({
-        where: {
-          id: existingReview.id,
-        },
-        data: {
-          rating,
-          comment,
-          updatedAt: new Date(),
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-          },
-        },
-      });
-    } else {
-      // Create new review
-      review = await prisma.review.create({
-        data: {
-          id: uuidv4(),
-          rating,
-          comment,
-          userId,
-          courseId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-          },
-        },
-      });
     }
 
     // Format review with User field for frontend compatibility
     const formattedReview = {
-      ...review,
-      User: review.user,
+      ...result.review,
+      User: result.review.user,
     };
 
     const response: ApiResponse<{ review: typeof formattedReview }> = {
@@ -131,7 +141,11 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(response);
+    // Create response with caching headers for API consistency
+    const jsonResponse = NextResponse.json(response);
+    jsonResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    return jsonResponse;
   } catch (error) {
     console.error('Error creating review:', error);
     const errorMessage =
@@ -166,15 +180,31 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Check if the review exists and belongs to the user
-    const existingReview = await prisma.review.findFirst({
-      where: {
-        id: reviewId,
-        userId,
-      },
+    // Use withPrisma for better database connection handling
+    const result = await withPrisma(async (prismaClient) => {
+      // Check if the review exists and belongs to the user
+      const existingReview = await prismaClient.review.findFirst({
+        where: {
+          id: reviewId,
+          userId,
+        },
+      });
+  
+      if (!existingReview) {
+        return { notFound: true };
+      }
+  
+      // Delete the review
+      await prismaClient.review.delete({
+        where: {
+          id: reviewId,
+        },
+      });
+      
+      return { success: true };
     });
-
-    if (!existingReview) {
+    
+    if (result.notFound) {
       return NextResponse.json(
         {
           success: false,
@@ -184,17 +214,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete the review
-    await prisma.review.delete({
-      where: {
-        id: reviewId,
-      },
-    });
-
-    return NextResponse.json({
+    // Add no-cache headers
+    const response = NextResponse.json({
       success: true,
       message: 'Review deleted successfully',
     });
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    return response;
   } catch (error) {
     console.error('Error deleting review:', error);
     const errorMessage =
