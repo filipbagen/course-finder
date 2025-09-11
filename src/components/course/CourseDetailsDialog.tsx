@@ -49,7 +49,7 @@ import {
   Plus,
   LogIn,
 } from 'lucide-react';
-import { useSchedule } from '@/app/(dashboard)/schedule/components/ScheduleProvider';
+import { createClient } from '@/lib/supabase/client';
 import { ScheduleActions } from '@/app/(dashboard)/schedule/types/schedule.types';
 import { ScheduleContextType } from '@/app/(dashboard)/schedule/types/schedule.types';
 import { useEnrollment } from '@/hooks/useEnrollment';
@@ -60,6 +60,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Link from 'next/link';
 
 const ConflictWarning = ({
   conflictingCourse,
@@ -559,6 +560,14 @@ const CourseDetails = ({
 
 export const CourseDetailsDialog = () => {
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [reviewsData, setReviewsData] = useState<{
+    averageRating: number;
+    count: number;
+  }>({
+    averageRating: 0,
+    count: 0,
+  });
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const {
@@ -585,6 +594,23 @@ export const CourseDetailsDialog = () => {
   // Enrollment Button Component
   const EnrollmentButton = ({ course }: { course: Course }) => {
     const { addToEnrollment } = useEnrollment(course.name);
+
+    // If user is not authenticated, show login button
+    if (!isAuthenticated) {
+      return (
+        <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
+          <Link
+            href="/login"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              handleClose();
+            }}
+          >
+            <LogIn className="h-4 w-4" />
+          </Link>
+        </Button>
+      );
+    }
 
     // Handle enrollment for authenticated users
     const handleEnrollment = (semester?: number | number[]) => {
@@ -697,14 +723,6 @@ export const CourseDetailsDialog = () => {
     onClose();
   };
 
-  const [reviewsData, setReviewsData] = useState<{
-    averageRating: number;
-    count: number;
-  }>({
-    averageRating: 0,
-    count: 0,
-  });
-
   // Check if course is enrolled and get current semester
   const isEnrolled = course && 'enrollment' in course;
   const currentSemester = isEnrolled
@@ -741,6 +759,19 @@ export const CourseDetailsDialog = () => {
       fetchReviewData();
     }
   }, [course?.id]);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+
+    checkAuth();
+  }, []);
 
   if (isDesktop) {
     return (
