@@ -71,13 +71,13 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [courseId]); // Only depend on courseId to prevent infinite loops
+  }, [courseId, onReviewDataUpdate, user]); // Include all dependencies
 
   useEffect(() => {
     if (courseId) {
       fetchReviews();
     }
-  }, [courseId]); // Only depend on courseId
+  }, [courseId, fetchReviews]); // Include fetchReviews dependency
 
   // Separate effect to update user review when user or reviews change
   useEffect(() => {

@@ -229,7 +229,7 @@ const CourseDetails = ({
     if (course?.id) {
       checkConflicts();
     }
-  }, [course?.id, enrolledCourses, loading]);
+  }, [course?.id, course?.code, course?.exclusions, enrolledCourses, loading]);
 
   const conflictingCourse = conflictCheck.conflictingCourse;
 
