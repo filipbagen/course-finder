@@ -264,7 +264,7 @@ export default function ScheduleCourseCard({
           <div className="flex items-start gap-2">
             <SignpostBig
               className="h-4 w-4 flex-shrink-0 mt-0.5"
-              color="#6366f1"
+              color="hsl(var(--primary))"
             />
             <div className="flex flex-wrap gap-1">
               {course.mainFieldOfStudy.length === 0 ? (

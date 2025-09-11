@@ -407,18 +407,7 @@ export function UserProfileComponent({
                       key={`${semester}-${period}`}
                       className="min-h-[200px] bg-background/50 backdrop-blur-sm border-2 border-dashed border-border"
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Termin {semester} - Period {period}
-                          </CardTitle>
-                          <Badge variant="outline" className="text-xs">
-                            {courses.length} kurser
-                          </Badge>
-                        </div>
-                      </CardHeader>
-
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-3 pt-6">
                         {courses.length > 0 ? (
                           courses.map((course) => (
                             <Card
@@ -436,20 +425,21 @@ export function UserProfileComponent({
                                       {course.code}
                                     </p>
                                   </div>
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                    className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
-                                      userProfile.colorScheme
-                                    )} hover:opacity-90`}
-                                    disabled={!isOwnProfile}
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Prevent card click
-                                      handleAddCourse(course);
-                                    }}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </Button>
+                                  {isOwnProfile && (
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
+                                        userProfile.colorScheme
+                                      )} hover:opacity-90`}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // Prevent card click
+                                        handleAddCourse(course);
+                                      }}
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  )}
                                 </div>
                               </CardHeader>
 

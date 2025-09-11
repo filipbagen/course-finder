@@ -82,21 +82,6 @@ export function SemesterBlock({
         }
       )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <SignpostBig className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">
-            S{semester} P{period}
-          </span>
-        </div>{' '}
-        {!readonly && courses.length > 0 && (
-          <span className="text-xs text-muted-foreground">
-            {courses.length} kurs{courses.length !== 1 ? 'er' : ''}
-          </span>
-        )}
-      </div>
-
       {/* Courses */}
       <div className="space-y-3">
         {courses.map((course) => (
@@ -121,7 +106,7 @@ export function SemesterBlock({
         >
           <div className="space-y-3 flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <SignpostBig className="h-6 w-6 text-muted-foreground" />
+              <SignpostBig className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
