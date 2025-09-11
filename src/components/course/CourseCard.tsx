@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,7 +69,7 @@ const CourseCard = ({
   );
   const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
 
-  // Check for course exclusions
+  // Client-side conflict detection (fast)
   const conflictingCourse = React.useMemo(() => {
     if (!enrollmentsLoading && enrolledCourses) {
       return enrolledCourses.find(
@@ -307,7 +307,7 @@ const CourseCard = ({
         </div>
 
         {/* Exclusion Warning */}
-        {conflictingCourse && variant === 'default' && (
+        {conflictingCourse && (
           <div className="mt-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0" />
