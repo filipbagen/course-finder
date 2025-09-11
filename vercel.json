@@ -8,27 +8,19 @@
     },
     "src/app/api/courses/*/reviews/route.ts": {
       "memory": 1024,
-      "maxDuration": 10,
-      "env": {
-        "USE_CONNECTION_POOLING": "true"
-      }
+      "maxDuration": 10
     },
     "src/app/api/courses/review/route.ts": {
       "memory": 1024,
-      "maxDuration": 10,
-      "env": {
-        "USE_CONNECTION_POOLING": "true"
-      }
+      "maxDuration": 10
     },
     "src/app/api/debug/connection/route.ts": {
       "memory": 1024,
-      "maxDuration": 10,
-      "env": {
-        "USE_CONNECTION_POOLING": "true"
-      }
+      "maxDuration": 10
     }
   },
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "USE_CONNECTION_POOLING": "true"
   }
 }
