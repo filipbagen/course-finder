@@ -3,8 +3,12 @@ import { prisma } from '@/lib/prisma';
 import { redirect, notFound } from 'next/navigation';
 import { UserProfileComponent } from '@/components/students/UserProfileComponent';
 import { Separator } from '@/components/ui/separator';
-import { User } from 'lucide-react';
+import { User, GraduationCap, Plus } from 'lucide-react';
 import { course as Course, enrollment, review } from '@prisma/client';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { transformCourse } from '@/lib/transformers';
 
 // Define an explicit type for the user profile
 interface UserProfileWithDetails {
@@ -70,10 +74,13 @@ async function getUserProfile(
     });
 
     // Combine enrollments with course data
-    const enrollmentsWithCourses = enrollments.map((enrollment) => ({
-      ...enrollment,
-      course: courses.find((c) => c.id === enrollment.courseId)!,
-    }));
+    const enrollmentsWithCourses = enrollments.map((enrollment) => {
+      const course = courses.find((c) => c.id === enrollment.courseId);
+      return {
+        ...enrollment,
+        course: transformCourse(course || null) as Course,
+      };
+    });
 
     // Fetch reviews with course data
     const reviews = await prisma.review.findMany({
@@ -102,10 +109,17 @@ async function getUserProfile(
     });
 
     // Combine reviews with course data
-    const reviewsWithCourses = reviews.map((review) => ({
-      ...review,
-      course: reviewCourses.find((c) => c.id === review.courseId)!,
-    }));
+    const reviewsWithCourses = reviews.map((review) => {
+      const course = reviewCourses.find((c) => c.id === review.courseId);
+      return {
+        ...review,
+        course: transformCourse(course || null) as {
+          id: string;
+          name: string;
+          code: string;
+        },
+      };
+    });
 
     // Calculate total credits
     const totalCredits = enrollmentsWithCourses.reduce((sum, enrollment) => {
@@ -114,7 +128,7 @@ async function getUserProfile(
 
     // Group courses by semester
     const coursesBySemester = enrollmentsWithCourses.reduce(
-      (acc: Record<number, Course[]>, enrollment) => {
+      (acc: Record<number, any[]>, enrollment) => {
         const semester = enrollment.semester;
         if (!acc[semester]) {
           acc[semester] = [];
@@ -185,14 +199,41 @@ export default async function UserProfilePage({ params }: PageProps) {
         {/* Header Content */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="px-2">
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0">
+                <Avatar className="h-20 w-20 shadow-xl">
+                  <AvatarImage
+                    src={userProfile.image || undefined}
+                    alt={userProfile.name || 'Anonymous User'}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xl font-semibold">
+                    {userProfile.name
+                      ? userProfile.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : 'AU'}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">
                   {userProfile.name}s schema
                 </h1>
-                <p className="text-muted-foreground">
-                  Visa studentens kurser och framsteg
-                </p>
+                {userProfile.program && (
+                  <Badge
+                    variant="secondary"
+                    className="w-fit text-sm px-3 py-1 rounded-full font-medium shadow-sm"
+                  >
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    {userProfile.program}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>

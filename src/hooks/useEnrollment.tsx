@@ -30,14 +30,14 @@ export const useEnrollment = (
   );
 
   const addToEnrollment = useCallback(
-    async (courseId: string, semester: number) => {
+    async (courseId: string | bigint, semester: number) => {
       try {
         const response = await fetch('/api/enrollment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ courseId, semester }),
+          body: JSON.stringify({ courseId: courseId.toString(), semester }),
         });
 
         if (!response.ok) {

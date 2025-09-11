@@ -56,12 +56,14 @@ export function ScheduleProvider({
         // Fetch reviews for all enrolled courses in parallel
         const reviewPromises = courses.map(async (course) => {
           try {
-            const response = await fetch(`/api/courses/${course.id}/reviews`);
+            const response = await fetch(
+              `/api/courses/${course.id.toString()}/reviews`
+            );
             if (response.ok) {
               const result = await response.json();
               if (result.success) {
                 return {
-                  courseId: course.id,
+                  courseId: course.id.toString(),
                   averageRating: result.data.averageRating,
                   count: result.data.reviews.length,
                 };

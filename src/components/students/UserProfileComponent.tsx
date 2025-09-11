@@ -11,6 +11,8 @@ import {
   TrendingUp,
   Target,
   SignpostBig,
+  Blocks,
+  Smile,
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +20,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { useCourseDetailsSheet } from '@/hooks/useCourseDetailsSheet';
+import { CourseDetailsDialog } from '@/components/course/CourseDetailsDialog';
+import { useEnrollment } from '@/hooks/useEnrollment';
 
 interface UserProfileData {
   id: string;
@@ -52,6 +57,25 @@ export function UserProfileComponent({
   userProfile,
   isOwnProfile,
 }: UserProfileComponentProps) {
+  const { onOpen } = useCourseDetailsSheet();
+  const { addToEnrollment } = useEnrollment('Course');
+
+  // Handle course enrollment
+  const handleAddCourse = (course: any) => {
+    if (!addToEnrollment) return;
+
+    // Extract semester from course data or use a default
+    let semester = 7; // Default semester
+    if (
+      course.semester &&
+      Array.isArray(course.semester) &&
+      course.semester.length > 0
+    ) {
+      semester = course.semester[0];
+    }
+
+    addToEnrollment(course.id, semester);
+  };
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -96,7 +120,8 @@ export function UserProfileComponent({
         // Avoid counting the same course multiple times
         if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
           course.mainFieldOfStudy.forEach((field: string) => {
-            creditCount[field] = (creditCount[field] || 0) + Number(course.credits);
+            creditCount[field] =
+              (creditCount[field] || 0) + Number(course.credits);
           });
           allCourses.push(course);
         }
@@ -173,6 +198,25 @@ export function UserProfileComponent({
     }
   };
 
+  const getUserPrimaryColorHex = (colorScheme: string) => {
+    switch (colorScheme) {
+      case 'blue':
+        return '#3b82f6';
+      case 'green':
+        return '#10b981';
+      case 'purple':
+        return '#8b5cf6';
+      case 'orange':
+        return '#f97316';
+      case 'pink':
+        return '#ec4899';
+      case 'indigo':
+        return '#6366f1';
+      default:
+        return '#6366f1'; // Default to indigo
+    }
+  };
+
   const getUserPrimaryColorLight = (colorScheme: string) => {
     switch (colorScheme) {
       case 'blue':
@@ -245,52 +289,6 @@ export function UserProfileComponent({
 
   return (
     <div className="space-y-8">
-      {/* User Profile Header */}
-      <Card className="bg-white/70 backdrop-blur-sm border-2 border-gray-200 rounded-2xl overflow-hidden">
-        <CardContent className="p-8">
-          <div className="flex items-center gap-8">
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <Avatar className="h-24 w-24 ring-4 ring-white shadow-xl">
-                <AvatarImage
-                  src={userProfile.image || undefined}
-                  alt={userProfile.name || 'Anonymous User'}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-semibold">
-                  {getInitials(userProfile.name)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-
-            {/* User Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-8">
-                {/* Name and Program */}
-                <div className="flex-shrink-0">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                      {userProfile.name || 'Anonymous User'}
-                    </h2>
-                    {userProfile.program && (
-                      <Badge
-                        variant="secondary"
-                        className={`${getColorFromProgram(
-                          userProfile.program
-                        )} text-sm px-3 py-1 rounded-full font-medium shadow-sm`}
-                      >
-                        <GraduationCap className="h-3 w-3 mr-1" />
-                        {userProfile.program}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Statistics Cards - Matching ScheduleStatistics Design */}
       <div className="space-y-6">
         {/* Main Statistics Cards */}
@@ -352,53 +350,6 @@ export function UserProfileComponent({
                   ? `${mainFieldOfStudy.credits} hp avancerade poäng`
                   : `Behöver ${requiredFieldCredits} hp i samma område`}
               </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Additional Statistics Row */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {/* Courses */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Kurser</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {userProfile._count.enrollment}
-              </div>
-              <p className="text-xs text-muted-foreground">inlagda kurser</p>
-            </CardContent>
-          </Card>
-
-          {/* Reviews */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recensioner</CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {userProfile._count.review}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                skrivna recensioner
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Placeholder for future stats */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Framsteg</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {Math.round(progressPercentage)}%
-              </div>
-              <p className="text-xs text-muted-foreground">av examensmålet</p>
             </CardContent>
           </Card>
         </div>
@@ -472,7 +423,8 @@ export function UserProfileComponent({
                           courses.map((course) => (
                             <Card
                               key={course.id}
-                              className="transition-all duration-200 hover:shadow-md"
+                              className="transition-all duration-200 hover:shadow-md cursor-pointer"
+                              onClick={() => onOpen(course)}
                             >
                               <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between gap-3">
@@ -484,16 +436,31 @@ export function UserProfileComponent({
                                       {course.code}
                                     </p>
                                   </div>
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className={`h-8 w-8 p-0 flex-shrink-0 ${getUserPrimaryColor(
+                                      userProfile.colorScheme
+                                    )} hover:opacity-90`}
+                                    disabled={!isOwnProfile}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent card click
+                                      handleAddCourse(course);
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </CardHeader>
 
                               <CardContent className="pt-0 space-y-3">
                                 {/* Main Field of Study */}
                                 <div className="flex items-start gap-2">
-                                  <BookOpen
-                                    className={`h-4 w-4 ${getUserPrimaryColor(
+                                  <SignpostBig
+                                    className="h-4 w-4 flex-shrink-0 mt-0.5"
+                                    color={getUserPrimaryColorHex(
                                       userProfile.colorScheme
-                                    )} flex-shrink-0 mt-0.5`}
+                                    )}
                                   />
                                   <div className="flex flex-wrap gap-1">
                                     {course.mainFieldOfStudy?.length === 0 ? (
@@ -518,24 +485,6 @@ export function UserProfileComponent({
                                     )}
                                   </div>
                                 </div>
-
-                                {/* Credits */}
-                                <div className="flex items-center justify-between pt-2 border-t border-border">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-xs"
-                                  >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Lägg till
-                                  </Button>
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {Number(course.credits)} hp
-                                  </Badge>
-                                </div>
                               </CardContent>
                             </Card>
                           ))
@@ -556,6 +505,62 @@ export function UserProfileComponent({
           ))}
         </div>
       </div>
+
+      {/* Reviews Section */}
+      {userProfile.reviews.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Star className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold">Recensioner</h2>
+            <Badge variant="secondary" className="text-sm">
+              {userProfile._count.review}
+            </Badge>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {userProfile.reviews.map((review) => (
+              <Card
+                key={review.id}
+                className="hover:shadow-md transition-shadow"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg leading-tight">
+                        {review.course.name}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {review.course.code}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 ml-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < review.rating
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-relaxed">{review.comment}</p>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {new Date(review.createdAt).toLocaleDateString('sv-SE')}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Course Details Dialog */}
+      <CourseDetailsDialog />
     </div>
   );
 }

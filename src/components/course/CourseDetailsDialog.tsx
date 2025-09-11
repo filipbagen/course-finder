@@ -666,7 +666,9 @@ export const CourseDetailsDialog = () => {
     if (course?.id) {
       const fetchReviewData = async () => {
         try {
-          const response = await fetch(`/api/courses/${course.id}/reviews`);
+          const response = await fetch(
+            `/api/courses/${course.id.toString()}/reviews`
+          );
           const result = await response.json();
 
           if (response.ok && result.success) {
@@ -756,7 +758,7 @@ export const CourseDetailsDialog = () => {
 
                 <TabsContent value="reviews">
                   <CourseReviews
-                    courseId={course.id}
+                    courseId={course.id.toString()}
                     onReviewDataUpdate={updateReviewData}
                   />
                 </TabsContent>
@@ -839,7 +841,7 @@ export const CourseDetailsDialog = () => {
 
               <TabsContent value="reviews">
                 <CourseReviews
-                  courseId={course.id}
+                  courseId={course.id.toString()}
                   onReviewDataUpdate={updateReviewData}
                 />
               </TabsContent>

@@ -15,6 +15,7 @@ export function transformCourse<T extends Record<string, any>>(
 
   return {
     ...course,
+    id: course.id !== undefined ? course.id.toString() : undefined,
     credits: course.credits !== undefined ? Number(course.credits) : undefined,
     scheduledHours:
       course.scheduledHours !== undefined && course.scheduledHours !== null

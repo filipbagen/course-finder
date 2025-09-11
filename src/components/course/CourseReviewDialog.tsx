@@ -163,7 +163,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {
-        courseId: course.id,
+        courseId: course.id.toString(),
         fromSemester: currentLocation.semester,
         fromPeriod: currentLocation.period,
         toSemester,
@@ -539,7 +539,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
                 <TabsContent value="reviews">
                   <CourseReviews
-                    courseId={course.id}
+                    courseId={course.id.toString()}
                     onReviewDataUpdate={updateReviewData}
                   />
                 </TabsContent>
@@ -656,7 +656,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
                 <TabsContent value="reviews">
                   <CourseReviews
-                    courseId={course.id}
+                    courseId={course.id.toString()}
                     onReviewDataUpdate={updateReviewData}
                   />
                 </TabsContent>
@@ -713,7 +713,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
           <TabsContent value="reviews">
             <CourseReviews
-              courseId={course.id}
+              courseId={course.id.toString()}
               onReviewDataUpdate={updateReviewData}
             />
           </TabsContent>

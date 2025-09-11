@@ -12,6 +12,7 @@ import {
   Target,
   TrendingUp,
   SignpostBig,
+  Smile,
 } from 'lucide-react';
 import { ScheduleService } from '../services/scheduleService';
 import { CourseWithEnrollment } from '@/types/types';
@@ -82,7 +83,8 @@ export function ScheduleStatistics() {
           // Avoid counting the same course multiple times
           if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
             course.mainFieldOfStudy.forEach((field: string) => {
-              creditCount[field] = (creditCount[field] || 0) + Number(course.credits);
+              creditCount[field] =
+                (creditCount[field] || 0) + Number(course.credits);
             });
             allCourses.push(course);
           }

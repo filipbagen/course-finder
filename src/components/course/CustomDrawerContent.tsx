@@ -35,7 +35,9 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/review?courseId=${course.id}`);
+        const response = await fetch(
+          `/api/review?courseId=${course.id.toString()}`
+        );
         if (response.ok) {
           const data = await response.json();
           setReviews(data);
@@ -204,7 +206,10 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
 
           <TabsContent value="reviews" className="flex flex-col gap-4">
             <h5>Skriv en recension</h5>
-            <ReviewForm courseId={course.id} onReviewSubmitted={() => {}} />
+            <ReviewForm
+              courseId={course.id.toString()}
+              onReviewSubmitted={() => {}}
+            />
             <Separator />
             {reviews.length === 0 ? (
               <p>Inga recensioner än.</p>

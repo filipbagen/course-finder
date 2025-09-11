@@ -6,7 +6,7 @@ import { CourseWithEnrollment } from '@/types/types';
 import ScheduleCourseCard from './ScheduleCourseCard';
 import { useSchedule } from './ScheduleProvider';
 import { cn } from '@/lib/utils';
-import { Plus, BookOpen } from 'lucide-react';
+import { Plus, BookOpen, Blocks, Smile, SignpostBig } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScheduleActions } from '../types/schedule.types';
 
@@ -85,7 +85,7 @@ export function SemesterBlock({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-muted-foreground" />
+          <SignpostBig className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium text-muted-foreground">
             S{semester} P{period}
           </span>
@@ -121,7 +121,7 @@ export function SemesterBlock({
         >
           <div className="space-y-3 flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-muted-foreground" />
+              <SignpostBig className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">

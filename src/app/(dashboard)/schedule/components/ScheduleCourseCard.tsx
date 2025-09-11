@@ -17,6 +17,9 @@ import {
   BookOpen,
   Star,
   ArrowRightLeft,
+  Blocks,
+  Smile,
+  SignpostBig,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -123,7 +126,7 @@ export default function ScheduleCourseCard({
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {
-        courseId: course.id,
+        courseId: course.id.toString(),
         fromSemester: currentLocation.semester,
         fromPeriod: currentLocation.period,
         toSemester,
@@ -259,7 +262,10 @@ export default function ScheduleCourseCard({
         <CardContent className="pt-0 space-y-3">
           {/* Main Field of Study */}
           <div className="flex items-start gap-2">
-            <BookOpen className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+            <SignpostBig
+              className="h-4 w-4 flex-shrink-0 mt-0.5"
+              color="#6366f1"
+            />
             <div className="flex flex-wrap gap-1">
               {course.mainFieldOfStudy.length === 0 ? (
                 <Badge variant="outline" className="text-xs">
@@ -290,7 +296,7 @@ export default function ScheduleCourseCard({
           {/* Schedule Information */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <div className="flex items-center gap-2">
-              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <Blocks className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">{blockText}</span>
             </div>
 
