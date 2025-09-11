@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform courses
-    const transformedCourses = result.courses.map((course) => transformCourse(course));
+    const transformedCourses = result.courses.map((course) =>
+      transformCourse(course)
+    );
 
     // Match enrollments with courses
     const enrollmentsWithCourses = result.enrollments

@@ -7,7 +7,10 @@ const globalForPrisma = globalThis as unknown as {
 // Create Prisma client optimized for serverless environments
 const createPrismaClient = () => {
   const client = new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
     errorFormat: 'pretty',
     datasourceUrl: process.env.DATABASE_URL,
   });
@@ -35,19 +38,23 @@ export async function withPrisma<T>(
       lastError = error as Error;
 
       // Check if it's a connection-related error
-      const isConnectionError = error instanceof Error && (
-        error.message.includes("Can't reach database server") ||
-        error.message.includes("Connection timed out") ||
-        error.message.includes("ENOTFOUND") ||
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("connection pool exhausted") ||
-        error.message.includes("too many connections")
-      );
+      const isConnectionError =
+        error instanceof Error &&
+        (error.message.includes("Can't reach database server") ||
+          error.message.includes('Connection timed out') ||
+          error.message.includes('ENOTFOUND') ||
+          error.message.includes('ECONNREFUSED') ||
+          error.message.includes('connection pool exhausted') ||
+          error.message.includes('too many connections'));
 
       if (isConnectionError && attempt < 3) {
-        console.warn(`Database operation failed (attempt ${attempt}), retrying in ${attempt * 1000}ms...`);
+        console.warn(
+          `Database operation failed (attempt ${attempt}), retrying in ${
+            attempt * 1000
+          }ms...`
+        );
         // Wait with exponential backoff
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
         continue;
       }
 
@@ -60,5 +67,7 @@ export async function withPrisma<T>(
 
   // If we get here, all retries failed
   console.error('Database operation failed after 3 attempts:', lastError);
-  throw new Error('Database is temporarily unavailable. Please try again in a moment.');
+  throw new Error(
+    'Database is temporarily unavailable. Please try again in a moment.'
+  );
 }
