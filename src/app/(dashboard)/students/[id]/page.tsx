@@ -221,16 +221,13 @@ export default async function UserProfilePage({ params }: PageProps) {
                 </Avatar>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <h1 className="text-3xl font-bold tracking-tight">
                   {userProfile.name}s schema
                 </h1>
                 {userProfile.program && (
-                  <Badge
-                    variant="secondary"
-                    className="w-fit text-sm px-3 py-1 rounded-full font-medium shadow-sm"
-                  >
-                    <GraduationCap className="h-3 w-3 mr-1" />
+                  <Badge className="bg-primary text-primary-foreground w-fit text-sm px-3 py-1 rounded-full font-medium shadow-sm">
+                    <GraduationCap className="h-4 w-4 mr-2" />
                     {userProfile.program}
                   </Badge>
                 )}

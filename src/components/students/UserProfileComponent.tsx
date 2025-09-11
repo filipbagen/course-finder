@@ -1126,7 +1126,7 @@ export function UserProfileComponent({
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <Star className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold">Recensioner</h2>
+                <h2 className="text-2xl font-bold pb-0">Recensioner</h2>
                 <Badge variant="secondary" className="text-sm">
                   {userProfile._count.review}
                 </Badge>
