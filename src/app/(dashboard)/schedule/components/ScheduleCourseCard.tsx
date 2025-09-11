@@ -19,6 +19,7 @@ import {
   ArrowRightLeft,
   Blocks,
   Smile,
+  SignpostBig,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -261,6 +262,7 @@ export default function ScheduleCourseCard({
         <CardContent className="pt-0 space-y-3">
           {/* Main Field of Study */}
           <div className="flex items-start gap-2">
+            <SignpostBig className="h-4 w-4 flex-shrink-0 mt-0.5 text-primary" />
             <div className="flex flex-wrap gap-1">
               {course.mainFieldOfStudy.length === 0 ? (
                 <Badge variant="outline" className="text-xs">
