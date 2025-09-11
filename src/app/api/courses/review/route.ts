@@ -118,9 +118,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const response: ApiResponse<{ review: typeof review }> = {
+    // Format review with User field for frontend compatibility
+    const formattedReview = {
+      ...review,
+      User: review.user,
+    };
+
+    const response: ApiResponse<{ review: typeof formattedReview }> = {
       success: true,
-      data: { review },
+      data: {
+        review: formattedReview,
+      },
     };
 
     return NextResponse.json(response);
@@ -139,7 +147,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/courses/review?reviewId=xxx - Delete a review
+// DELETE /api/courses/review?reviewId=xxx - Delete a review (only allowed for the review owner)
 export async function DELETE(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser();

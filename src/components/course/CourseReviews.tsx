@@ -56,7 +56,10 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
       // Find the current user's review if exists
       if (user) {
         const userReview = result.data.reviews.find(
-          (review: any) => review.userId === user.id
+          (review: any) =>
+            review.userId === user.id ||
+            (review.user && review.user.id === user.id) ||
+            (review.User && review.User.id === user.id)
         );
         setUserReview(userReview || null);
       }

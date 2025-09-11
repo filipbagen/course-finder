@@ -41,6 +41,19 @@ const ReviewList: React.FC<ReviewListProps> = ({
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Helper function to check if current user is the owner of a review
+  const isReviewOwner = (
+    review: ReviewData,
+    userId: string | null | undefined
+  ): boolean => {
+    if (!userId) return false;
+
+    return !!(
+      userId === review.userId ||
+      (review.User && userId === review.User.id)
+    );
+  };
+
   const deleteReview = async (reviewId: string) => {
     setDeletingId(reviewId);
 
@@ -84,17 +97,17 @@ const ReviewList: React.FC<ReviewListProps> = ({
                     {review.User?.image ? (
                       <AvatarImage
                         src={review.User.image}
-                        alt={review.User.name}
+                        alt={review.User.name || 'Användare'}
                       />
                     ) : (
                       <AvatarFallback>
-                        {review.User?.name?.charAt(0).toUpperCase() || 'U'}
+                        {(review.User?.name?.charAt(0) || 'A').toUpperCase()}
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div className="flex flex-col gap-0">
                     <span className="font-medium">
-                      {review.User?.name || 'Anonymous'}
+                      {review.User?.name || 'Anonym användare'}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(review.createdAt).toLocaleDateString('sv-SE', {
@@ -102,6 +115,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
                         month: 'long',
                         day: 'numeric',
                       })}
+                      {review.createdAt !== review.updatedAt && ' (redigerad)'}
                     </span>
                   </div>
                 </div>
@@ -131,7 +145,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
               </div>
 
               {/* Delete button (only for user's own reviews) */}
-              {currentUserId && currentUserId === review.userId && (
+              {isReviewOwner(review, currentUserId) && (
                 <Button
                   variant="ghost"
                   size="icon"

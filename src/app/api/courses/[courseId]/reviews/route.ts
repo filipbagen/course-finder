@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    // Get reviews for the course
+    // Get reviews for the course with user data
     const reviews = await prisma.review.findMany({
       where: { courseId },
       include: {
@@ -47,18 +47,25 @@ export async function GET(
       orderBy: { createdAt: 'desc' },
     });
 
+    // Transform reviews to add User field for frontend compatibility
+    const formattedReviews = reviews.map((review) => ({
+      ...review,
+      // Add User field with capitalized U for frontend consistency
+      User: review.user,
+    }));
+
     // Calculate average rating
     const averageRating = reviews.length
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
       : 0;
 
     const response: ApiResponse<{
-      reviews: typeof reviews;
+      reviews: typeof formattedReviews;
       averageRating: number;
     }> = {
       success: true,
       data: {
-        reviews,
+        reviews: formattedReviews,
         averageRating: parseFloat(averageRating.toFixed(1)),
       },
     };
