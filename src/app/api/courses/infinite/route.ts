@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 import { infiniteError } from '@/lib/errors';
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation';
 import type { InfiniteResponse } from '@/types/api';
@@ -282,7 +282,24 @@ export async function GET(
       },
     };
 
-    const courses = await prisma.course.findMany(queryOptions);
+    // Use withPrisma wrapper for database operations
+    const dbResult = await withPrisma(async (prismaClient) => {
+      const courses = await prismaClient.course.findMany(queryOptions);
+
+      // Get total count for this query (only when no cursor for performance)
+      let totalCount = null;
+      if (!cursor) {
+        const countQuery = await prismaClient.course.count({
+          where: whereConditions,
+        });
+        totalCount = countQuery;
+      }
+
+      return { courses, totalCount };
+    });
+
+    const courses = dbResult.courses;
+    const totalCount = dbResult.totalCount;
 
     // Transform data
     let filteredCourses = transformCourses(courses) as unknown as Course[];
@@ -293,15 +310,6 @@ export async function GET(
       ? filteredCourses.slice(0, limit)
       : filteredCourses;
     const nextCursor = hasNextPage ? items[items.length - 1]?.id : null;
-
-    // Get total count for this query (only when no cursor for performance)
-    let totalCount = null;
-    if (!cursor) {
-      const countQuery = await prisma.course.count({
-        where: whereConditions,
-      });
-      totalCount = countQuery;
-    }
 
     const result = {
       success: true,

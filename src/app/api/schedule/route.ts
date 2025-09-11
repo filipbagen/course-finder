@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { ScheduleResponse } from '@/types/types';
@@ -20,35 +20,40 @@ export async function GET(request: NextRequest) {
     // Use target user ID if provided, otherwise use authenticated user
     const userId = targetUserId || authenticatedUser.id;
 
-    // First, fetch enrollments
-    const enrollments = await prisma.enrollment.findMany({
-      where: {
-        userId: userId,
-        // Filter for semesters 7, 8, 9 which are the focus of this schedule view
-        semester: {
-          in: [7, 8, 9],
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(async (prismaClient) => {
+      // First, fetch enrollments
+      const enrollments = await prismaClient.enrollment.findMany({
+        where: {
+          userId: userId,
+          // Filter for semesters 7, 8, 9 which are the focus of this schedule view
+          semester: {
+            in: [7, 8, 9],
+          },
         },
-      },
-      orderBy: [{ semester: 'asc' }],
-    });
+        orderBy: [{ semester: 'asc' }],
+      });
 
-    // Get all course IDs from enrollments
-    const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+      // Get all course IDs from enrollments
+      const courseIds = enrollments.map((enrollment) => enrollment.courseId);
 
-    // Fetch courses separately
-    const courses = await prisma.course.findMany({
-      where: {
-        id: {
-          in: courseIds,
+      // Fetch courses separately
+      const courses = await prismaClient.course.findMany({
+        where: {
+          id: {
+            in: courseIds,
+          },
         },
-      },
+      });
+
+      return { enrollments, courses };
     });
 
     // Transform courses
-    const transformedCourses = courses.map((course) => transformCourse(course));
+    const transformedCourses = result.courses.map((course) => transformCourse(course));
 
     // Match enrollments with courses
-    const enrollmentsWithCourses = enrollments
+    const enrollmentsWithCourses = result.enrollments
       .map((enrollment) => {
         const course = transformedCourses.find(
           (c) => c?.id === enrollment.courseId

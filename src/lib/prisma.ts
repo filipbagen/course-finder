@@ -1,107 +1,64 @@
 import { PrismaClient } from '@prisma/client';
 
-// For debugging database connection issues
-if (process.env.NODE_ENV === 'production') {
-  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-  console.log('DIRECT_URL exists:', !!process.env.DIRECT_URL);
-}
-
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Create Prisma client with optimized connection settings for production
+// Create Prisma client optimized for serverless environments
 const createPrismaClient = () => {
   const client = new PrismaClient({
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     errorFormat: 'pretty',
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
-  });
-
-  // Add connection event handlers for better debugging
-  // Using any event name to silence TypeScript error
-  (client as any).$on('error', (e: any) => {
-    console.error('Prisma Client error:', e);
+    datasourceUrl: process.env.DATABASE_URL,
   });
 
   return client;
 };
 
-// Export Prisma client with singleton pattern
+// Use singleton pattern for development, fresh client for production
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-// Helper function to safely execute database operations with proper error handling
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// Enhanced withPrisma wrapper with better error handling for serverless
 export async function withPrisma<T>(
   callback: (prisma: PrismaClient) => Promise<T>
 ): Promise<T> {
-  try {
-    return await callback(prisma);
-  } catch (error) {
-    // Handle connection errors specifically
-    if (
-      error instanceof Error &&
-      (error.message.includes("Can't reach database server") ||
-        error.message.includes('Connection timed out'))
-    ) {
-      console.error('Database connection error:', error);
-      // Return a standardized error that won't crash your app
-      throw new Error(
-        'Database is currently unavailable. Please try again later.'
+  let lastError: Error | null = null;
+
+  // Try up to 3 times with exponential backoff
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const result = await callback(prisma);
+      return result;
+    } catch (error) {
+      lastError = error as Error;
+
+      // Check if it's a connection-related error
+      const isConnectionError = error instanceof Error && (
+        error.message.includes("Can't reach database server") ||
+        error.message.includes("Connection timed out") ||
+        error.message.includes("ENOTFOUND") ||
+        error.message.includes("ECONNREFUSED") ||
+        error.message.includes("connection pool exhausted") ||
+        error.message.includes("too many connections")
       );
-    }
-    throw error;
-  }
-}
 
-// Attempt to connect to the database during initialization in production
-// This will help identify connection issues immediately
-if (process.env.NODE_ENV === 'production') {
-  // Function to attempt database connection with retries
-  const connectWithRetry = async (retries = 3, delay = 2000) => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        console.log(
-          `Attempting database connection (attempt ${attempt}/${retries})...`
-        );
-        await prisma.$connect();
-        console.log('Successfully connected to database');
-        return true;
-      } catch (error) {
-        console.error(`Connection attempt ${attempt} failed:`, error);
+      if (isConnectionError && attempt < 3) {
+        console.warn(`Database operation failed (attempt ${attempt}), retrying in ${attempt * 1000}ms...`);
+        // Wait with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
 
-        if (attempt === retries) {
-          console.error('All connection attempts failed');
-          // Provide detailed error information
-          if (error instanceof Error) {
-            console.error({
-              name: error.name,
-              message: error.message,
-              stack: error.stack,
-              code: (error as any).code,
-              meta: (error as any).meta,
-            });
-          }
-          return false;
-        }
-
-        console.log(`Retrying in ${delay / 1000} seconds...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+      // If it's not a connection error or we've exhausted retries, throw
+      if (!isConnectionError) {
+        throw error;
       }
     }
-    return false;
-  };
+  }
 
-  // Start the connection process
-  connectWithRetry().catch((e) => {
-    console.error('Failed to initialize database connection:', e);
-  });
+  // If we get here, all retries failed
+  console.error('Database operation failed after 3 attempts:', lastError);
+  throw new Error('Database is temporarily unavailable. Please try again in a moment.');
 }
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
