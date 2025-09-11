@@ -273,74 +273,6 @@ export function UserProfileComponent({
 
   return (
     <div className="space-y-8">
-      {/* Statistics Cards - Matching ScheduleStatistics Design */}
-      <div className="space-y-6">
-        {/* Main Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {/* Total Credits and Advanced Credits side by side on mobile */}
-          <div className="grid grid-cols-2 gap-4 md:contents">
-            {/* Total Credits */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Totala poäng
-                </CardTitle>
-                <GraduationCap className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {userProfile.totalCredits} hp
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  av {expectedTotalCredits} hp krävda
-                </p>
-                <Progress value={progressPercentage} className="mt-2 h-2" />
-              </CardContent>
-            </Card>
-
-            {/* Advanced Credits */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Avancerade poäng
-                </CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{advancedCredits} hp</div>
-                <p className="text-xs text-muted-foreground">
-                  av {expectedAdvancedCredits} hp krävda
-                </p>
-                <Progress
-                  value={advancedProgressPercentage}
-                  className="mt-2 h-2"
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Field of Study */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Huvudområde</CardTitle>
-              <SignpostBig className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {mainFieldOfStudy ? mainFieldOfStudy.field : 'Ej uppfyllt'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {mainFieldOfStudy
-                  ? `${mainFieldOfStudy.credits} hp avancerade poäng`
-                  : `Behöver ${requiredFieldCredits} hp i samma område`}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Separator />
-
       {/* Tabs for Schedule and Reviews */}
       <Tabs defaultValue="schedule" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -352,18 +284,82 @@ export function UserProfileComponent({
 
         {/* Schedule Tab */}
         <TabsContent value="schedule" className="space-y-6 mt-6">
+          {/* Statistics Cards - Matching ScheduleStatistics Design */}
+          <div className="space-y-6">
+            {/* Main Statistics Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Total Credits and Advanced Credits side by side on mobile */}
+              <div className="grid grid-cols-2 gap-4 md:contents">
+                {/* Total Credits */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Totala poäng
+                    </CardTitle>
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {userProfile.totalCredits} hp
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      av {expectedTotalCredits} hp krävda
+                    </p>
+                    <Progress value={progressPercentage} className="mt-2 h-2" />
+                  </CardContent>
+                </Card>
+
+                {/* Advanced Credits */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Avancerade poäng
+                    </CardTitle>
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {advancedCredits} hp
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      av {expectedAdvancedCredits} hp krävda
+                    </p>
+                    <Progress
+                      value={advancedProgressPercentage}
+                      className="mt-2 h-2"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Main Field of Study */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Huvudområde
+                  </CardTitle>
+                  <SignpostBig className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {mainFieldOfStudy ? mainFieldOfStudy.field : 'Ej uppfyllt'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {mainFieldOfStudy
+                      ? `${mainFieldOfStudy.credits} hp avancerade poäng`
+                      : `Behöver ${requiredFieldCredits} hp i samma område`}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Schedule Grid - Same layout as schedule view */}
           <div className="w-full space-y-6">
             {/* Mobile Layout - Single Column */}
             <div className="md:hidden space-y-6">
-              {/* Semester 7 Header */}
-              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Termin 7
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
-              </div>
-
               {/* Semester 7 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -372,8 +368,12 @@ export function UserProfileComponent({
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 7 - Höst år 4
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester7?.period1?.map((course) => (
                       <Card
                         key={course.id}
@@ -471,8 +471,12 @@ export function UserProfileComponent({
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 7 - Höst år 4
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester7?.period2?.map((course) => (
                       <Card
                         key={course.id}
@@ -562,14 +566,6 @@ export function UserProfileComponent({
                 </div>
               </div>
 
-              {/* Semester 8 Header */}
-              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Termin 8
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
-              </div>
-
               {/* Semester 8 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -578,8 +574,12 @@ export function UserProfileComponent({
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 8 - Vår år 4
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester8?.period1?.map((course) => (
                       <Card
                         key={course.id}
@@ -677,8 +677,12 @@ export function UserProfileComponent({
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 8 - Vår år 4
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester8?.period2?.map((course) => (
                       <Card
                         key={course.id}
@@ -768,14 +772,6 @@ export function UserProfileComponent({
                 </div>
               </div>
 
-              {/* Semester 9 Header */}
-              <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Termin 9
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
-              </div>
-
               {/* Semester 9 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -784,8 +780,12 @@ export function UserProfileComponent({
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 9 - Höst år 5
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester9?.period1?.map((course) => (
                       <Card
                         key={course.id}
@@ -883,8 +883,12 @@ export function UserProfileComponent({
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card">
-                  <div className="space-y-3">
+                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                  {/* Semester Label */}
+                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    Termin 9 - Höst år 5
+                  </div>
+                  <div className="space-y-3 pt-8">
                     {schedule?.semester9?.period2?.map((course) => (
                       <Card
                         key={course.id}
@@ -977,23 +981,6 @@ export function UserProfileComponent({
 
             {/* Desktop Layout - Original 2x3 Grid */}
             <div className="hidden md:block">
-              {/* Semester Headers */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {semesters.map((semester) => (
-                  <div
-                    key={semester}
-                    className="text-center p-4 bg-primary/10 rounded-lg"
-                  >
-                    <h3 className="text-lg font-semibold text-foreground">
-                      Termin {semester}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {getSemesterDescription(semester)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
               {/* Schedule Grid */}
               <div className="space-y-8 mt-3">
                 {periods.map((period) => (
@@ -1020,9 +1007,14 @@ export function UserProfileComponent({
                         return (
                           <div
                             key={`${semester}-${period}`}
-                            className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card"
+                            className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative"
                           >
-                            <div className="space-y-3">
+                            {/* Semester Label */}
+                            <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                              Termin {semester} -{' '}
+                              {getSemesterDescription(semester)}
+                            </div>
+                            <div className="space-y-3 pt-8">
                               {courses.map((course) => (
                                 <Card
                                   key={course.id}

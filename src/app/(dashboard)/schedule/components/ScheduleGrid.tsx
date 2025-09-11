@@ -96,12 +96,6 @@ export function ScheduleGrid() {
     <div className="w-full space-y-6">
       {/* Mobile Layout - Single Column */}
       <div className="md:hidden space-y-6">
-        {/* Semester 7 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-          <h3 className="text-lg font-semibold text-foreground">Termin 7</h3>
-          <p className="text-sm text-muted-foreground mt-1">Höst år 4</p>
-        </div>
-
         {/* Semester 7 - Period 1 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -113,6 +107,7 @@ export function ScheduleGrid() {
             period={1}
             courses={schedule?.semester7?.period1 || []}
             dropZoneId="semester7-period1"
+            semesterLabel="Termin 7 - Höst år 4"
           />
         </div>
 
@@ -127,13 +122,8 @@ export function ScheduleGrid() {
             period={2}
             courses={schedule?.semester7?.period2 || []}
             dropZoneId="semester7-period2"
+            semesterLabel="Termin 7 - Höst år 4"
           />
-        </div>
-
-        {/* Semester 8 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-          <h3 className="text-lg font-semibold text-foreground">Termin 8</h3>
-          <p className="text-sm text-muted-foreground mt-1">Vår år 4</p>
         </div>
 
         {/* Semester 8 - Period 1 */}
@@ -147,6 +137,7 @@ export function ScheduleGrid() {
             period={1}
             courses={schedule?.semester8?.period1 || []}
             dropZoneId="semester8-period1"
+            semesterLabel="Termin 8 - Vår år 4"
           />
         </div>
 
@@ -161,13 +152,8 @@ export function ScheduleGrid() {
             period={2}
             courses={schedule?.semester8?.period2 || []}
             dropZoneId="semester8-period2"
+            semesterLabel="Termin 8 - Vår år 4"
           />
-        </div>
-
-        {/* Semester 9 Header */}
-        <div className="text-center p-4 bg-primary/10 rounded-lg mb-2">
-          <h3 className="text-lg font-semibold text-foreground">Termin 9</h3>
-          <p className="text-sm text-muted-foreground mt-1">Höst år 5</p>
         </div>
 
         {/* Semester 9 - Period 1 */}
@@ -181,6 +167,7 @@ export function ScheduleGrid() {
             period={1}
             courses={schedule?.semester9?.period1 || []}
             dropZoneId="semester9-period1"
+            semesterLabel="Termin 9 - Höst år 5"
           />
         </div>
 
@@ -195,29 +182,13 @@ export function ScheduleGrid() {
             period={2}
             courses={schedule?.semester9?.period2 || []}
             dropZoneId="semester9-period2"
+            semesterLabel="Termin 9 - Höst år 5"
           />
         </div>
       </div>
 
       {/* Desktop Layout - Original 2x3 Grid */}
       <div className="hidden md:block">
-        {/* Semester Headers */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {semesters.map((semester) => (
-            <div
-              key={semester}
-              className="text-center p-4 bg-primary/10 rounded-lg"
-            >
-              <h3 className="text-lg font-semibold text-foreground">
-                Termin {semester}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {getSemesterDescription(semester)}
-              </p>
-            </div>
-          ))}
-        </div>
-
         {/* Schedule Grid */}
         <div className="space-y-8 mt-3">
           {periods.map((period) => (
@@ -247,6 +218,9 @@ export function ScheduleGrid() {
                       period={period}
                       courses={courses}
                       dropZoneId={`semester${semester}-period${period}`}
+                      semesterLabel={`Termin ${semester} - ${getSemesterDescription(
+                        semester
+                      )}`}
                     />
                   );
                 })}

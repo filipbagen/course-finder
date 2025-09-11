@@ -16,6 +16,7 @@ interface SemesterBlockProps {
   courses: CourseWithEnrollment[];
   dropZoneId: string;
   readonly?: boolean;
+  semesterLabel?: string;
 }
 
 /**
@@ -36,6 +37,7 @@ export function SemesterBlock({
   courses,
   dropZoneId,
   readonly = false,
+  semesterLabel,
 }: SemesterBlockProps) {
   const { state, dispatch } = useSchedule();
   const { isDragging, draggedCourse } = state;
@@ -82,6 +84,15 @@ export function SemesterBlock({
         }
       )}
     >
+      {/* Semester Label */}
+      {semesterLabel && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className="bg-primary/90 text-primary-foreground text-xs font-medium px-2 py-1 rounded-md shadow-sm">
+            {semesterLabel}
+          </div>
+        </div>
+      )}
+
       {/* Courses */}
       <div className="space-y-3">
         {courses.map((course) => (
