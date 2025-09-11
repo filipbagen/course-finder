@@ -30,6 +30,7 @@ import { CourseWithEnrollment } from '@/types/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import CourseReviewDialog from '@/components/course/CourseReviewDialog';
+import { StarRating } from '@/components/course/StarRating';
 
 interface ScheduleCourseCardProps {
   course: CourseWithEnrollment;
@@ -274,6 +275,18 @@ export default function ScheduleCourseCard({
             </div>
           </div>
 
+          {/* Review Rating */}
+          {(course as any).reviewStats &&
+            (course as any).reviewStats.count > 0 && (
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                <span className="text-xs text-muted-foreground">
+                  {(course as any).reviewStats.averageRating.toFixed(1)} (
+                  {(course as any).reviewStats.count})
+                </span>
+              </div>
+            )}
+
           {/* Schedule Information */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <div className="flex items-center gap-2">
@@ -295,6 +308,7 @@ export default function ScheduleCourseCard({
           course={course}
           isFromSchedule={true}
           onRemove={onRemove}
+          initialReviewsData={(course as any).reviewStats}
           trigger={
             <button
               ref={dialogTriggerRef}

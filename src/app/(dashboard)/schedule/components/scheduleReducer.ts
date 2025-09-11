@@ -84,6 +84,12 @@ export function scheduleReducer(
         lastAction: action,
       };
 
+    case ScheduleActions.UPDATE_COURSE_REVIEWS:
+      return {
+        ...state,
+        schedule: updateCourseReviews(state.schedule, action.payload),
+      };
+
     default:
       return state;
   }
@@ -239,6 +245,60 @@ function removeCourseFromSchedule(
       period2: schedule.semester9.period2.filter(
         (course) => course.enrollment?.id !== enrollmentId
       ),
+    },
+  };
+
+  return newSchedule;
+}
+
+/**
+ * Update course reviews in the schedule
+ */
+function updateCourseReviews(
+  schedule: ScheduleData,
+  reviewData: Array<{
+    courseId: string;
+    averageRating: number;
+    count: number;
+  }>
+): ScheduleData {
+  // Create a deep copy of the schedule
+  const newSchedule: ScheduleData = {
+    semester7: {
+      period1: schedule.semester7.period1.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
+      period2: schedule.semester7.period2.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
+    },
+    semester8: {
+      period1: schedule.semester8.period1.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
+      period2: schedule.semester8.period2.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
+    },
+    semester9: {
+      period1: schedule.semester9.period1.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
+      period2: schedule.semester9.period2.map((course) => ({
+        ...course,
+        reviewStats:
+          reviewData.find((r) => r.courseId === course.id) || undefined,
+      })),
     },
   };
 

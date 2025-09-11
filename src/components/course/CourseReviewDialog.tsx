@@ -59,6 +59,10 @@ interface CourseReviewDialogProps {
   trigger?: React.ReactNode;
   onRemove?: (enrollmentId: string) => void;
   isFromSchedule?: boolean;
+  initialReviewsData?: {
+    averageRating: number;
+    count: number;
+  };
 }
 
 const DetailSection = ({
@@ -95,6 +99,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   trigger,
   onRemove,
   isFromSchedule = false,
+  initialReviewsData,
 }) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -104,8 +109,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
     averageRating: number;
     count: number;
   }>({
-    averageRating: 0,
-    count: 0,
+    averageRating: initialReviewsData?.averageRating || 0,
+    count: initialReviewsData?.count || 0,
   });
 
   // Check if course is enrolled
@@ -293,14 +298,14 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </div>
 
           {/* Rating information if available */}
-          {reviewsData.count > 0 && (
+          {currentReviewData.count > 0 && (
             <div className="col-span-2 mt-2 pt-3 border-t border-neutral-200 dark:border-slate-700/50">
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
                 Betyg från studenter
               </p>
               <div className="flex items-center gap-2 flex-row">
                 <StarRating
-                  initialValue={reviewsData.averageRating}
+                  initialValue={currentReviewData.averageRating}
                   size={20}
                   allowFraction
                   readonly
@@ -309,8 +314,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   className="flex-shrink-0"
                 />
                 <span className="font-medium ml-2">
-                  {reviewsData.averageRating.toFixed(1)} ({reviewsData.count}{' '}
-                  {reviewsData.count === 1 ? 'recension' : 'recensioner'})
+                  {currentReviewData.averageRating.toFixed(1)} ({currentReviewData.count}{' '}
+                  {currentReviewData.count === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
             </div>
@@ -425,15 +430,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
     </div>
   );
 
-  // Reset review data when course changes
-  useEffect(() => {
-    if (course?.id) {
-      setReviewsData({
-        averageRating: 0,
-        count: 0,
-      });
-    }
-  }, [course?.id]);
+  // Get the current review data (prefer initial data if available)
+  const currentReviewData = initialReviewsData || reviewsData;
 
   // If from schedule and desktop, use Dialog
   if (isFromSchedule && isDesktop) {
@@ -460,10 +458,10 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mt-3">
-                  {reviewsData.count > 0 ? (
+                  {currentReviewData.count > 0 ? (
                     <>
                       <StarRating
-                        initialValue={reviewsData.averageRating}
+                        initialValue={currentReviewData.averageRating}
                         size={20}
                         allowFraction
                         readonly
@@ -471,8 +469,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                         emptyColor="#e4e5e9"
                       />
                       <span className="text-sm text-muted-foreground">
-                        {reviewsData.averageRating.toFixed(1)} (
-                        {reviewsData.count} recensioner)
+                        {currentReviewData.averageRating.toFixed(1)} (
+                        {currentReviewData.count} recensioner)
                       </span>
                     </>
                   ) : (
@@ -529,7 +527,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
-                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                    {currentReviewData.count > 0 && `(${currentReviewData.count})`}
                   </TabsTrigger>
                 </TabsList>
 
@@ -576,10 +574,10 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mt-3">
-                  {reviewsData.count > 0 ? (
+                  {currentReviewData.count > 0 ? (
                     <>
                       <StarRating
-                        initialValue={reviewsData.averageRating}
+                        initialValue={currentReviewData.averageRating}
                         size={18}
                         allowFraction
                         readonly
@@ -587,8 +585,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                         emptyColor="#e4e5e9"
                       />
                       <span className="text-sm text-muted-foreground">
-                        {reviewsData.averageRating.toFixed(1)} (
-                        {reviewsData.count} recensioner)
+                        {currentReviewData.averageRating.toFixed(1)} (
+                        {currentReviewData.count} recensioner)
                       </span>
                     </>
                   ) : (
@@ -645,7 +643,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
-                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                    {currentReviewData.count > 0 && `(${currentReviewData.count})`}
                   </TabsTrigger>
                 </TabsList>
 
@@ -670,30 +668,28 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   // Default behavior for non-schedule contexts
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" size="sm" className="gap-2">
-            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-            <span>
-              {reviewsData.count > 0
-                ? `${reviewsData.averageRating.toFixed(1)} (${
-                    reviewsData.count
-                  })`
-                : 'Recensioner'}
-            </span>
-          </Button>
-        )}
-      </DialogTrigger>
-
-      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button variant="outline" size="sm" className="gap-2">
+              <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+              <span>
+                {currentReviewData.count > 0
+                  ? `${currentReviewData.averageRating.toFixed(1)} (${
+                      currentReviewData.count
+                    })`
+                  : 'Recensioner'}
+              </span>
+            </Button>
+          )}
+        </DialogTrigger>      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
           <DialogDescription>
             Recensioner för {course.name}, kurskod {course.code}.
-            {reviewsData.count > 0
-              ? ` Genomsnittligt betyg ${reviewsData.averageRating.toFixed(
+            {currentReviewData.count > 0
+              ? ` Genomsnittligt betyg ${currentReviewData.averageRating.toFixed(
                   1
-                )} av 5 baserat på ${reviewsData.count} recensioner.`
+                )} av 5 baserat på ${currentReviewData.count} recensioner.`
               : ' Inga recensioner ännu.'}
           </DialogDescription>
         </DialogHeader>
@@ -702,7 +698,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="info">Kursinformation</TabsTrigger>
             <TabsTrigger value="reviews">
-              Recensioner {reviewsData.count > 0 && `(${reviewsData.count})`}
+              Recensioner {currentReviewData.count > 0 && `(${currentReviewData.count})`}
             </TabsTrigger>
           </TabsList>
 

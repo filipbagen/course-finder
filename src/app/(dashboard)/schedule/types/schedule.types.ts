@@ -6,6 +6,10 @@ import { CourseWithEnrollment } from '@/types/types';
 
 export interface ScheduleCourse extends CourseWithEnrollment {
   // Extend with schedule-specific properties if needed
+  reviewStats?: {
+    averageRating: number;
+    count: number;
+  };
 }
 
 export interface SemesterData {
@@ -46,6 +50,7 @@ export enum ScheduleActions {
   REMOVE_COURSE = 'REMOVE_COURSE',
   SET_DRAG_STATE = 'SET_DRAG_STATE',
   SET_ERROR = 'SET_ERROR',
+  UPDATE_COURSE_REVIEWS = 'UPDATE_COURSE_REVIEWS',
 }
 
 export interface ScheduleAction {

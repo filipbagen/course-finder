@@ -16,6 +16,7 @@ import { scheduleReducer, initialScheduleState } from './scheduleReducer';
 import { ScheduleService } from '../services/scheduleService';
 import { toast } from 'sonner';
 import { useEnrolledCoursesStore } from '@/hooks/useEnrolledCoursesStore';
+import { CourseWithEnrollment } from '@/types/types';
 
 const ScheduleContext = createContext<ScheduleContextType | null>(null);
 
@@ -47,6 +48,50 @@ export function ScheduleProvider({
     useEnrolledCoursesStore();
 
   /**
+   * Load reviews for enrolled courses
+   */
+  const loadReviewsForCourses = useCallback(
+    async (courses: CourseWithEnrollment[]) => {
+      try {
+        // Fetch reviews for all enrolled courses in parallel
+        const reviewPromises = courses.map(async (course) => {
+          try {
+            const response = await fetch(`/api/courses/${course.id}/reviews`);
+            if (response.ok) {
+              const result = await response.json();
+              if (result.success) {
+                return {
+                  courseId: course.id,
+                  averageRating: result.data.averageRating,
+                  count: result.data.reviews.length,
+                };
+              }
+            }
+          } catch (error) {
+            console.error(
+              `Failed to load reviews for course ${course.id}:`,
+              error
+            );
+          }
+          return null;
+        });
+
+        const reviewResults = await Promise.all(reviewPromises);
+        const validReviews = reviewResults.filter((result) => result !== null);
+
+        // Update schedule with review data
+        dispatch({
+          type: ScheduleActions.UPDATE_COURSE_REVIEWS,
+          payload: validReviews,
+        });
+      } catch (error) {
+        console.error('Failed to load reviews for courses:', error);
+      }
+    },
+    []
+  );
+
+  /**
    * Load schedule data from API
    */
   const loadScheduleData = useCallback(async () => {
@@ -69,6 +114,9 @@ export function ScheduleProvider({
       ];
       setEnrolledCourses(allCourses);
       setLoading(false);
+
+      // Load reviews for all enrolled courses
+      await loadReviewsForCourses(allCourses);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load schedule';
@@ -80,7 +128,7 @@ export function ScheduleProvider({
       setLoading(false);
       toast.error(errorMessage);
     }
-  }, [userId, setEnrolledCourses, setLoading, setError]);
+  }, [userId, setEnrolledCourses, setLoading, setError, loadReviewsForCourses]);
 
   /**
    * Handle course movement with optimistic updates
