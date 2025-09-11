@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { Course } from '@/types/types';
+import { CourseWithEnrollment } from '@/types/types';
 
 interface EnrolledCoursesState {
-  enrolledCourses: Course[];
-  setEnrolledCourses: (courses: Course[]) => void;
+  enrolledCourses: CourseWithEnrollment[];
+  setEnrolledCourses: (courses: CourseWithEnrollment[]) => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
   error: string | null;

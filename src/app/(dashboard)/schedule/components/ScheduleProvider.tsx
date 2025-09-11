@@ -188,6 +188,15 @@ export function ScheduleProvider({
 
       try {
         await ScheduleService.removeCourseFromSchedule(enrollmentId);
+
+        // Immediately update the enrolled courses store to remove the course
+        const currentEnrolledCourses =
+          useEnrolledCoursesStore.getState().enrolledCourses;
+        const updatedCourses = currentEnrolledCourses.filter(
+          (course) => course.enrollment.id !== enrollmentId
+        );
+        setEnrolledCourses(updatedCourses);
+
         toast.success('Course removed from schedule');
       } catch (error) {
         // Reload data on error to restore state
@@ -198,7 +207,7 @@ export function ScheduleProvider({
         toast.error(errorMessage);
       }
     },
-    [readonly, loadScheduleData]
+    [readonly, loadScheduleData, setEnrolledCourses]
   );
 
   /**
