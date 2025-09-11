@@ -58,19 +58,42 @@ const ReviewList: React.FC<ReviewListProps> = ({
     setDeletingId(reviewId);
 
     try {
-      const response = await fetch(`/api/courses/review?reviewId=${reviewId}`, {
-        method: 'DELETE',
-      });
+      console.log('Deleting review:', reviewId);
 
-      const result = await response.json();
+      // Add cache-busting query parameter
+      const timestamp = new Date().getTime();
+      const response = await fetch(
+        `/api/courses/review?reviewId=${reviewId}&_=${timestamp}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        }
+      );
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to delete review');
+      // Handle timeout (Vercel's function timeout is typically 10s)
+      const responseData = (await Promise.race([
+        response.json(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timed out')), 8000)
+        ),
+      ])) as any;
+
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.error || 'Failed to delete review');
       }
 
+      console.log('Review deleted successfully');
       onReviewDeleted();
     } catch (error) {
       console.error('Error deleting review:', error);
+
+      // Show user-friendly error message
+      alert(
+        'Det gick inte att ta bort recensionen. Vänligen försök igen senare.'
+      );
     } finally {
       setDeletingId(null);
     }

@@ -196,7 +196,13 @@ export function ScheduleProvider({
       console.log('EnrollmentId length:', enrollmentId?.length);
 
       try {
-        await ScheduleService.removeCourseFromSchedule(enrollmentId);
+        // Use Promise.race to handle potential timeouts
+        await Promise.race([
+          ScheduleService.removeCourseFromSchedule(enrollmentId),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Operation timed out')), 10000)
+          ),
+        ]);
 
         // Immediately update the enrolled courses store to remove the course
         const currentEnrolledCourses =
@@ -214,12 +220,23 @@ export function ScheduleProvider({
         toast.success('Course removed from schedule');
       } catch (error) {
         console.error('ScheduleProvider: Error removing course:', error);
-        // Reload data on error to restore state
-        await loadScheduleData();
 
+        // Provide a user-friendly error message
         const errorMessage =
           error instanceof Error ? error.message : 'Failed to remove course';
+
         toast.error(errorMessage);
+
+        // Reload data on error to restore state after a short delay
+        setTimeout(async () => {
+          try {
+            await loadScheduleData();
+            console.log('Schedule data reloaded after error');
+          } catch (reloadError) {
+            console.error('Failed to reload schedule data:', reloadError);
+            toast.error('Please refresh the page to update your schedule');
+          }
+        }, 1000);
       }
     },
     [readonly, loadScheduleData, setEnrolledCourses]

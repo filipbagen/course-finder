@@ -180,6 +180,9 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/courses/review?reviewId=xxx - Delete a review (only allowed for the review owner)
 export async function DELETE(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(2, 8);
+  console.log(`[${requestId}] Review deletion request started`);
+
   try {
     const user = await getAuthenticatedUser();
     const userId = user.id;
@@ -188,6 +191,7 @@ export async function DELETE(request: NextRequest) {
     const reviewId = searchParams.get('reviewId');
 
     if (!reviewId) {
+      console.log(`[${requestId}] Missing reviewId parameter`);
       return NextResponse.json(
         {
           success: false,
@@ -197,29 +201,43 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Use withPrisma for better database connection handling
-    const result = await withPrisma(async (prismaClient) => {
-      // Check if the review exists and belongs to the user
-      const existingReview = await prismaClient.review.findFirst({
-        where: {
-          id: reviewId,
-          userId,
-        },
-      });
+    console.log(
+      `[${requestId}] Deleting review ${reviewId} for user ${userId}`
+    );
 
-      if (!existingReview) {
-        return { notFound: true };
+    // Use withPrisma with tighter timeout for review deletion
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Check if the review exists and belongs to the user - use select to minimize data transfer
+        const existingReview = await prismaClient.review.findFirst({
+          where: {
+            id: reviewId,
+            userId,
+          },
+          select: { id: true }, // Only get the ID to verify existence
+        });
+
+        if (!existingReview) {
+          console.log(`[${requestId}] Review not found or not owned by user`);
+          return { notFound: true };
+        }
+
+        // Delete the review - optimized query
+        await prismaClient.review.delete({
+          where: {
+            id: reviewId,
+          },
+        });
+
+        console.log(`[${requestId}] Review deleted successfully`);
+        return { success: true };
+      },
+      {
+        maxRetries: 2, // Reduce retries for faster feedback
+        initialBackoff: 100, // Start with 100ms
+        maxBackoff: 1000, // Cap at 1 second
       }
-
-      // Delete the review
-      await prismaClient.review.delete({
-        where: {
-          id: reviewId,
-        },
-      });
-
-      return { success: true };
-    });
+    );
 
     if (result.notFound) {
       return NextResponse.json(
@@ -235,15 +253,21 @@ export async function DELETE(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       message: 'Review deleted successfully',
+      requestId,
     });
     response.headers.set(
       'Cache-Control',
       'no-cache, no-store, must-revalidate'
     );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
 
+    console.log(
+      `[${requestId}] Review deletion request completed successfully`
+    );
     return response;
   } catch (error) {
-    console.error('Error deleting review:', error);
+    console.error(`[${requestId}] Error deleting review:`, error);
     const errorMessage =
       error instanceof Error ? error.message : 'Failed to delete review';
 
@@ -251,6 +275,7 @@ export async function DELETE(request: NextRequest) {
       {
         success: false,
         error: errorMessage,
+        requestId,
       },
       { status: 500 }
     );

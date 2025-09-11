@@ -17,12 +17,19 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ enrollmentId: string }> }
 ): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
+  // Generate a unique request ID for tracking in logs
+  const requestId = Math.random().toString(36).substring(2, 8);
+  console.log(`[${requestId}] Course removal request started`);
+
   try {
     const { enrollmentId } = await params;
+    console.log(`[${requestId}] Removing enrollment: ${enrollmentId}`);
 
     const user = await getAuthenticatedUser();
+    console.log(`[${requestId}] Authenticated user: ${user.id}`);
 
     if (!enrollmentId) {
+      console.log(`[${requestId}] Error: Missing enrollment ID`);
       return badRequest('Enrollment ID is required');
     }
 
@@ -30,29 +37,33 @@ export async function DELETE(
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(enrollmentId)) {
-      console.log('Invalid UUID format:', enrollmentId);
+      console.log(`[${requestId}] Invalid UUID format: ${enrollmentId}`);
       return badRequest('Invalid enrollment ID format');
     }
 
-    // Use withPrisma wrapper for better database connection handling
+    // Use withPrisma wrapper with stricter timeouts for Vercel serverless environment
     const result = await withPrisma(
       async (prismaClient) => {
-        // First check if enrollment exists at all
-        const enrollmentExists = await prismaClient.enrollment.findUnique({
-          where: { id: enrollmentId },
+        // First check if enrollment exists and belongs to user - do this in a single query
+        const enrollmentExists = await prismaClient.enrollment.findFirst({
+          where: {
+            id: enrollmentId,
+            userId: user.id,
+          },
+          select: { id: true }, // Only select ID to minimize data transfer
         });
 
         if (!enrollmentExists) {
-          return { notFound: true, message: 'Enrollment not found' };
-        }
-
-        // Verify enrollment belongs to the user
-        if (enrollmentExists.userId !== user.id) {
+          console.log(
+            `[${requestId}] Enrollment not found or not owned by user ${user.id}`
+          );
           return {
             notFound: true,
             message: 'Enrollment not found or access denied',
           };
         }
+
+        console.log(`[${requestId}] Deleting enrollment ${enrollmentId}`);
 
         // Delete the enrollment
         await prismaClient.enrollment.delete({
@@ -61,12 +72,14 @@ export async function DELETE(
           },
         });
 
+        console.log(`[${requestId}] Enrollment deleted successfully`);
         return { success: true };
       },
       {
         // More aggressive retry pattern for critical operations
-        maxRetries: 4,
+        maxRetries: 2, // Lower retries for faster feedback
         initialBackoff: 100,
+        maxBackoff: 1000, // Cap at 1 second to prevent Vercel timeout
       }
     );
 
@@ -75,22 +88,24 @@ export async function DELETE(
     }
 
     // Add cache control headers
-    const response = createSuccessResponse({ success: true });
+    const response = createSuccessResponse({
+      success: true,
+      requestId, // Include the request ID for correlation
+    });
     response.headers.set(
       'Cache-Control',
       'no-cache, no-store, must-revalidate'
     );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
 
+    console.log(`[${requestId}] Course removal request completed successfully`);
     return response;
   } catch (error) {
-    console.error('Error removing course from schedule:', error);
-
-    // Generate an error reference for tracking
-    const errorRef = Math.random().toString(36).substring(2, 10);
-    console.error(`Schedule remove course error (ref: ${errorRef}):`, error);
+    console.error(`[${requestId}] Error removing course from schedule:`, error);
 
     return internalServerError(
-      `Failed to remove course from schedule. Please try again. (Ref: ${errorRef})`
+      `Failed to remove course from schedule. Please try again. (Ref: ${requestId})`
     );
   }
 }

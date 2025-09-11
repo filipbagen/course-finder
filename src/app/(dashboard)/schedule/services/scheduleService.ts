@@ -54,39 +54,66 @@ export class ScheduleService {
     try {
       console.log('Updating course schedule:', update);
 
+      // Create a unique request ID for tracking
+      const requestId = Math.random().toString(36).substring(2, 8);
+
       const response = await fetch(`${this.BASE_URL}/course`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
+          'X-Request-ID': requestId,
         },
         credentials: 'include',
         body: JSON.stringify(update),
       });
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error(
-          'Update course error:',
-          response.status,
-          response.statusText,
-          errorBody
-        );
-        throw new Error(
-          `Error updating course schedule: ${response.statusText}. ${errorBody}`
-        );
-      }
+      // Handle potential timeout
+      const responsePromise = async () => {
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error(
+            `Update course error (${requestId}):`,
+            response.status,
+            response.statusText,
+            errorBody
+          );
+          throw new Error(
+            `Error updating course schedule: ${response.statusText}. ${errorBody}`
+          );
+        }
+        return await response.json();
+      };
 
-      const result = await response.json();
-      console.log('Update course response:', result);
-      return result;
+      const responseData = await Promise.race([
+        responsePromise(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timed out')), 8000)
+        ),
+      ]);
+
+      console.log(`Update course response (${requestId}):`, responseData);
+      return responseData as CourseWithEnrollment;
     } catch (error) {
       console.error('Error updating course schedule:', error);
+
+      // Provide a more specific error message based on the error type
+      if (error instanceof Error) {
+        if (error.message.includes('timed out')) {
+          throw new Error(
+            'Uppdateringen tog för lång tid. Vänligen försök igen.'
+          );
+        } else if (error.message.includes('fetch')) {
+          throw new Error(
+            'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
+          );
+        }
+      }
+
       throw new Error('Failed to update course placement');
     }
   }
-
   /**
    * Add course to schedule
    */
@@ -130,29 +157,78 @@ export class ScheduleService {
    */
   static async removeCourseFromSchedule(enrollmentId: string): Promise<void> {
     try {
-      // URL encode the enrollment ID to handle any special characters
-      const encodedEnrollmentId = encodeURIComponent(enrollmentId);
-      const response = await fetch(
-        `${this.BASE_URL}/course/${encodedEnrollmentId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
+      // Create a unique request ID for tracking
+      const requestId = Math.random().toString(36).substring(2, 8);
+      console.log(
+        `Removing course ${enrollmentId} from schedule (${requestId})`
       );
 
-      if (!response.ok) {
-        console.error(
-          'Remove course error:',
-          response.status,
-          response.statusText
-        );
-        throw new Error(`Failed to remove course: ${response.statusText}`);
-      }
+      // URL encode the enrollment ID to handle any special characters
+      const encodedEnrollmentId = encodeURIComponent(enrollmentId);
+
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      const url = `${this.BASE_URL}/course/${encodedEnrollmentId}?_=${timestamp}`;
+
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          'X-Request-ID': requestId,
+        },
+        credentials: 'include',
+      });
+
+      // Handle potential timeout with Promise.race
+      await Promise.race([
+        (async () => {
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+              `Remove course error (${requestId}):`,
+              response.status,
+              response.statusText,
+              errorText
+            );
+            throw new Error(
+              `Failed to remove course: ${response.statusText}. ${errorText}`
+            );
+          }
+
+          // Only try to parse JSON if there's a content
+          if (response.headers.get('content-length') !== '0') {
+            const data = await response.json();
+            console.log(`Remove course response (${requestId}):`, data);
+          } else {
+            console.log(
+              `Remove course successful (${requestId}) - no content returned`
+            );
+          }
+        })(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timed out')), 8000)
+        ),
+      ]);
+
+      console.log(`Course ${enrollmentId} removed successfully (${requestId})`);
     } catch (error) {
       console.error('Error removing course from schedule:', error);
+
+      // Provide a user-friendly error message based on the error type
+      if (error instanceof Error) {
+        if (error.message.includes('timed out')) {
+          throw new Error(
+            'Borttagningen tog för lång tid. Vänligen försök igen eller uppdatera sidan.'
+          );
+        } else if (error.message.includes('fetch')) {
+          throw new Error(
+            'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
+          );
+        }
+      }
+
       throw new Error('Failed to remove course from schedule');
     }
   }
