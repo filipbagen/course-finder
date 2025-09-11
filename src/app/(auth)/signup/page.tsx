@@ -56,8 +56,8 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md border-border bg-card text-card-foreground shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
             Skapa ditt konto

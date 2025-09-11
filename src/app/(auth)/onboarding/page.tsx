@@ -46,8 +46,8 @@ export default async function OnboardingPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-2xl border-border bg-card text-card-foreground shadow-lg">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <GraduationCap className="h-12 w-12 text-primary" />

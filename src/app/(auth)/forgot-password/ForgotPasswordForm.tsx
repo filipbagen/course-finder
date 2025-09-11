@@ -47,7 +47,7 @@ export function ForgotPasswordForm({
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       {success ? (
-        <Card>
+        <Card className="border-border bg-card text-card-foreground shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Kolla din e-post</CardTitle>
             <CardDescription>
@@ -62,7 +62,7 @@ export function ForgotPasswordForm({
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="border-border bg-card text-card-foreground shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Återställ ditt lösenord</CardTitle>
             <CardDescription>
@@ -85,7 +85,7 @@ export function ForgotPasswordForm({
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100" disabled={isLoading}>
                   {isLoading ? 'Skickar...' : 'Skicka återställningslänk'}
                 </Button>
               </div>

@@ -50,7 +50,7 @@ export default function OnboardingForm({
       {/* Profile Picture */}
       <div className="space-y-2">
         <Label>Profilbild</Label>
-        <Card className="p-4">
+        <Card className="p-4 border-border bg-card text-card-foreground">
           <div className="flex flex-col items-center space-y-4">
             <Avatar
               uid={userId}
