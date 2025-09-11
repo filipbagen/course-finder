@@ -38,19 +38,19 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
   // Error messages mapping
   const errorMessages = {
-    passwords_dont_match: 'Passwords do not match. Please try again.',
-    password_too_short: 'Password must be at least 6 characters long.',
-    name_required: 'Full name is required to create an account.',
+    passwords_dont_match: 'Lösenorden matchar inte. Försök igen.',
+    password_too_short: 'Lösenordet måste vara minst 6 tecken långt.',
+    name_required: 'Fullständigt namn krävs för att skapa ett konto.',
     signup_failed:
-      'Account creation failed. Please try again with a different email.',
-    unexpected_error: 'An unexpected error occurred. Please try again.',
+      'Kontoskapande misslyckades. Försök igen med en annan e-postadress.',
+    unexpected_error: 'Ett oväntat fel inträffade. Försök igen.',
     email_already_exists:
-      'An account with this email already exists. Please sign in instead.',
+      'Ett konto med denna e-postadress finns redan. Logga in istället.',
   };
 
   const successMessages = {
     check_email:
-      'Please check your email and click the confirmation link to activate your account.',
+      'Vänligen kontrollera din e-post och klicka på bekräftelselänken för att aktivera ditt konto.',
   };
 
   return (
@@ -58,15 +58,15 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
-            Create your account
+            Skapa ditt konto
           </CardTitle>
           <CardDescription className="text-center">
-            Already have an account?{' '}
+            Har du redan ett konto?{' '}
             <Link
               href="/login"
               className="font-medium text-primary hover:underline"
             >
-              Sign in here
+              Logga in här
             </Link>
           </CardDescription>
         </CardHeader>
@@ -78,7 +78,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 {errorMessages[params.error as keyof typeof errorMessages] ||
-                  'An error occurred. Please try again.'}
+                  'Ett fel inträffade. Försök igen.'}
               </AlertDescription>
             </Alert>
           )}
@@ -97,31 +97,31 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
           <form className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Fullständigt namn</Label>
               <Input
                 id="name"
                 name="name"
                 type="text"
                 autoComplete="name"
                 required
-                placeholder="Enter your full name"
+                placeholder="Ange ditt fullständiga namn"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">E-postadress</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                placeholder="Enter your email"
+                placeholder="Ange din e-postadress"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Lösenord</Label>
               <Input
                 id="password"
                 name="password"
@@ -129,12 +129,12 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                placeholder="Enter your password (min. 6 characters)"
+                placeholder="Ange ditt lösenord (minst 6 tecken)"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -142,13 +142,13 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                placeholder="Confirm your password"
+                placeholder="Bekräfta ditt lösenord"
               />
             </div>
 
             <Button formAction={signUp} type="submit" className="w-full">
               <UserPlus className="h-4 w-4 mr-2" />
-              Create Account
+              Skapa konto
             </Button>
           </form>
 
@@ -157,7 +157,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               href="/"
               className="text-sm text-muted-foreground hover:text-primary hover:underline"
             >
-              ← Back to home
+              ← Tillbaka till startsidan
             </Link>
           </div>
         </CardContent>

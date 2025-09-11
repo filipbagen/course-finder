@@ -34,14 +34,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   // Error messages mapping
   const errorMessages = {
-    invalid_credentials: 'Invalid email or password. Please try again.',
-    signup_failed: 'Account creation failed. Please try again.',
-    unexpected_error: 'An unexpected error occurred. Please try again.',
+    invalid_credentials: 'Ogiltig e-post eller lösenord. Försök igen.',
+    signup_failed: 'Kontoskapande misslyckades. Försök igen.',
+    unexpected_error: 'Ett oväntat fel inträffade. Försök igen.',
   };
 
   const successMessages = {
-    account_created: 'Account created successfully! Please sign in.',
-    password_updated: 'Password updated successfully! Please sign in.',
+    account_created: 'Konto skapat! Vänligen logga in.',
+    password_updated: 'Lösenord uppdaterat! Vänligen logga in.',
   };
 
   return (
@@ -49,15 +49,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
-            Sign in to your account
+            Logga in på ditt konto
           </CardTitle>
           <CardDescription className="text-center">
-            Don't have an account?{' '}
+            Har du inget konto?{' '}
             <Link
               href="/signup"
               className="font-medium text-primary hover:underline"
             >
-              Create one here
+              Skapa ett här
             </Link>
           </CardDescription>
         </CardHeader>
@@ -69,7 +69,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 {errorMessages[params.error as keyof typeof errorMessages] ||
-                  'An error occurred. Please try again.'}
+                  'Ett fel inträffade. Försök igen.'}
               </AlertDescription>
             </Alert>
           )}
@@ -88,31 +88,31 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <form action={signIn} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">E-postadress</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                placeholder="Enter your email"
+                placeholder="Ange din e-postadress"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Lösenord</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                placeholder="Enter your password"
+                placeholder="Ange ditt lösenord"
               />
             </div>
 
             <Button type="submit" className="w-full">
-              Sign in
+              Logga in
             </Button>
           </form>
 
@@ -121,14 +121,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               href="/forgot-password"
               className="text-sm text-muted-foreground hover:text-primary hover:underline"
             >
-              Forgot your password?
+              Glömt ditt lösenord?
             </Link>
             <div>
               <Link
                 href="/"
                 className="text-sm text-muted-foreground hover:text-primary hover:underline"
               >
-                ← Back to home
+                ← Tillbaka till startsidan
               </Link>
             </div>
           </div>
