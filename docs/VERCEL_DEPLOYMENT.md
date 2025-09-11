@@ -83,15 +83,24 @@ git push origin main
 
 ## 🔍 Troubleshooting
 
+### New Debug Endpoint
+Visit your deployed site with the debug endpoint to get detailed connection information:
+```
+https://www.coursefinder.se/api/debug/connection
+```
+This will show if your database connection is working and provide details about any errors.
+
 ### Check Environment Variables
 1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
 2. Verify all variables are set correctly
 3. Make sure they're set for the correct environments (Production/Preview/Development)
+4. **Important**: After updating environment variables, redeploy your application
 
 ### Check Supabase Database
 1. Go to your Supabase dashboard
 2. Make sure your database is not paused
 3. Check if there are any connection limits or issues
+4. Try using the direct connection string instead of the connection pooling URL
 
 ### Test Locally First
 ```bash
