@@ -18,11 +18,11 @@ const globalForPrisma = globalThis as unknown as {
 const connectionPoolConfig =
   process.env.NODE_ENV === 'production'
     ? {
-        connection_limit: 3, // Lower the connection limit for serverless environment
-        pool_timeout: 5, // 5 seconds
-        connect_timeout: 5, // 5 seconds
-        statement_timeout: 5000, // 5 seconds in ms (critical for Vercel's timeout)
-        idle_in_transaction_session_timeout: 5000, // 5 seconds in ms
+        connection_limit: 1, // Set to 1 for serverless to prevent connection exhaustion
+        pool_timeout: 3, // 3 seconds - decreased from 5s
+        connect_timeout: 3, // 3 seconds - decreased from 5s
+        statement_timeout: 3000, // 3 seconds in ms (critical for Vercel's timeout)
+        idle_in_transaction_session_timeout: 3000, // 3 seconds in ms
       }
     : undefined;
 

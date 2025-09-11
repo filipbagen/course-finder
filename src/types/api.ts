@@ -8,6 +8,7 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
   success: boolean;
+  requestId?: string; // Add requestId for tracking
 }
 
 export interface ApiError {
@@ -15,6 +16,7 @@ export interface ApiError {
   code: string;
   statusCode: number;
   details?: any;
+  requestId?: string; // Add requestId for tracking
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {

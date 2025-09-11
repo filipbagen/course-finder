@@ -7,11 +7,36 @@ import { prisma, withPrisma } from '@/lib/prisma';
 
 // POST /api/courses/review - Create or update a review
 export async function POST(request: NextRequest) {
+  // Generate a request ID for tracking
+  const requestId = Math.random().toString(36).substring(2, 8);
+  console.log(`[${requestId}] Review submission started`);
+
   try {
-    const user = await getAuthenticatedUser();
+    // Use a timeout promise to ensure we don't get stuck in auth
+    const authUserPromise = getAuthenticatedUser();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Auth timeout')), 2000)
+    );
+
+    const user = (await Promise.race([
+      authUserPromise,
+      timeoutPromise,
+    ])) as Awaited<typeof authUserPromise>;
     const userId = user.id;
 
-    const body: CreateReviewRequest = await request.json();
+    console.log(
+      `[${requestId}] Auth successful, user: ${userId.substring(0, 6)}...`
+    );
+
+    // Parse request with timeout protection
+    const bodyPromise = request.json();
+    const body: CreateReviewRequest = (await Promise.race([
+      bodyPromise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request parsing timeout')), 1000)
+      ),
+    ])) as Awaited<typeof bodyPromise>;
+
     const { rating, comment, courseId } = body;
 
     if (!rating || !courseId) {
@@ -19,6 +44,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Rating and course ID are required',
+          requestId,
         },
         { status: 400 }
       );
@@ -36,96 +62,133 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Rating must be between 1 and 5 with 0.5 increments',
+          requestId,
         },
         { status: 400 }
       );
     }
 
-    // Use withPrisma wrapper for better connection handling
-    const result = await withPrisma(async (prismaClient) => {
-      // Check if the user is already enrolled in this course
-      const enrollment = await prismaClient.enrollment.findFirst({
-        where: {
-          userId,
-          courseId,
-        },
-      });
-
-      if (!enrollment) {
-        return {
-          error: 'You can only review courses you are enrolled in',
-          status: 403,
-        };
-      }
-
-      // Check if user has already reviewed this course
-      const existingReview = await prismaClient.review.findUnique({
-        where: {
-          userId_courseId: {
-            userId,
-            courseId,
-          },
-        },
-      });
-
-      let reviewResult;
-
-      if (existingReview) {
-        // Update existing review
-        reviewResult = await prismaClient.review.update({
-          where: {
-            id: existingReview.id,
-          },
-          data: {
-            rating,
-            comment,
-            updatedAt: new Date(),
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
+    // Simplified database operations - using a dedicated transaction
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Use a transaction to ensure atomicity and faster execution
+        return await prismaClient.$transaction(
+          async (tx) => {
+            // Check if the user is already enrolled in this course - optimized query
+            const enrollment = await tx.enrollment.findFirst({
+              where: {
+                userId,
+                courseId,
               },
-            },
-          },
-        });
-      } else {
-        // Create new review
-        reviewResult = await prismaClient.review.create({
-          data: {
-            id: uuidv4(),
-            rating,
-            comment,
-            userId,
-            courseId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-              },
-            },
-          },
-        });
-      }
+              select: { id: true }, // Only select what we need
+            });
 
-      return { success: true, review: reviewResult };
-    });
+            if (!enrollment) {
+              return {
+                error: 'You can only review courses you are enrolled in',
+                status: 403,
+              };
+            }
+
+            // Check if user has already reviewed this course
+            const existingReview = await tx.review.findUnique({
+              where: {
+                userId_courseId: {
+                  userId,
+                  courseId,
+                },
+              },
+              select: { id: true }, // Minimize data transfer
+            });
+
+            let reviewResult;
+
+            if (existingReview) {
+              // Update existing review
+              reviewResult = await tx.review.update({
+                where: {
+                  id: existingReview.id,
+                },
+                data: {
+                  rating,
+                  comment,
+                  updatedAt: new Date(),
+                },
+                select: {
+                  // Select only what we need
+                  id: true,
+                  rating: true,
+                  comment: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  userId: true,
+                  courseId: true,
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                      image: true,
+                    },
+                  },
+                },
+              });
+            } else {
+              // Create new review
+              reviewResult = await tx.review.create({
+                data: {
+                  id: uuidv4(),
+                  rating,
+                  comment,
+                  userId,
+                  courseId,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
+                select: {
+                  // Select only what we need
+                  id: true,
+                  rating: true,
+                  comment: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  userId: true,
+                  courseId: true,
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                      image: true,
+                    },
+                  },
+                },
+              });
+            }
+
+            return { success: true, review: reviewResult };
+          },
+          {
+            // Transaction options - aggressive timeout to prevent function timeout
+            timeout: 3000, // 3 seconds max for the entire transaction
+          }
+        );
+      },
+      {
+        maxRetries: 1, // Only retry once to avoid long waits
+        initialBackoff: 100,
+        maxBackoff: 500,
+      }
+    );
 
     // Handle custom error returned from withPrisma
     if (result.error) {
+      console.log(`[${requestId}] Review submission error: ${result.error}`);
       return NextResponse.json(
         {
           success: false,
           error: result.error,
+          requestId,
         },
         { status: result.status || 500 }
       );
@@ -133,10 +196,12 @@ export async function POST(request: NextRequest) {
 
     // At this point, result.success is true and result.review is guaranteed to exist
     if (!result.review) {
+      console.log(`[${requestId}] Review result missing review data`);
       return NextResponse.json(
         {
           success: false,
           error: 'Failed to create or update review',
+          requestId,
         },
         { status: 500 }
       );
@@ -153,6 +218,7 @@ export async function POST(request: NextRequest) {
       data: {
         review: formattedReview,
       },
+      requestId,
     };
 
     // Create response with caching headers for API consistency
@@ -161,10 +227,13 @@ export async function POST(request: NextRequest) {
       'Cache-Control',
       'no-cache, no-store, must-revalidate'
     );
+    jsonResponse.headers.set('Pragma', 'no-cache');
+    jsonResponse.headers.set('Expires', '0');
 
+    console.log(`[${requestId}] Review submission successful`);
     return jsonResponse;
   } catch (error) {
-    console.error('Error creating review:', error);
+    console.error(`[${requestId}] Error creating review:`, error);
     const errorMessage =
       error instanceof Error ? error.message : 'Failed to create review';
 
@@ -172,6 +241,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: errorMessage,
+        requestId,
       },
       { status: 500 }
     );
