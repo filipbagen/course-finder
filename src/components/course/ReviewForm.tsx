@@ -37,10 +37,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     setError('');
 
     try {
+      console.log('Submitting review for course:', courseId);
+
       const response = await fetch('/api/courses/review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
         },
         body: JSON.stringify({
           rating,
@@ -50,8 +54,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       });
 
       const result = await response.json();
+      console.log('Review submission response:', result);
 
       if (!response.ok || !result.success) {
+        console.error('Review submission failed:', result);
         throw new Error(result.error || 'Failed to post review');
       }
 
@@ -64,6 +70,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         setComment('');
       }
     } catch (error: any) {
+      console.error('Review submission error:', error);
       setError(error.message || 'Failed to post review');
     } finally {
       setLoading(false);

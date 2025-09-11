@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
 import {
   createSuccessResponse,
@@ -15,7 +15,7 @@ import { transformCourse } from '@/lib/transformers';
 
 /**
  * PUT /api/schedule/course
- * Update course placement in schedule
+ * Update course placement in schedule with enhanced error handling
  */
 export async function PUT(
   request: NextRequest
@@ -27,61 +27,118 @@ export async function PUT(
     const validatedData = validateRequest(body, UpdateScheduleSchema);
     const { courseId, semester } = validatedData;
 
-    // Find the enrollment to update
-    const enrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId: courseId,
-      },
-    });
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Find the enrollment to update
+        const enrollment = await prismaClient.enrollment.findFirst({
+          where: {
+            userId: user.id,
+            courseId: courseId,
+          },
+        });
 
-    if (!enrollment) {
-      return notFound('Enrollment not found for this course');
+        if (!enrollment) {
+          return {
+            notFound: true,
+            message: 'Enrollment not found for this course',
+          };
+        }
+
+        // Check if enrollment already exists in the target semester
+        const existingInTargetSemester =
+          await prismaClient.enrollment.findFirst({
+            where: {
+              userId: user.id,
+              courseId: courseId,
+              semester: semester,
+              id: { not: enrollment.id }, // Exclude the current enrollment
+            },
+          });
+
+        if (existingInTargetSemester) {
+          return {
+            conflict: true,
+            message: 'Already enrolled in this course for this semester',
+          };
+        }
+
+        // Update the enrollment
+        const updatedEnrollment = await prismaClient.enrollment.update({
+          where: {
+            id: enrollment.id,
+          },
+          data: {
+            semester,
+          },
+        });
+
+        // Fetch the course separately
+        const course = await prismaClient.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+
+        if (!course) {
+          return { notFound: true, message: 'Course not found' };
+        }
+
+        // Transform the course
+        const transformedCourse = transformCourse(course);
+
+        return {
+          success: true,
+          course: {
+            ...transformedCourse,
+            enrollment: {
+              id: updatedEnrollment.id,
+              semester: updatedEnrollment.semester,
+              userId: updatedEnrollment.userId,
+              courseId: updatedEnrollment.courseId,
+            },
+          },
+        };
+      },
+      {
+        // More aggressive retry pattern for schedule operations
+        maxRetries: 4,
+        initialBackoff: 100,
+      }
+    );
+
+    if (result.notFound) {
+      return notFound(result.message);
     }
 
-    // Update the enrollment
-    const updatedEnrollment = await prisma.enrollment.update({
-      where: {
-        id: enrollment.id,
-      },
-      data: {
-        semester,
-      },
-    });
-
-    // Fetch the course separately
-    const course = await prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-
-    if (!course) {
-      return notFound('Course not found');
+    if (result.conflict) {
+      return conflict(result.message);
     }
 
-    // Transform the course
-    const transformedCourse = transformCourse(course);
+    // Add cache control headers
+    const response = createSuccessResponse(result.course);
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
 
-    // Create the response with enrollment data
-    return createSuccessResponse({
-      ...transformedCourse,
-      enrollment: {
-        id: updatedEnrollment.id,
-        semester: updatedEnrollment.semester,
-        userId: updatedEnrollment.userId,
-        courseId: updatedEnrollment.courseId,
-      },
-    });
+    return response;
   } catch (error) {
     console.error('Error updating course schedule:', error);
-    return internalServerError('Failed to update course schedule');
+
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Schedule update error (ref: ${errorRef}):`, error);
+
+    return internalServerError(
+      `Failed to update course schedule. Please try again. (Ref: ${errorRef})`
+    );
   }
 }
 
 /**
  * POST /api/schedule/course
- * Add course to schedule
+ * Add course to schedule with enhanced error handling
  */
 export async function POST(
   request: NextRequest
@@ -93,55 +150,94 @@ export async function POST(
     const validatedData = validateRequest(body, UpdateScheduleSchema);
     const { courseId, semester } = validatedData;
 
-    // Check if enrollment already exists
-    const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId,
-        semester,
-      },
-    });
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Check if enrollment already exists
+        const existingEnrollment = await prismaClient.enrollment.findFirst({
+          where: {
+            userId: user.id,
+            courseId,
+            semester,
+          },
+        });
 
-    if (existingEnrollment) {
-      return conflict('Already enrolled in this course for this semester');
+        if (existingEnrollment) {
+          return {
+            conflict: true,
+            message: 'Already enrolled in this course for this semester',
+          };
+        }
+
+        // Create new enrollment
+        const enrollment = await prismaClient.enrollment.create({
+          data: {
+            id: randomUUID(),
+            userId: user.id,
+            courseId,
+            semester,
+          },
+        });
+
+        // Fetch the course separately
+        const course = await prismaClient.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+
+        if (!course) {
+          return { notFound: true, message: 'Course not found' };
+        }
+
+        // Transform the course
+        const transformedCourse = transformCourse(course);
+
+        return {
+          success: true,
+          course: {
+            ...transformedCourse,
+            enrollment: {
+              id: enrollment.id,
+              semester: enrollment.semester,
+              userId: enrollment.userId,
+              courseId: enrollment.courseId,
+            },
+          },
+        };
+      },
+      {
+        // More aggressive retry pattern for schedule operations
+        maxRetries: 4,
+        initialBackoff: 100,
+      }
+    );
+
+    if (result.notFound) {
+      return notFound(result.message);
     }
 
-    // Create new enrollment
-    const enrollment = await prisma.enrollment.create({
-      data: {
-        id: randomUUID(),
-        userId: user.id,
-        courseId,
-        semester,
-      },
-    });
-
-    // Fetch the course separately
-    const course = await prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-
-    if (!course) {
-      return notFound('Course not found');
+    if (result.conflict) {
+      return conflict(result.message);
     }
 
-    // Transform the course
-    const transformedCourse = transformCourse(course);
+    // Add cache control headers
+    const response = createSuccessResponse(result.course);
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
 
-    // Create the response with enrollment data
-    return createSuccessResponse({
-      ...transformedCourse,
-      enrollment: {
-        id: enrollment.id,
-        semester: enrollment.semester,
-        userId: enrollment.userId,
-        courseId: enrollment.courseId,
-      },
-    });
+    return response;
   } catch (error) {
     console.error('Error adding course to schedule:', error);
-    return internalServerError('Failed to add course to schedule');
+
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Schedule add course error (ref: ${errorRef}):`, error);
+
+    return internalServerError(
+      `Failed to add course to schedule. Please try again. (Ref: ${errorRef})`
+    );
   }
 }

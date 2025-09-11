@@ -29,15 +29,25 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   const hasUpdatedParent = useRef(false);
 
   // Check if the user is enrolled in this course
-  const isUserEnrolled =
-    (!enrollmentsLoading &&
+  const isUserEnrolled = React.useMemo(() => {
+    // If the user has a review, they must be enrolled
+    if (userReview) return true;
+
+    // Check enrollment from the global store
+    const hasEnrollment =
+      !enrollmentsLoading &&
       enrolledCourses &&
       Array.isArray(enrolledCourses) &&
-      enrolledCourses.some((course) => course.id === courseId)) ||
-    // If the user has a review for this course, they must be enrolled
-    !!userReview ||
-    // Also check if user is enrolled via schedule context
-    false; // We'll add schedule check later if needed
+      enrolledCourses.some((course) => course && course.id === courseId);
+
+    console.log(
+      `Enrollment check for course ${courseId}: enrolled=${hasEnrollment}, enrolledCourses.length=${
+        enrolledCourses?.length || 0
+      }`
+    );
+
+    return hasEnrollment;
+  }, [userReview, enrollmentsLoading, enrolledCourses, courseId]);
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
@@ -100,13 +110,20 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
 
   const getReviewSubmitInfo = useCallback(() => {
     if (userReview) return null;
+
+    // Don't show any message while still loading
     if (authLoading || enrollmentsLoading) return null;
 
+    // This is a critical check - only show login message if explicitly not logged in
     if (user === null && !authLoading) {
       return 'Du måste vara inloggad för att recensera kursen.';
-    } else if (user && !isUserEnrolled && !enrollmentsLoading) {
+    }
+
+    // Only check enrollment if the user is definitely logged in
+    if (user && !isUserEnrolled && !enrollmentsLoading) {
       return 'Du måste lägga till kursen i ditt schema för att kunna recensera den.';
     }
+
     return null;
   }, [userReview, authLoading, enrollmentsLoading, user, isUserEnrolled]);
 

@@ -16,6 +16,7 @@ import { scheduleReducer, initialScheduleState } from './scheduleReducer';
 import { ScheduleService } from '../services/scheduleService';
 import { toast } from 'sonner';
 import { useEnrolledCoursesStore } from '@/hooks/useEnrolledCoursesStore';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { CourseWithEnrollment } from '@/types/types';
 
 const ScheduleContext = createContext<ScheduleContextType | null>(null);
@@ -46,6 +47,7 @@ export function ScheduleProvider({
   });
   const { setEnrolledCourses, setLoading, setError } =
     useEnrolledCoursesStore();
+  const { user, loading: authLoading } = useAuth();
 
   /**
    * Load reviews for enrolled courses
@@ -267,6 +269,15 @@ export function ScheduleProvider({
   useEffect(() => {
     loadScheduleData();
   }, [loadScheduleData]);
+
+  // Add an effect to refresh the schedule when authentication state changes
+  useEffect(() => {
+    // Only reload when auth state is confirmed (not during loading)
+    if (!authLoading && user) {
+      console.log('Auth state confirmed, refreshing schedule data');
+      loadScheduleData();
+    }
+  }, [authLoading, user, loadScheduleData]);
 
   const contextValue: ScheduleContextType = {
     state,
