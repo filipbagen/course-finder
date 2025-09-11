@@ -1,6 +1,6 @@
 # 🧭 Course Finder
 
-![alt text](public/assets/dashboard-preview-light.jpg)
+![alt text](public/assets/dashboard-preview-light.png)
 
 ## Overview
 
