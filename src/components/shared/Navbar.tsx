@@ -76,7 +76,7 @@ export async function Navbar() {
   return (
     <div className="h-20 inset-x-0 top-0 z-30 w-full transition-colors">
       {/* Glassmorphism Container */}
-      <div className="mt-4 rounded-3xl bg-white/10 backdrop-blur-2xl min-w-64 dark:bg-card shadow-[0px_0px_0px_1px_rgba(100,6,69,0.10),0px_3px_6px_0px_rgba(100,6,69,0.12),0px_-4px_0px_0px_rgba(100,6,69,0.08)_inset] dark:shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
+      <div className="mt-4 rounded-3xl bg-[rgb(22,20,18)] backdrop-blur-2xl min-w-64 shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
         <div className="flex items-center justify-between h-16 px-6">
           {/* Logo */}
           <Link
