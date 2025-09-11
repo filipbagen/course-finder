@@ -35,13 +35,15 @@ if (process.env.NODE_ENV === 'production') {
   const connectWithRetry = async (retries = 3, delay = 2000) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        console.log(`Attempting database connection (attempt ${attempt}/${retries})...`);
+        console.log(
+          `Attempting database connection (attempt ${attempt}/${retries})...`
+        );
         await prisma.$connect();
         console.log('Successfully connected to database');
         return true;
       } catch (error) {
         console.error(`Connection attempt ${attempt} failed:`, error);
-        
+
         if (attempt === retries) {
           console.error('All connection attempts failed');
           // Provide detailed error information
@@ -56,16 +58,16 @@ if (process.env.NODE_ENV === 'production') {
           }
           return false;
         }
-        
-        console.log(`Retrying in ${delay/1000} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+
+        console.log(`Retrying in ${delay / 1000} seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
     return false;
   };
-  
+
   // Start the connection process
-  connectWithRetry().catch(e => {
+  connectWithRetry().catch((e) => {
     console.error('Failed to initialize database connection:', e);
   });
 }

@@ -34,24 +34,30 @@ export async function GET() {
   } catch (error) {
     console.error('Database connection test failed:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    return NextResponse.json({
-      success: false,
-      message: 'Database connection failed',
-      error: errorMessage,
-      // Include stack trace for better debugging
-      stack: error instanceof Error ? error.stack : undefined,
-      // Include more details if available
-      details: error instanceof Error ? {
-        name: error.name,
-        code: (error as any).code,
-        meta: (error as any).meta,
-      } : undefined,
-      environmentInfo: {
-        nodeEnv: process.env.NODE_ENV,
-        databaseUrlExists: !!process.env.DATABASE_URL,
-        directUrlExists: !!process.env.DIRECT_URL,
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Database connection failed',
+        error: errorMessage,
+        // Include stack trace for better debugging
+        stack: error instanceof Error ? error.stack : undefined,
+        // Include more details if available
+        details:
+          error instanceof Error
+            ? {
+                name: error.name,
+                code: (error as any).code,
+                meta: (error as any).meta,
+              }
+            : undefined,
+        environmentInfo: {
+          nodeEnv: process.env.NODE_ENV,
+          databaseUrlExists: !!process.env.DATABASE_URL,
+          directUrlExists: !!process.env.DIRECT_URL,
+        },
       },
-    }, { status: 500 });
+      { status: 500 }
+    );
   }
 }
