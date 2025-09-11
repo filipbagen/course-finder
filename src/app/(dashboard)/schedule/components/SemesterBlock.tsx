@@ -86,8 +86,8 @@ export function SemesterBlock({
     >
       {/* Semester Label */}
       {semesterLabel && (
-        <div className="absolute top-2 left-2 z-10">
-          <div className="bg-primary/90 text-primary-foreground text-xs font-medium px-2 py-1 rounded-md shadow-sm">
+        <div className="mb-2">
+          <div className="text-muted-foreground text-xs font-medium">
             {semesterLabel}
           </div>
         </div>

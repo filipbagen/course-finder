@@ -10,7 +10,6 @@ import {
   Award,
   TrendingUp,
   Target,
-  SignpostBig,
   Blocks,
   Smile,
 } from 'lucide-react';
@@ -338,7 +337,7 @@ export function UserProfileComponent({
                   <CardTitle className="text-sm font-medium">
                     Huvudområde
                   </CardTitle>
-                  <SignpostBig className="h-4 w-4 text-muted-foreground" />
+                  <Award className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -396,12 +395,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -450,7 +443,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -499,12 +492,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -553,7 +540,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -602,12 +589,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -656,7 +637,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -705,12 +686,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -759,7 +734,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -808,12 +783,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -862,7 +831,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -911,12 +880,6 @@ export function UserProfileComponent({
                         <CardContent className="pt-0 space-y-3">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
-                            <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
-                              color={getUserPrimaryColorHex(
-                                currentUserColorScheme
-                              )}
-                            />
                             <div className="flex flex-wrap gap-1">
                               {course.mainFieldOfStudy?.length === 0 ? (
                                 <Badge variant="outline" className="text-xs">
@@ -965,7 +928,7 @@ export function UserProfileComponent({
                     <div className="flex flex-col items-center justify-center h-32 text-center">
                       <div className="space-y-3 flex flex-col items-center">
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                          <SignpostBig className="h-6 w-6 text-primary" />
+                          <div className="w-6 h-6 rounded-full bg-primary/20" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
@@ -1037,12 +1000,6 @@ export function UserProfileComponent({
                                   <CardContent className="pt-0 space-y-3">
                                     {/* Main Field of Study */}
                                     <div className="flex items-start gap-2">
-                                      <SignpostBig
-                                        className="h-4 w-4 flex-shrink-0 mt-0.5"
-                                        color={getUserPrimaryColorHex(
-                                          currentUserColorScheme
-                                        )}
-                                      />
                                       <div className="flex flex-wrap gap-1">
                                         {course.mainFieldOfStudy?.length ===
                                         0 ? (
@@ -1099,7 +1056,7 @@ export function UserProfileComponent({
                               <div className="flex flex-col items-center justify-center h-32 text-center">
                                 <div className="space-y-3 flex flex-col items-center">
                                   <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                                    <SignpostBig className="h-6 w-6 text-primary" />
+                                    <div className="w-6 h-6 rounded-full bg-primary/20" />
                                   </div>
                                   <div className="space-y-1">
                                     <p className="text-sm text-muted-foreground">
