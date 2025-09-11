@@ -186,19 +186,32 @@ export function ScheduleProvider({
     async (enrollmentId: string) => {
       if (readonly) return;
 
+      console.log(
+        'ScheduleProvider: handleCourseRemoval called with enrollmentId:',
+        enrollmentId
+      );
+      console.log('EnrollmentId type:', typeof enrollmentId);
+      console.log('EnrollmentId length:', enrollmentId?.length);
+
       try {
         await ScheduleService.removeCourseFromSchedule(enrollmentId);
 
         // Immediately update the enrolled courses store to remove the course
         const currentEnrolledCourses =
           useEnrolledCoursesStore.getState().enrolledCourses;
+        console.log(
+          'Current enrolled courses count:',
+          currentEnrolledCourses.length
+        );
         const updatedCourses = currentEnrolledCourses.filter(
           (course) => course.enrollment.id !== enrollmentId
         );
+        console.log('Updated enrolled courses count:', updatedCourses.length);
         setEnrolledCourses(updatedCourses);
 
         toast.success('Course removed from schedule');
       } catch (error) {
+        console.error('ScheduleProvider: Error removing course:', error);
         // Reload data on error to restore state
         await loadScheduleData();
 

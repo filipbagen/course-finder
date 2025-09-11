@@ -70,38 +70,6 @@ export async function POST(
       return notFound('Course not found');
     }
 
-    // Get all user's enrolled courses
-    const userEnrollments = await prisma.enrollment.findMany({
-      where: { userId: user.id },
-      include: { course: true },
-    });
-
-    // Check if any enrolled course conflicts with the course being enrolled
-    const conflictingCourse = userEnrollments.find((enrollment) => {
-      const enrolledCourse = enrollment.course;
-      // Check if the course to enroll excludes the enrolled course
-      if (
-        courseToEnroll.exclusions &&
-        courseToEnroll.exclusions.includes(enrolledCourse.code)
-      ) {
-        return true;
-      }
-      // Check if the enrolled course excludes the course to enroll
-      if (
-        enrolledCourse.exclusions &&
-        enrolledCourse.exclusions.includes(courseToEnroll.code)
-      ) {
-        return true;
-      }
-      return false;
-    });
-
-    if (conflictingCourse) {
-      return conflict(
-        `Cannot enroll in ${courseToEnroll.name} (${courseToEnroll.code}) because it conflicts with ${conflictingCourse.course.name} (${conflictingCourse.course.code}). These courses cannot be taken together.`
-      );
-    }
-
     // Create new enrollment
     const enrollment = await prisma.enrollment.create({
       data: {

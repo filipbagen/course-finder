@@ -162,7 +162,7 @@ export function ScheduleHeader({
               <TooltipTrigger asChild>
                 <div className="flex items-center">
                   {hasConflicts ? (
-                    <CircleAlert className="h-6 w-6 text-amber-500" />
+                    <CircleAlert className="h-6 w-6 text-red-500" />
                   ) : (
                     <CircleCheck className="h-6 w-6 text-green-500" />
                   )}
@@ -177,7 +177,7 @@ export function ScheduleHeader({
                     <ul className="space-y-1 text-sm">
                       {conflicts.map((conflict, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <CircleAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <CircleAlert className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                           <div>
                             <span className="font-medium">
                               {conflict.course1.name} ({conflict.course1.code})

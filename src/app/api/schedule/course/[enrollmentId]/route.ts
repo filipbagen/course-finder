@@ -19,10 +19,34 @@ export async function DELETE(
 ): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
   try {
     const { enrollmentId } = await params;
+    console.log('DELETE enrollmentId:', enrollmentId);
+    console.log('EnrollmentId type:', typeof enrollmentId);
+    console.log('EnrollmentId length:', enrollmentId?.length);
+
     const user = await getAuthenticatedUser();
+    console.log('Authenticated user:', user.id);
 
     if (!enrollmentId) {
       return badRequest('Enrollment ID is required');
+    }
+
+    // Validate UUID format
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(enrollmentId)) {
+      console.log('Invalid UUID format:', enrollmentId);
+      return badRequest('Invalid enrollment ID format');
+    }
+
+    // First check if enrollment exists at all
+    const enrollmentExists = await prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+    });
+    console.log('Enrollment exists in database:', !!enrollmentExists);
+    if (enrollmentExists) {
+      console.log('Enrollment userId:', enrollmentExists.userId);
+      console.log('Authenticated userId:', user.id);
+      console.log('User IDs match:', enrollmentExists.userId === user.id);
     }
 
     // Verify enrollment belongs to the user
@@ -33,7 +57,15 @@ export async function DELETE(
       },
     });
 
+    console.log('Found enrollment for user:', !!enrollment);
+
     if (!enrollment) {
+      console.log(
+        'Enrollment not found for user:',
+        user.id,
+        'enrollmentId:',
+        enrollmentId
+      );
       return notFound('Enrollment not found');
     }
 

@@ -120,13 +120,18 @@ export class ScheduleService {
    */
   static async removeCourseFromSchedule(enrollmentId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/course/${enrollmentId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+      // URL encode the enrollment ID to handle any special characters
+      const encodedEnrollmentId = encodeURIComponent(enrollmentId);
+      const response = await fetch(
+        `${this.BASE_URL}/course/${encodedEnrollmentId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         console.error(
