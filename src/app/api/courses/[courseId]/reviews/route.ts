@@ -16,6 +16,11 @@ export async function GET(
     const params = await context.params;
     const courseId = params.courseId;
 
+    // Debug logging
+    console.log('Fetching reviews for courseId:', courseId);
+    console.log('Database URL exists:', !!process.env.DATABASE_URL);
+    console.log('Direct URL exists:', !!process.env.DIRECT_URL);
+
     // Verify the course exists
     const course = await prisma.course.findUnique({
       where: { id: courseId },

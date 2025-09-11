@@ -1,10 +1,16 @@
-# Vercel Deployment Guide
+# Vercel Deployment Guide - Database Connection Fix
 
-## Environment Variables Setup
+## 🚨 Critical: Environment Variables Setup
 
-In your Vercel dashboard, go to your project settings and add these environment variables:
+### Step 1: Go to Vercel Dashboard
+1. Open your Vercel project
+2. Go to **Settings** → **Environment Variables**
 
-### Required Environment Variables:
+### Step 2: Add These Environment Variables
+
+**IMPORTANT**: Make sure to set these for **Production**, **Preview**, and **Development** environments.
+
+#### Required Environment Variables:
 
 1. **DATABASE_URL**
    ```
@@ -36,23 +42,97 @@ In your Vercel dashboard, go to your project settings and add these environment 
    https://www.coursefinder.se
    ```
 
-## Troubleshooting Steps:
+## 🔧 Alternative DATABASE_URL Formats
 
-1. **Check Environment Variables**: Ensure all environment variables are set correctly in Vercel dashboard
-2. **Database Connection**: Verify your Supabase database is accessible and not paused
-3. **Prisma Client**: The build process now includes `prisma generate` to ensure the client is properly generated
-4. **Connection Limits**: The DATABASE_URL includes connection limits suitable for serverless environments
+If the above doesn't work, try these alternatives:
 
-## Alternative DATABASE_URL Format:
+### Option A: Without connection pooling
+```
+postgresql://postgres.anjvfmqlxaxwtwmnxtvh:hibjij-qoggi2-gAczyd@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+```
 
-If the current format doesn't work, try this alternative:
-
+### Option B: With schema specification
 ```
 postgresql://postgres.anjvfmqlxaxwtwmnxtvh:hibjij-qoggi2-gAczyd@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?schema=public
 ```
 
-## Build Command:
+### Option C: Direct connection (if pooler fails)
+```
+postgres://postgres.anjvfmqlxaxwtwmnxtvh:hibjij-qoggi2-gAczyd@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+```
 
-The build command is now: `prisma generate && next build`
+## 🚀 Deployment Steps
 
-This ensures Prisma generates the client before building the Next.js application.
+### Step 1: Commit Changes
+```bash
+git add .
+git commit -m "Fix database connection for Vercel deployment"
+git push origin main
+```
+
+### Step 2: Set Environment Variables in Vercel
+1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Add all the environment variables listed above
+3. **Important**: Set them for Production, Preview, and Development environments
+4. Click "Save" for each variable
+
+### Step 3: Redeploy
+1. Go to Vercel Dashboard → Your Project → Deployments
+2. Click "Redeploy" on the latest deployment
+3. Or push a new commit to trigger automatic deployment
+
+## 🔍 Troubleshooting
+
+### Check Environment Variables
+1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Verify all variables are set correctly
+3. Make sure they're set for the correct environments (Production/Preview/Development)
+
+### Check Supabase Database
+1. Go to your Supabase dashboard
+2. Make sure your database is not paused
+3. Check if there are any connection limits or issues
+
+### Test Locally First
+```bash
+# Test if your local environment works
+npm run dev
+# Try accessing a course with reviews
+```
+
+### Check Vercel Logs
+1. Go to Vercel Dashboard → Your Project → Functions
+2. Check the logs for any API routes
+3. Look for database connection errors
+
+## 🐛 Common Issues
+
+### Issue: "Can't reach database server"
+**Solution**: Check that DATABASE_URL is set correctly in Vercel
+
+### Issue: "Prisma client not found"
+**Solution**: The build process now includes `prisma generate`
+
+### Issue: "Connection timeout"
+**Solution**: Try the alternative DATABASE_URL formats above
+
+### Issue: "Environment variables not found"
+**Solution**: Make sure to set them for all environments (Production/Preview/Development)
+
+## 📞 Support
+
+If you're still having issues:
+
+1. Check the Vercel deployment logs for specific error messages
+2. Verify your Supabase database is active and accessible
+3. Try the alternative DATABASE_URL formats
+4. Make sure all environment variables are properly set in Vercel
+
+## ✅ Verification
+
+After deployment, test these endpoints:
+- `/api/courses/[courseId]/reviews` - Should return reviews without database errors
+- `/api/courses/review` - Should allow posting reviews
+- Any page that loads course data
+
+The application should now work properly on Vercel with full database connectivity.
