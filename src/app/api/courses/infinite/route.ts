@@ -8,7 +8,7 @@ import { transformCourses } from '@/lib/transformers';
 
 export const dynamic = 'force-dynamic';
 
-// Simple in-memory cache for search results
+// Improved in-memory cache with TTL and size management
 interface CacheEntry {
   data: any;
   timestamp: number;
@@ -17,6 +17,7 @@ interface CacheEntry {
 
 const searchCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 200; // Maximum number of cached queries
 
 function getCacheKey(params: any): string {
   // Create a cache key from search parameters
@@ -33,6 +34,8 @@ function getCacheKey(params: any): string {
     params.sortOrder || 'asc',
     params.limit || 20,
     params.cursor || '',
+    // Include a version number to invalidate cache after schema changes
+    'v1.1',
   ];
   return keyParts.join('|');
 }
@@ -51,10 +54,14 @@ function getCachedResult(cacheKey: string): any | null {
 
 function setCachedResult(cacheKey: string, data: any, ttl = CACHE_TTL): void {
   // Limit cache size to prevent memory issues
-  if (searchCache.size >= 100) {
-    const firstKey = searchCache.keys().next().value;
-    if (firstKey) {
-      searchCache.delete(firstKey);
+  if (searchCache.size >= MAX_CACHE_SIZE) {
+    // Find and delete the oldest entries
+    const entries = Array.from(searchCache.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+      .slice(0, Math.floor(MAX_CACHE_SIZE * 0.2)); // Remove oldest 20%
+    
+    for (const [key] of entries) {
+      searchCache.delete(key);
     }
   }
 
@@ -65,6 +72,10 @@ function setCachedResult(cacheKey: string, data: any, ttl = CACHE_TTL): void {
   });
 }
 
+/**
+ * GET /api/courses/infinite
+ * Infinite loading API for course search with enhanced reliability
+ */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<InfiniteResponse<Course>>> {
@@ -90,12 +101,15 @@ export async function GET(
 
     const limit = Math.min(Math.max(rawLimit || 20, 1), 50);
 
-    // Check cache for non-cursor requests
+    // Check cache for non-cursor requests to improve performance
     if (!cursor) {
       const cacheKey = getCacheKey(params);
       const cachedResult = getCachedResult(cacheKey);
       if (cachedResult) {
-        return NextResponse.json(cachedResult);
+        // Add cache hit header for monitoring
+        const response = NextResponse.json(cachedResult);
+        response.headers.set('X-Cache', 'HIT');
+        return response;
       }
     }
 
@@ -282,21 +296,35 @@ export async function GET(
       },
     };
 
-    // Use withPrisma wrapper for database operations
-    const dbResult = await withPrisma(async (prismaClient) => {
-      const courses = await prismaClient.course.findMany(queryOptions);
+    // Generate a cache key for this search query
+    const cacheKey = getCacheKey(params);
 
-      // Get total count for this query (only when no cursor for performance)
-      let totalCount = null;
-      if (!cursor) {
-        const countQuery = await prismaClient.course.count({
-          where: whereConditions,
-        });
-        totalCount = countQuery;
+    // Use enhanced withPrisma wrapper for more reliable database operations
+    const dbResult = await withPrisma(
+      async (prismaClient) => {
+        const courses = await prismaClient.course.findMany(queryOptions);
+
+        // Get total count for this query (only when no cursor for performance)
+        let totalCount = null;
+        if (!cursor) {
+          const countQuery = await prismaClient.course.count({
+            where: whereConditions,
+          });
+          totalCount = countQuery;
+        }
+
+        return { courses, totalCount };
+      },
+      {
+        // Use caching for better performance
+        useCache: !cursor, // Only cache first page queries
+        cacheKey: !cursor ? `query-${cacheKey}` : undefined,
+        cacheTtl: 60, // 1 minute cache for database results
+        // Configure retry pattern for this endpoint
+        maxRetries: 3,
+        initialBackoff: 150,
       }
-
-      return { courses, totalCount };
-    });
+    );
 
     const courses = dbResult.courses;
     const totalCount = dbResult.totalCount;
@@ -322,15 +350,37 @@ export async function GET(
 
     // Cache the result for non-cursor requests
     if (!cursor) {
-      const cacheKey = getCacheKey(params);
       setCachedResult(cacheKey, result);
     }
 
-    return NextResponse.json(result);
+    // Create response with cache control headers
+    const response = NextResponse.json(result);
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=60, stale-while-revalidate=300'
+    );
+    response.headers.set('X-Cache', 'MISS');
+
+    return response;
   } catch (error) {
     console.error('Error fetching courses:', error);
-    let errorMessage =
-      error instanceof Error ? error.message : 'An unknown error occurred';
-    return infiniteError(errorMessage);
+    
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Courses infinite error (ref: ${errorRef}):`, error);
+    
+    const errorMessage = error instanceof Error 
+      ? `Failed to fetch courses: ${error.message}`
+      : 'An unknown error occurred';
+    
+    const errorResponse = infiniteError(
+      'Failed to load courses. Please try again in a moment.',
+      errorRef
+    );
+    
+    // No caching for error responses
+    errorResponse.headers.set('Cache-Control', 'no-store, max-age=0');
+    
+    return errorResponse;
   }
 }

@@ -248,11 +248,12 @@ export const internalServerError = (message?: string) =>
 /**
  * Create infinite error response
  */
-export const infiniteError = (message?: string) =>
+export const infiniteError = (message?: string, errorRef?: string) =>
   NextResponse.json(
     {
       success: false,
       error: message || 'Internal server error',
+      ref: errorRef,
       data: [],
       hasNextPage: false,
       count: 0,
