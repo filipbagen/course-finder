@@ -22,7 +22,8 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    console.error('Login error:', error);
+    // Keep error logging for debugging but use a more concise message
+    console.error('Login error');
     redirect('/login?error=invalid_credentials');
   }
 
@@ -53,7 +54,8 @@ export async function signUp(formData: FormData) {
   });
 
   if (authError) {
-    console.error('Supabase auth error:', authError);
+    // Keep error logging for debugging but use a more concise message
+    console.error('Signup error');
     redirect('/signup?error=signup_failed');
   }
 

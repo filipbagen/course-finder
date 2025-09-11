@@ -23,15 +23,6 @@ export async function updateUserProfile(formData: FormData) {
   const isPublic = formData.get('isPublic') === 'on';
   const avatarUrl = formData.get('avatarUrl') as string;
 
-  console.log('Creating/updating user profile:', {
-    userId: user.id,
-    name,
-    program,
-    colorScheme,
-    isPublic,
-    avatarUrl,
-  });
-
   try {
     // Use upsert to create or update user profile
     const result = await prisma.user.upsert({
@@ -54,8 +45,6 @@ export async function updateUserProfile(formData: FormData) {
         updatedAt: new Date(),
       },
     });
-
-    console.log('Profile created/updated successfully:', result);
   } catch (error) {
     console.error('Error creating/updating profile with Prisma:', error);
 
@@ -68,7 +57,6 @@ export async function updateUserProfile(formData: FormData) {
   }
 
   // Redirect OUTSIDE of try/catch block
-  console.log('Redirecting to courses page...');
   revalidatePath('/', 'layout');
   redirect('/courses');
 }
