@@ -160,7 +160,7 @@ export function UserSearchComponent({
     <div className="flex gap-6">
       {/* Desktop Filter Panel */}
       <div className="hidden lg:block w-80 flex-shrink-0">
-        <div className="p-6 rounded-lg border shadow-sm space-y-6">
+        <div className="p-6 rounded-lg border shadow-sm space-y-6 bg-card">
           <h3 className="font-semibold text-lg">Filter</h3>
           <div className="space-y-4">
             <Label>Program</Label>

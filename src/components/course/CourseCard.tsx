@@ -242,7 +242,7 @@ const CourseCard = ({
         'transition-all duration-200 group',
         {
           // Default and Landing variants - for course browsing and carousel
-          'hover:shadow-lg hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50':
+          'hover:shadow-lg hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white to-gray-50/50 dark:from-card dark:to-card':
             variant === 'default' || variant === 'landing',
 
           // Schedule variant - for schedule management

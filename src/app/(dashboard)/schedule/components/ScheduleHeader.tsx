@@ -168,7 +168,7 @@ export function ScheduleHeader({
                   )}
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="backdrop-blur-md bg-white/80 border border-gray-200 rounded-lg shadow-lg">
+              <TooltipContent className="backdrop-blur-md bg-popover border border-border rounded-lg shadow-lg">
                 {hasConflicts ? (
                   <div className="max-w-xs">
                     <p className="font-semibold mb-2">

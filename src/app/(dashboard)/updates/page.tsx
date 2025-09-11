@@ -91,9 +91,9 @@ export default function UpdatesPage() {
     switch (status) {
       case 'current':
         return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">
             Aktuell version
-        </Badge>
+          </Badge>
         );
       default:
         return <Badge variant="secondary">Tidigare</Badge>;
@@ -114,7 +114,7 @@ export default function UpdatesPage() {
         </div>
 
         {/* Current Version Highlight */}
-        <Card className="mb-8 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="mb-8 shadow-lg border-0 bg-card backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -133,12 +133,12 @@ export default function UpdatesPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-700 mb-4">{updates[0].description}</p>
+            <p className="mb-4">{updates[0].description}</p>
             <div className="grid gap-2 md:grid-cols-2">
               {updates[0].features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{feature}</span>
+                  <span className="text-sm">{feature}</span>
                 </div>
               ))}
             </div>
@@ -147,19 +147,17 @@ export default function UpdatesPage() {
 
         {/* Version History */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Versionshistorik
-          </h2>
+          <h2 className="text-2xl font-bold mb-6">Versionshistorik</h2>
 
           {updates.slice(1).map((update, index) => (
             <Card
               key={index}
-              className="shadow-lg border-0 bg-white/80 backdrop-blur-sm"
+              className="shadow-lg border-0 bg-card backdrop-blur-sm"
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-500" />
+                    <CheckCircle className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <CardTitle className="text-lg">
                         Version {update.version}
@@ -174,12 +172,12 @@ export default function UpdatesPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 mb-4">{update.description}</p>
+                <p className="mb-4">{update.description}</p>
                 <div className="grid gap-2 md:grid-cols-2">
                   {update.features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{feature}</span>
+                      <CheckCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
                     </div>
                   ))}
                 </div>

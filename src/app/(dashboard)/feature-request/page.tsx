@@ -76,7 +76,7 @@ export default function FeatureRequestPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Form */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-lg border-0 bg-card backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lightbulb className="h-5 w-5" />
@@ -145,14 +145,14 @@ export default function FeatureRequestPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-lg border-0 bg-card backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-lg">Tips</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <ul>
-                    <li>Var så specifik som möjligt</li>
-                    <li>Förklara varför förslaget är viktigt</li>
+                  <li>Var så specifik som möjligt</li>
+                  <li>Förklara varför förslaget är viktigt</li>
                 </ul>
               </CardContent>
             </Card>

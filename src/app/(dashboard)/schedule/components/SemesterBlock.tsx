@@ -77,7 +77,6 @@ export function SemesterBlock({
           'border-dashed border-border': !isDragging,
           'border-dashed': isDragging && !isOver,
           'border-solid': isDragging && isOver,
-          'hover:bg-accent/5': !isDragging,
           'bg-green-50 dark:bg-green-950/20': isOver && isValidDrop,
           'bg-red-50 dark:bg-red-950/20': isOver && !isValidDrop,
           'cursor-not-allowed opacity-60': readonly,
