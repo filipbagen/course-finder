@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   Dialog,
@@ -591,96 +591,8 @@ export const CourseDetailsDialog = () => {
   const loading = storeLoading || fetchLoading;
   const error = storeError || fetchError;
 
-  // Enrollment Button Component
-  const EnrollmentButton = ({ course }: { course: Course }) => {
-    const { addToEnrollment } = useEnrollment(course.name);
-
-    // If user is not authenticated, show login button
-    if (!isAuthenticated) {
-      return (
-        <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
-          <Link
-            href="/login"
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              handleClose();
-            }}
-          >
-            <LogIn className="h-4 w-4" />
-          </Link>
-        </Button>
-      );
-    }
-
-    // Handle enrollment for authenticated users
-    const handleEnrollment = (semester?: number | number[]) => {
-      if (!addToEnrollment) return;
-
-      // Extract a usable semester value
-      let targetSemester: number;
-
-      if (typeof semester === 'number') {
-        // If it's already a number, use it directly
-        targetSemester = semester;
-      } else if (Array.isArray(semester) && semester.length > 0) {
-        // Use the first semester from the array
-        targetSemester = semester[0];
-      } else if (
-        course.semester &&
-        Array.isArray(course.semester) &&
-        course.semester.length > 0
-      ) {
-        // Fallback to the course's first semester
-        targetSemester = course.semester[0];
-      } else {
-        // Default fallback
-        targetSemester = 1;
-      }
-
-      addToEnrollment(course.id, targetSemester);
-    };
-
-    // If course has multiple semesters, show dropdown
-    if (course.semester && course.semester.length > 1) {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {course.semester.map((semester) => (
-              <DropdownMenuItem
-                key={semester}
-                className="cursor-pointer"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  handleEnrollment(semester);
-                }}
-              >
-                Lägg till i termin {semester}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    }
-
-    // Single semester or default case
-    return (
-      <Button
-        size="sm"
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          handleEnrollment(course.semester);
-        }}
-        className="h-8 w-8 p-0"
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
-    );
-  };
+  // Move useEnrollment hook outside of callback
+  const { addToEnrollment } = useEnrollment(course?.name || '');
 
   useEffect(() => {
     if (isOpen && courseId && course) {
@@ -718,47 +630,30 @@ export const CourseDetailsDialog = () => {
     setOpen(isOpen);
   }, [isOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
     onClose();
-  };
+  }, [onClose]);
 
   // Check if course is enrolled and get current semester
   const isEnrolled = course && 'enrollment' in course;
   const currentSemester = isEnrolled
     ? (course as any).enrollment.semester
     : null;
-  const isMobile = useMediaQuery('(max-width: 767px)');
 
   // Function to update review data
-  const updateReviewData = (averageRating: number, count: number) => {
-    setReviewsData({ averageRating, count });
-  };
-
-  // This effect fetches the review data when the course changes
-  useEffect(() => {
-    if (course?.id) {
-      const fetchReviewData = async () => {
-        try {
-          const response = await fetch(
-            `/api/courses/${course.id.toString()}/reviews`
-          );
-          const result = await response.json();
-
-          if (response.ok && result.success) {
-            setReviewsData({
-              averageRating: result.data.averageRating,
-              count: result.data.reviews.length,
-            });
-          }
-        } catch (error) {
-          // Silent error handling
-        }
-      };
-
-      fetchReviewData();
-    }
-  }, [course?.id]);
+  const updateReviewData = useCallback(
+    (averageRating: number, count: number) => {
+      // Only update if the values have actually changed
+      if (
+        reviewsData.averageRating !== averageRating ||
+        reviewsData.count !== count
+      ) {
+        setReviewsData({ averageRating, count });
+      }
+    },
+    [reviewsData.averageRating, reviewsData.count]
+  );
 
   // Check authentication status
   useEffect(() => {
@@ -772,6 +667,98 @@ export const CourseDetailsDialog = () => {
 
     checkAuth();
   }, []);
+
+  // Enrollment Button Component
+  const EnrollmentButton = useCallback(
+    ({ course }: { course: Course }) => {
+      // If user is not authenticated, show login button
+      if (!isAuthenticated) {
+        return (
+          <Button asChild size="sm" variant="outline" className="h-8 w-8 p-0">
+            <Link
+              href="/login"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                handleClose();
+              }}
+            >
+              <LogIn className="h-4 w-4" />
+            </Link>
+          </Button>
+        );
+      }
+
+      // Handle enrollment for authenticated users
+      const handleEnrollment = (semester?: number | number[]) => {
+        if (!addToEnrollment) return;
+
+        // Extract a usable semester value
+        let targetSemester: number;
+
+        if (typeof semester === 'number') {
+          // If it's already a number, use it directly
+          targetSemester = semester;
+        } else if (Array.isArray(semester) && semester.length > 0) {
+          // Use the first semester from the array
+          targetSemester = semester[0];
+        } else if (
+          course.semester &&
+          Array.isArray(course.semester) &&
+          course.semester.length > 0
+        ) {
+          // Fallback to the course's first semester
+          targetSemester = course.semester[0];
+        } else {
+          // Default fallback
+          targetSemester = 1;
+        }
+
+        addToEnrollment(course.id, targetSemester);
+      };
+
+      // If course has multiple semesters, show dropdown
+      if (course.semester && course.semester.length > 1) {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {course.semester.map((semester) => (
+                <DropdownMenuItem
+                  key={semester}
+                  className="cursor-pointer"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    handleEnrollment(semester);
+                  }}
+                >
+                  Lägg till i termin {semester}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      }
+
+      // Single semester or default case
+      return (
+        <Button
+          size="sm"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            handleEnrollment(course.semester);
+          }}
+          className="h-8 w-8 p-0"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      );
+    },
+    [isAuthenticated, handleClose, addToEnrollment]
+  );
 
   if (isDesktop) {
     return (

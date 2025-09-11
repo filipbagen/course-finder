@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
@@ -25,6 +25,9 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [userReview, setUserReview] = useState<Review | null>(null);
 
+  // Add a ref to track whether we've already updated the parent
+  const hasUpdatedParent = useRef(false);
+
   // Check if the user is enrolled in this course
   const isUserEnrolled =
     (!enrollmentsLoading &&
@@ -50,14 +53,6 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
       setReviews(result.data.reviews);
       setAverageRating(result.data.averageRating);
 
-      // Update parent component with review data
-      if (onReviewDataUpdate) {
-        onReviewDataUpdate(
-          result.data.averageRating,
-          result.data.reviews.length
-        );
-      }
-
       // Find the current user's review if exists
       if (user) {
         const userReview = result.data.reviews.find(
@@ -71,35 +66,36 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [courseId, onReviewDataUpdate, user]); // Include all dependencies
+  }, [courseId, user]);
 
   useEffect(() => {
     if (courseId) {
       fetchReviews();
     }
-  }, [courseId, fetchReviews]); // Include fetchReviews dependency
+  }, [courseId, fetchReviews]);
 
-  // Separate effect to update user review when user or reviews change
+  // Separate effect to update parent component when review data changes
+  // Using a ref to prevent excessive updates
   useEffect(() => {
-    if (user && reviews.length > 0) {
-      const userReview = reviews.find(
-        (review: any) => review.userId === user.id
-      );
-      setUserReview(userReview || null);
-    } else if (!user) {
-      setUserReview(null);
+    if (onReviewDataUpdate && !loading && !hasUpdatedParent.current) {
+      onReviewDataUpdate(averageRating, reviews.length);
+      hasUpdatedParent.current = true;
     }
-  }, [user, reviews]);
+  }, [onReviewDataUpdate, averageRating, reviews.length, loading]);
 
-  const handleReviewSubmitted = () => {
+  const handleReviewSubmitted = useCallback(() => {
     fetchReviews();
-  };
+    // Reset the update flag so we can update the parent again after a new review
+    hasUpdatedParent.current = false;
+  }, [fetchReviews]);
 
-  const handleReviewDeleted = () => {
+  const handleReviewDeleted = useCallback(() => {
     fetchReviews();
-  };
+    // Reset the update flag so we can update the parent again after a review is deleted
+    hasUpdatedParent.current = false;
+  }, [fetchReviews]);
 
-  const getReviewSubmitInfo = () => {
+  const getReviewSubmitInfo = useCallback(() => {
     if (userReview) return null;
     if (authLoading || enrollmentsLoading) return null;
 
@@ -109,9 +105,13 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
       return 'Du måste lägga till kursen i ditt schema för att kunna recensera den.';
     }
     return null;
-  };
+  }, [userReview, authLoading, enrollmentsLoading, user, isUserEnrolled]);
 
-  const reviewSubmitInfo = getReviewSubmitInfo();
+  // Memoize the result to prevent recalculation on every render
+  const reviewSubmitInfo = React.useMemo(
+    () => getReviewSubmitInfo(),
+    [getReviewSubmitInfo]
+  );
 
   return (
     <div className="space-y-4">
