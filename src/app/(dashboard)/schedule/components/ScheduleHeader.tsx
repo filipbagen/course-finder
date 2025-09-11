@@ -64,18 +64,25 @@ export function ScheduleHeader({
     const conflictList: Array<{
       course1: { id: string; code: string; name: string };
       course2: { id: string; code: string; name: string };
+      type: 'exclusion' | 'scheduling';
     }> = [];
+
+    // Helper function to check if two arrays have common elements
+    const hasOverlap = (arr1: number[], arr2: number[]): boolean => {
+      return arr1.some((item) => arr2.includes(item));
+    };
 
     for (let i = 0; i < enrolledCourses.length; i++) {
       for (let j = i + 1; j < enrolledCourses.length; j++) {
         const course1 = enrolledCourses[i];
         const course2 = enrolledCourses[j];
 
-        // Check if course1 excludes course2
+        // Check for exclusion conflicts
         if (course1.exclusions && course1.exclusions.includes(course2.code)) {
           conflictList.push({
             course1: { id: course1.id, code: course1.code, name: course1.name },
             course2: { id: course2.id, code: course2.code, name: course2.name },
+            type: 'exclusion',
           });
         }
         // Check if course2 excludes course1
@@ -86,6 +93,19 @@ export function ScheduleHeader({
           conflictList.push({
             course1: { id: course2.id, code: course2.code, name: course2.name },
             course2: { id: course1.id, code: course1.code, name: course1.name },
+            type: 'exclusion',
+          });
+        }
+        // Check for scheduling conflicts (same block, semester, and period)
+        else if (
+          hasOverlap(course1.semester, course2.semester) &&
+          hasOverlap(course1.period, course2.period) &&
+          hasOverlap(course1.block, course2.block)
+        ) {
+          conflictList.push({
+            course1: { id: course1.id, code: course1.code, name: course1.name },
+            course2: { id: course2.id, code: course2.code, name: course2.name },
+            type: 'scheduling',
           });
         }
       }
@@ -148,7 +168,7 @@ export function ScheduleHeader({
                   )}
                 </div>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="backdrop-blur-md bg-white/80 border border-gray-200 rounded-lg shadow-lg">
                 {hasConflicts ? (
                   <div className="max-w-xs">
                     <p className="font-semibold mb-2">
@@ -156,9 +176,23 @@ export function ScheduleHeader({
                     </p>
                     <ul className="space-y-1 text-sm">
                       {conflicts.map((conflict, index) => (
-                        <li key={index}>
-                          {conflict.course1.name} ({conflict.course1.code}) ↔{' '}
-                          {conflict.course2.name} ({conflict.course2.code})
+                        <li key={index} className="flex items-start gap-2">
+                          <CircleAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">
+                              {conflict.course1.name} ({conflict.course1.code})
+                            </span>
+                            {' ↔ '}
+                            <span className="font-medium">
+                              {conflict.course2.name} ({conflict.course2.code})
+                            </span>
+                            <br />
+                            <span className="text-xs text-muted-foreground">
+                              {conflict.type === 'exclusion'
+                                ? 'Kursuteslutning'
+                                : 'Samma block, termin och period'}
+                            </span>
+                          </div>
                         </li>
                       ))}
                     </ul>
