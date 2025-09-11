@@ -21,51 +21,54 @@ export async function GET(request: NextRequest) {
 
     // Use target user ID if provided, otherwise use authenticated user
     const userId = targetUserId || authenticatedUser.id;
-    
+
     // Create a cache key based on user ID
     const cacheKey = `schedule-${userId}`;
 
     // Use enhanced withPrisma wrapper with caching for better performance
-    const result = await withPrisma(async (prismaClient) => {
-      // First, fetch enrollments
-      const enrollments = await prismaClient.enrollment.findMany({
-        where: {
-          userId: userId,
-          // Filter for semesters 7, 8, 9 which are the focus of this schedule view
-          semester: {
-            in: [7, 8, 9],
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // First, fetch enrollments
+        const enrollments = await prismaClient.enrollment.findMany({
+          where: {
+            userId: userId,
+            // Filter for semesters 7, 8, 9 which are the focus of this schedule view
+            semester: {
+              in: [7, 8, 9],
+            },
           },
-        },
-        orderBy: [{ semester: 'asc' }],
-      });
+          orderBy: [{ semester: 'asc' }],
+        });
 
-      // If no enrollments, return early to save an unnecessary query
-      if (enrollments.length === 0) {
-        return { enrollments: [], courses: [] };
+        // If no enrollments, return early to save an unnecessary query
+        if (enrollments.length === 0) {
+          return { enrollments: [], courses: [] };
+        }
+
+        // Get all course IDs from enrollments
+        const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+
+        // Fetch courses separately
+        const courses = await prismaClient.course.findMany({
+          where: {
+            id: {
+              in: courseIds,
+            },
+          },
+        });
+
+        return { enrollments, courses };
+      },
+      {
+        // Enable caching for this operation with a 1 minute TTL
+        useCache: true,
+        cacheKey,
+        cacheTtl: 60,
+        // More aggressive retry pattern for schedule which is critical functionality
+        maxRetries: 4,
+        initialBackoff: 100,
       }
-
-      // Get all course IDs from enrollments
-      const courseIds = enrollments.map((enrollment) => enrollment.courseId);
-
-      // Fetch courses separately
-      const courses = await prismaClient.course.findMany({
-        where: {
-          id: {
-            in: courseIds,
-          },
-        },
-      });
-
-      return { enrollments, courses };
-    }, {
-      // Enable caching for this operation with a 1 minute TTL
-      useCache: true,
-      cacheKey,
-      cacheTtl: 60,
-      // More aggressive retry pattern for schedule which is critical functionality
-      maxRetries: 4,
-      initialBackoff: 100,
-    });
+    );
 
     // Transform courses
     const transformedCourses = result.courses.map((course) =>
@@ -112,26 +115,26 @@ export async function GET(request: NextRequest) {
     // Include a random error reference for tracking
     const errorRef = Math.random().toString(36).substring(2, 10);
     console.error(`Schedule error reference: ${errorRef}`, error);
-    
+
     const errorResponse = handleApiError(error);
-    
+
     // Add the error reference to the response
     if (errorResponse instanceof NextResponse) {
       const body = await errorResponse.json();
       body.ref = errorRef;
-      
+
       // Create a new response with the modified body and same status
-      const newResponse = NextResponse.json(body, { 
+      const newResponse = NextResponse.json(body, {
         status: errorResponse.status,
         headers: {
           // No caching for error responses
-          'Cache-Control': 'no-store'
-        }
+          'Cache-Control': 'no-store',
+        },
       });
-      
+
       return newResponse;
     }
-    
+
     return errorResponse;
   }
 }

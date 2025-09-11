@@ -59,7 +59,7 @@ function setCachedResult(cacheKey: string, data: any, ttl = CACHE_TTL): void {
     const entries = Array.from(searchCache.entries())
       .sort((a, b) => a[1].timestamp - b[1].timestamp)
       .slice(0, Math.floor(MAX_CACHE_SIZE * 0.2)); // Remove oldest 20%
-    
+
     for (const [key] of entries) {
       searchCache.delete(key);
     }
@@ -364,23 +364,24 @@ export async function GET(
     return response;
   } catch (error) {
     console.error('Error fetching courses:', error);
-    
+
     // Generate an error reference for tracking
     const errorRef = Math.random().toString(36).substring(2, 10);
     console.error(`Courses infinite error (ref: ${errorRef}):`, error);
-    
-    const errorMessage = error instanceof Error 
-      ? `Failed to fetch courses: ${error.message}`
-      : 'An unknown error occurred';
-    
+
+    const errorMessage =
+      error instanceof Error
+        ? `Failed to fetch courses: ${error.message}`
+        : 'An unknown error occurred';
+
     const errorResponse = infiniteError(
       'Failed to load courses. Please try again in a moment.',
       errorRef
     );
-    
+
     // No caching for error responses
     errorResponse.headers.set('Cache-Control', 'no-store, max-age=0');
-    
+
     return errorResponse;
   }
 }

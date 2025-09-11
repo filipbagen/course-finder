@@ -115,8 +115,8 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching reviews:', error);
     const errorMessage =
-      error instanceof Error 
-        ? `Failed to fetch reviews: ${error.message}` 
+      error instanceof Error
+        ? `Failed to fetch reviews: ${error.message}`
         : 'Failed to fetch reviews';
 
     // Include a random error reference for tracking
@@ -127,14 +127,14 @@ export async function GET(
       {
         success: false,
         error: 'Failed to load reviews. Please try again in a moment.',
-        ref: errorRef
+        ref: errorRef,
       },
-      { 
+      {
         status: 500,
         // No caching for error responses
         headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
+          'Cache-Control': 'no-store, max-age=0',
+        },
       }
     );
   }
