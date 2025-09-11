@@ -192,29 +192,34 @@ export async function PATCH(
       const existingEnrollment = await prismaClient.enrollment.findUnique({
         where: { id: enrollmentId },
       });
-  
+
       if (!existingEnrollment || existingEnrollment.userId !== user.id) {
         return { notFound: true };
       }
-  
+
       const updatedEnrollment = await prismaClient.enrollment.update({
         where: { id: enrollmentId },
         data: {
           semester: newSemester,
         },
       });
-      
+
       return { updatedEnrollment };
     });
-    
+
     if (result.notFound) {
       return notFound('Enrollment not found or access denied');
     }
 
     // Add cache control headers
-    const response = createSuccessResponse({ updatedEnrollment: result.updatedEnrollment });
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    
+    const response = createSuccessResponse({
+      updatedEnrollment: result.updatedEnrollment,
+    });
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+
     return response;
   } catch (error) {
     console.error('Failed to update enrollment:', error);

@@ -50,11 +50,14 @@ export async function POST(request: NextRequest) {
           courseId,
         },
       });
-  
+
       if (!enrollment) {
-        return { error: 'You can only review courses you are enrolled in', status: 403 };
+        return {
+          error: 'You can only review courses you are enrolled in',
+          status: 403,
+        };
       }
-  
+
       // Check if user has already reviewed this course
       const existingReview = await prismaClient.review.findUnique({
         where: {
@@ -64,9 +67,9 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-  
+
       let reviewResult;
-  
+
       if (existingReview) {
         // Update existing review
         reviewResult = await prismaClient.review.update({
@@ -113,10 +116,10 @@ export async function POST(request: NextRequest) {
           },
         });
       }
-      
+
       return { success: true, review: reviewResult };
     });
-    
+
     // Handle custom error returned from withPrisma
     if (result.error) {
       return NextResponse.json(
@@ -143,8 +146,11 @@ export async function POST(request: NextRequest) {
 
     // Create response with caching headers for API consistency
     const jsonResponse = NextResponse.json(response);
-    jsonResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    
+    jsonResponse.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+
     return jsonResponse;
   } catch (error) {
     console.error('Error creating review:', error);
@@ -189,21 +195,21 @@ export async function DELETE(request: NextRequest) {
           userId,
         },
       });
-  
+
       if (!existingReview) {
         return { notFound: true };
       }
-  
+
       // Delete the review
       await prismaClient.review.delete({
         where: {
           id: reviewId,
         },
       });
-      
+
       return { success: true };
     });
-    
+
     if (result.notFound) {
       return NextResponse.json(
         {
@@ -219,8 +225,11 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Review deleted successfully',
     });
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+
     return response;
   } catch (error) {
     console.error('Error deleting review:', error);
