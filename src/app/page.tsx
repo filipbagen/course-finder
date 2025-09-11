@@ -96,17 +96,17 @@ export default async function Home() {
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
-                  src="/assets/dashboard-preview-dark.jpg"
+                  src="/assets/dashboard-preview-dark.png"
                   alt="product preview"
-                  width={2368}
-                  height={1452}
+                  width={3033}
+                  height={2031}
                   className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
                 />
                 <Image
-                  src="/assets/dashboard-preview-light.jpg"
+                  src="/assets/dashboard-preview-light.png"
                   alt="product preview"
-                  width={2368}
-                  height={1452}
+                  width={3033}
+                  height={2031}
                   className="rounded-md bg-background p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
                 />
               </div>
@@ -198,17 +198,17 @@ export default async function Home() {
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
-                  src="/assets/schedule-dark.jpg"
+                  src="/assets/schedule-dark.png"
                   alt="Schedule view"
-                  width={2368}
-                  height={1452}
+                  width={3033}
+                  height={2031}
                   className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
                 />
                 <Image
-                  src="/assets/schedule-light.jpg"
+                  src="/assets/schedule-light.png"
                   alt="Schedule view"
-                  width={2368}
-                  height={1452}
+                  width={3033}
+                  height={2031}
                   className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
                 />
               </div>

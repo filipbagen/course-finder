@@ -76,7 +76,7 @@ export async function Navbar() {
   return (
     <div className="h-20 inset-x-0 top-0 z-30 w-full transition-colors">
       {/* Glassmorphism Container */}
-      <div className="mt-4 rounded-3xl bg-white/20 backdrop-blur-2xl min-w-64 dark:bg-[#161412]/80 shadow-[0px_0px_0px_1px_rgba(100,6,69,0.10),0px_3px_6px_0px_rgba(100,6,69,0.12),0px_-4px_0px_0px_rgba(100,6,69,0.08)_inset] dark:shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
+      <div className="mt-4 rounded-3xl bg-card min-w-64 shadow-[0px_0px_0px_1px_rgba(100,6,69,0.10),0px_3px_6px_0px_rgba(100,6,69,0.12),0px_-4px_0px_0px_rgba(100,6,69,0.08)_inset] dark:shadow-[0px_0px_0px_1px_rgba(26,32,44,0.10),0px_3px_6px_0px_rgba(26,32,44,0.12),0px_-4px_0px_0px_rgba(26,32,44,0.08)_inset]">
         <div className="flex items-center justify-between h-16 px-6">
           {/* Logo */}
           <Link
@@ -216,7 +216,7 @@ export async function Navbar() {
                 <Link href="/courses">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-blue-600 hover:bg-transparent"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary hover:bg-transparent"
                   >
                     <Telescope className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Utforska</span>
@@ -226,7 +226,7 @@ export async function Navbar() {
                 <Link href="/login">
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-blue-600 hover:bg-transparent"
+                    className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-colors duration-150 rounded-xl hover:text-primary hover:bg-transparent"
                   >
                     <CircleUser className="h-4 w-4 transition-colors" />
                     <span className="text-[10px] font-medium">Logga in</span>
@@ -283,7 +283,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Telescope className="mr-3 h-4 w-4" />
                         <span className="font-medium">Utforska</span>
@@ -292,7 +292,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/schedule"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Calendar className="mr-3 h-4 w-4" />
                         <span className="font-medium">Schema</span>
@@ -301,7 +301,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/students"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Users className="mr-3 h-4 w-4" />
                         <span className="font-medium">Studenter</span>
@@ -311,7 +311,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href={user ? `/students/${user.id}` : '/login'}
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <User className="mr-3 h-4 w-4" />
                         <span className="font-medium">Profil</span>
@@ -320,7 +320,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/settings"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Settings className="mr-3 h-4 w-4" />
                         <span className="font-medium">Inställningar</span>
@@ -329,7 +329,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/feature-request"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Lightbulb className="mr-3 h-4 w-4" />
                         <span className="font-medium">
@@ -340,14 +340,14 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/updates"
-                        className="flex items-center w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="flex items-center w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <Sparkles className="mr-3 h-4 w-4" />
                         <span className="font-medium">Vad är nytt</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-transparent focus:bg-transparent transition-colors cursor-pointer">
+                    <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600 rounded-xl mx-2 my-1 p-3 hover:bg-red-50/30 focus:bg-red-50/30 transition-colors cursor-pointer">
                       <LogOut className="mr-3 h-4 w-4" />
                       <SignOutButton />
                     </DropdownMenuItem>
@@ -358,7 +358,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/courses"
-                        className="w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <span className="font-medium">Utforska</span>
                       </Link>
@@ -367,7 +367,7 @@ export async function Navbar() {
                     <DropdownMenuItem asChild className="rounded-xl mx-2 my-1">
                       <Link
                         href="/login"
-                        className="w-full p-3 hover:bg-transparent transition-colors cursor-pointer"
+                        className="w-full p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <CircleUser className="mr-3 h-4 w-4" />
                         <span className="font-medium">Logga in</span>
