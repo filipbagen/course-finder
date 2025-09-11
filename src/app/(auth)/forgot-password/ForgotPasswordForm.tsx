@@ -50,11 +50,14 @@ export function ForgotPasswordForm({
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Kolla din e-post</CardTitle>
-            <CardDescription>Instruktioner för lösenordsåterställning skickade</CardDescription>
+            <CardDescription>
+              Instruktioner för lösenordsåterställning skickade
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Om du registrerade dig med din e-postadress och lösenord kommer du att få ett e-postmeddelande för att återställa lösenordet.
+              Om du registrerade dig med din e-postadress och lösenord kommer du
+              att få ett e-postmeddelande för att återställa lösenordet.
             </p>
           </CardContent>
         </Card>
@@ -63,7 +66,8 @@ export function ForgotPasswordForm({
           <CardHeader>
             <CardTitle className="text-2xl">Återställ ditt lösenord</CardTitle>
             <CardDescription>
-              Ange din e-postadress så skickar vi en länk för att återställa ditt lösenord
+              Ange din e-postadress så skickar vi en länk för att återställa
+              ditt lösenord
             </CardDescription>
           </CardHeader>
           <CardContent>

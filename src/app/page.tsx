@@ -60,7 +60,7 @@ export default async function Home() {
 
         <h1 className="max-w-3xl text-4xl font-bold md:text-6xl lg:text-6xl">
           Hitta de bästa{' '}
-          <span className="bg-gradient-to-r from-primary to-blue-400 inline-block text-transparent bg-clip-text">
+          <span className="bg-gradient-to-r from-blue-600 to-blue-400 inline-block text-transparent bg-clip-text">
             masterkurserna
           </span>{' '}
           snabbt och enkelt!
@@ -238,7 +238,7 @@ export default async function Home() {
         <div className="grid grid-cols-2 gap-12 text-start">
           <div className="flex flex-col gap-4">
             <Search />
-            <h5 className="text-primary">Sök</h5>
+            <h5 className="text-blue-600">Sök</h5>
             <span>
               Hitta enkelt den kurs du letar efter geneom att sök efter kurser
               baserat på kursnamn och kurskod.
@@ -247,7 +247,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <ArrowDownWideNarrow />
-            <h5 className="text-primary">Filter</h5>
+            <h5 className="text-blue-600">Filter</h5>
             <span>
               Filtrera enkelt kurser baserat på bland annat termin, studietakt,
               huvudområde och examinationsmoment.
@@ -256,7 +256,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <LineChart />
-            <h5 className="text-primary">Statistik</h5>
+            <h5 className="text-blue-600">Statistik</h5>
             <span>
               Se exakt hur många högskolepoäng du har läst och hur många du
               behöver för att nå din examen.
@@ -265,7 +265,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <Handshake />
-            <h5 className="text-primary">Samarbete</h5>
+            <h5 className="text-blue-600">Samarbete</h5>
             <span>
               Dela dina kurser med dina vänner och se vilka kurser ni har
               gemensamt. Hjälp varandra att hitta de bästa kurserna.
@@ -274,7 +274,7 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <Star />
-            <h5 className="text-primary">Recension</h5>
+            <h5 className="text-blue-600">Recension</h5>
             <span>
               Se recensioner på kurser och lämna rekommendationer på en kurs och
               hjälp andra studenter att hitta rätt.
@@ -283,7 +283,9 @@ export default async function Home() {
 
           <div className="flex flex-col gap-4">
             <Sparkles />
-            <h5 className="text-primary">AI-rekommendationer (kommer snart)</h5>
+            <h5 className="text-blue-600">
+              AI-rekommendationer (kommer snart)
+            </h5>
             <span>
               Få rekommendationer på kurser som passar dina intressen och
               tidigare valda kurser. Hitta nya spännande kurser att läsa.
