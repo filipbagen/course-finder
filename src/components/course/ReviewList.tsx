@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { StarRating } from './StarRating';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 interface ReviewUser {
   id: string;
@@ -40,6 +41,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
   onReviewDeleted,
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { refreshAuth } = useAuth();
 
   // Helper function to check if current user is the owner of a review
   const isReviewOwner = (
@@ -80,6 +82,14 @@ const ReviewList: React.FC<ReviewListProps> = ({
           setTimeout(() => reject(new Error('Request timed out')), 8000)
         ),
       ])) as any;
+
+      // Check for auth issues and refresh auth state if needed
+      if (response.status === 401 || response.status === 403) {
+        console.log(
+          'Auth issue detected during review deletion, refreshing state'
+        );
+        await refreshAuth();
+      }
 
       if (!response.ok || !responseData.success) {
         throw new Error(responseData.error || 'Failed to delete review');

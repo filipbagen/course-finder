@@ -2,6 +2,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { SubmitReviewButton } from '@/components/shared/SubmitButtons';
 import { StarRating } from './StarRating';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 type ReviewFormProps = {
   courseId: string;
@@ -20,6 +21,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [comment, setComment] = useState(existingComment);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { refreshAuth } = useAuth();
 
   const handleRatingChange = (newRating: number) => {
     setRating(newRating);
@@ -57,6 +59,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       console.log('Review submission response:', result);
 
       if (!response.ok || !result.success) {
+        // Check for auth-related errors and refresh auth state if needed
+        if (response.status === 401 || response.status === 403) {
+          await refreshAuth();
+        }
         console.error('Review submission failed:', result);
         throw new Error(result.error || 'Failed to post review');
       }

@@ -17,7 +17,12 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
   courseId,
   onReviewDataUpdate,
 }) => {
-  const { user, loading: authLoading } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    isAuthenticated,
+    refreshAuth,
+  } = useAuth();
   const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
@@ -53,7 +58,27 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/courses/${courseId}/reviews`);
+      // Add cache-busting parameter to prevent stale data
+      const timestamp = new Date().getTime();
+      const response = await fetch(
+        `/api/courses/${courseId}/reviews?_=${timestamp}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+            Expires: '0',
+          },
+        }
+      );
+
+      // Handle potential auth issues
+      if (response.status === 401 || response.status === 403) {
+        console.log(
+          'Auth issue detected during review fetch, refreshing state'
+        );
+        await refreshAuth();
+      }
+
       const result = await response.json();
 
       if (!response.ok || !result.success) {
@@ -79,7 +104,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [courseId, user]);
+  }, [courseId, user, refreshAuth]);
 
   useEffect(() => {
     if (courseId) {
@@ -115,7 +140,8 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     if (authLoading || enrollmentsLoading) return null;
 
     // This is a critical check - only show login message if explicitly not logged in
-    if (user === null && !authLoading) {
+    // Use the explicit isAuthenticated flag from AuthProvider
+    if (!isAuthenticated && !authLoading) {
       return 'Du måste vara inloggad för att recensera kursen.';
     }
 
@@ -125,7 +151,14 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     }
 
     return null;
-  }, [userReview, authLoading, enrollmentsLoading, user, isUserEnrolled]);
+  }, [
+    userReview,
+    authLoading,
+    enrollmentsLoading,
+    user,
+    isUserEnrolled,
+    isAuthenticated,
+  ]);
 
   // Memoize the result to prevent recalculation on every render
   const reviewSubmitInfo = React.useMemo(
@@ -180,19 +213,21 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
           />
 
           {/* Review form for enrolled users */}
-          {user !== null && (isUserEnrolled || userReview) && !authLoading && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="text-lg font-semibold mb-4">
-                {userReview ? 'Redigera din recension' : 'Skriv en recension'}
-              </h3>
-              <ReviewForm
-                courseId={courseId}
-                onReviewSubmitted={handleReviewSubmitted}
-                existingRating={userReview?.rating}
-                existingComment={userReview?.comment}
-              />
-            </div>
-          )}
+          {isAuthenticated &&
+            (isUserEnrolled || userReview) &&
+            !authLoading && (
+              <div className="pt-6 border-t border-border">
+                <h3 className="text-lg font-semibold mb-4">
+                  {userReview ? 'Redigera din recension' : 'Skriv en recension'}
+                </h3>
+                <ReviewForm
+                  courseId={courseId}
+                  onReviewSubmitted={handleReviewSubmitted}
+                  existingRating={userReview?.rating}
+                  existingComment={userReview?.comment}
+                />
+              </div>
+            )}
 
           {/* Message for users who can't review */}
           {reviewSubmitInfo && (
