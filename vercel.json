@@ -24,7 +24,7 @@
       "memory": 1024,
       "maxDuration": 10,
       "env": {
-        "USE_CONNECTION_POOLING": "true" 
+        "USE_CONNECTION_POOLING": "true"
       }
     }
   },

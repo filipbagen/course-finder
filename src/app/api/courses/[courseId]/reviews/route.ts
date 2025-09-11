@@ -30,11 +30,11 @@ export async function GET(
       const course = await prisma.course.findUnique({
         where: { id: courseId },
       });
-      
+
       if (!course) {
         return { notFound: true, reviews: [] };
       }
-      
+
       // Get reviews for the course with user data
       const reviews = await prisma.review.findMany({
         where: { courseId },
@@ -50,10 +50,10 @@ export async function GET(
         },
         orderBy: { createdAt: 'desc' },
       });
-      
+
       return { course, reviews, notFound: false };
     });
-    
+
     // Handle course not found
     if (result.notFound) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // Transform reviews to add User field for frontend compatibility
     const formattedReviews = result.reviews.map((review) => ({
       ...review,
@@ -74,7 +74,8 @@ export async function GET(
 
     // Calculate average rating
     const averageRating = result.reviews.length
-      ? result.reviews.reduce((sum, review) => sum + review.rating, 0) / result.reviews.length
+      ? result.reviews.reduce((sum, review) => sum + review.rating, 0) /
+        result.reviews.length
       : 0;
 
     const response: ApiResponse<{
@@ -90,10 +91,13 @@ export async function GET(
 
     // Create response with caching headers
     const jsonResponse = NextResponse.json(response);
-    
+
     // Cache for 1 minute, stale-while-revalidate for 5 minutes
-    jsonResponse.headers.set('Cache-Control', 'max-age=60, s-maxage=60, stale-while-revalidate=300');
-    
+    jsonResponse.headers.set(
+      'Cache-Control',
+      'max-age=60, s-maxage=60, stale-while-revalidate=300'
+    );
+
     return jsonResponse;
   } catch (error) {
     console.error('Error fetching reviews:', error);

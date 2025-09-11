@@ -13,7 +13,10 @@ const globalForPrisma = globalThis as unknown as {
 // Create Prisma client with optimized connection settings for production
 const createPrismaClient = () => {
   const client = new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
     errorFormat: 'pretty',
     datasources: {
       db: {
@@ -43,13 +46,15 @@ export async function withPrisma<T>(
   } catch (error) {
     // Handle connection errors specifically
     if (
-      error instanceof Error && 
-      (error.message.includes("Can't reach database server") || 
-       error.message.includes("Connection timed out"))
+      error instanceof Error &&
+      (error.message.includes("Can't reach database server") ||
+        error.message.includes('Connection timed out'))
     ) {
       console.error('Database connection error:', error);
       // Return a standardized error that won't crash your app
-      throw new Error('Database is currently unavailable. Please try again later.');
+      throw new Error(
+        'Database is currently unavailable. Please try again later.'
+      );
     }
     throw error;
   }
