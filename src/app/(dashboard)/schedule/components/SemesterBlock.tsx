@@ -134,35 +134,26 @@ export function SemesterBlock({
 
 /**
  * Check if a course can be dropped in a specific semester/period
+ * Simplified logic to improve reliability
  */
 function isValidDropTarget(
   course: CourseWithEnrollment,
   targetSemester: number,
   targetPeriod: number
 ): boolean {
-  // Rule 1: Check if course can be moved between semesters
-  // Courses in semesters 7 and 9 can be moved between each other
+  // Rule 1: Courses in semesters 7 and 9 can be moved between each other
   // Courses in semester 8 can only be moved within semester 8
   const currentSemester = course.enrollment.semester;
-  const canMove79 =
-    (currentSemester === 7 || currentSemester === 9) &&
-    (targetSemester === 7 || targetSemester === 9);
 
-  // If current semester is 8, it must stay in 8
-  const stayIn8 = currentSemester === 8 && targetSemester === 8;
-
-  // Check if either condition is true
-  if (!(canMove79 || stayIn8)) {
-    return false;
+  if (currentSemester === 8) {
+    // Semester 8 courses can only stay in semester 8
+    return targetSemester === 8;
+  } else if (currentSemester === 7 || currentSemester === 9) {
+    // Semester 7 and 9 courses can move between semesters 7 and 9
+    return targetSemester === 7 || targetSemester === 9;
   }
 
-  // Rule 2: Course cannot be moved between different periods
-  // The course must be offered in the target period
-  if (!course.period.includes(targetPeriod)) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 /**

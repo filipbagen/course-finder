@@ -17,19 +17,12 @@ export class ScheduleService {
     try {
       const url = userId ? `${this.BASE_URL}?userId=${userId}` : this.BASE_URL;
 
-      // Add cache busting parameter to avoid stale cache issues
-      const cacheBuster = `_=${Date.now()}`;
-      const finalUrl = `${url}${url.includes('?') ? '&' : '?'}${cacheBuster}`;
-
-      const response = await fetch(finalUrl, {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
         },
         credentials: 'include',
-        // Extend timeout for fetch operations to 8 seconds
         next: { revalidate: 0 },
       });
 
@@ -40,13 +33,11 @@ export class ScheduleService {
           response.statusText
         );
 
-        // Try to get more detailed error information from the response
         let errorDetails = '';
         try {
           const errorData = await response.json();
           errorDetails = errorData.message || errorData.error || '';
         } catch (e) {
-          // If we can't parse JSON, try to get text
           errorDetails = await response.text();
         }
 
@@ -63,25 +54,7 @@ export class ScheduleService {
     } catch (error) {
       console.error('Error fetching schedule:', error);
 
-      // Provide a more specific error message based on the error type
       if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch')) {
-          throw new Error(
-            'Network error: Could not connect to the server. Please check your internet connection and try again.'
-          );
-        } else if (
-          error.message.includes('Database is temporarily unavailable')
-        ) {
-          throw new Error(
-            'Database connection error: Our systems are experiencing temporary issues. Please try again in a few moments.'
-          );
-        } else if (error.message.includes('timed out')) {
-          throw new Error(
-            'Request timed out: The server took too long to respond. Please try again.'
-          );
-        }
-
-        // Pass through the specific error message
         throw error;
       }
 
@@ -100,63 +73,33 @@ export class ScheduleService {
     try {
       console.log('Updating course schedule:', update);
 
-      // Create a unique request ID for tracking
-      const requestId = Math.random().toString(36).substring(2, 8);
-
       const response = await fetch(`${this.BASE_URL}/course`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          'X-Request-ID': requestId,
         },
         credentials: 'include',
         body: JSON.stringify(update),
       });
 
-      // Handle potential timeout
-      const responsePromise = async () => {
-        if (!response.ok) {
-          const errorBody = await response.text();
-          console.error(
-            `Update course error (${requestId}):`,
-            response.status,
-            response.statusText,
-            errorBody
-          );
-          throw new Error(
-            `Error updating course schedule: ${response.statusText}. ${errorBody}`
-          );
-        }
-        return await response.json();
-      };
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(
+          `Update course error:`,
+          response.status,
+          response.statusText,
+          errorBody
+        );
+        throw new Error(
+          `Error updating course schedule: ${response.statusText}. ${errorBody}`
+        );
+      }
 
-      const responseData = await Promise.race([
-        responsePromise(),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out')), 8000)
-        ),
-      ]);
-
-      console.log(`Update course response (${requestId}):`, responseData);
+      const responseData = await response.json();
+      console.log(`Update course response:`, responseData);
       return responseData as CourseWithEnrollment;
     } catch (error) {
       console.error('Error updating course schedule:', error);
-
-      // Provide a more specific error message based on the error type
-      if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          throw new Error(
-            'Uppdateringen tog för lång tid. Vänligen försök igen.'
-          );
-        } else if (error.message.includes('fetch')) {
-          throw new Error(
-            'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
-          );
-        }
-      }
-
       throw new Error('Failed to update course placement');
     }
   }
@@ -203,78 +146,36 @@ export class ScheduleService {
    */
   static async removeCourseFromSchedule(enrollmentId: string): Promise<void> {
     try {
-      // Create a unique request ID for tracking
-      const requestId = Math.random().toString(36).substring(2, 8);
-      console.log(
-        `Removing course ${enrollmentId} from schedule (${requestId})`
-      );
+      console.log(`Removing course ${enrollmentId} from schedule`);
 
       // URL encode the enrollment ID to handle any special characters
       const encodedEnrollmentId = encodeURIComponent(enrollmentId);
-
-      // Add cache-busting timestamp
-      const timestamp = Date.now();
-      const url = `${this.BASE_URL}/course/${encodedEnrollmentId}?_=${timestamp}`;
+      const url = `${this.BASE_URL}/course/${encodedEnrollmentId}`;
 
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          'X-Request-ID': requestId,
         },
         credentials: 'include',
       });
 
-      // Handle potential timeout with Promise.race
-      await Promise.race([
-        (async () => {
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(
-              `Remove course error (${requestId}):`,
-              response.status,
-              response.statusText,
-              errorText
-            );
-            throw new Error(
-              `Failed to remove course: ${response.statusText}. ${errorText}`
-            );
-          }
-
-          // Only try to parse JSON if there's a content
-          if (response.headers.get('content-length') !== '0') {
-            const data = await response.json();
-            console.log(`Remove course response (${requestId}):`, data);
-          } else {
-            console.log(
-              `Remove course successful (${requestId}) - no content returned`
-            );
-          }
-        })(),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out')), 8000)
-        ),
-      ]);
-
-      console.log(`Course ${enrollmentId} removed successfully (${requestId})`);
-    } catch (error) {
-      console.error('Error removing course from schedule:', error);
-
-      // Provide a user-friendly error message based on the error type
-      if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          throw new Error(
-            'Borttagningen tog för lång tid. Vänligen försök igen eller uppdatera sidan.'
-          );
-        } else if (error.message.includes('fetch')) {
-          throw new Error(
-            'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
-          );
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Remove course error:`,
+          response.status,
+          response.statusText,
+          errorText
+        );
+        throw new Error(
+          `Failed to remove course: ${response.statusText}. ${errorText}`
+        );
       }
 
+      console.log(`Course ${enrollmentId} removed successfully`);
+    } catch (error) {
+      console.error('Error removing course from schedule:', error);
       throw new Error('Failed to remove course from schedule');
     }
   }

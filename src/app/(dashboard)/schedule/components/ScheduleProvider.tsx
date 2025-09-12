@@ -50,52 +50,6 @@ export function ScheduleProvider({
   const { user, loading: authLoading, isAuthenticated } = useAuth();
 
   /**
-   * Load reviews for enrolled courses
-   */
-  const loadReviewsForCourses = useCallback(
-    async (courses: CourseWithEnrollment[]) => {
-      try {
-        // Fetch reviews for all enrolled courses in parallel
-        const reviewPromises = courses.map(async (course) => {
-          try {
-            const response = await fetch(
-              `/api/courses/${course.id.toString()}/reviews`
-            );
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success) {
-                return {
-                  courseId: course.id.toString(),
-                  averageRating: result.data.averageRating,
-                  count: result.data.reviews.length,
-                };
-              }
-            }
-          } catch (error) {
-            console.error(
-              `Failed to load reviews for course ${course.id}:`,
-              error
-            );
-          }
-          return null;
-        });
-
-        const reviewResults = await Promise.all(reviewPromises);
-        const validReviews = reviewResults.filter((result) => result !== null);
-
-        // Update schedule with review data
-        dispatch({
-          type: ScheduleActions.UPDATE_COURSE_REVIEWS,
-          payload: validReviews,
-        });
-      } catch (error) {
-        console.error('Failed to load reviews for courses:', error);
-      }
-    },
-    []
-  );
-
-  /**
    * Load schedule data from API
    */
   const loadScheduleData = useCallback(async () => {
@@ -108,32 +62,8 @@ export function ScheduleProvider({
     setError('');
 
     try {
-      // Add retries for schedule fetching to handle intermittent failures
-      let attempt = 0;
-      const maxAttempts = 2;
-      let scheduleData;
-      let lastError;
-
-      while (attempt < maxAttempts) {
-        try {
-          scheduleData = await ScheduleService.fetchSchedule(userId);
-          break; // Exit the loop if successful
-        } catch (error) {
-          lastError = error;
-          attempt++;
-
-          // If this was our last attempt, don't wait
-          if (attempt < maxAttempts) {
-            // Wait with exponential backoff before retrying
-            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-          }
-        }
-      }
-
-      // If all attempts failed, throw the last error
-      if (!scheduleData) {
-        throw lastError;
-      }
+      // Fetch schedule data
+      const scheduleData = await ScheduleService.fetchSchedule(userId);
 
       dispatch({
         type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
@@ -151,9 +81,6 @@ export function ScheduleProvider({
 
       setEnrolledCourses(allCourses);
       setLoading(false);
-
-      // Load reviews for all enrolled courses
-      await loadReviewsForCourses(allCourses);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load schedule';
@@ -168,9 +95,9 @@ export function ScheduleProvider({
       setLoading(false);
 
       // Show a user-friendly error toast
-      toast.error(`Error fetching schedule: ${errorMessage}`);
+      toast.error(`Error loading schedule: ${errorMessage}`);
     }
-  }, [userId, setEnrolledCourses, setLoading, setError, loadReviewsForCourses]);
+  }, [userId, setEnrolledCourses, setLoading, setError]);
 
   /**
    * Handle course movement with optimistic updates
@@ -214,9 +141,12 @@ export function ScheduleProvider({
           payload: errorMessage,
         });
         toast.error(errorMessage);
+
+        // Reload data on error to ensure state consistency
+        loadScheduleData();
       }
     },
-    [readonly]
+    [readonly, loadScheduleData]
   );
 
   /**
@@ -230,29 +160,18 @@ export function ScheduleProvider({
         'ScheduleProvider: handleCourseRemoval called with enrollmentId:',
         enrollmentId
       );
-      console.log('EnrollmentId type:', typeof enrollmentId);
-      console.log('EnrollmentId length:', enrollmentId?.length);
 
       try {
-        // Use Promise.race to handle potential timeouts
-        await Promise.race([
-          ScheduleService.removeCourseFromSchedule(enrollmentId),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Operation timed out')), 10000)
-          ),
-        ]);
+        await ScheduleService.removeCourseFromSchedule(enrollmentId);
 
         // Immediately update the enrolled courses store to remove the course
         const currentEnrolledCourses =
           useEnrolledCoursesStore.getState().enrolledCourses;
-        console.log(
-          'Current enrolled courses count:',
-          currentEnrolledCourses.length
-        );
+
         const updatedCourses = currentEnrolledCourses.filter(
           (course) => course.enrollment.id !== enrollmentId
         );
-        console.log('Updated enrolled courses count:', updatedCourses.length);
+
         setEnrolledCourses(updatedCourses);
 
         toast.success('Course removed from schedule');
@@ -265,16 +184,8 @@ export function ScheduleProvider({
 
         toast.error(errorMessage);
 
-        // Reload data on error to restore state after a short delay
-        setTimeout(async () => {
-          try {
-            await loadScheduleData();
-            console.log('Schedule data reloaded after error');
-          } catch (reloadError) {
-            console.error('Failed to reload schedule data:', reloadError);
-            toast.error('Please refresh the page to update your schedule');
-          }
-        }, 1000);
+        // Reload schedule data to ensure state consistency
+        loadScheduleData();
       }
     },
     [readonly, loadScheduleData, setEnrolledCourses]
@@ -321,11 +232,6 @@ export function ScheduleProvider({
   }, [state.lastAction, handleCourseMove, handleCourseRemoval]);
 
   // Load initial data
-  useEffect(() => {
-    loadScheduleData();
-  }, [loadScheduleData]);
-
-  // Add an effect to load the schedule data when the component mounts
   useEffect(() => {
     console.log('Loading schedule data for userId:', userId);
     loadScheduleData();

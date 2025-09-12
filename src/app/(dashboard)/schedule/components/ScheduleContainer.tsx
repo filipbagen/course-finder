@@ -94,37 +94,24 @@ export function ScheduleContainer({
 
   /**
    * Validate if a course can be moved to a specific semester and period
+   * Simplified logic to improve reliability
    */
   const isValidMove = (
     course: CourseWithEnrollment,
     targetSemester: number,
     targetPeriod: number
   ): boolean => {
-    // Rule 1: Course must be offered in the target semester
-    // We need to check if the course can be moved between semesters 7, 9
-    // Courses in semester 8 can only be moved within semester 8
-
-    // First, check if the source semester is either 7 or 9
     const currentSemester = course.enrollment.semester;
-    const canMove79 =
-      (currentSemester === 7 || currentSemester === 9) &&
-      (targetSemester === 7 || targetSemester === 9);
 
-    // If current semester is 8, it must stay in 8
-    const stayIn8 = currentSemester === 8 && targetSemester === 8;
-
-    // Check if either condition is true
-    if (!(canMove79 || stayIn8)) {
-      return false;
+    if (currentSemester === 8) {
+      // Semester 8 courses can only stay in semester 8
+      return targetSemester === 8;
+    } else if (currentSemester === 7 || currentSemester === 9) {
+      // Semester 7 and 9 courses can move between semesters 7 and 9
+      return targetSemester === 7 || targetSemester === 9;
     }
 
-    // Rule 2: Course cannot be moved between different periods
-    // The course must be offered in the target period
-    if (!course.period.includes(targetPeriod)) {
-      return false;
-    }
-
-    return true;
+    return false;
   };
 
   /**
