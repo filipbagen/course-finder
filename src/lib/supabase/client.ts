@@ -10,8 +10,6 @@ let supabaseClient: ReturnType<typeof createBrowserClient> | null = null;
 export function createClient() {
   if (!supabaseClient) {
     try {
-      console.log('Creating new Supabase browser client');
-
       // Validate environment variables
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,7 +19,7 @@ export function createClient() {
         throw new Error('Supabase configuration is missing');
       }
 
-      // Create the client directly - simpler is better
+      // Create the client directly
       supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
     } catch (error) {
       console.error('Error creating Supabase client:', error);
@@ -38,21 +36,7 @@ export function createClient() {
 export async function checkAuthStatus() {
   try {
     const supabase = createClient();
-
-    // Add timeout handling with Promise.race
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Auth check timed out')), 5000);
-    });
-
-    const sessionPromise = supabase.auth.getSession();
-
-    // Race the session fetch against a timeout
-    const { data, error } = (await Promise.race([
-      sessionPromise,
-      timeoutPromise.then(() => {
-        throw new Error('Auth check timed out');
-      }),
-    ])) as Awaited<typeof sessionPromise>;
+    const { data, error } = await supabase.auth.getSession();
 
     if (error) {
       console.error('Error checking auth status:', error);
@@ -96,30 +80,14 @@ export function resetSupabaseClient() {
  */
 export async function refreshSupabaseSession() {
   try {
-    console.log('Refreshing Supabase session...');
     const supabase = createClient();
-
-    // Add timeout handling with Promise.race
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Session refresh timed out')), 5000);
-    });
-
-    const refreshPromise = supabase.auth.refreshSession();
-
-    // Race the refresh against a timeout
-    const { data, error } = (await Promise.race([
-      refreshPromise,
-      timeoutPromise.then(() => {
-        throw new Error('Session refresh timed out');
-      }),
-    ])) as Awaited<typeof refreshPromise>;
+    const { data, error } = await supabase.auth.refreshSession();
 
     if (error) {
       console.error('Error refreshing session:', error);
       return { success: false, error: error.message };
     }
 
-    console.log('Session refreshed successfully');
     return {
       success: true,
       session: data.session,

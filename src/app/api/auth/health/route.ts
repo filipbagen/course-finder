@@ -11,19 +11,9 @@ export async function GET(request: NextRequest) {
     // Get supabase client for server-side auth check
     const supabase = await createClient();
 
-    // Add timeout handling for session check
-    const sessionPromise = supabase.auth.getSession();
-    const sessionTimeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Session check timed out')), 5000);
-    });
-
-    // Race against timeout
-    const { data: sessionData, error: sessionError } = (await Promise.race([
-      sessionPromise,
-      sessionTimeoutPromise.then(() => {
-        throw new Error('Server-side session check timed out');
-      }),
-    ])) as Awaited<typeof sessionPromise>;
+    // Check session
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
 
     // Get cookies for diagnostic purposes
     const allCookies = await cookies();
@@ -73,22 +63,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get user data with timeout
-    const userPromise = supabase.auth.getUser();
-    const userTimeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('User check timed out')), 5000);
-    });
-
-    // Race against timeout
-    const { data: userData } = (await Promise.race([
-      userPromise,
-      userTimeoutPromise.then(() => {
-        console.warn(
-          'User data check timed out, proceeding with session data only'
-        );
-        return { data: { user: sessionData.session?.user } };
-      }),
-    ])) as Awaited<typeof userPromise>;
+    // Get user data
+    const { data: userData } = await supabase.auth.getUser();
 
     // Calculate token expiration info
     const expiresAt = sessionData.session.expires_at;

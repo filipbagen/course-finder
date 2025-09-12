@@ -13,7 +13,7 @@ import type { Session } from '@supabase/supabase-js';
 
 /**
  * A hook for managing authentication state
- * Provides reliable auth state and methods for auth operations
+ * Provides auth state and methods for auth operations
  */
 export function useAuth() {
   const [user, setUser] = useState<any>(null);
@@ -23,219 +23,114 @@ export function useAuth() {
   const router = useRouter();
 
   // Function to check auth status
-  const checkAuth = useCallback(
-    async (showToast = false, maxAttempts = 2) => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const checkAuth = useCallback(async (showToast = false) => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        if (showToast) {
-          toast.loading('Checking authentication status...');
-        }
+      if (showToast) {
+        toast.loading('Checking authentication status...');
+      }
 
-        // Multiple attempts with exponential backoff
-        let authStatus = null;
-        let attempt = 0;
-        let lastError = null;
+      // Get auth status from Supabase
+      const authStatus = await checkAuthStatus();
+      console.log('Auth: Supabase auth check:', authStatus);
 
-        while (attempt < maxAttempts) {
-          attempt++;
-          try {
-            console.log(`Auth check attempt ${attempt}/${maxAttempts}...`);
-            authStatus = await checkAuthStatus();
-            console.log('Auth: Direct Supabase auth check:', authStatus);
-            break; // Success, exit the retry loop
-          } catch (err) {
-            lastError = err;
-            console.error(`Auth check error (attempt ${attempt}):`, err);
+      if (authStatus.isAuthenticated && authStatus.userId) {
+        // Fetch user profile from API
+        try {
+          const response = await fetch('/api/auth/session');
 
-            if (attempt < maxAttempts) {
-              // Exponential backoff with jitter
-              const delay = Math.min(
-                500 * Math.pow(1.5, attempt) + Math.random() * 300,
-                3000
-              );
-              console.log(`Retrying auth check in ${delay}ms...`);
-              await new Promise((resolve) => setTimeout(resolve, delay));
-            }
+          if (!response.ok) {
+            throw new Error(`Failed to fetch user profile: ${response.status}`);
           }
-        }
 
-        // If all attempts failed, throw the last error
-        if (!authStatus) {
-          console.error(
-            `All auth check attempts failed after ${maxAttempts} tries`
-          );
-          throw (
-            lastError || new Error('Auth check failed after multiple attempts')
-          );
-        }
+          const data = await response.json();
 
-        if (authStatus.isAuthenticated && authStatus.userId) {
-          // Fetch user profile from API with timeout
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+          if (data.user) {
+            console.log('Auth: User session loaded successfully');
+            setUser(data.user);
+            setIsAuthenticated(true);
 
-            const response = await fetch('/api/auth/session', {
-              signal: controller.signal,
-            });
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-              throw new Error(
-                `Failed to fetch user profile: ${response.status}`
-              );
+            if (showToast) {
+              toast.success('Authenticated successfully');
             }
-
-            const data = await response.json();
-
-            if (data.user) {
-              console.log('Auth: User session loaded successfully');
-              setUser(data.user);
-              setIsAuthenticated(true);
-
-              if (showToast) {
-                toast.success('Authenticated successfully');
-              }
-            } else {
-              console.warn('Auth: User session API returned no user');
-              // Fallback to using basic Supabase data
-              setUser({
-                id: authStatus.userId,
-                email: authStatus.email,
-                // Add default values for required fields
-                name: 'User',
-                role: 'user',
-              });
-              setIsAuthenticated(true);
-
-              // Try to refresh session in background
-              refreshSupabaseSession().catch((e) =>
-                console.error('Background session refresh failed:', e)
-              );
-            }
-          } catch (profileError) {
-            console.error('Auth: Error fetching user profile:', profileError);
-            // Fallback to basic user info from Supabase
+          } else {
+            console.warn('Auth: User session API returned no user');
+            // Fallback to using basic Supabase data
             setUser({
               id: authStatus.userId,
               email: authStatus.email,
-              // Add default values for required fields
               name: 'User',
               role: 'user',
             });
             setIsAuthenticated(true);
-            setError('Failed to fetch complete user profile');
 
-            if (showToast) {
-              toast.error('Authenticated, but failed to load full profile');
-            }
+            // Attempt a session refresh in the background
+            refreshSupabaseSession();
           }
-        } else {
-          console.warn('Auth: Not authenticated according to Supabase');
-          setUser(null);
-          setIsAuthenticated(false);
-
-          // Try to refresh the token if needed
-          console.log('Auth: Attempting token refresh...');
-          refreshSupabaseSession().catch((e) =>
-            console.error('Auth token refresh failed:', e)
-          );
+        } catch (profileError) {
+          console.error('Auth: Error fetching user profile:', profileError);
+          // Fallback to basic user info from Supabase
+          setUser({
+            id: authStatus.userId,
+            email: authStatus.email,
+            name: 'User',
+            role: 'user',
+          });
+          setIsAuthenticated(true);
+          setError('Failed to fetch complete user profile');
 
           if (showToast) {
-            toast.error('Not authenticated');
+            toast.error('Authenticated, but failed to load full profile');
           }
         }
-      } catch (e) {
-        console.error('Auth: Unexpected error checking auth status:', e);
+      } else {
+        console.log('Auth: Not authenticated according to Supabase');
         setUser(null);
         setIsAuthenticated(false);
-        setError(
-          e instanceof Error ? e.message : 'Unknown authentication error'
-        );
 
         if (showToast) {
-          toast.error('Authentication check failed');
-        }
-      } finally {
-        setIsLoading(false);
-
-        if (showToast) {
-          toast.dismiss();
+          toast.error('Not authenticated');
         }
       }
-    },
-    [] // No dependencies needed here
-  );
+    } catch (e) {
+      console.error('Auth: Error checking auth status:', e);
+      setUser(null);
+      setIsAuthenticated(false);
+      setError(e instanceof Error ? e.message : 'Unknown authentication error');
+
+      if (showToast) {
+        toast.error('Authentication check failed');
+      }
+    } finally {
+      setIsLoading(false);
+
+      if (showToast) {
+        toast.dismiss();
+      }
+    }
+  }, []);
 
   // Function to refresh auth
-  const refreshAuth = useCallback(
-    async (maxAttempts = 3) => {
-      try {
-        console.log('Auth: Attempting to refresh session');
+  const refreshAuth = useCallback(async () => {
+    try {
+      console.log('Auth: Attempting to refresh session');
+      const result = await refreshSupabaseSession();
 
-        // Multiple attempts with exponential backoff
-        let attempt = 0;
-        let lastError = null;
-
-        while (attempt < maxAttempts) {
-          attempt++;
-          try {
-            console.log(
-              `Refreshing Supabase session (attempt ${attempt}/${maxAttempts})...`
-            );
-            const result = await refreshSupabaseSession();
-
-            if (result.success) {
-              console.log('Auth: Session refreshed successfully');
-              await checkAuth();
-              return true;
-            } else {
-              lastError = new Error(result.error || 'Session refresh failed');
-              console.error(
-                `Unexpected error refreshing session (attempt ${attempt}):`,
-                lastError
-              );
-
-              if (attempt < maxAttempts) {
-                // Exponential backoff with jitter
-                const delay = Math.min(
-                  1000 * Math.pow(1.5, attempt) + Math.random() * 300,
-                  5000
-                );
-                console.log(`Retrying session refresh in ${delay}ms...`);
-                await new Promise((resolve) => setTimeout(resolve, delay));
-              }
-            }
-          } catch (err) {
-            lastError = err;
-            console.error(`Session refresh error (attempt ${attempt}):`, err);
-
-            if (attempt < maxAttempts) {
-              // Exponential backoff with jitter
-              const delay = Math.min(
-                1000 * Math.pow(1.5, attempt) + Math.random() * 300,
-                5000
-              );
-              console.log(`Retrying session refresh in ${delay}ms...`);
-              await new Promise((resolve) => setTimeout(resolve, delay));
-            }
-          }
-        }
-
-        // If we get here, all attempts failed
-        console.error(
-          `All session refresh attempts failed after ${maxAttempts} tries`
-        );
-        return false;
-      } catch (e) {
-        console.error('Auth: Error refreshing session:', e);
+      if (result.success) {
+        console.log('Auth: Session refreshed successfully');
+        await checkAuth();
+        return true;
+      } else {
+        console.warn('Auth: Session refresh failed:', result.error);
         return false;
       }
-    },
-    [checkAuth]
-  );
+    } catch (e) {
+      console.error('Auth: Error refreshing session:', e);
+      return false;
+    }
+  }, [checkAuth]);
 
   // Function to reset auth state
   const resetAuth = useCallback(() => {
