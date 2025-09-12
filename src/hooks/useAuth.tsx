@@ -118,7 +118,7 @@ export function useAuth() {
         }
       }
     },
-    [router]
+    [] // No dependencies needed here
   );
 
   // Function to refresh auth
