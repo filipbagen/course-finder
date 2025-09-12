@@ -82,9 +82,18 @@ export function ScheduleGrid() {
   // Show error state
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
+      <Alert variant="destructive" className="mb-6">
+        <AlertCircle className="h-5 w-5 mr-2" />
+        <AlertDescription className="text-sm">
+          <div className="font-semibold mb-1">Error loading schedule:</div>
+          <div>{error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-3 px-4 py-2 bg-destructive/10 hover:bg-destructive/20 rounded text-xs font-medium transition-colors"
+          >
+            Refresh Page
+          </button>
+        </AlertDescription>
       </Alert>
     );
   }

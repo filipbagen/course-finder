@@ -18,11 +18,11 @@ const globalForPrisma = globalThis as unknown as {
 const connectionPoolConfig =
   process.env.NODE_ENV === 'production'
     ? {
-        connection_limit: 1, // Set to 1 for serverless to prevent connection exhaustion
-        pool_timeout: 3, // 3 seconds - decreased from 5s
-        connect_timeout: 3, // 3 seconds - decreased from 5s
-        statement_timeout: 3000, // 3 seconds in ms (critical for Vercel's timeout)
-        idle_in_transaction_session_timeout: 3000, // 3 seconds in ms
+        connection_limit: 2, // Increased from 1 to allow more concurrent connections
+        pool_timeout: 5, // Increased from 3s to 5s
+        connect_timeout: 5, // Increased from 3s to 5s
+        statement_timeout: 5000, // Increased from 3s to 5s (in ms)
+        idle_in_transaction_session_timeout: 5000, // Increased from 3s to 5s (in ms)
       }
     : undefined;
 
@@ -108,8 +108,8 @@ export async function withPrisma<T>(
   // Default options
   const {
     maxRetries = 3,
-    initialBackoff = 200, // Start with 200ms
-    maxBackoff = 3000, // Cap at 3 seconds
+    initialBackoff = 300, // Increased from 200ms to 300ms
+    maxBackoff = 5000, // Increased from 3s to 5s
     useCache = false,
     cacheKey = '',
     cacheTtl = 60, // 1 minute default cache

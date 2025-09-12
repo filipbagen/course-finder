@@ -15,8 +15,13 @@ export const revalidate = 30; // Revalidate cache every 30 seconds
  * Fetch user's schedule data with enhanced reliability
  */
 export async function GET(request: NextRequest) {
+  // Create a request ID for tracing this specific request in logs
+  const requestId = Math.random().toString(36).substring(2, 10);
+  console.log(`Schedule API request started (${requestId})`);
+
   try {
     const authenticatedUser = await getAuthenticatedUser();
+    console.log(`User authenticated: ${authenticatedUser.id} (${requestId})`);
 
     // Get userId from query params for viewing other users' schedules
     const { searchParams } = new URL(request.url);
@@ -24,6 +29,7 @@ export async function GET(request: NextRequest) {
 
     // Use target user ID if provided, otherwise use authenticated user
     const userId = targetUserId || authenticatedUser.id;
+    console.log(`Using userId: ${userId} (${requestId})`);
 
     // Create a cache key based on user ID
     const cacheKey = `schedule-${userId}`;
@@ -31,7 +37,12 @@ export async function GET(request: NextRequest) {
     // Use enhanced withPrisma wrapper with caching for better performance
     const result = await withPrisma(
       async (prismaClient) => {
+        console.log(`withPrisma callback started (${requestId})`);
+
         // First, fetch enrollments
+        console.log(
+          `Fetching enrollments for userId: ${userId} (${requestId})`
+        );
         const enrollments = await prismaClient.enrollment.findMany({
           where: {
             userId: userId,
@@ -43,13 +54,17 @@ export async function GET(request: NextRequest) {
           orderBy: [{ semester: 'asc' }],
         });
 
+        console.log(`Found ${enrollments.length} enrollments (${requestId})`);
+
         // If no enrollments, return early to save an unnecessary query
         if (enrollments.length === 0) {
+          console.log(`No enrollments found, returning early (${requestId})`);
           return { enrollments: [], courses: [] };
         }
 
         // Get all course IDs from enrollments
         const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+        console.log(`Fetching ${courseIds.length} courses (${requestId})`);
 
         // Fetch courses separately
         const courses = await prismaClient.course.findMany({
@@ -60,6 +75,8 @@ export async function GET(request: NextRequest) {
           },
         });
 
+        console.log(`Found ${courses.length} courses (${requestId})`);
+
         return { enrollments, courses };
       },
       {
@@ -69,13 +86,19 @@ export async function GET(request: NextRequest) {
         cacheTtl: 60,
         // More aggressive retry pattern for schedule which is critical functionality
         maxRetries: 4,
-        initialBackoff: 100,
+        initialBackoff: 300, // Increased from 100ms
       }
     );
+
+    console.log(`withPrisma operation completed (${requestId})`);
 
     // Transform courses
     const transformedCourses = result.courses.map((course) =>
       transformCourse(course)
+    );
+
+    console.log(
+      `Transformed ${transformedCourses.length} courses (${requestId})`
     );
 
     // Match enrollments with courses
@@ -88,8 +111,11 @@ export async function GET(request: NextRequest) {
         return {
           id: enrollment.id,
           semester: enrollment.semester,
-          // Use period 1 as default since we don't have it in the schema
+          // Use period 1 as default since it might not exist in all enrollments
           period: 1,
+          // Add userId for debugging
+          userId: enrollment.userId,
+          courseId: enrollment.courseId,
           // Default values for backward compatibility
           status: 'enrolled',
           grade: null,
@@ -99,44 +125,56 @@ export async function GET(request: NextRequest) {
       })
       .filter((item) => item.course !== null);
 
+    console.log(
+      `Matched ${enrollmentsWithCourses.length} enrollments with courses (${requestId})`
+    );
+
     // Create a response with proper cache headers
     const response = createSuccessResponse(
-      { enrollments: enrollmentsWithCourses },
+      {
+        enrollments: enrollmentsWithCourses,
+        requestId, // Include request ID for client-side debugging
+      },
       'Schedule fetched successfully'
     );
 
     // Set caching headers for browsers and CDNs
     if (response instanceof NextResponse) {
-      response.headers.set(
-        'Cache-Control',
-        'public, s-maxage=30, stale-while-revalidate=300'
-      );
+      response.headers.set('Cache-Control', 'no-cache, private');
     }
+
+    console.log(`Schedule API request completed successfully (${requestId})`);
 
     return response;
   } catch (error) {
     // Include a random error reference for tracking
-    const errorRef = Math.random().toString(36).substring(2, 10);
-    console.error(`Schedule error reference: ${errorRef}`, error);
+    console.error(`Schedule error reference: ${requestId}`, error);
 
-    const errorResponse = handleApiError(error);
+    // Add more detailed error information
+    let errorDetails = '';
+    if (error instanceof Error) {
+      errorDetails = error.message;
+      console.error(`Error message: ${error.message}`);
+      console.error(`Error stack: ${error.stack}`);
+    }
 
-    // Add the error reference to the response
-    if (errorResponse instanceof NextResponse) {
-      const body = await errorResponse.json();
-      body.ref = errorRef;
-
-      // Create a new response with the modified body and same status
-      const newResponse = NextResponse.json(body, {
-        status: errorResponse.status,
+    // Create a detailed error response with debugging information
+    const errorResponse = NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to fetch schedule',
+        error: errorDetails || 'Unknown error',
+        ref: requestId,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        status: 500,
         headers: {
           // No caching for error responses
           'Cache-Control': 'no-store',
         },
-      });
-
-      return newResponse;
-    }
+      }
+    );
 
     return errorResponse;
   }

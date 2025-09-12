@@ -106,8 +106,14 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({
     }
   }, [courseId, user, refreshAuth]);
 
+  // Reset reviews when course ID changes to prevent showing cached reviews from previous courses
   useEffect(() => {
     if (courseId) {
+      // Clear previous reviews first
+      setReviews([]);
+      setAverageRating(0);
+      setUserReview(null);
+      // Then fetch new reviews
       fetchReviews();
     }
   }, [courseId, fetchReviews]);

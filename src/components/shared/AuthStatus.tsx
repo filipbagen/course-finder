@@ -51,6 +51,8 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
           if (refreshResult.success) {
             // If refresh succeeded, update state
             setIsAuthenticated(true);
+            // Force a router refresh to update all components
+            router.refresh();
           } else {
             // If refresh failed, reset client and try again from scratch
             console.log('AuthStatus: Refresh failed, resetting client...');
@@ -61,6 +63,10 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
             console.log('AuthStatus: Final check result', finalCheck);
 
             setIsAuthenticated(finalCheck.isAuthenticated);
+            if (finalCheck.isAuthenticated) {
+              // Force a router refresh if we succeeded on the final check
+              router.refresh();
+            }
           }
         }
       } catch (err) {
@@ -73,7 +79,7 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
     };
 
     checkAuth();
-  }, []);
+  }, [router]);
 
   // Show a loading state
   if (isLoading) {
@@ -120,7 +126,7 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
         className="ml-2 underline"
         onClick={() => {
           toast.info('Redirecting to login page...');
-          router.push('/auth/login');
+          router.push('/login');
         }}
       >
         Log in

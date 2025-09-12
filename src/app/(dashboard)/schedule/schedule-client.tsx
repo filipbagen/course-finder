@@ -38,6 +38,22 @@ export default function ScheduleClient() {
     );
   }
 
+  // If we don't have a user, show a login message
+  if (!user) {
+    return (
+      <div className="mb-12 space-y-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <h2 className="text-xl font-semibold mb-4">
+            Please log in to view your schedule
+          </h2>
+          <p className="text-muted-foreground">
+            You need to be logged in to view and manage your course schedule.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ScheduleProvider>
       <div className="mb-12 space-y-6">

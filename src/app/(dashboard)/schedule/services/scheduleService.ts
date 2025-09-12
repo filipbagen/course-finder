@@ -17,12 +17,20 @@ export class ScheduleService {
     try {
       const url = userId ? `${this.BASE_URL}?userId=${userId}` : this.BASE_URL;
 
-      const response = await fetch(url, {
+      // Add cache busting parameter to avoid stale cache issues
+      const cacheBuster = `_=${Date.now()}`;
+      const finalUrl = `${url}${url.includes('?') ? '&' : '?'}${cacheBuster}`;
+
+      const response = await fetch(finalUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
         },
         credentials: 'include',
+        // Extend timeout for fetch operations to 8 seconds
+        next: { revalidate: 0 },
       });
 
       if (!response.ok) {
@@ -31,7 +39,20 @@ export class ScheduleService {
           response.status,
           response.statusText
         );
-        throw new Error(`Failed to fetch schedule: ${response.statusText}`);
+
+        // Try to get more detailed error information from the response
+        let errorDetails = '';
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.message || errorData.error || '';
+        } catch (e) {
+          // If we can't parse JSON, try to get text
+          errorDetails = await response.text();
+        }
+
+        throw new Error(
+          `Failed to fetch schedule: ${errorDetails || response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -41,7 +62,32 @@ export class ScheduleService {
       return this.transformApiResponse(data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
-      throw new Error('Failed to load schedule data');
+
+      // Provide a more specific error message based on the error type
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          throw new Error(
+            'Network error: Could not connect to the server. Please check your internet connection and try again.'
+          );
+        } else if (
+          error.message.includes('Database is temporarily unavailable')
+        ) {
+          throw new Error(
+            'Database connection error: Our systems are experiencing temporary issues. Please try again in a few moments.'
+          );
+        } else if (error.message.includes('timed out')) {
+          throw new Error(
+            'Request timed out: The server took too long to respond. Please try again.'
+          );
+        }
+
+        // Pass through the specific error message
+        throw error;
+      }
+
+      throw new Error(
+        'Failed to load schedule data. Please try refreshing the page.'
+      );
     }
   }
 

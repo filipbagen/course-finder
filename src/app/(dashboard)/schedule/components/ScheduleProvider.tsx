@@ -99,15 +99,47 @@ export function ScheduleProvider({
    * Load schedule data from API
    */
   const loadScheduleData = useCallback(async () => {
+    // Set loading state first to show loading indicators
     dispatch({ type: ScheduleActions.FETCH_SCHEDULE_START });
     setLoading(true);
 
+    // Clear any previous errors
+    dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
+    setError('');
+
     try {
-      const scheduleData = await ScheduleService.fetchSchedule(userId);
+      // Add retries for schedule fetching to handle intermittent failures
+      let attempt = 0;
+      const maxAttempts = 2;
+      let scheduleData;
+      let lastError;
+
+      while (attempt < maxAttempts) {
+        try {
+          scheduleData = await ScheduleService.fetchSchedule(userId);
+          break; // Exit the loop if successful
+        } catch (error) {
+          lastError = error;
+          attempt++;
+
+          // If this was our last attempt, don't wait
+          if (attempt < maxAttempts) {
+            // Wait with exponential backoff before retrying
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+          }
+        }
+      }
+
+      // If all attempts failed, throw the last error
+      if (!scheduleData) {
+        throw lastError;
+      }
+
       dispatch({
         type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
         payload: scheduleData,
       });
+
       const allCourses = [
         ...scheduleData.semester7.period1,
         ...scheduleData.semester7.period2,
@@ -116,6 +148,7 @@ export function ScheduleProvider({
         ...scheduleData.semester9.period1,
         ...scheduleData.semester9.period2,
       ];
+
       setEnrolledCourses(allCourses);
       setLoading(false);
 
@@ -124,13 +157,18 @@ export function ScheduleProvider({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load schedule';
+      console.error('Schedule fetch error:', error);
+
       dispatch({
         type: ScheduleActions.FETCH_SCHEDULE_ERROR,
         payload: errorMessage,
       });
+
       setError(errorMessage);
       setLoading(false);
-      toast.error(errorMessage);
+
+      // Show a user-friendly error toast
+      toast.error(`Error fetching schedule: ${errorMessage}`);
     }
   }, [userId, setEnrolledCourses, setLoading, setError, loadReviewsForCourses]);
 
@@ -290,11 +328,21 @@ export function ScheduleProvider({
   // Add an effect to refresh the schedule when authentication state changes
   useEffect(() => {
     // Only reload when auth state is confirmed (not during loading)
-    if (!authLoading && user) {
-      console.log('Auth state confirmed, refreshing schedule data');
-      loadScheduleData();
+    if (!authLoading) {
+      if (user) {
+        console.log('Auth state confirmed, refreshing schedule data');
+        loadScheduleData();
+      } else if (!readonly) {
+        // Clear schedule data if user is logged out (unless in readonly mode)
+        console.log('User not authenticated, clearing schedule data');
+        dispatch({
+          type: ScheduleActions.FETCH_SCHEDULE_ERROR,
+          payload: 'Please log in to view your schedule',
+        });
+        setEnrolledCourses([]);
+      }
     }
-  }, [authLoading, user, loadScheduleData]);
+  }, [authLoading, user, loadScheduleData, readonly, setEnrolledCourses]);
 
   const contextValue: ScheduleContextType = {
     state,
