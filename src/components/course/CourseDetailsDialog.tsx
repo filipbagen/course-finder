@@ -763,7 +763,18 @@ export const CourseDetailsDialog = () => {
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <DialogContent
+          className="max-w-4xl h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+          onInteractOutside={(e) => {
+            // Prevent interaction outside when open
+            if (open) e.preventDefault();
+          }}
+          onEscapeKeyDown={(e) => {
+            // Use escape key to close
+            e.preventDefault();
+            handleClose();
+          }}
+        >
           <DialogHeader className="mb-6 pt-6">
             {course && (
               <>
@@ -777,7 +788,7 @@ export const CourseDetailsDialog = () => {
                     </DialogDescription>
                     {!loading && (
                       <div className="flex items-center gap-2 mt-2">
-                        {reviewsData.count > 0 ? (
+                        {reviewsData.count > 0 && (
                           <>
                             <div className="flex items-center gap-1 flex-row">
                               <StarRating
@@ -799,10 +810,6 @@ export const CourseDetailsDialog = () => {
                               </span>
                             </div>
                           </>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            Inga recensioner ännu
-                          </span>
                         )}
                       </div>
                     )}
@@ -845,8 +852,12 @@ export const CourseDetailsDialog = () => {
   }
 
   return (
-    <Drawer open={open} onOpenChange={handleClose}>
-      <DrawerContent className="max-h-[90vh] shadow-2xl">
+    <Drawer
+      open={open}
+      onOpenChange={handleClose}
+      onClose={() => handleClose()}
+    >
+      <DrawerContent className="h-[90vh] shadow-2xl">
         <DrawerHeader className="text-left pt-6">
           {course && (
             <>
@@ -860,7 +871,7 @@ export const CourseDetailsDialog = () => {
                   </DrawerDescription>
                   {!loading && (
                     <div className="flex items-center gap-2 mt-2">
-                      {reviewsData.count > 0 ? (
+                      {reviewsData.count > 0 && (
                         <>
                           <div className="flex items-center gap-1 flex-row">
                             <StarRating
@@ -882,10 +893,6 @@ export const CourseDetailsDialog = () => {
                             </span>
                           </div>
                         </>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">
-                          Inga recensioner ännu
-                        </span>
                       )}
                     </div>
                   )}

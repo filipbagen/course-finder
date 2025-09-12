@@ -113,6 +113,14 @@ export function ScheduleProvider({
       if (readonly) return;
 
       try {
+        console.log('Moving course:', {
+          courseId,
+          fromSemester,
+          fromPeriod,
+          toSemester,
+          toPeriod,
+        });
+
         // Update via API
         await ScheduleService.updateCourseSchedule({
           courseId,
@@ -121,6 +129,11 @@ export function ScheduleProvider({
         });
 
         toast.success('Course moved successfully');
+
+        // Reload schedule data to ensure database and UI are in sync
+        setTimeout(() => {
+          loadScheduleData();
+        }, 300);
       } catch (error) {
         // Revert the optimistic update
         dispatch({

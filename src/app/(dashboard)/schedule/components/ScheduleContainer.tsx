@@ -166,6 +166,7 @@ export function ScheduleContainer({
       currentPosition.semester === targetSemester &&
       currentPosition.period === targetPeriod
     ) {
+      console.log('Course position did not change, skipping update');
       return;
     }
 
@@ -182,7 +183,7 @@ export function ScheduleContainer({
       return;
     }
 
-    // Dispatch move action
+    // Dispatch move action with the updated period information
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {

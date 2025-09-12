@@ -28,7 +28,7 @@ export async function PUT(
 
     const body = await request.json();
     const validatedData = validateRequest(body, UpdateScheduleSchema);
-    const { courseId, semester } = validatedData;
+    const { courseId, semester, period } = validatedData;
 
     // Use withPrisma wrapper for better database connection handling
     const result = await withPrisma(
@@ -66,7 +66,7 @@ export async function PUT(
           };
         }
 
-        // Update the enrollment
+        // Update the enrollment with semester
         const updatedEnrollment = await prismaClient.enrollment.update({
           where: {
             id: enrollment.id,
