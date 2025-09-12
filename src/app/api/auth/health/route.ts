@@ -11,9 +11,19 @@ export async function GET(request: NextRequest) {
     // Get supabase client for server-side auth check
     const supabase = await createClient();
 
-    // Check session
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.getSession();
+    // Add timeout handling for session check
+    const sessionPromise = supabase.auth.getSession();
+    const sessionTimeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Session check timed out')), 5000);
+    });
+
+    // Race against timeout
+    const { data: sessionData, error: sessionError } = (await Promise.race([
+      sessionPromise,
+      sessionTimeoutPromise.then(() => {
+        throw new Error('Server-side session check timed out');
+      }),
+    ])) as Awaited<typeof sessionPromise>;
 
     // Get cookies for diagnostic purposes
     const allCookies = await cookies();
@@ -27,6 +37,14 @@ export async function GET(request: NextRequest) {
           c.name.includes('session')
       );
 
+    // Add cookie details without exposing values
+    const authCookieDetails = authCookies.map((c) => ({
+      name: c.name,
+      exists: true,
+      hasValue: !!c.value,
+      valueLength: c.value ? c.value.length : 0,
+    }));
+
     if (sessionError) {
       return NextResponse.json(
         {
@@ -34,8 +52,9 @@ export async function GET(request: NextRequest) {
           error: sessionError.message,
           cookies: {
             count: cookieCount,
-            authCookies: authCookies.map((c) => ({ name: c.name })),
+            authCookies: authCookieDetails,
           },
+          timestamp: new Date().toISOString(),
         },
         { status: 500 }
       );
@@ -48,13 +67,28 @@ export async function GET(request: NextRequest) {
         message: 'No active session found',
         cookies: {
           count: cookieCount,
-          authCookies: authCookies.map((c) => ({ name: c.name })),
+          authCookies: authCookieDetails,
         },
+        timestamp: new Date().toISOString(),
       });
     }
 
-    // Get user data
-    const { data: userData } = await supabase.auth.getUser();
+    // Get user data with timeout
+    const userPromise = supabase.auth.getUser();
+    const userTimeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('User check timed out')), 5000);
+    });
+
+    // Race against timeout
+    const { data: userData } = (await Promise.race([
+      userPromise,
+      userTimeoutPromise.then(() => {
+        console.warn(
+          'User data check timed out, proceeding with session data only'
+        );
+        return { data: { user: sessionData.session?.user } };
+      }),
+    ])) as Awaited<typeof userPromise>;
 
     // Calculate token expiration info
     const expiresAt = sessionData.session.expires_at;
@@ -81,15 +115,46 @@ export async function GET(request: NextRequest) {
       },
       cookies: {
         count: cookieCount,
-        authCookies: authCookies.map((c) => ({ name: c.name })),
+        authCookies: authCookieDetails,
       },
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Auth health check error:', error);
+
+    // Try to get cookies even if the main operation failed
+    let cookieInfo = null;
+    try {
+      const allCookies = await cookies();
+      const cookieCount = allCookies.getAll().length;
+      const authCookies = allCookies
+        .getAll()
+        .filter(
+          (c) =>
+            c.name.includes('supabase') ||
+            c.name.includes('auth') ||
+            c.name.includes('session')
+        );
+
+      cookieInfo = {
+        count: cookieCount,
+        authCookies: authCookies.map((c) => ({
+          name: c.name,
+          exists: true,
+          hasValue: !!c.value,
+          valueLength: c.value ? c.value.length : 0,
+        })),
+      };
+    } catch (cookieError) {
+      cookieInfo = { error: 'Failed to retrieve cookies' };
+    }
+
     return NextResponse.json(
       {
         status: 'error',
         error: error instanceof Error ? error.message : 'Unknown error',
+        cookies: cookieInfo,
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );

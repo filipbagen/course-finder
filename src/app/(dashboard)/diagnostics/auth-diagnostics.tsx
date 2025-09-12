@@ -27,8 +27,36 @@ export default function AuthDiagnostics() {
 
     try {
       const supabase = createClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const { data: userData } = await supabase.auth.getUser();
+
+      // Add timeout handling
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Auth session check timed out')),
+          5000
+        )
+      );
+
+      // Race against timeout
+      const { data: sessionData } = (await Promise.race([
+        sessionPromise,
+        timeoutPromise.then(() => {
+          throw new Error('Auth session check timed out');
+        }),
+      ])) as Awaited<typeof sessionPromise>;
+
+      // Same for user data
+      const userPromise = supabase.auth.getUser();
+      const userTimeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth user check timed out')), 5000)
+      );
+
+      const { data: userData } = (await Promise.race([
+        userPromise,
+        userTimeoutPromise.then(() => {
+          throw new Error('Auth user check timed out');
+        }),
+      ])) as Awaited<typeof userPromise>;
 
       // Calculate expiry time
       let expiresIn = null;
@@ -46,11 +74,13 @@ export default function AuthDiagnostics() {
         session: sessionData?.session,
         expiresIn,
         expiresInMinutes,
+        lastUpdated: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error checking client auth:', error);
       setStatus({
         error: error instanceof Error ? error.message : 'Unknown error',
+        lastUpdated: new Date().toISOString(),
       });
     } finally {
       setLoading(false);
@@ -77,16 +107,76 @@ export default function AuthDiagnostics() {
     setRefreshing(true);
 
     try {
-      const result = await refreshSupabaseSession();
-      console.log('Session refresh result:', result);
+      // Multiple attempts with exponential backoff
+      let attempt = 0;
+      const maxAttempts = 3;
+      let success = false;
+      let lastError = null;
 
-      // Re-check auth status
+      while (attempt < maxAttempts && !success) {
+        attempt++;
+        try {
+          console.log(
+            `Refreshing session (attempt ${attempt}/${maxAttempts})...`
+          );
+          const result = await refreshSupabaseSession();
+
+          if (result.success) {
+            console.log('Session refresh successful');
+            success = true;
+
+            // Re-check auth status
+            await checkClientAuth();
+            await checkServerAuth();
+
+            return true;
+          } else {
+            lastError = new Error(
+              result.error || 'Unknown error refreshing session'
+            );
+            console.error(
+              `Session refresh failed (attempt ${attempt}):`,
+              result.error
+            );
+
+            if (attempt < maxAttempts) {
+              // Exponential backoff
+              const delay = Math.min(1000 * Math.pow(1.5, attempt), 5000);
+              console.log(`Retrying session refresh in ${delay}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+          }
+        } catch (error) {
+          lastError = error;
+          console.error(
+            `Session refresh threw error (attempt ${attempt}):`,
+            error
+          );
+
+          if (attempt < maxAttempts) {
+            // Exponential backoff
+            const delay = Math.min(1000 * Math.pow(1.5, attempt), 5000);
+            console.log(`Retrying session refresh in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
+        }
+      }
+
+      // If we get here and success is false, all attempts failed
+      if (!success) {
+        console.error(
+          `All session refresh attempts failed after ${maxAttempts} tries`,
+          lastError
+        );
+      }
+
+      // Re-check auth status even if refresh failed
       await checkClientAuth();
       await checkServerAuth();
 
-      return result.success;
+      return success;
     } catch (error) {
-      console.error('Error refreshing session:', error);
+      console.error('Unexpected error in refreshSession:', error);
       return false;
     } finally {
       setRefreshing(false);

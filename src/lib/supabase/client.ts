@@ -38,7 +38,21 @@ export function createClient() {
 export async function checkAuthStatus() {
   try {
     const supabase = createClient();
-    const { data, error } = await supabase.auth.getSession();
+
+    // Add timeout handling with Promise.race
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Auth check timed out')), 5000);
+    });
+
+    const sessionPromise = supabase.auth.getSession();
+
+    // Race the session fetch against a timeout
+    const { data, error } = (await Promise.race([
+      sessionPromise,
+      timeoutPromise.then(() => {
+        throw new Error('Auth check timed out');
+      }),
+    ])) as Awaited<typeof sessionPromise>;
 
     if (error) {
       console.error('Error checking auth status:', error);
@@ -84,7 +98,21 @@ export async function refreshSupabaseSession() {
   try {
     console.log('Refreshing Supabase session...');
     const supabase = createClient();
-    const { data, error } = await supabase.auth.refreshSession();
+
+    // Add timeout handling with Promise.race
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Session refresh timed out')), 5000);
+    });
+
+    const refreshPromise = supabase.auth.refreshSession();
+
+    // Race the refresh against a timeout
+    const { data, error } = (await Promise.race([
+      refreshPromise,
+      timeoutPromise.then(() => {
+        throw new Error('Session refresh timed out');
+      }),
+    ])) as Awaited<typeof refreshPromise>;
 
     if (error) {
       console.error('Error refreshing session:', error);

@@ -4,23 +4,33 @@
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 60,
+      "memory": 1024
     },
     "src/app/api/courses/*/reviews/route.ts": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 30
     },
     "src/app/api/courses/review/route.ts": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 30
+    },
+    "src/app/api/schedule/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "src/app/api/auth/*/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
     },
     "src/app/api/debug/connection/route.ts": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 30
     }
   },
   "env": {
     "NODE_ENV": "production",
+    "VERCEL": "1",
     "USE_CONNECTION_POOLING": "true"
   }
 }

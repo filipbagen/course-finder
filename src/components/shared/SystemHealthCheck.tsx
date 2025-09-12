@@ -26,6 +26,54 @@ export function SystemHealthCheck() {
     setError(null);
 
     try {
+      // Try the new health check endpoint first
+      try {
+        const response = await fetch('/api/health/connection');
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Transform to the expected format
+          const transformedData = {
+            status: Object.values(data.services).every(
+              (service: any) => service.status === 'healthy'
+            )
+              ? 'healthy'
+              : 'degraded',
+            responseTime: data.totalResponseTime || 'unknown',
+            timestamp: data.timestamp,
+            environment: data.environment,
+            components: {
+              database: {
+                status:
+                  data.services.database?.status === 'healthy'
+                    ? 'healthy'
+                    : 'unhealthy',
+                responseTime: data.services.database?.responseTime || 'unknown',
+                ...data.services.database,
+              },
+              supabase: {
+                status:
+                  data.services.supabase?.status === 'healthy'
+                    ? 'healthy'
+                    : 'unhealthy',
+                responseTime: data.services.supabase?.responseTime || 'unknown',
+                ...data.services.supabase,
+              },
+            },
+          };
+
+          setHealth(transformedData);
+          return;
+        }
+      } catch (e) {
+        console.warn(
+          'New health check endpoint failed, falling back to old endpoint',
+          e
+        );
+      }
+
+      // Fall back to old endpoint
       const response = await fetch('/api/system/health');
 
       if (!response.ok) {
