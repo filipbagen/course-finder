@@ -325,35 +325,11 @@ export function ScheduleProvider({
     loadScheduleData();
   }, [loadScheduleData]);
 
-  // Add an effect to refresh the schedule when authentication state changes
+  // Add an effect to load the schedule data when the component mounts
   useEffect(() => {
-    // Only reload when auth state is confirmed (not during loading)
-    if (!authLoading) {
-      if (user && isAuthenticated) {
-        console.log('Auth state confirmed with user, refreshing schedule data');
-        loadScheduleData();
-      } else if (!isAuthenticated) {
-        console.log(
-          'Auth state confirmed with no user, clearing schedule data'
-        );
-        // Clear the schedule data
-        dispatch({
-          type: ScheduleActions.FETCH_SCHEDULE_ERROR,
-          payload: 'User not authenticated',
-        });
-        setEnrolledCourses([]);
-        setLoading(false);
-      }
-    }
-  }, [
-    authLoading,
-    user,
-    isAuthenticated,
-    loadScheduleData,
-    dispatch,
-    setLoading,
-    setEnrolledCourses,
-  ]);
+    console.log('Loading schedule data for userId:', userId);
+    loadScheduleData();
+  }, [loadScheduleData, userId]);
 
   const contextValue: ScheduleContextType = {
     state,
