@@ -9,6 +9,9 @@ import {
 } from '@/lib/errors';
 import type { ApiResponse } from '@/types/api';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * DELETE /api/schedule/course/[enrollmentId]
  * Remove course from schedule with enhanced error handling and connection reliability

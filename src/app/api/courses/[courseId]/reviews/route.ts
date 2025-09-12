@@ -3,6 +3,9 @@ import { getOptionalUser } from '@/lib/auth';
 import { ApiResponse } from '@/types/api';
 import { prisma, withPrisma } from '@/lib/prisma';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 // Stale while revalidate caching for reviews
 export const revalidate = 60; // Revalidate cache every 60 seconds
 

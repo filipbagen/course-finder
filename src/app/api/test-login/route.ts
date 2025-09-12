@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getOptionalUser } from '@/lib/auth';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/test-login
  * Test endpoint for checking login status

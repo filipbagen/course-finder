@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering since we're manipulating cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * Test endpoint for cookies
  * Used for debugging authentication and session issues

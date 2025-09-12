@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/test-supabase
  * Test endpoint for checking Supabase connectivity

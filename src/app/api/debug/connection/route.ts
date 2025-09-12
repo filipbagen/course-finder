@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withPrisma } from '@/lib/prisma';
 import { getOptionalUser } from '@/lib/auth';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/debug/connection
  * Debug endpoint to check database connectivity

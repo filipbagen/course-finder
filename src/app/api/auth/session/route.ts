@@ -3,6 +3,9 @@ import { getOptionalUser } from '@/lib/auth';
 import { withPrisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   // Create a reference ID for tracking this request in logs
   const requestId = uuidv4().substring(0, 8);

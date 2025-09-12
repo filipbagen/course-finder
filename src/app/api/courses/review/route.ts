@@ -5,6 +5,9 @@ import { CreateReviewRequest } from '@/types/types';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma, withPrisma } from '@/lib/prisma';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 // POST /api/courses/review - Create or update a review
 export async function POST(request: NextRequest) {
   // Generate a request ID for tracking

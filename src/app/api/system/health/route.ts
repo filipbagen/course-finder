@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { withPrisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * Health check endpoint to verify system components
  * This can be used to diagnose issues with the database or auth

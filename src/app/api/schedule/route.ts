@@ -4,6 +4,9 @@ import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transformCourse } from '@/lib/transformers';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 // Stale while revalidate caching for schedule
 export const revalidate = 30; // Revalidate cache every 30 seconds
 

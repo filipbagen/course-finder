@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getOptionalUser } from '@/lib/auth';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * This endpoint is for testing conflict scenarios
  * It logs the request and returns a simple response

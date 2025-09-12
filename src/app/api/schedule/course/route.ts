@@ -13,6 +13,9 @@ import { randomUUID } from 'crypto';
 import type { ApiResponse } from '@/types/api';
 import { transformCourse } from '@/lib/transformers';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 /**
  * PUT /api/schedule/course
  * Update course placement in schedule with enhanced error handling

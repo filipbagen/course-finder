@@ -13,6 +13,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 
+// Force dynamic rendering to avoid static generation errors with cookies
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'System Diagnostics - Course Finder',
   description: 'Test and debug system components',
