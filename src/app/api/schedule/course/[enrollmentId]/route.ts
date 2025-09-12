@@ -18,14 +18,14 @@ export const dynamic = 'force-dynamic';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ enrollmentId: string }> }
+  { params }: { params: { enrollmentId: string } }
 ): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
   // Generate a unique request ID for tracking in logs
   const requestId = Math.random().toString(36).substring(2, 8);
   console.log(`[${requestId}] Course removal request started`);
 
   try {
-    const { enrollmentId } = await params;
+    const enrollmentId = params.enrollmentId;
     console.log(`[${requestId}] Removing enrollment: ${enrollmentId}`);
 
     const user = await getAuthenticatedUser();
