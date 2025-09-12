@@ -322,7 +322,6 @@ export async function GET(
         cacheTtl: 60, // 1 minute cache for database results
         // Configure retry pattern for this endpoint
         maxRetries: 3,
-        initialBackoff: 150,
       }
     );
 

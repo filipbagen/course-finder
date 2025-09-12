@@ -65,7 +65,6 @@ export async function GET(
         cacheTtl: 120,
         // Configure more aggressive retry pattern for reviews
         maxRetries: 4,
-        initialBackoff: 100,
       }
     );
 

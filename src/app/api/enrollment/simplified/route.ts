@@ -128,8 +128,6 @@ export async function POST(
       {
         // Higher retries but faster timeouts for better reliability
         maxRetries: 3,
-        initialBackoff: 100,
-        maxBackoff: 1000,
       }
     );
 

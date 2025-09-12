@@ -179,8 +179,6 @@ export async function POST(request: NextRequest) {
       },
       {
         maxRetries: 1, // Only retry once to avoid long waits
-        initialBackoff: 100,
-        maxBackoff: 500,
       }
     );
 
@@ -307,8 +305,6 @@ export async function DELETE(request: NextRequest) {
       },
       {
         maxRetries: 2, // Reduce retries for faster feedback
-        initialBackoff: 100, // Start with 100ms
-        maxBackoff: 1000, // Cap at 1 second
       }
     );
 

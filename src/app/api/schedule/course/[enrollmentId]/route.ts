@@ -81,8 +81,6 @@ export async function DELETE(
       {
         // More aggressive retry pattern for critical operations
         maxRetries: 2, // Lower retries for faster feedback
-        initialBackoff: 100,
-        maxBackoff: 1000, // Cap at 1 second to prevent Vercel timeout
       }
     );
 

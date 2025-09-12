@@ -69,8 +69,6 @@ export async function GET(request: NextRequest) {
       },
       {
         maxRetries: 1, // Only retry once to avoid timeouts
-        initialBackoff: 100,
-        maxBackoff: 500,
       }
     );
 

@@ -2,50 +2,64 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  // Create a simple response without touching the request
-  const response = NextResponse.next();
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-  try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options);
-            });
-          },
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name) {
+          return request.cookies.get(name)?.value;
         },
-      }
-    );
+        set(name, value, options) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name, options) {
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+            maxAge: 0,
+          });
+        },
+      },
+    }
+  );
 
-    // Handle auth callback for password reset
-    if (
-      request.nextUrl.pathname === '/' &&
-      request.nextUrl.searchParams.has('code')
-    ) {
-      // Exchange the code for a session
-      const code = request.nextUrl.searchParams.get('code');
-      if (code) {
-        const { error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession(code);
+  // Refresh session if it exists
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-        if (!exchangeError) {
-          // Successfully exchanged code, redirect to update-password page
-          const resetUrl = new URL('/auth/update-password', request.url);
-          return NextResponse.redirect(resetUrl);
-        }
+  if (session) {
+    // If a session exists, the user is logged in
+    response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+
+    // Try to refresh the session if it's getting close to expiry
+    const expiresAt = session.expires_at;
+    if (expiresAt) {
+      const now = Math.floor(Date.now() / 1000);
+      const timeUntilExpiry = expiresAt - now;
+
+      // If token expires in less than 15 minutes, refresh it
+      if (timeUntilExpiry < 900) {
+        await supabase.auth.refreshSession();
       }
     }
-
-    return response;
-  } catch (e) {
-    // If anything fails, just continue without breaking the app
-    console.error('Error in middleware:', e);
-    return response;
   }
+
+  return response;
 }

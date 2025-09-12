@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
         useCache: false,
         // More retries for comprehensive testing
         maxRetries: 5,
-        initialBackoff: 100,
       }
     );
 
