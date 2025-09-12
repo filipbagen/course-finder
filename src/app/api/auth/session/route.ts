@@ -12,16 +12,8 @@ export async function GET(request: NextRequest) {
   console.log(`[${requestId}] Auth session request started`);
 
   try {
-    // Use a timeout to ensure we don't get stuck in auth
-    const authUserPromise = getOptionalUser();
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Auth timeout')), 2000)
-    );
-
-    const authUser = (await Promise.race([
-      authUserPromise,
-      timeoutPromise,
-    ])) as Awaited<typeof authUserPromise>;
+    // Get authenticated user
+    const authUser = await getOptionalUser();
 
     if (!authUser) {
       console.log(`[${requestId}] No authenticated user found`);
@@ -48,37 +40,24 @@ export async function GET(request: NextRequest) {
       )}...`
     );
 
-    // Get user details from database with timeout protection
-    const prismaPromise = withPrisma(
-      async (prisma) => {
-        // Minimal select to improve performance
-        const user = await prisma.user.findUnique({
-          where: { id: authUser.id },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            program: true,
-            colorScheme: true,
-            isPublic: true,
-          },
-        });
+    // Get user details from database
+    const result = await withPrisma(async (prisma) => {
+      // Minimal select to improve performance
+      const user = await prisma.user.findUnique({
+        where: { id: authUser.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          program: true,
+          colorScheme: true,
+          isPublic: true,
+        },
+      });
 
-        return { user };
-      },
-      {
-        maxRetries: 1, // Only retry once to avoid timeouts
-      }
-    );
-
-    // Use a timeout to prevent hanging
-    const result = (await Promise.race([
-      prismaPromise,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Database timeout')), 2500)
-      ),
-    ])) as Awaited<typeof prismaPromise>;
+      return { user };
+    });
 
     console.log(`[${requestId}] User profile fetched successfully`);
 

@@ -72,115 +72,110 @@ export async function POST(request: NextRequest) {
     }
 
     // Simplified database operations - using a dedicated transaction
-    const result = await withPrisma(
-      async (prismaClient) => {
-        // Use a transaction to ensure atomicity and faster execution
-        return await prismaClient.$transaction(
-          async (tx) => {
-            // Check if the user is already enrolled in this course - optimized query
-            const enrollment = await tx.enrollment.findFirst({
-              where: {
+    const result = await withPrisma(async (prismaClient) => {
+      // Use a transaction to ensure atomicity and faster execution
+      return await prismaClient.$transaction(
+        async (tx) => {
+          // Check if the user is already enrolled in this course - optimized query
+          const enrollment = await tx.enrollment.findFirst({
+            where: {
+              userId,
+              courseId,
+            },
+            select: { id: true }, // Only select what we need
+          });
+
+          if (!enrollment) {
+            return {
+              error: 'You can only review courses you are enrolled in',
+              status: 403,
+            };
+          }
+
+          // Check if user has already reviewed this course
+          const existingReview = await tx.review.findUnique({
+            where: {
+              userId_courseId: {
                 userId,
                 courseId,
               },
-              select: { id: true }, // Only select what we need
-            });
+            },
+            select: { id: true }, // Minimize data transfer
+          });
 
-            if (!enrollment) {
-              return {
-                error: 'You can only review courses you are enrolled in',
-                status: 403,
-              };
-            }
+          let reviewResult;
 
-            // Check if user has already reviewed this course
-            const existingReview = await tx.review.findUnique({
+          if (existingReview) {
+            // Update existing review
+            reviewResult = await tx.review.update({
               where: {
-                userId_courseId: {
-                  userId,
-                  courseId,
+                id: existingReview.id,
+              },
+              data: {
+                rating,
+                comment,
+                updatedAt: new Date(),
+              },
+              select: {
+                // Select only what we need
+                id: true,
+                rating: true,
+                comment: true,
+                createdAt: true,
+                updatedAt: true,
+                userId: true,
+                courseId: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                  },
                 },
               },
-              select: { id: true }, // Minimize data transfer
             });
-
-            let reviewResult;
-
-            if (existingReview) {
-              // Update existing review
-              reviewResult = await tx.review.update({
-                where: {
-                  id: existingReview.id,
-                },
-                data: {
-                  rating,
-                  comment,
-                  updatedAt: new Date(),
-                },
-                select: {
-                  // Select only what we need
-                  id: true,
-                  rating: true,
-                  comment: true,
-                  createdAt: true,
-                  updatedAt: true,
-                  userId: true,
-                  courseId: true,
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      email: true,
-                      image: true,
-                    },
+          } else {
+            // Create new review
+            reviewResult = await tx.review.create({
+              data: {
+                id: uuidv4(),
+                rating,
+                comment,
+                userId,
+                courseId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+              select: {
+                // Select only what we need
+                id: true,
+                rating: true,
+                comment: true,
+                createdAt: true,
+                updatedAt: true,
+                userId: true,
+                courseId: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
                   },
                 },
-              });
-            } else {
-              // Create new review
-              reviewResult = await tx.review.create({
-                data: {
-                  id: uuidv4(),
-                  rating,
-                  comment,
-                  userId,
-                  courseId,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-                select: {
-                  // Select only what we need
-                  id: true,
-                  rating: true,
-                  comment: true,
-                  createdAt: true,
-                  updatedAt: true,
-                  userId: true,
-                  courseId: true,
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      email: true,
-                      image: true,
-                    },
-                  },
-                },
-              });
-            }
-
-            return { success: true, review: reviewResult };
-          },
-          {
-            // Transaction options - aggressive timeout to prevent function timeout
-            timeout: 3000, // 3 seconds max for the entire transaction
+              },
+            });
           }
-        );
-      },
-      {
-        maxRetries: 1, // Only retry once to avoid long waits
-      }
-    );
+
+          return { success: true, review: reviewResult };
+        },
+        {
+          // Transaction options - aggressive timeout to prevent function timeout
+          timeout: 3000, // 3 seconds max for the entire transaction
+        }
+      );
+    }, {});
 
     // Handle custom error returned from withPrisma
     if (result.error) {
@@ -277,36 +272,31 @@ export async function DELETE(request: NextRequest) {
     );
 
     // Use withPrisma with tighter timeout for review deletion
-    const result = await withPrisma(
-      async (prismaClient) => {
-        // Check if the review exists and belongs to the user - use select to minimize data transfer
-        const existingReview = await prismaClient.review.findFirst({
-          where: {
-            id: reviewId,
-            userId,
-          },
-          select: { id: true }, // Only get the ID to verify existence
-        });
+    const result = await withPrisma(async (prismaClient) => {
+      // Check if the review exists and belongs to the user - use select to minimize data transfer
+      const existingReview = await prismaClient.review.findFirst({
+        where: {
+          id: reviewId,
+          userId,
+        },
+        select: { id: true }, // Only get the ID to verify existence
+      });
 
-        if (!existingReview) {
-          console.log(`[${requestId}] Review not found or not owned by user`);
-          return { notFound: true };
-        }
-
-        // Delete the review - optimized query
-        await prismaClient.review.delete({
-          where: {
-            id: reviewId,
-          },
-        });
-
-        console.log(`[${requestId}] Review deleted successfully`);
-        return { success: true };
-      },
-      {
-        maxRetries: 2, // Reduce retries for faster feedback
+      if (!existingReview) {
+        console.log(`[${requestId}] Review not found or not owned by user`);
+        return { notFound: true };
       }
-    );
+
+      // Delete the review - optimized query
+      await prismaClient.review.delete({
+        where: {
+          id: reviewId,
+        },
+      });
+
+      console.log(`[${requestId}] Review deleted successfully`);
+      return { success: true };
+    }, {});
 
     if (result.notFound) {
       return NextResponse.json(

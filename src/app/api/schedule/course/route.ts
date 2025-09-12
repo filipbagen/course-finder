@@ -105,7 +105,6 @@ export async function PUT(
       },
       {
         // More aggressive retry pattern for schedule operations
-        maxRetries: 4
       }
     );
 
@@ -210,7 +209,6 @@ export async function POST(
       },
       {
         // More aggressive retry pattern for schedule operations
-        maxRetries: 4
       }
     );
 

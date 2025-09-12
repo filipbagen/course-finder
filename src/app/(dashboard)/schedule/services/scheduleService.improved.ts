@@ -14,153 +14,81 @@ export class ScheduleService {
    * Fetch user's schedule data
    */
   static async fetchSchedule(userId?: string): Promise<ScheduleData> {
-    const MAX_RETRIES = 3;
-    let retries = 0;
-    let lastError: any = null;
-
-    // Try to refresh the auth token before making the request
     try {
-      const { tokenManager } = await import('@/lib/supabase/tokenManager');
-      await tokenManager.checkAndRefreshToken();
-    } catch (error) {
-      console.warn('Failed to refresh token before schedule fetch:', error);
-      // Continue anyway
-    }
-
-    while (retries < MAX_RETRIES) {
+      // Try to refresh the auth token before making the request
       try {
-        // Add cache-busting timestamp to prevent stale cache issues
-        const timestamp = Date.now();
-        const baseUrl = userId
-          ? `${this.BASE_URL}?userId=${userId}`
-          : this.BASE_URL;
-        const url = `${baseUrl}${
-          baseUrl.includes('?') ? '&' : '?'
-        }_=${timestamp}`;
-
-        console.log(
-          `Schedule fetch attempt ${retries + 1}/${MAX_RETRIES}:`,
-          url
-        );
-
-        // Create a promise that will fetch the schedule
-        const fetchPromise = fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-          credentials: 'include',
-          cache: 'no-store',
-        });
-
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Schedule fetch timed out')), 8000);
-        });
-
-        // Race the fetch against the timeout
-        const response = (await Promise.race([
-          fetchPromise,
-          timeoutPromise,
-        ])) as Response;
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(
-            `Schedule API error (attempt ${retries + 1}/${MAX_RETRIES}):`,
-            response.status,
-            response.statusText,
-            errorText
-          );
-
-          // If we get a 401/403, try to refresh the token and retry
-          if (
-            (response.status === 401 || response.status === 403) &&
-            retries < MAX_RETRIES - 1
-          ) {
-            console.log('Authentication error, attempting token refresh...');
-            try {
-              const { tokenManager } = await import(
-                '@/lib/supabase/tokenManager'
-              );
-              const refreshed = await tokenManager.forceRefresh();
-
-              if (refreshed) {
-                console.log('Token refreshed, retrying schedule fetch');
-                retries++;
-                // Add a short delay before retrying
-                await new Promise((r) => setTimeout(r, 500));
-                continue;
-              }
-            } catch (refreshError) {
-              console.error('Failed to refresh token:', refreshError);
-            }
-
-            throw new Error('You must be logged in to view your schedule');
-          }
-
-          // If we get a 500, retry after a delay
-          if (response.status >= 500 && retries < MAX_RETRIES - 1) {
-            retries++;
-            const delay = Math.min(1000 * Math.pow(2, retries), 5000);
-            console.log(`Server error, retrying in ${delay}ms...`);
-            await new Promise((r) => setTimeout(r, delay));
-            continue;
-          }
-
-          throw new Error(
-            `Failed to fetch schedule: ${response.statusText}. ${errorText}`
-          );
-        }
-
-        const data = await response.json();
-        console.log('Schedule API response:', data);
-
-        // Transform the data to match our ScheduleData interface
-        return this.transformApiResponse(data);
+        const { tokenManager } = await import('@/lib/supabase/tokenManager');
+        await tokenManager.refreshTokenIfNeeded();
       } catch (error) {
-        lastError = error;
-        retries++;
+        console.warn('Failed to refresh token before schedule fetch:', error);
+        // Continue anyway
+      }
 
-        if (retries < MAX_RETRIES) {
-          // Exponential backoff with jitter
-          const delay = Math.min(
-            1000 * Math.pow(2, retries) * (0.9 + Math.random() * 0.2),
-            8000
-          );
-          console.warn(
-            `Schedule fetch failed, retrying in ${delay.toFixed(0)}ms:`,
-            error
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
+      // Add cache-busting timestamp to prevent stale cache issues
+      const timestamp = Date.now();
+      const baseUrl = userId
+        ? `${this.BASE_URL}?userId=${userId}`
+        : this.BASE_URL;
+      const url = `${baseUrl}${
+        baseUrl.includes('?') ? '&' : '?'
+      }_=${timestamp}`;
+
+      console.log('Fetching schedule:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          'Schedule API error:',
+          response.status,
+          response.statusText,
+          errorText
+        );
+
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('You must be logged in to view your schedule');
         }
-      }
-    }
 
-    // If we get here, all retries failed
-    console.error('All schedule fetch attempts failed:', lastError);
-
-    // Provide a more specific error message based on the error type
-    if (lastError instanceof Error) {
-      if (lastError.message.includes('timed out')) {
         throw new Error(
-          'Could not load your schedule due to a timeout. Please try again.'
-        );
-      } else if (lastError.message.includes('logged in')) {
-        throw new Error('You must be logged in to view your schedule');
-      } else if (
-        lastError.message.includes('fetch') ||
-        lastError.message.includes('network')
-      ) {
-        throw new Error(
-          'Could not connect to the server. Please check your internet connection.'
+          `Failed to fetch schedule: ${response.statusText}. ${errorText}`
         );
       }
-    }
 
-    throw new Error('Failed to load schedule data after multiple attempts');
+      const data = await response.json();
+      console.log('Schedule API response:', data);
+
+      // Transform the data to match our ScheduleData interface
+      return this.transformApiResponse(data);
+    } catch (error) {
+      console.error('Error fetching schedule:', error);
+
+      // Provide a more specific error message based on the error type
+      if (error instanceof Error) {
+        if (error.message.includes('logged in')) {
+          throw new Error('You must be logged in to view your schedule');
+        } else if (
+          error.message.includes('fetch') ||
+          error.message.includes('network')
+        ) {
+          throw new Error(
+            'Could not connect to the server. Please check your internet connection.'
+          );
+        }
+        throw error;
+      }
+
+      throw new Error('Failed to load schedule data');
+    }
   }
 
   /**
@@ -175,7 +103,7 @@ export class ScheduleService {
       // Try to refresh the auth token before making the request
       try {
         const { tokenManager } = await import('@/lib/supabase/tokenManager');
-        await tokenManager.checkAndRefreshToken();
+        await tokenManager.refreshTokenIfNeeded();
       } catch (error) {
         console.warn('Failed to refresh token before update:', error);
         // Continue anyway
@@ -196,49 +124,43 @@ export class ScheduleService {
         body: JSON.stringify(update),
       });
 
-      // Handle potential timeout
-      const responsePromise = async () => {
-        if (!response.ok) {
-          const errorBody = await response.text();
-          console.error(
-            `Update course error (${requestId}):`,
-            response.status,
-            response.statusText,
-            errorBody
-          );
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(
+          `Update course error (${requestId}):`,
+          response.status,
+          response.statusText,
+          errorBody
+        );
 
-          // If we get a 401/403, try to refresh the token
-          if (response.status === 401 || response.status === 403) {
-            try {
-              console.log(
-                'Authentication error during update, attempting token refresh...'
-              );
-              const { tokenManager } = await import(
-                '@/lib/supabase/tokenManager'
-              );
-              await tokenManager.forceRefresh();
-            } catch (refreshError) {
-              console.error(
-                'Failed to refresh token during update:',
-                refreshError
-              );
-            }
+        // If we get a 401/403, try to refresh the token
+        if (response.status === 401 || response.status === 403) {
+          try {
+            console.log(
+              'Authentication error during update, attempting token refresh...'
+            );
+            const { tokenManager } = await import(
+              '@/lib/supabase/tokenManager'
+            );
+            await tokenManager.forceRefresh();
+          } catch (refreshError) {
+            console.error(
+              'Failed to refresh token during update:',
+              refreshError
+            );
           }
 
           throw new Error(
-            `Error updating course schedule: ${response.statusText}. ${errorBody}`
+            'Du måste vara inloggad för att uppdatera din kursplanering.'
           );
         }
-        return await response.json();
-      };
 
-      const responseData = await Promise.race([
-        responsePromise(),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out')), 8000)
-        ),
-      ]);
+        throw new Error(
+          `Error updating course schedule: ${response.statusText}. ${errorBody}`
+        );
+      }
 
+      const responseData = await response.json();
       console.log(`Update course response (${requestId}):`, responseData);
       return responseData as CourseWithEnrollment;
     } catch (error) {
@@ -246,11 +168,7 @@ export class ScheduleService {
 
       // Provide a more specific error message based on the error type
       if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          throw new Error(
-            'Uppdateringen tog för lång tid. Vänligen försök igen.'
-          );
-        } else if (error.message.includes('fetch')) {
+        if (error.message.includes('fetch')) {
           throw new Error(
             'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
           );
@@ -262,6 +180,8 @@ export class ScheduleService {
             'Du måste vara inloggad för att uppdatera din kursplanering.'
           );
         }
+
+        throw error;
       }
 
       throw new Error('Failed to update course placement');
@@ -279,7 +199,7 @@ export class ScheduleService {
       // Try to refresh the auth token before making the request
       try {
         const { tokenManager } = await import('@/lib/supabase/tokenManager');
-        await tokenManager.checkAndRefreshToken();
+        await tokenManager.refreshTokenIfNeeded();
       } catch (error) {
         console.warn('Failed to refresh token before adding course:', error);
         // Continue anyway
@@ -308,6 +228,11 @@ export class ScheduleService {
           response.statusText,
           errorText
         );
+
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Du måste vara inloggad för att lägga till en kurs.');
+        }
+
         throw new Error(
           `Failed to add course: ${response.statusText}. ${errorText}`
         );
@@ -319,11 +244,7 @@ export class ScheduleService {
 
       // Provide a more specific error message based on the error type
       if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          throw new Error(
-            'Tilläggningen tog för lång tid. Vänligen försök igen.'
-          );
-        } else if (error.message.includes('fetch')) {
+        if (error.message.includes('fetch')) {
           throw new Error(
             'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
           );
@@ -350,7 +271,7 @@ export class ScheduleService {
       // Try to refresh the auth token before making the request
       try {
         const { tokenManager } = await import('@/lib/supabase/tokenManager');
-        await tokenManager.checkAndRefreshToken();
+        await tokenManager.refreshTokenIfNeeded();
       } catch (error) {
         console.warn('Failed to refresh token before removing course:', error);
         // Continue anyway
@@ -380,59 +301,49 @@ export class ScheduleService {
         credentials: 'include',
       });
 
-      // Handle potential timeout with Promise.race
-      await Promise.race([
-        (async () => {
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(
-              `Remove course error (${requestId}):`,
-              response.status,
-              response.statusText,
-              errorText
-            );
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Remove course error (${requestId}):`,
+          response.status,
+          response.statusText,
+          errorText
+        );
 
-            // If we get a 401/403, try to refresh the token
-            if (response.status === 401 || response.status === 403) {
-              try {
-                console.log(
-                  'Authentication error during removal, attempting token refresh...'
-                );
-                const { tokenManager } = await import(
-                  '@/lib/supabase/tokenManager'
-                );
-                await tokenManager.forceRefresh();
-              } catch (refreshError) {
-                console.error(
-                  'Failed to refresh token during removal:',
-                  refreshError
-                );
-              }
-
-              throw new Error(
-                'Du måste vara inloggad för att ta bort en kurs.'
-              );
-            }
-
-            throw new Error(
-              `Failed to remove course: ${response.statusText}. ${errorText}`
-            );
-          }
-
-          // Only try to parse JSON if there's a content
-          if (response.headers.get('content-length') !== '0') {
-            const data = await response.json();
-            console.log(`Remove course response (${requestId}):`, data);
-          } else {
+        // If we get a 401/403, try to refresh the token
+        if (response.status === 401 || response.status === 403) {
+          try {
             console.log(
-              `Remove course successful (${requestId}) - no content returned`
+              'Authentication error during removal, attempting token refresh...'
+            );
+            const { tokenManager } = await import(
+              '@/lib/supabase/tokenManager'
+            );
+            await tokenManager.forceRefresh();
+          } catch (refreshError) {
+            console.error(
+              'Failed to refresh token during removal:',
+              refreshError
             );
           }
-        })(),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out')), 8000)
-        ),
-      ]);
+
+          throw new Error('Du måste vara inloggad för att ta bort en kurs.');
+        }
+
+        throw new Error(
+          `Failed to remove course: ${response.statusText}. ${errorText}`
+        );
+      }
+
+      // Only try to parse JSON if there's a content
+      if (response.headers.get('content-length') !== '0') {
+        const data = await response.json();
+        console.log(`Remove course response (${requestId}):`, data);
+      } else {
+        console.log(
+          `Remove course successful (${requestId}) - no content returned`
+        );
+      }
 
       console.log(`Course ${enrollmentId} removed successfully (${requestId})`);
     } catch (error) {
@@ -440,11 +351,7 @@ export class ScheduleService {
 
       // Provide a user-friendly error message based on the error type
       if (error instanceof Error) {
-        if (error.message.includes('timed out')) {
-          throw new Error(
-            'Borttagningen tog för lång tid. Vänligen försök igen eller uppdatera sidan.'
-          );
-        } else if (error.message.includes('fetch')) {
+        if (error.message.includes('fetch')) {
           throw new Error(
             'Kunde inte ansluta till servern. Kontrollera din internetanslutning.'
           );

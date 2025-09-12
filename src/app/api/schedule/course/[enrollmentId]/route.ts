@@ -79,8 +79,7 @@ export async function DELETE(
         return { success: true };
       },
       {
-        // More aggressive retry pattern for critical operations
-        maxRetries: 2, // Lower retries for faster feedback
+        // More aggressive retry pattern for critical operations, // Lower retries for faster feedback
       }
     );
 

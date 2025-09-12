@@ -320,8 +320,7 @@ export async function GET(
         useCache: !cursor, // Only cache first page queries
         cacheKey: !cursor ? `query-${cacheKey}` : undefined,
         cacheTtl: 60, // 1 minute cache for database results
-        // Configure retry pattern for this endpoint
-        maxRetries: 3,
+        // Configure retry pattern for this endpoint,
       }
     );
 

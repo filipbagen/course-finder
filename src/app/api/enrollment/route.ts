@@ -96,7 +96,6 @@ export async function POST(
         return { created: true, enrollment };
       },
       {
-        maxRetries: 4 // More retries for critical user operation
       }
     );
 
@@ -259,7 +258,6 @@ export async function DELETE(
         return { success: true };
       },
       {
-        maxRetries: 3
       }
     );
 
@@ -351,7 +349,6 @@ export async function PATCH(
         return { success: true, updatedEnrollment };
       },
       {
-        maxRetries: 4 // More retries for critical user operation
       }
     );
 

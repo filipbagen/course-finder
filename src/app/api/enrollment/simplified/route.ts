@@ -126,8 +126,7 @@ export async function POST(
         }
       },
       {
-        // Higher retries but faster timeouts for better reliability
-        maxRetries: 3,
+        // Higher retries but faster timeouts for better reliability,
       }
     );
 

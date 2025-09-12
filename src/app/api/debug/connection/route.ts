@@ -47,8 +47,7 @@ export async function GET(request: NextRequest) {
       {
         // No caching for diagnostic endpoint
         useCache: false,
-        // More retries for comprehensive testing
-        maxRetries: 5,
+        // More retries for comprehensive testing,
       }
     );
 

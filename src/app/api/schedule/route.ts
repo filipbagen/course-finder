@@ -84,8 +84,6 @@ export async function GET(request: NextRequest) {
         useCache: true,
         cacheKey,
         cacheTtl: 60,
-        // More aggressive retry pattern for schedule which is critical functionality
-        maxRetries: 4,
       }
     );
 

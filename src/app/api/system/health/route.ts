@@ -81,7 +81,7 @@ async function checkDatabase() {
         await prisma.$queryRaw`SELECT 1 AS health_check`;
         return { connected: true };
       },
-      { maxRetries: 0 }
+      { }
     ); // No retries for health check
 
     const responseTime = Date.now() - dbStartTime;
