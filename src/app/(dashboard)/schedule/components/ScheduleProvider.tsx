@@ -284,7 +284,7 @@ export function ScheduleProvider({
         await loadScheduleData();
       }
     },
-    [readonly, loadScheduleData, setEnrolledCourses, dispatch, removeCourse]
+    [readonly, loadScheduleData, dispatch, removeCourse]
   );
 
   /**
