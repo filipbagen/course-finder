@@ -47,7 +47,7 @@ export function ScheduleProvider({
   });
   const { setEnrolledCourses, setLoading, setError } =
     useEnrolledCoursesStore();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
 
   /**
    * Load reviews for enrolled courses
@@ -329,20 +329,31 @@ export function ScheduleProvider({
   useEffect(() => {
     // Only reload when auth state is confirmed (not during loading)
     if (!authLoading) {
-      if (user) {
-        console.log('Auth state confirmed, refreshing schedule data');
+      if (user && isAuthenticated) {
+        console.log('Auth state confirmed with user, refreshing schedule data');
         loadScheduleData();
-      } else if (!readonly) {
-        // Clear schedule data if user is logged out (unless in readonly mode)
-        console.log('User not authenticated, clearing schedule data');
+      } else if (!isAuthenticated) {
+        console.log(
+          'Auth state confirmed with no user, clearing schedule data'
+        );
+        // Clear the schedule data
         dispatch({
           type: ScheduleActions.FETCH_SCHEDULE_ERROR,
-          payload: 'Please log in to view your schedule',
+          payload: 'User not authenticated',
         });
         setEnrolledCourses([]);
+        setLoading(false);
       }
     }
-  }, [authLoading, user, loadScheduleData, readonly, setEnrolledCourses]);
+  }, [
+    authLoading,
+    user,
+    isAuthenticated,
+    loadScheduleData,
+    dispatch,
+    setLoading,
+    setEnrolledCourses,
+  ]);
 
   const contextValue: ScheduleContextType = {
     state,

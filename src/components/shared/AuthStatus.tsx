@@ -38,6 +38,19 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
         const status = await checkAuthStatus();
         console.log('AuthStatus: Result', status);
 
+        // Check if token is about to expire (< 10 minutes remaining)
+        const tokenNeedsRefresh =
+          status.isAuthenticated && status.expiresAt
+            ? Math.floor(Date.now() / 1000) > status.expiresAt - 600
+            : false;
+
+        if (tokenNeedsRefresh) {
+          console.log(
+            'AuthStatus: Token close to expiry, refreshing proactively'
+          );
+          await refreshSupabaseSession();
+        }
+
         setIsAuthenticated(status.isAuthenticated);
 
         // If not authenticated but we should be, try to refresh
@@ -48,7 +61,7 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
           const refreshResult = await refreshSupabaseSession();
           console.log('AuthStatus: Refresh result', refreshResult);
 
-          if (refreshResult.success) {
+          if (refreshResult.success && refreshResult.session) {
             // If refresh succeeded, update state
             setIsAuthenticated(true);
             // Force a router refresh to update all components
@@ -73,12 +86,44 @@ export function AuthStatus({ children, fallback }: AuthStatusProps) {
         console.error('AuthStatus: Error checking auth status', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setIsAuthenticated(false);
+
+        // Try to recover by resetting the client
+        try {
+          resetSupabaseClient();
+        } catch (resetError) {
+          console.error('AuthStatus: Failed to reset client', resetError);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
+
+    // Set up a periodic check for token expiration (every 5 minutes)
+    const intervalId = setInterval(async () => {
+      try {
+        const status = await checkAuthStatus();
+        if (status.isAuthenticated && status.expiresAt) {
+          const now = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = status.expiresAt - now;
+
+          // If token expires in less than 10 minutes, refresh it
+          if (timeUntilExpiry < 600) {
+            console.log(
+              `AuthStatus: Token expires in ${timeUntilExpiry}s, refreshing`
+            );
+            await refreshSupabaseSession();
+          }
+        }
+      } catch (err) {
+        console.error('AuthStatus: Error in token check interval', err);
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [router]);
 
   // Show a loading state

@@ -27,6 +27,36 @@ const connectionPoolConfig =
     : undefined;
 
 /**
+ * Get the database connection URL with appropriate configuration parameters
+ * This handles adding connection pooling parameters in production
+ */
+function getDatabaseUrl() {
+  const url = process.env.DATABASE_URL;
+
+  if (!url) {
+    console.error('DATABASE_URL is not defined in environment variables');
+    return undefined;
+  }
+
+  // In production, add connection pooling parameters
+  if (process.env.NODE_ENV === 'production') {
+    // Check if URL already has parameters
+    const hasParams = url.includes('?');
+    const separator = hasParams ? '&' : '?';
+
+    // Add connection pooling parameters
+    const params = Object.entries(connectionPoolConfig || {})
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+
+    // Build the final URL with parameters
+    return `${url}${separator}${params}`;
+  }
+
+  return url;
+}
+
+/**
  * Create a new PrismaClient instance with optimized settings for serverless
  */
 const createPrismaClient = () => {
@@ -40,24 +70,12 @@ const createPrismaClient = () => {
         ? ['query', 'error', 'warn']
         : ['error'],
     errorFormat: 'pretty',
-
-    // Use connection pooling in production
-    datasourceUrl: process.env.DATABASE_URL
-      ? `${process.env.DATABASE_URL}${
-          process.env.NODE_ENV === 'production' &&
-          !process.env.DATABASE_URL.includes('?')
-            ? '?' +
-              Object.entries(connectionPoolConfig || {})
-                .map(([key, value]) => `${key}=${value}`)
-                .join('&')
-            : ''
-        }`
-      : undefined,
+    datasourceUrl: getDatabaseUrl(),
   });
 
   // Add middleware to detect slow queries in production
   if (process.env.NODE_ENV === 'production') {
-    client.$use(async (params, next) => {
+    client.$use(async (params: any, next: any) => {
       const start = Date.now();
       const result = await next(params);
       const end = Date.now();
@@ -107,7 +125,7 @@ export async function withPrisma<T>(
 ): Promise<T> {
   // Default options
   const {
-    maxRetries = 3,
+    maxRetries = 5, // Increased from 3 to 5
     initialBackoff = 300, // Increased from 200ms to 300ms
     maxBackoff = 5000, // Increased from 3s to 5s
     useCache = false,
@@ -154,17 +172,26 @@ export async function withPrisma<T>(
           error.message.includes('Connection timed out') ||
           error.message.includes('ENOTFOUND') ||
           error.message.includes('ECONNREFUSED') ||
+          error.message.includes('ETIMEDOUT') ||
+          error.message.includes('EHOSTUNREACH') ||
           // Pool exhaustion issues
           error.message.includes('connection pool exhausted') ||
           error.message.includes('too many connections') ||
           error.message.includes('Connection terminated unexpectedly') ||
+          error.message.includes('pool timeout') ||
           // Transaction issues
           error.message.includes('Transaction API error') ||
           error.message.includes('Transaction has been aborted') ||
+          error.message.includes('failed to commit transaction') ||
           // Temporary issues
           error.message.includes('Timed out fetching a new connection') ||
           error.message.includes('Connection lost') ||
-          error.message.includes('The server closed the connection'));
+          error.message.includes('The server closed the connection') ||
+          error.message.includes('Operation was canceled') ||
+          error.message.includes('operation timed out') ||
+          // Generic database errors that may be temporary
+          error.message.includes('database error') ||
+          error.message.includes('read-only transaction'));
 
       // If it's a connection issue and we have retries left
       if (isConnectionError && attempt < maxRetries) {
