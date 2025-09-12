@@ -60,8 +60,25 @@ export function useAuth() {
               }
             } else {
               console.warn('Auth: User session API returned no user');
-              // Try to refresh session
-              await refreshAuth();
+              // Try to refresh session without using refreshAuth to avoid circular dependency
+              console.log('Auth: Attempting direct session refresh');
+              const refreshResult = await refreshSupabaseSession();
+
+              if (refreshResult.success) {
+                console.log('Auth: Session refreshed successfully');
+                // Check auth again but don't call ourselves recursively to avoid infinite loop
+                const refreshedStatus = await checkAuthStatus();
+                setIsAuthenticated(refreshedStatus.isAuthenticated);
+                if (refreshedStatus.isAuthenticated) {
+                  const refreshedResponse = await fetch('/api/auth/session');
+                  if (refreshedResponse.ok) {
+                    const refreshedData = await refreshedResponse.json();
+                    if (refreshedData.user) {
+                      setUser(refreshedData.user);
+                    }
+                  }
+                }
+              }
             }
           } catch (profileError) {
             console.error('Auth: Error fetching user profile:', profileError);
