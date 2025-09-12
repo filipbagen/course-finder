@@ -30,6 +30,12 @@ export async function PUT(
     const validatedData = validateRequest(body, UpdateScheduleSchema);
     const { courseId, semester, period } = validatedData;
 
+    console.log('API: Updating course schedule:', {
+      courseId,
+      semester,
+      period,
+    });
+
     // Use withPrisma wrapper for better database connection handling
     const result = await withPrisma(
       async (prismaClient) => {
@@ -90,6 +96,8 @@ export async function PUT(
         // Transform the course
         const transformedCourse = transformCourse(course);
 
+        // Create the final response with the period data explicitly included
+        // Period isn't stored in database but is needed for UI state management
         return {
           success: true,
           course: {
@@ -99,6 +107,7 @@ export async function PUT(
               semester: updatedEnrollment.semester,
               userId: updatedEnrollment.userId,
               courseId: updatedEnrollment.courseId,
+              period: period, // Include the period explicitly
             },
           },
         };

@@ -821,8 +821,16 @@ export const CourseDetailsDialog = () => {
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto">
-            {loading && <p>Laddar kursinformation...</p>}
-            {error && <p className="text-red-500">{error}</p>}
+            {loading && (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-lg">Laddar kursinformation...</p>
+              </div>
+            )}
+            {error && (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-red-500 text-lg">{error}</p>
+              </div>
+            )}
             {!loading && !error && course && (
               <Tabs defaultValue="info" className="w-full">
                 <TabsList className="grid grid-cols-2 mb-6">
@@ -904,8 +912,16 @@ export const CourseDetailsDialog = () => {
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
-          {loading && <p>Laddar kursinformation...</p>}
-          {error && <p className="text-red-500">{error}</p>}
+          {loading && (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-lg">Laddar kursinformation...</p>
+            </div>
+          )}
+          {error && (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-red-500 text-lg">{error}</p>
+            </div>
+          )}
           {!loading && !error && course && (
             <Tabs defaultValue="info" className="w-full">
               <TabsList className="grid grid-cols-2 mb-6">

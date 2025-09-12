@@ -113,7 +113,7 @@ export function ScheduleProvider({
       if (readonly) return;
 
       try {
-        console.log('Moving course:', {
+        console.log('ScheduleProvider: Moving course:', {
           courseId,
           fromSemester,
           fromPeriod,
@@ -121,23 +121,38 @@ export function ScheduleProvider({
           toPeriod,
         });
 
-        // Update via API
-        await ScheduleService.updateCourseSchedule({
+        // First, optimistically update the UI for smoother UX
+        dispatch({
+          type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
+          payload: {
+            courseId,
+            fromSemester,
+            fromPeriod,
+            toSemester,
+            toPeriod,
+          },
+        });
+
+        // Then update via API
+        const updatedCourse = await ScheduleService.updateCourseSchedule({
           courseId,
           semester: toSemester,
           period: toPeriod,
         });
 
+        console.log('ScheduleProvider: API update successful:', updatedCourse);
+
+        // Show success message
         toast.success('Course moved successfully');
 
-        // Reload schedule data to ensure database and UI are in sync
-        setTimeout(() => {
-          loadScheduleData();
-        }, 300);
+        // Important: Reload schedule data to ensure database and UI are in sync
+        await loadScheduleData();
       } catch (error) {
+        console.error('ScheduleProvider: Error moving course:', error);
+
         // Revert the optimistic update
         dispatch({
-          type: ScheduleActions.MOVE_COURSE,
+          type: ScheduleActions.MOVE_COURSE_REVERT,
           payload: {
             courseId,
             fromSemester: toSemester,
@@ -156,10 +171,10 @@ export function ScheduleProvider({
         toast.error(errorMessage);
 
         // Reload data on error to ensure state consistency
-        loadScheduleData();
+        await loadScheduleData();
       }
     },
-    [readonly, loadScheduleData]
+    [readonly, loadScheduleData, dispatch]
   );
 
   /**
@@ -175,6 +190,13 @@ export function ScheduleProvider({
       );
 
       try {
+        // First apply optimistic UI update
+        dispatch({
+          type: ScheduleActions.REMOVE_COURSE_OPTIMISTIC,
+          payload: { enrollmentId },
+        });
+
+        // Then perform the API call
         await ScheduleService.removeCourseFromSchedule(enrollmentId);
 
         // Immediately update the enrolled courses store to remove the course
@@ -188,8 +210,17 @@ export function ScheduleProvider({
         setEnrolledCourses(updatedCourses);
 
         toast.success('Course removed from schedule');
+
+        // Important: Reload full schedule data to ensure database and UI are in sync
+        await loadScheduleData();
       } catch (error) {
         console.error('ScheduleProvider: Error removing course:', error);
+
+        // Revert the optimistic update
+        dispatch({
+          type: ScheduleActions.REMOVE_COURSE_REVERT,
+          payload: { enrollmentId },
+        });
 
         // Provide a user-friendly error message
         const errorMessage =
@@ -198,10 +229,10 @@ export function ScheduleProvider({
         toast.error(errorMessage);
 
         // Reload schedule data to ensure state consistency
-        loadScheduleData();
+        await loadScheduleData();
       }
     },
-    [readonly, loadScheduleData, setEnrolledCourses]
+    [readonly, loadScheduleData, setEnrolledCourses, dispatch]
   );
 
   /**
@@ -239,7 +270,11 @@ export function ScheduleProvider({
       }
     };
 
-    if (state.lastAction) {
+    if (
+      state.lastAction &&
+      (state.lastAction.type === ScheduleActions.MOVE_COURSE ||
+        state.lastAction.type === ScheduleActions.REMOVE_COURSE)
+    ) {
       handleAsyncAction();
     }
   }, [state.lastAction, handleCourseMove, handleCourseRemoval]);

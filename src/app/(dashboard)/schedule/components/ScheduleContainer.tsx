@@ -183,7 +183,27 @@ export function ScheduleContainer({
       return;
     }
 
-    // Dispatch move action with the updated period information
+    console.log('ScheduleContainer: Handling drag end - moving course', {
+      courseId,
+      fromSemester: currentPosition.semester,
+      fromPeriod: currentPosition.period,
+      toSemester: targetSemester,
+      toPeriod: targetPeriod,
+    });
+
+    // Apply optimistic UI update
+    dispatch({
+      type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
+      payload: {
+        courseId,
+        fromSemester: currentPosition.semester,
+        fromPeriod: currentPosition.period,
+        toSemester: targetSemester,
+        toPeriod: targetPeriod,
+      },
+    });
+
+    // Trigger the actual API update via the main handler
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {

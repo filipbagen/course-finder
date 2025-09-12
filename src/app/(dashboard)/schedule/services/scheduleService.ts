@@ -71,15 +71,17 @@ export class ScheduleService {
     update: ScheduleUpdate
   ): Promise<CourseWithEnrollment> {
     try {
-      console.log('Updating course schedule:', update);
+      console.log('ScheduleService: Updating course schedule:', update);
 
       const response = await fetch(`${this.BASE_URL}/course`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
         credentials: 'include',
         body: JSON.stringify(update),
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -96,8 +98,8 @@ export class ScheduleService {
       }
 
       const responseData = await response.json();
-      console.log(`Update course response:`, responseData);
-      return responseData as CourseWithEnrollment;
+      console.log(`ScheduleService: Update course response:`, responseData);
+      return responseData.data as CourseWithEnrollment;
     } catch (error) {
       console.error('Error updating course schedule:', error);
       throw new Error('Failed to update course placement');

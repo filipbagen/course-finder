@@ -71,17 +71,34 @@ export function scheduleReducer(
       };
 
     case ScheduleActions.MOVE_COURSE:
+    case ScheduleActions.MOVE_COURSE_OPTIMISTIC:
       return {
         ...state,
         schedule: moveCourseInSchedule(state.schedule, action.payload),
         lastAction: action,
       };
 
+    case ScheduleActions.MOVE_COURSE_REVERT:
+      return {
+        ...state,
+        schedule: moveCourseInSchedule(state.schedule, action.payload),
+        lastAction: null,
+      };
+
     case ScheduleActions.REMOVE_COURSE:
+    case ScheduleActions.REMOVE_COURSE_OPTIMISTIC:
       return {
         ...state,
         schedule: removeCourseFromSchedule(state.schedule, action.payload),
         lastAction: action,
+      };
+
+    case ScheduleActions.REMOVE_COURSE_REVERT:
+      // We should reload the data in this case, as reverting a removal
+      // requires adding the course back with all its original details
+      return {
+        ...state,
+        lastAction: null,
       };
 
     case ScheduleActions.UPDATE_COURSE_REVIEWS:
