@@ -45,8 +45,13 @@ export function ScheduleProvider({
     ...initialScheduleState,
     readonly,
   });
-  const { setEnrolledCourses, setLoading, setError } =
-    useEnrolledCoursesStore();
+  const {
+    setEnrolledCourses,
+    setLoading,
+    setError,
+    removeCourse,
+    updateCourse,
+  } = useEnrolledCoursesStore();
   const { user, loading: authLoading, isAuthenticated } = useAuth();
 
   /**
@@ -145,8 +150,37 @@ export function ScheduleProvider({
         // Show success message
         toast.success('Course moved successfully');
 
-        // Important: Reload schedule data to ensure database and UI are in sync
-        await loadScheduleData();
+        // Mark the operation as successful in the reducer
+        dispatch({
+          type: ScheduleActions.MOVE_COURSE_SUCCESS,
+          payload: {
+            courseId,
+            course: updatedCourse,
+          },
+        });
+
+        // Find the course before updating it
+        const currentEnrolledCourses =
+          useEnrolledCoursesStore.getState().enrolledCourses;
+        const courseToUpdate = currentEnrolledCourses.find(
+          (course) => course.id === courseId
+        );
+
+        if (courseToUpdate) {
+          // Update the enrolled courses store directly
+          const updatedCourses = currentEnrolledCourses.map((course) =>
+            course.id === courseId
+              ? {
+                  ...course,
+                  enrollment: {
+                    ...course.enrollment,
+                    semester: toSemester,
+                  },
+                }
+              : course
+          );
+          setEnrolledCourses(updatedCourses);
+        }
       } catch (error) {
         console.error('ScheduleProvider: Error moving course:', error);
 
@@ -174,7 +208,7 @@ export function ScheduleProvider({
         await loadScheduleData();
       }
     },
-    [readonly, loadScheduleData, dispatch]
+    [readonly, loadScheduleData, dispatch, setEnrolledCourses]
   );
 
   /**
@@ -189,37 +223,55 @@ export function ScheduleProvider({
         enrollmentId
       );
 
+      // Find the course before removing it so we can restore if needed
+      const currentEnrolledCourses =
+        useEnrolledCoursesStore.getState().enrolledCourses;
+      const courseToRemove = currentEnrolledCourses.find(
+        (course) => course.enrollment?.id === enrollmentId
+      );
+
       try {
         // First apply optimistic UI update
         dispatch({
           type: ScheduleActions.REMOVE_COURSE_OPTIMISTIC,
-          payload: { enrollmentId },
+          payload: {
+            enrollmentId,
+            courseToRestore: courseToRemove,
+          },
         });
 
         // Then perform the API call
-        await ScheduleService.removeCourseFromSchedule(enrollmentId);
-
-        // Immediately update the enrolled courses store to remove the course
-        const currentEnrolledCourses =
-          useEnrolledCoursesStore.getState().enrolledCourses;
-
-        const updatedCourses = currentEnrolledCourses.filter(
-          (course) => course.enrollment.id !== enrollmentId
+        const result = await ScheduleService.removeCourseFromSchedule(
+          enrollmentId
         );
+        console.log('ScheduleProvider: Course removal API result:', result);
 
-        setEnrolledCourses(updatedCourses);
+        // If the API reports the course was already removed or was removed successfully
+        if (result.success || result.alreadyRemoved) {
+          // Update the Zustand store
+          removeCourse(enrollmentId);
 
-        toast.success('Course removed from schedule');
+          // Mark the operation as successful in the reducer
+          dispatch({
+            type: ScheduleActions.REMOVE_COURSE_SUCCESS,
+            payload: { enrollmentId },
+          });
 
-        // Important: Reload full schedule data to ensure database and UI are in sync
-        await loadScheduleData();
+          // Show success toast
+          toast.success('Course removed from schedule');
+        } else {
+          throw new Error('Failed to remove course: Unknown error');
+        }
       } catch (error) {
         console.error('ScheduleProvider: Error removing course:', error);
 
         // Revert the optimistic update
         dispatch({
           type: ScheduleActions.REMOVE_COURSE_REVERT,
-          payload: { enrollmentId },
+          payload: {
+            enrollmentId,
+            courseToRestore: courseToRemove,
+          },
         });
 
         // Provide a user-friendly error message
@@ -284,6 +336,22 @@ export function ScheduleProvider({
     console.log('Loading schedule data for userId:', userId);
     loadScheduleData();
   }, [loadScheduleData, userId]);
+
+  // Detect pending operations and force a refresh if needed
+  useEffect(() => {
+    // If there are pending operations, periodically try to refresh
+    if (state.pendingOperations.length > 0) {
+      const timer = setTimeout(() => {
+        console.log(
+          'Found pending operations, refreshing schedule...',
+          state.pendingOperations
+        );
+        loadScheduleData();
+      }, 5000); // Try to refresh every 5 seconds if there are pending operations
+
+      return () => clearTimeout(timer);
+    }
+  }, [state.pendingOperations, loadScheduleData]);
 
   const contextValue: ScheduleContextType = {
     state,

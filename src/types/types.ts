@@ -59,6 +59,7 @@ export interface Enrollment {
   semester: number;
   userId: string;
   courseId: string;
+  period?: number; // Add period property (optional to maintain compatibility)
 }
 
 export interface CourseWithEnrollment extends Omit<Course, 'semester'> {

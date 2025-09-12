@@ -15,15 +15,21 @@ export class ScheduleService {
    */
   static async fetchSchedule(userId?: string): Promise<ScheduleData> {
     try {
-      const url = userId ? `${this.BASE_URL}?userId=${userId}` : this.BASE_URL;
+      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      const url = userId
+        ? `${this.BASE_URL}?userId=${userId}&t=${timestamp}`
+        : `${this.BASE_URL}?t=${timestamp}`;
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
         credentials: 'include',
-        next: { revalidate: 0 },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -73,11 +79,14 @@ export class ScheduleService {
     try {
       console.log('ScheduleService: Updating course schedule:', update);
 
-      const response = await fetch(`${this.BASE_URL}/course`, {
+      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      const response = await fetch(`${this.BASE_URL}/course?t=${timestamp}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
         credentials: 'include',
         body: JSON.stringify(update),
@@ -114,10 +123,14 @@ export class ScheduleService {
     period: number
   ): Promise<CourseWithEnrollment> {
     try {
-      const response = await fetch(`${this.BASE_URL}/course`, {
+      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      const response = await fetch(`${this.BASE_URL}/course?t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -125,18 +138,25 @@ export class ScheduleService {
           semester,
           period,
         }),
+        cache: 'no-store',
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         console.error(
           'Add course error:',
           response.status,
-          response.statusText
+          response.statusText,
+          errorText
         );
-        throw new Error(`Failed to add course: ${response.statusText}`);
+        throw new Error(
+          `Failed to add course: ${response.statusText}. ${errorText}`
+        );
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('Add course response:', result);
+      return result.data;
     } catch (error) {
       console.error('Error adding course to schedule:', error);
       throw new Error('Failed to add course to schedule');
@@ -146,9 +166,11 @@ export class ScheduleService {
   /**
    * Remove course from schedule
    */
-  static async removeCourseFromSchedule(enrollmentId: string): Promise<void> {
+  static async removeCourseFromSchedule(enrollmentId: string): Promise<any> {
     try {
-      console.log(`Removing course ${enrollmentId} from schedule`);
+      console.log(
+        `ScheduleService: Removing course ${enrollmentId} from schedule`
+      );
 
       // URL encode the enrollment ID to handle any special characters
       const encodedEnrollmentId = encodeURIComponent(enrollmentId);
@@ -158,8 +180,12 @@ export class ScheduleService {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
         credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -170,12 +196,23 @@ export class ScheduleService {
           response.statusText,
           errorText
         );
+
+        // Special handling for 404 errors which might mean the course was already deleted
+        if (response.status === 404) {
+          console.warn(
+            `Course ${enrollmentId} not found, may have been already removed`
+          );
+          return { success: true, alreadyRemoved: true, enrollmentId };
+        }
+
         throw new Error(
           `Failed to remove course: ${response.statusText}. ${errorText}`
         );
       }
 
-      console.log(`Course ${enrollmentId} removed successfully`);
+      const result = await response.json();
+      console.log(`Course ${enrollmentId} removed successfully:`, result);
+      return result.data;
     } catch (error) {
       console.error('Error removing course from schedule:', error);
       throw new Error('Failed to remove course from schedule');

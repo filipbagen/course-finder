@@ -17,6 +17,89 @@ import { transformCourse } from '@/lib/transformers';
 export const dynamic = 'force-dynamic';
 
 /**
+ * DELETE /api/schedule/course/:enrollmentId
+ * Remove a course from the schedule
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { enrollmentId: string } }
+): Promise<NextResponse<ApiResponse<any>>> {
+  try {
+    const user = await getAuthenticatedUser();
+    const enrollmentId = params.enrollmentId;
+
+    if (!enrollmentId) {
+      return badRequest('Enrollment ID is required');
+    }
+
+    console.log('API: Removing enrollment with ID:', enrollmentId);
+
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(async (prismaClient) => {
+      // Find the enrollment to delete
+      const enrollment = await prismaClient.enrollment.findFirst({
+        where: {
+          id: enrollmentId,
+          userId: user.id,
+        },
+        include: {
+          course: true,
+        },
+      });
+
+      if (!enrollment) {
+        return {
+          notFound: true,
+          message: 'Enrollment not found or access denied',
+        };
+      }
+
+      // Delete the enrollment
+      await prismaClient.enrollment.delete({
+        where: {
+          id: enrollmentId,
+        },
+      });
+
+      return {
+        success: true,
+        data: {
+          enrollmentId,
+          courseId: enrollment.courseId,
+          semester: enrollment.semester,
+          courseName: enrollment.course.name,
+        },
+      };
+    });
+
+    if (result.notFound) {
+      return notFound(result.message);
+    }
+
+    // Add cache control headers
+    const response = createSuccessResponse(result.data);
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
+  } catch (error) {
+    console.error('Error removing course from schedule:', error);
+
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Schedule remove error (ref: ${errorRef}):`, error);
+
+    return internalServerError(
+      `Failed to remove course from schedule. Please try again. (Ref: ${errorRef})`
+    );
+  }
+}
+
+/**
  * PUT /api/schedule/course
  * Update course placement in schedule with enhanced error handling
  */
@@ -131,6 +214,8 @@ export async function PUT(
       'Cache-Control',
       'no-cache, no-store, must-revalidate'
     );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
 
     return response;
   } catch (error) {

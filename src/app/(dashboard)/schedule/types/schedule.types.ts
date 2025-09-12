@@ -39,6 +39,14 @@ export interface MoveOperation {
 
 export interface RemoveOperation {
   enrollmentId: string;
+  courseToRestore?: CourseWithEnrollment;
+}
+
+// Pending operation tracking
+export interface PendingOperation {
+  type: 'move' | 'remove';
+  id: string;
+  data: MoveOperation | RemoveOperation;
 }
 
 // Action types for the reducer
@@ -48,9 +56,11 @@ export enum ScheduleActions {
   FETCH_SCHEDULE_ERROR = 'FETCH_SCHEDULE_ERROR',
   MOVE_COURSE = 'MOVE_COURSE',
   MOVE_COURSE_OPTIMISTIC = 'MOVE_COURSE_OPTIMISTIC',
+  MOVE_COURSE_SUCCESS = 'MOVE_COURSE_SUCCESS',
   MOVE_COURSE_REVERT = 'MOVE_COURSE_REVERT',
   REMOVE_COURSE = 'REMOVE_COURSE',
   REMOVE_COURSE_OPTIMISTIC = 'REMOVE_COURSE_OPTIMISTIC',
+  REMOVE_COURSE_SUCCESS = 'REMOVE_COURSE_SUCCESS',
   REMOVE_COURSE_REVERT = 'REMOVE_COURSE_REVERT',
   SET_DRAG_STATE = 'SET_DRAG_STATE',
   SET_ERROR = 'SET_ERROR',
@@ -59,7 +69,7 @@ export enum ScheduleActions {
 
 export interface ScheduleAction {
   type: ScheduleActions;
-  payload?: any;
+  payload?: any; // We'll keep this for backward compatibility
 }
 
 export interface DragState {
@@ -76,6 +86,7 @@ export interface ScheduleState {
   draggedCourse: CourseWithEnrollment | null;
   lastUpdated: Date | null;
   lastAction: ScheduleAction | null;
+  pendingOperations: PendingOperation[];
 }
 
 export interface ScheduleContextType {

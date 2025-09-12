@@ -21,6 +21,7 @@ export const initialScheduleState: ScheduleState = {
   draggedCourse: null,
   lastUpdated: null,
   lastAction: null,
+  pendingOperations: [], // Track operations in progress
 };
 
 /**
@@ -33,6 +34,8 @@ export function scheduleReducer(
   state: ScheduleState,
   action: ScheduleAction
 ): ScheduleState {
+  console.log(`Schedule Reducer: Handling action ${action.type}`, action);
+
   switch (action.type) {
     case ScheduleActions.FETCH_SCHEDULE_START:
       return {
@@ -48,6 +51,8 @@ export function scheduleReducer(
         error: null,
         schedule: action.payload,
         lastUpdated: new Date(),
+        // Clear any pending operations when we get fresh data
+        pendingOperations: [],
       };
 
     case ScheduleActions.FETCH_SCHEDULE_ERROR:
@@ -70,36 +75,115 @@ export function scheduleReducer(
         error: action.payload,
       };
 
-    case ScheduleActions.MOVE_COURSE:
-    case ScheduleActions.MOVE_COURSE_OPTIMISTIC:
+    case ScheduleActions.MOVE_COURSE_OPTIMISTIC: {
+      // Track this operation as pending
+      const pendingOperations = [
+        ...state.pendingOperations,
+        {
+          type: 'move' as const,
+          id: action.payload.courseId,
+          data: action.payload,
+        },
+      ];
+
       return {
         ...state,
         schedule: moveCourseInSchedule(state.schedule, action.payload),
         lastAction: action,
+        pendingOperations,
       };
+    }
 
-    case ScheduleActions.MOVE_COURSE_REVERT:
+    case ScheduleActions.MOVE_COURSE_SUCCESS: {
+      // Remove this operation from pending
+      const pendingOperations = state.pendingOperations.filter(
+        (op) => !(op.type === 'move' && op.id === action.payload.courseId)
+      );
+
+      return {
+        ...state,
+        pendingOperations,
+        lastAction: null,
+      };
+    }
+
+    case ScheduleActions.MOVE_COURSE_REVERT: {
+      // Remove this operation from pending
+      const pendingOperations = state.pendingOperations.filter(
+        (op) => !(op.type === 'move' && op.id === action.payload.courseId)
+      );
+
       return {
         ...state,
         schedule: moveCourseInSchedule(state.schedule, action.payload),
         lastAction: null,
+        pendingOperations,
       };
+    }
 
-    case ScheduleActions.REMOVE_COURSE:
-    case ScheduleActions.REMOVE_COURSE_OPTIMISTIC:
+    case ScheduleActions.REMOVE_COURSE_OPTIMISTIC: {
+      // Track this operation as pending
+      const pendingOperations = [
+        ...state.pendingOperations,
+        {
+          type: 'remove' as const,
+          id: action.payload.enrollmentId,
+          data: action.payload,
+        },
+      ];
+
       return {
         ...state,
         schedule: removeCourseFromSchedule(state.schedule, action.payload),
         lastAction: action,
+        pendingOperations,
       };
+    }
 
-    case ScheduleActions.REMOVE_COURSE_REVERT:
-      // We should reload the data in this case, as reverting a removal
-      // requires adding the course back with all its original details
+    case ScheduleActions.REMOVE_COURSE_SUCCESS: {
+      // Remove this operation from pending
+      const pendingOperations = state.pendingOperations.filter(
+        (op) => !(op.type === 'remove' && op.id === action.payload.enrollmentId)
+      );
+
       return {
         ...state,
+        pendingOperations,
         lastAction: null,
       };
+    }
+
+    case ScheduleActions.REMOVE_COURSE_REVERT: {
+      // Get the original course data to add back
+      const originalData = state.pendingOperations.find(
+        (op) => op.type === 'remove' && op.id === action.payload.enrollmentId
+      )?.data;
+
+      // Remove this operation from pending
+      const pendingOperations = state.pendingOperations.filter(
+        (op) => !(op.type === 'remove' && op.id === action.payload.enrollmentId)
+      );
+
+      // If we don't have the original data, we need to fetch the schedule again
+      if (!originalData) {
+        return {
+          ...state,
+          pendingOperations,
+          lastAction: null,
+        };
+      }
+
+      // Otherwise, we can add the course back
+      return {
+        ...state,
+        schedule: addCourseBackToSchedule(
+          state.schedule,
+          action.payload.courseToRestore
+        ),
+        pendingOperations,
+        lastAction: null,
+      };
+    }
 
     case ScheduleActions.UPDATE_COURSE_REVIEWS:
       return {
@@ -113,6 +197,34 @@ export function scheduleReducer(
 }
 
 /**
+ * Add a course back to the schedule (for reverting removals)
+ */
+function addCourseBackToSchedule(
+  schedule: ScheduleData,
+  course: CourseWithEnrollment | null
+): ScheduleData {
+  if (!course || !course.enrollment) {
+    console.warn('Cannot add course back: Missing course data');
+    return schedule;
+  }
+
+  // Create a deep copy of the schedule
+  const newSchedule = JSON.parse(JSON.stringify(schedule)) as ScheduleData;
+
+  const semester = course.enrollment.semester;
+  const period = course.enrollment.period || 1;
+
+  // Determine which array to add the course to
+  const semesterKey = `semester${semester}` as keyof ScheduleData;
+  const periodKey = `period${period}` as 'period1' | 'period2';
+
+  // Add the course back
+  newSchedule[semesterKey][periodKey].push(course);
+
+  return newSchedule;
+}
+
+/**
  * Move a course between semesters/periods
  */
 function moveCourseInSchedule(
@@ -123,20 +235,7 @@ function moveCourseInSchedule(
     operation;
 
   // Create a deep copy of the schedule
-  const newSchedule: ScheduleData = {
-    semester7: {
-      period1: [...schedule.semester7.period1],
-      period2: [...schedule.semester7.period2],
-    },
-    semester8: {
-      period1: [...schedule.semester8.period1],
-      period2: [...schedule.semester8.period2],
-    },
-    semester9: {
-      period1: [...schedule.semester9.period1],
-      period2: [...schedule.semester9.period2],
-    },
-  };
+  const newSchedule: ScheduleData = JSON.parse(JSON.stringify(schedule));
 
   // Get source and destination keys
   const fromSemesterKey = `semester${fromSemester}` as keyof ScheduleData;
@@ -217,6 +316,7 @@ function moveCourseInSchedule(
       enrollment: {
         ...courseToMove.enrollment,
         semester: toSemester,
+        period: toPeriod, // This is now valid with our updated Enrollment interface
       },
     };
 
