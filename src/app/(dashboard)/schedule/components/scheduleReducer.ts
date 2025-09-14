@@ -316,7 +316,8 @@ function moveCourseInSchedule(
       enrollment: {
         ...courseToMove.enrollment,
         semester: toSemester,
-        period: toPeriod, // This is now valid with our updated Enrollment interface
+        // Do not update the period - it should stay fixed
+        // period: toPeriod, // Removed this line as it causes issues
       },
     };
 

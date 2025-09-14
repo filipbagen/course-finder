@@ -138,11 +138,11 @@ export function ScheduleProvider({
           },
         });
 
-        // Then update via API
+        // Then update via API - only pass the semester change, the period should stay the same
         const updatedCourse = await ScheduleService.updateCourseSchedule({
           courseId,
           semester: toSemester,
-          period: toPeriod,
+          period: fromPeriod, // We'll send the original period, but API will use course's actual period
         });
 
         console.log('ScheduleProvider: API update successful:', updatedCourse);
@@ -175,6 +175,7 @@ export function ScheduleProvider({
                   enrollment: {
                     ...course.enrollment,
                     semester: toSemester,
+                    // Keep the original period - don't update it
                   },
                 }
               : course

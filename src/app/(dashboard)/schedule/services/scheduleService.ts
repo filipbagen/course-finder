@@ -79,6 +79,10 @@ export class ScheduleService {
     try {
       console.log('ScheduleService: Updating course schedule:', update);
 
+      // Even though we send the period, the API will ignore it and use the course's actual period
+      // We're just keeping the interface consistent for the frontend
+      const { courseId, semester, period } = update;
+
       const timestamp = new Date().getTime(); // Add timestamp to prevent caching
       const response = await fetch(`${this.BASE_URL}/course?t=${timestamp}`, {
         method: 'PUT',
@@ -89,7 +93,7 @@ export class ScheduleService {
           Expires: '0',
         },
         credentials: 'include',
-        body: JSON.stringify(update),
+        body: JSON.stringify({ courseId, semester, period }),
         cache: 'no-store',
       });
 

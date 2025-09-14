@@ -72,32 +72,36 @@ export async function PUT(
           };
         }
 
-        // Update the enrollment with semester
+        // Update the enrollment with semester only (don't update period)
         const updatedEnrollment = await prismaClient.enrollment.update({
           where: {
             id: enrollment.id,
           },
           data: {
             semester,
+            // Do not update period - it should stay fixed during drag operations
+          },
+          include: {
+            course: true, // Include the course data directly
           },
         });
 
-        // Fetch the course separately
-        const course = await prismaClient.course.findUnique({
-          where: {
-            id: courseId,
-          },
-        });
-
-        if (!course) {
+        if (!updatedEnrollment.course) {
           return { notFound: true, message: 'Course not found' };
         }
 
         // Transform the course
-        const transformedCourse = transformCourse(course);
+        const transformedCourse = transformCourse(updatedEnrollment.course);
 
-        // Create the final response with the period data explicitly included
-        // Period isn't stored in database but is needed for UI state management
+        // For multi-period courses, we need to respect the original period array
+        const coursePeriod =
+          transformedCourse && transformedCourse.period
+            ? Array.isArray(transformedCourse.period)
+              ? transformedCourse.period
+              : [transformedCourse.period]
+            : [1]; // Default to period 1 if undefined
+
+        // Create the final response with the correct period data
         return {
           success: true,
           course: {
@@ -107,7 +111,8 @@ export async function PUT(
               semester: updatedEnrollment.semester,
               userId: updatedEnrollment.userId,
               courseId: updatedEnrollment.courseId,
-              period: period, // Include the period explicitly
+              // Use the course's original period - this is crucial for correct placement
+              period: coursePeriod[0],
             },
           },
         };
