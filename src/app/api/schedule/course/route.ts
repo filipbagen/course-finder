@@ -1,249 +1,273 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withPrisma } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { transformCourse } from '@/lib/transformers';
+import {
+  createSuccessResponse,
+  badRequest,
+  notFound,
+  conflict,
+  internalServerError,
+} from '@/lib/errors';
+import { UpdateScheduleSchema, validateRequest } from '@/lib/validation';
 import { randomUUID } from 'crypto';
+import type { ApiResponse } from '@/types/api';
+import { transformCourse } from '@/lib/transformers';
 
 // Force dynamic rendering to avoid static generation errors with cookies
 export const dynamic = 'force-dynamic';
 
 /**
  * PUT /api/schedule/course
- * Update course semester in schedule
+ * Update course placement in schedule with enhanced error handling
  */
-export async function PUT(request: NextRequest) {
+export async function PUT(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<any>>> {
   try {
     const user = await getAuthenticatedUser();
+
     const body = await request.json();
-    const { courseId, semester } = body;
+    const validatedData = validateRequest(body, UpdateScheduleSchema);
+    const { courseId, semester, period } = validatedData;
 
-    if (!courseId || !semester) {
-      return NextResponse.json(
-        { success: false, error: 'courseId and semester are required' },
-        { status: 400 }
-      );
-    }
-
-    console.log('API: Updating course semester:', {
+    console.log('API: Updating course schedule:', {
       courseId,
       semester,
-      userId: user.id,
+      period,
     });
 
-    // Find the enrollment to update
-    const enrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId: courseId,
-      },
-      include: {
-        course: true,
-      },
-    });
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Find the enrollment to update
+        const enrollment = await prismaClient.enrollment.findFirst({
+          where: {
+            userId: user.id,
+            courseId: courseId,
+          },
+        });
 
-    if (!enrollment) {
-      console.error('Enrollment not found for course:', courseId);
-      return NextResponse.json(
-        { success: false, error: 'Enrollment not found for this course' },
-        { status: 404 }
-      );
-    }
+        if (!enrollment) {
+          return {
+            notFound: true,
+            message: 'Enrollment not found for this course',
+          };
+        }
 
-    // Check if enrollment already exists in the target semester
-    const existingInTargetSemester = await prisma.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId: courseId,
-        semester: semester,
-        id: { not: enrollment.id },
+        // Check if enrollment already exists in the target semester
+        const existingInTargetSemester =
+          await prismaClient.enrollment.findFirst({
+            where: {
+              userId: user.id,
+              courseId: courseId,
+              semester: semester,
+              id: { not: enrollment.id }, // Exclude the current enrollment
+            },
+          });
+
+        if (existingInTargetSemester) {
+          return {
+            conflict: true,
+            message: 'Already enrolled in this course for this semester',
+          };
+        }
+
+        // Update the enrollment with the new semester
+        const updatedEnrollment = await prismaClient.enrollment.update({
+          where: {
+            id: enrollment.id,
+          },
+          data: {
+            semester: semester, // Update to the new semester
+          },
+          include: {
+            course: true, // Include the course data directly
+          },
+        });
+
+        if (!updatedEnrollment.course) {
+          return { notFound: true, message: 'Course not found' };
+        }
+
+        // Transform the course
+        const transformedCourse = transformCourse(updatedEnrollment.course);
+
+        if (!transformedCourse) {
+          return { notFound: true, message: 'Failed to transform course data' };
+        }
+
+        // Use the course's actual period data
+        const coursePeriod =
+          transformedCourse.period && Array.isArray(transformedCourse.period)
+            ? transformedCourse.period
+            : [1]; // Default to period 1 if undefined
+
+        // Create the final response with the correct period data
+        return {
+          success: true,
+          course: {
+            ...transformedCourse,
+            enrollment: {
+              id: updatedEnrollment.id,
+              semester: updatedEnrollment.semester,
+              userId: updatedEnrollment.userId,
+              courseId: updatedEnrollment.courseId,
+              // Use the course's actual period data
+              period: coursePeriod,
+            },
+          },
+        };
       },
-    });
-
-    if (existingInTargetSemester) {
-      console.error('Already enrolled in course for target semester:', {
-        courseId,
-        semester,
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Already enrolled in this course for this semester',
-        },
-        { status: 409 }
-      );
-    }
-
-    // Update the enrollment semester
-    const updatedEnrollment = await prisma.enrollment.update({
-      where: {
-        id: enrollment.id,
-      },
-      data: {
-        semester: semester,
-      },
-      include: {
-        course: true,
-      },
-    });
-
-    // Transform the course for the response
-    const transformedCourse = transformCourse(updatedEnrollment.course);
-
-    const response = {
-      success: true,
-      course: {
-        ...transformedCourse,
-        enrollment: {
-          id: updatedEnrollment.id,
-          semester: updatedEnrollment.semester,
-          userId: updatedEnrollment.userId,
-          courseId: updatedEnrollment.courseId,
-          period:
-            transformedCourse && Array.isArray(transformedCourse.period)
-              ? transformedCourse.period[0]
-              : 1,
-        },
-      },
-    };
-
-    console.log('Course semester updated successfully:', {
-      courseId,
-      newSemester: semester,
-    });
-
-    return NextResponse.json(response, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-    });
-  } catch (error) {
-    console.error('Error updating course semester:', error);
-    return NextResponse.json(
       {
-        success: false,
-        error: 'Failed to update course semester',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
+        // More aggressive retry pattern for schedule operations
+      }
+    );
+
+    if (result.notFound) {
+      return notFound(result.message);
+    }
+
+    if (result.conflict) {
+      return conflict(result.message);
+    }
+
+    // Add cache control headers
+    const response = createSuccessResponse(result.course);
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
+  } catch (error) {
+    console.error('Error updating course schedule:', error);
+
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Schedule update error (ref: ${errorRef}):`, error);
+
+    return internalServerError(
+      `Failed to update course schedule. Please try again. (Ref: ${errorRef})`
     );
   }
 }
 
 /**
  * POST /api/schedule/course
- * Add course to schedule
+ * Add course to schedule with enhanced error handling
  */
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse<any>>> {
   try {
     const user = await getAuthenticatedUser();
+
     const body = await request.json();
-    const { courseId, semester } = body;
+    const validatedData = validateRequest(body, UpdateScheduleSchema);
+    const { courseId, semester, period } = validatedData;
 
-    if (!courseId || !semester) {
-      return NextResponse.json(
-        { success: false, error: 'courseId and semester are required' },
-        { status: 400 }
-      );
+    // Use withPrisma wrapper for better database connection handling
+    const result = await withPrisma(
+      async (prismaClient) => {
+        // Check if enrollment already exists
+        const existingEnrollment = await prismaClient.enrollment.findFirst({
+          where: {
+            userId: user.id,
+            courseId,
+            semester,
+          },
+        });
+
+        if (existingEnrollment) {
+          return {
+            conflict: true,
+            message: 'Already enrolled in this course for this semester',
+          };
+        }
+
+        // Create new enrollment
+        const enrollment = await prismaClient.enrollment.create({
+          data: {
+            id: randomUUID(),
+            userId: user.id,
+            courseId,
+            semester,
+          },
+        });
+
+        // Fetch the course separately
+        const course = await prismaClient.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+
+        if (!course) {
+          return { notFound: true, message: 'Course not found' };
+        }
+
+        // Transform the course
+        const transformedCourse = transformCourse(course);
+
+        if (!transformedCourse) {
+          return { notFound: true, message: 'Failed to transform course data' };
+        }
+
+        // Use the course's actual period data
+        const coursePeriod =
+          transformedCourse.period && Array.isArray(transformedCourse.period)
+            ? transformedCourse.period
+            : [1]; // Default to period 1 if undefined
+
+        return {
+          success: true,
+          course: {
+            ...transformedCourse,
+            enrollment: {
+              id: enrollment.id,
+              semester: enrollment.semester,
+              userId: enrollment.userId,
+              courseId: enrollment.courseId,
+              // Use the course's actual period data
+              period: coursePeriod,
+            },
+          },
+        };
+      },
+      {
+        // More aggressive retry pattern for schedule operations
+      }
+    );
+
+    if (result.notFound) {
+      return notFound(result.message);
     }
 
-    console.log('API: Adding course to schedule:', {
-      courseId,
-      semester,
-      userId: user.id,
-    });
-
-    // Check if enrollment already exists
-    const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId: user.id,
-        courseId,
-        semester,
-      },
-    });
-
-    if (existingEnrollment) {
-      console.error('Already enrolled in course for semester:', {
-        courseId,
-        semester,
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Already enrolled in this course for this semester',
-        },
-        { status: 409 }
-      );
+    if (result.conflict) {
+      return conflict(result.message);
     }
 
-    // Verify course exists
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-    });
+    // Add cache control headers
+    const response = createSuccessResponse(result.course);
+    response.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
 
-    if (!course) {
-      console.error('Course not found:', courseId);
-      return NextResponse.json(
-        { success: false, error: 'Course not found' },
-        { status: 404 }
-      );
-    }
-
-    // Create new enrollment
-    const enrollment = await prisma.enrollment.create({
-      data: {
-        id: randomUUID(),
-        userId: user.id,
-        courseId,
-        semester,
-      },
-      include: {
-        course: true,
-      },
-    });
-
-    // Transform the course for the response
-    const transformedCourse = transformCourse(enrollment.course);
-
-    const response = {
-      success: true,
-      course: {
-        ...transformedCourse,
-        enrollment: {
-          id: enrollment.id,
-          semester: enrollment.semester,
-          userId: enrollment.userId,
-          courseId: enrollment.courseId,
-          period:
-            transformedCourse && Array.isArray(transformedCourse.period)
-              ? transformedCourse.period[0]
-              : 1,
-        },
-      },
-    };
-
-    console.log('Course added to schedule successfully:', {
-      courseId,
-      semester,
-    });
-
-    return NextResponse.json(response, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-    });
+    return response;
   } catch (error) {
     console.error('Error adding course to schedule:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to add course to schedule',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
+
+    // Generate an error reference for tracking
+    const errorRef = Math.random().toString(36).substring(2, 10);
+    console.error(`Schedule add course error (ref: ${errorRef}):`, error);
+
+    return internalServerError(
+      `Failed to add course to schedule. Please try again. (Ref: ${errorRef})`
     );
   }
 }

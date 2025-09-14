@@ -105,22 +105,29 @@ export async function GET(request: NextRequest) {
           (c) => c?.id === enrollment.courseId
         );
 
+        if (!course) {
+          console.warn(`Course not found for enrollment ${enrollment.id}`);
+          return null;
+        }
+
+        // Use the course's actual period data instead of hardcoding period 1
+        const coursePeriod =
+          course.period && Array.isArray(course.period) ? course.period : [1]; // Default to period 1 if undefined
+
         return {
           id: enrollment.id,
           semester: enrollment.semester,
-          // Use period 1 as default since it might not exist in all enrollments
-          period: 1,
-          // Add userId for debugging
+          // Use the course's period data - this is crucial for correct placement
+          period: coursePeriod,
           userId: enrollment.userId,
           courseId: enrollment.courseId,
-          // Default values for backward compatibility
           status: 'enrolled',
           grade: null,
           enrolledAt: new Date(),
-          course: course || null,
+          course: course,
         };
       })
-      .filter((item) => item.course !== null);
+      .filter((item) => item !== null);
 
     console.log(
       `Matched ${enrollmentsWithCourses.length} enrollments with courses (${requestId})`

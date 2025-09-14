@@ -26,15 +26,15 @@ export interface ScheduleData {
 export interface ScheduleUpdate {
   courseId: string;
   semester: number;
-  period: number;
+  period: number[];
 }
 
 export interface MoveOperation {
   courseId: string;
   fromSemester: number;
-  fromPeriod: number;
+  fromPeriod: number[];
   toSemester: number;
-  toPeriod: number;
+  toPeriod: number[];
 }
 
 export interface RemoveOperation {

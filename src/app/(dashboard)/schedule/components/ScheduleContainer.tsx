@@ -16,6 +16,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSchedule } from './ScheduleProvider';
 import ScheduleCourseCard from './ScheduleCourseCard';
+import { ScheduleActions } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
 
 interface ScheduleContainerProps {
@@ -39,7 +40,7 @@ export function ScheduleContainer({
   children,
   readonly = false,
 }: ScheduleContainerProps) {
-  const { moveCourse } = useSchedule();
+  const { state, dispatch } = useSchedule();
   const [activeCourse, setActiveCourse] =
     React.useState<CourseWithEnrollment | null>(null);
 
@@ -68,6 +69,10 @@ export function ScheduleContainer({
     const course = findCourseById(courseId);
     if (course) {
       setActiveCourse(course);
+      dispatch({
+        type: ScheduleActions.SET_DRAG_STATE,
+        payload: { isDragging: true, draggedCourse: course },
+      });
     }
   };
 
@@ -112,12 +117,16 @@ export function ScheduleContainer({
   /**
    * Handle drag end - update the schedule
    */
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     if (readonly) return;
 
     const { active, over } = event;
 
     setActiveCourse(null);
+    dispatch({
+      type: ScheduleActions.SET_DRAG_STATE,
+      payload: { isDragging: false, draggedCourse: null },
+    });
 
     if (!over || !activeCourse) {
       return;
@@ -145,57 +154,133 @@ export function ScheduleContainer({
       return;
     }
 
-    // Validate if the course can be moved to the target position
-    if (!isValidMove(activeCourse, targetSemester, targetPeriod)) {
-      console.warn('Move not allowed');
+    // Get current position
+    const currentPosition = findCoursePosition(courseId);
+    if (!currentPosition) {
+      console.error('Could not find current position for course:', courseId);
       return;
     }
 
-    console.log('Moving course:', {
+    // Check if position actually changed
+    if (
+      currentPosition.semester === targetSemester &&
+      currentPosition.period.includes(targetPeriod)
+    ) {
+      console.log('Course position did not change, skipping update');
+      return;
+    }
+
+    // Validate if the course can be moved to the target position
+    if (!isValidMove(activeCourse, targetSemester, targetPeriod)) {
+      // TODO: Show user feedback about why the move isn't allowed
+      console.warn('Move not allowed:', {
+        course: activeCourse.code,
+        from: currentPosition,
+        to: { semester: targetSemester, period: targetPeriod },
+        availableSemesters: [activeCourse.semester],
+        availablePeriods: activeCourse.period,
+      });
+      return;
+    }
+
+    console.log('ScheduleContainer: Handling drag end - moving course', {
       courseId,
-      fromSemester: activeCourse.enrollment.semester,
+      fromSemester: currentPosition.semester,
+      fromPeriod: currentPosition.period,
       toSemester: targetSemester,
-      period: targetPeriod,
+      toPeriod: targetPeriod,
     });
 
-    try {
-      await moveCourse(
+    // Apply optimistic UI update
+    dispatch({
+      type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
+      payload: {
         courseId,
-        activeCourse.enrollment.semester,
-        targetSemester,
-        targetPeriod
-      );
-    } catch (error) {
-      console.error('Failed to move course:', error);
-    }
+        fromSemester: currentPosition.semester,
+        fromPeriod: currentPosition.period,
+        toSemester: targetSemester,
+        toPeriod: [targetPeriod], // Convert to array
+      },
+    });
+
+    // Trigger the actual API update via the main handler
+    dispatch({
+      type: ScheduleActions.MOVE_COURSE,
+      payload: {
+        courseId,
+        fromSemester: currentPosition.semester,
+        fromPeriod: currentPosition.period,
+        toSemester: targetSemester,
+        toPeriod: [targetPeriod], // Convert to array
+      },
+    });
   };
 
   /**
    * Find a course by ID in the schedule
-   * Note: This is a simplified version since we don't have access to the full schedule state
    */
   const findCourseById = (courseId: string): CourseWithEnrollment | null => {
-    // For now, we'll just return the activeCourse if it matches
-    // In a more complete implementation, you might want to fetch this from a global store
-    return activeCourse?.id === courseId ? activeCourse : null;
+    const { schedule } = state;
+
+    for (const semesterKey of Object.keys(schedule) as Array<
+      keyof typeof schedule
+    >) {
+      const semesterData = schedule[semesterKey];
+      for (const periodKey of Object.keys(semesterData) as Array<
+        keyof typeof semesterData
+      >) {
+        const courses = semesterData[periodKey];
+        const course = courses.find((c) => c.id === courseId);
+        if (course) {
+          return course;
+        }
+      }
+    }
+
+    return null;
   };
 
   /**
    * Find the position of a course in the schedule
-   * Note: Simplified since we get position from the course enrollment
    */
   const findCoursePosition = (
     courseId: string
-  ): { semester: number; period: number } | null => {
-    if (activeCourse?.id === courseId) {
-      return {
-        semester: activeCourse.enrollment.semester,
-        period: activeCourse.enrollment.period || 1,
-      };
+  ): { semester: number; period: number[] } | null => {
+    const { schedule } = state;
+
+    for (const semesterKey of Object.keys(schedule) as Array<
+      keyof typeof schedule
+    >) {
+      const semester = parseInt(semesterKey.replace('semester', ''));
+      const semesterData = schedule[semesterKey];
+
+      for (const periodKey of Object.keys(semesterData) as Array<
+        keyof typeof semesterData
+      >) {
+        const period = parseInt(periodKey.replace('period', ''));
+        const courses = semesterData[periodKey];
+        const course = courses.find((c) => c.id === courseId);
+
+        if (course) {
+          // For multi-period courses, return all periods the course appears in
+          const allPeriods: number[] = [];
+          if (course.period && Array.isArray(course.period)) {
+            course.period.forEach((p) => {
+              if (p === 1 || p === 2) {
+                allPeriods.push(p);
+              }
+            });
+          } else if (course.period === 1 || course.period === 2) {
+            allPeriods.push(course.period);
+          }
+
+          return { semester, period: allPeriods };
+        }
+      }
     }
+
     return null;
   };
-
   if (readonly) {
     return <div className="w-full">{children}</div>;
   }

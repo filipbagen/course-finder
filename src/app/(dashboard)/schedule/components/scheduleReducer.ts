@@ -212,14 +212,22 @@ function addCourseBackToSchedule(
   const newSchedule = JSON.parse(JSON.stringify(schedule)) as ScheduleData;
 
   const semester = course.enrollment.semester;
-  const period = course.enrollment.period || 1;
+  const period = course.enrollment.period || [1];
 
-  // Determine which array to add the course to
+  // Determine which arrays to add the course to
   const semesterKey = `semester${semester}` as keyof ScheduleData;
-  const periodKey = `period${period}` as 'period1' | 'period2';
 
-  // Add the course back
-  newSchedule[semesterKey][periodKey].push(course);
+  if (Array.isArray(period)) {
+    period.forEach((p) => {
+      if (p === 1 || p === 2) {
+        const periodKey = `period${p}` as 'period1' | 'period2';
+        newSchedule[semesterKey][periodKey].push(course);
+      }
+    });
+  } else if (period === 1 || period === 2) {
+    const periodKey = `period${period}` as 'period1' | 'period2';
+    newSchedule[semesterKey][periodKey].push(course);
+  }
 
   return newSchedule;
 }
@@ -240,18 +248,43 @@ function moveCourseInSchedule(
   // Get source and destination keys
   const fromSemesterKey = `semester${fromSemester}` as keyof ScheduleData;
   const toSemesterKey = `semester${toSemester}` as keyof ScheduleData;
-  const fromPeriodKey = `period${fromPeriod}` as 'period1' | 'period2';
-  const toPeriodKey = `period${toPeriod}` as 'period1' | 'period2';
 
   // Find the course in the source location
-  const fromArray = newSchedule[fromSemesterKey][fromPeriodKey];
-  const courseIndex = fromArray.findIndex((course) => course.id === courseId);
-  if (courseIndex === -1) {
+  // Since courses can be in multiple periods, we need to find it in any period
+  let course: CourseWithEnrollment | null = null;
+  let fromPeriodKey: 'period1' | 'period2' | null = null;
+
+  if (Array.isArray(fromPeriod)) {
+    // For multi-period courses, check all periods
+    for (const period of fromPeriod) {
+      if (period === 1 || period === 2) {
+        const periodKey = `period${period}` as 'period1' | 'period2';
+        const foundCourse = newSchedule[fromSemesterKey][periodKey].find(
+          (c) => c.id === courseId
+        );
+        if (foundCourse) {
+          course = foundCourse;
+          fromPeriodKey = periodKey;
+          break;
+        }
+      }
+    }
+  } else {
+    // Single period
+    if (fromPeriod === 1 || fromPeriod === 2) {
+      const periodKey = `period${fromPeriod}` as 'period1' | 'period2';
+      course =
+        newSchedule[fromSemesterKey][periodKey].find(
+          (c) => c.id === courseId
+        ) || null;
+      fromPeriodKey = periodKey;
+    }
+  }
+
+  if (!course || !fromPeriodKey) {
     console.warn('Course not found in source location:', courseId);
     return schedule;
   }
-
-  const course = fromArray[courseIndex];
 
   // Check if this is a multi-period course
   const isMultiPeriod =
@@ -307,23 +340,40 @@ function moveCourseInSchedule(
       }
     });
   } else {
-    // Single period course - normal move logic
-    const [courseToMove] = fromArray.splice(courseIndex, 1);
+    // Single period course - remove from source and add to destination
+    const fromArray = newSchedule[fromSemesterKey][fromPeriodKey];
+    const courseIndex = fromArray.findIndex((c) => c.id === courseId);
+    if (courseIndex !== -1) {
+      const [courseToMove] = fromArray.splice(courseIndex, 1);
 
-    // Update the enrollment semester
-    const updatedCourse = {
-      ...courseToMove,
-      enrollment: {
-        ...courseToMove.enrollment,
-        semester: toSemester,
-        // Do not update the period - it should stay fixed
-        // period: toPeriod, // Removed this line as it causes issues
-      },
-    };
+      // Update the enrollment semester
+      const updatedCourse = {
+        ...courseToMove,
+        enrollment: {
+          ...courseToMove.enrollment,
+          semester: toSemester,
+        },
+      };
 
-    // Add to destination
-    const toArray = newSchedule[toSemesterKey][toPeriodKey];
-    toArray.push(updatedCourse);
+      // Add to destination
+      if (Array.isArray(toPeriod)) {
+        // For multi-period destination, add to all periods
+        toPeriod.forEach((period) => {
+          if (period === 1 || period === 2) {
+            const toPeriodKey = `period${period}` as 'period1' | 'period2';
+            const toArray = newSchedule[toSemesterKey][toPeriodKey];
+            toArray.push(updatedCourse);
+          }
+        });
+      } else {
+        // Single period destination
+        if (toPeriod === 1 || toPeriod === 2) {
+          const toPeriodKey = `period${toPeriod}` as 'period1' | 'period2';
+          const toArray = newSchedule[toSemesterKey][toPeriodKey];
+          toArray.push(updatedCourse);
+        }
+      }
+    }
   }
 
   return newSchedule;
