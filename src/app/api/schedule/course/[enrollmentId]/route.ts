@@ -60,6 +60,8 @@ export async function DELETE(
     // Add cache control headers
     const response = createSuccessResponse({
       success: true,
+      enrollmentId: enrollmentId, // Return the enrollment ID for client-side processing
+      data: { success: true, enrollmentId: enrollmentId }, // Include data property for consistent API response
     });
 
     response.headers.set(

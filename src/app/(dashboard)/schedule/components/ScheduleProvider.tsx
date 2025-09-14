@@ -139,6 +139,12 @@ export function ScheduleProvider({
         });
 
         // Then update via API - only pass the semester change, the period should stay the same
+        console.log('ScheduleProvider: Sending update to API:', {
+          courseId,
+          toSemester,
+          fromPeriod,
+        });
+
         const updatedCourse = await ScheduleService.updateCourseSchedule({
           courseId,
           semester: toSemester,
@@ -158,6 +164,8 @@ export function ScheduleProvider({
             course: updatedCourse,
           },
         });
+
+        console.log('ScheduleProvider: Dispatched MOVE_COURSE_SUCCESS');
 
         // Find the course before updating it
         const currentEnrolledCourses =
@@ -247,8 +255,11 @@ export function ScheduleProvider({
         );
         console.log('ScheduleProvider: Course removal API result:', result);
 
-        // If the API reports the course was already removed or was removed successfully
-        if (result.success || result.alreadyRemoved) {
+        // Check if the API call was successful
+        if (
+          result &&
+          (result.success === true || result.alreadyRemoved === true)
+        ) {
           // Update the Zustand store
           removeCourse(enrollmentId);
 
@@ -261,7 +272,7 @@ export function ScheduleProvider({
           // Show success toast
           toast.success('Course removed from schedule');
         } else {
-          throw new Error('Failed to remove course: Unknown error');
+          throw new Error('Failed to remove course: API call unsuccessful');
         }
       } catch (error) {
         console.error('ScheduleProvider: Error removing course:', error);
@@ -306,6 +317,18 @@ export function ScheduleProvider({
       ) {
         const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
           lastAction.payload;
+
+        console.log(
+          'ScheduleProvider: Detected MOVE_COURSE action in useEffect, processing:',
+          {
+            courseId,
+            fromSemester,
+            fromPeriod,
+            toSemester,
+            toPeriod,
+          }
+        );
+
         await handleCourseMove(
           courseId,
           fromSemester,
@@ -319,6 +342,11 @@ export function ScheduleProvider({
         lastAction?.type === ScheduleActions.REMOVE_COURSE &&
         lastAction.payload
       ) {
+        console.log(
+          'ScheduleProvider: Detected REMOVE_COURSE action in useEffect, processing enrollmentId:',
+          lastAction.payload.enrollmentId
+        );
+
         await handleCourseRemoval(lastAction.payload.enrollmentId);
       }
     };

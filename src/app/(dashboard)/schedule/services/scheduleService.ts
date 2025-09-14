@@ -216,7 +216,13 @@ export class ScheduleService {
 
       const result = await response.json();
       console.log(`Course ${enrollmentId} removed successfully:`, result);
-      return result.data;
+
+      // Handle both data format and direct success property
+      return {
+        success: result.success || (result.data && result.data.success),
+        enrollmentId: enrollmentId,
+        alreadyRemoved: false,
+      };
     } catch (error) {
       console.error('Error removing course from schedule:', error);
       throw new Error('Failed to remove course from schedule');
