@@ -139,12 +139,6 @@ export function ScheduleProvider({
         });
 
         // Then update via API - only pass the semester change, the period should stay the same
-        console.log('ScheduleProvider: Sending update to API:', {
-          courseId,
-          toSemester,
-          fromPeriod,
-        });
-
         const updatedCourse = await ScheduleService.updateCourseSchedule({
           courseId,
           semester: toSemester,
@@ -165,7 +159,8 @@ export function ScheduleProvider({
           },
         });
 
-        console.log('ScheduleProvider: Dispatched MOVE_COURSE_SUCCESS');
+        // Clear the last action to prevent re-triggering
+        dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
 
         // Find the course before updating it
         const currentEnrolledCourses =
@@ -213,6 +208,21 @@ export function ScheduleProvider({
         });
         toast.error(errorMessage);
 
+        // Revert the optimistic update
+        dispatch({
+          type: ScheduleActions.MOVE_COURSE_REVERT,
+          payload: {
+            courseId,
+            fromSemester: toSemester,
+            fromPeriod: toPeriod,
+            toSemester: fromSemester,
+            toPeriod: fromPeriod,
+          },
+        });
+
+        // Clear the last action on error
+        dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
+
         // Reload data on error to ensure state consistency
         await loadScheduleData();
       }
@@ -255,11 +265,8 @@ export function ScheduleProvider({
         );
         console.log('ScheduleProvider: Course removal API result:', result);
 
-        // Check if the API call was successful
-        if (
-          result &&
-          (result.success === true || result.alreadyRemoved === true)
-        ) {
+        // If the API reports the course was already removed or was removed successfully
+        if (result.success || result.alreadyRemoved) {
           // Update the Zustand store
           removeCourse(enrollmentId);
 
@@ -269,10 +276,13 @@ export function ScheduleProvider({
             payload: { enrollmentId },
           });
 
+          // Clear the last action to prevent re-triggering
+          dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
+
           // Show success toast
           toast.success('Course removed from schedule');
         } else {
-          throw new Error('Failed to remove course: API call unsuccessful');
+          throw new Error('Failed to remove course: Unknown error');
         }
       } catch (error) {
         console.error('ScheduleProvider: Error removing course:', error);
@@ -292,6 +302,18 @@ export function ScheduleProvider({
 
         toast.error(errorMessage);
 
+        // Revert the optimistic update
+        dispatch({
+          type: ScheduleActions.REMOVE_COURSE_REVERT,
+          payload: {
+            enrollmentId,
+            courseToRestore: courseToRemove,
+          },
+        });
+
+        // Clear the last action on error
+        dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
+
         // Reload schedule data to ensure state consistency
         await loadScheduleData();
       }
@@ -308,28 +330,18 @@ export function ScheduleProvider({
 
   // Set up effect to handle async operations triggered by dispatch
   useEffect(() => {
-    const handleAsyncAction = async () => {
+    if (
+      state.lastAction &&
+      (state.lastAction.type === ScheduleActions.MOVE_COURSE ||
+        state.lastAction.type === ScheduleActions.REMOVE_COURSE)
+    ) {
       const lastAction = state.lastAction;
+      const payload = lastAction.payload;
 
-      if (
-        lastAction?.type === ScheduleActions.MOVE_COURSE &&
-        lastAction.payload
-      ) {
+      if (lastAction.type === ScheduleActions.MOVE_COURSE && payload) {
         const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
-          lastAction.payload;
-
-        console.log(
-          'ScheduleProvider: Detected MOVE_COURSE action in useEffect, processing:',
-          {
-            courseId,
-            fromSemester,
-            fromPeriod,
-            toSemester,
-            toPeriod,
-          }
-        );
-
-        await handleCourseMove(
+          payload;
+        handleCourseMove(
           courseId,
           fromSemester,
           fromPeriod,
@@ -338,27 +350,11 @@ export function ScheduleProvider({
         );
       }
 
-      if (
-        lastAction?.type === ScheduleActions.REMOVE_COURSE &&
-        lastAction.payload
-      ) {
-        console.log(
-          'ScheduleProvider: Detected REMOVE_COURSE action in useEffect, processing enrollmentId:',
-          lastAction.payload.enrollmentId
-        );
-
-        await handleCourseRemoval(lastAction.payload.enrollmentId);
+      if (lastAction.type === ScheduleActions.REMOVE_COURSE && payload) {
+        handleCourseRemoval(payload.enrollmentId);
       }
-    };
-
-    if (
-      state.lastAction &&
-      (state.lastAction.type === ScheduleActions.MOVE_COURSE ||
-        state.lastAction.type === ScheduleActions.REMOVE_COURSE)
-    ) {
-      handleAsyncAction();
     }
-  }, [state.lastAction, handleCourseMove, handleCourseRemoval]);
+  }, [state.lastAction]); // Keep only state.lastAction as dependency
 
   // Load initial data
   useEffect(() => {
@@ -368,19 +364,22 @@ export function ScheduleProvider({
 
   // Detect pending operations and force a refresh if needed
   useEffect(() => {
-    // If there are pending operations, periodically try to refresh
+    // Only refresh if there are pending operations and no recent activity
     if (state.pendingOperations.length > 0) {
-      const timer = setTimeout(() => {
+      const lastActivity = state.lastUpdated || new Date(0);
+      const timeSinceLastActivity = Date.now() - lastActivity.getTime();
+
+      // Only refresh if it's been more than 10 seconds since last activity
+      // and we haven't refreshed in the last 30 seconds
+      if (timeSinceLastActivity > 10000) {
         console.log(
-          'Found pending operations, refreshing schedule...',
+          'Found stale pending operations, refreshing schedule...',
           state.pendingOperations
         );
         loadScheduleData();
-      }, 5000); // Try to refresh every 5 seconds if there are pending operations
-
-      return () => clearTimeout(timer);
+      }
     }
-  }, [state.pendingOperations, loadScheduleData]);
+  }, [state.pendingOperations, state.lastUpdated, loadScheduleData]);
 
   const contextValue: ScheduleContextType = {
     state,

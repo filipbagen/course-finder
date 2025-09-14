@@ -112,7 +112,7 @@ export class ScheduleService {
 
       const responseData = await response.json();
       console.log(`ScheduleService: Update course response:`, responseData);
-      return responseData.data as CourseWithEnrollment;
+      return responseData.data || (responseData.course as CourseWithEnrollment);
     } catch (error) {
       console.error('Error updating course schedule:', error);
       throw new Error('Failed to update course placement');
@@ -160,7 +160,7 @@ export class ScheduleService {
 
       const result = await response.json();
       console.log('Add course response:', result);
-      return result.data;
+      return result.data || result.course;
     } catch (error) {
       console.error('Error adding course to schedule:', error);
       throw new Error('Failed to add course to schedule');
@@ -216,13 +216,7 @@ export class ScheduleService {
 
       const result = await response.json();
       console.log(`Course ${enrollmentId} removed successfully:`, result);
-
-      // Handle both data format and direct success property
-      return {
-        success: result.success || (result.data && result.data.success),
-        enrollmentId: enrollmentId,
-        alreadyRemoved: false,
-      };
+      return result.data || result;
     } catch (error) {
       console.error('Error removing course from schedule:', error);
       throw new Error('Failed to remove course from schedule');
@@ -242,11 +236,13 @@ export class ScheduleService {
     // Group courses by semester and period
     if (
       data &&
-      data.data &&
-      data.data.enrollments &&
-      Array.isArray(data.data.enrollments)
+      ((data.data &&
+        data.data.enrollments &&
+        Array.isArray(data.data.enrollments)) ||
+        (data.enrollments && Array.isArray(data.enrollments)))
     ) {
-      data.data.enrollments.forEach((enrollmentData: any) => {
+      const enrollments = data.data ? data.data.enrollments : data.enrollments;
+      enrollments.forEach((enrollmentData: any) => {
         if (!enrollmentData || !enrollmentData.course) {
           console.warn(
             'Missing course data in enrollment:',

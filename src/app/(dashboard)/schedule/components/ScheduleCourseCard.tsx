@@ -120,24 +120,13 @@ export default function ScheduleCourseCard({
     };
 
     const currentLocation = findCurrentLocation();
-    if (!currentLocation) {
-      console.error('Failed to find current location for course:', course.id);
-      return;
-    }
-
-    console.log('ScheduleCourseCard: Moving course with button:', {
-      courseId: course.id,
-      fromSemester: currentLocation.semester,
-      fromPeriod: currentLocation.period,
-      toSemester,
-      toPeriod: currentLocation.period, // Keep same period
-    });
+    if (!currentLocation) return;
 
     // Dispatch move action
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {
-        courseId: course.id,
+        courseId: course.id.toString(),
         fromSemester: currentLocation.semester,
         fromPeriod: currentLocation.period,
         toSemester,

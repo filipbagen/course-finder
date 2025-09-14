@@ -95,26 +95,15 @@ export function scheduleReducer(
     }
 
     case ScheduleActions.MOVE_COURSE_SUCCESS: {
-      console.log(
-        'Schedule Reducer: Processing MOVE_COURSE_SUCCESS for courseId:',
-        action.payload.courseId
-      );
-
       // Remove this operation from pending
       const pendingOperations = state.pendingOperations.filter(
         (op) => !(op.type === 'move' && op.id === action.payload.courseId)
       );
 
-      console.log(
-        'Schedule Reducer: Pending operations after filtering:',
-        pendingOperations
-      );
-
       return {
         ...state,
         pendingOperations,
-        lastAction: null,
-        lastUpdated: new Date(), // Add timestamp to track when the course was last successfully moved
+        lastAction: null, // Clear the last action
       };
     }
 
@@ -127,7 +116,7 @@ export function scheduleReducer(
       return {
         ...state,
         schedule: moveCourseInSchedule(state.schedule, action.payload),
-        lastAction: null,
+        lastAction: null, // Clear the last action
         pendingOperations,
       };
     }
@@ -152,26 +141,15 @@ export function scheduleReducer(
     }
 
     case ScheduleActions.REMOVE_COURSE_SUCCESS: {
-      console.log(
-        'Schedule Reducer: Processing REMOVE_COURSE_SUCCESS for enrollmentId:',
-        action.payload.enrollmentId
-      );
-
       // Remove this operation from pending
       const pendingOperations = state.pendingOperations.filter(
         (op) => !(op.type === 'remove' && op.id === action.payload.enrollmentId)
       );
 
-      console.log(
-        'Schedule Reducer: Pending operations after filtering:',
-        pendingOperations
-      );
-
       return {
         ...state,
         pendingOperations,
-        lastAction: null,
-        lastUpdated: new Date(), // Add timestamp to track when the course was last successfully removed
+        lastAction: null, // Clear the last action
       };
     }
 
@@ -191,7 +169,7 @@ export function scheduleReducer(
         return {
           ...state,
           pendingOperations,
-          lastAction: null,
+          lastAction: null, // Clear the last action
         };
       }
 
@@ -203,7 +181,7 @@ export function scheduleReducer(
           action.payload.courseToRestore
         ),
         pendingOperations,
-        lastAction: null,
+        lastAction: null, // Clear the last action
       };
     }
 
