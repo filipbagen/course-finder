@@ -16,7 +16,6 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSchedule } from './ScheduleProvider';
 import ScheduleCourseCard from './ScheduleCourseCard';
-import { ScheduleActions } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
 
 interface ScheduleContainerProps {
@@ -40,7 +39,7 @@ export function ScheduleContainer({
   children,
   readonly = false,
 }: ScheduleContainerProps) {
-  const { state, dispatch } = useSchedule();
+  const { moveCourse } = useSchedule();
   const [activeCourse, setActiveCourse] =
     React.useState<CourseWithEnrollment | null>(null);
 
@@ -69,10 +68,6 @@ export function ScheduleContainer({
     const course = findCourseById(courseId);
     if (course) {
       setActiveCourse(course);
-      dispatch({
-        type: ScheduleActions.SET_DRAG_STATE,
-        payload: { isDragging: true, draggedCourse: course },
-      });
     }
   };
 
@@ -117,16 +112,12 @@ export function ScheduleContainer({
   /**
    * Handle drag end - update the schedule
    */
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     if (readonly) return;
 
     const { active, over } = event;
 
     setActiveCourse(null);
-    dispatch({
-      type: ScheduleActions.SET_DRAG_STATE,
-      payload: { isDragging: false, draggedCourse: null },
-    });
 
     if (!over || !activeCourse) {
       return;
@@ -154,119 +145,54 @@ export function ScheduleContainer({
       return;
     }
 
-    // Get current position
-    const currentPosition = findCoursePosition(courseId);
-    if (!currentPosition) {
-      console.error('Could not find current position for course:', courseId);
-      return;
-    }
-
-    // Check if position actually changed
-    if (
-      currentPosition.semester === targetSemester &&
-      currentPosition.period === targetPeriod
-    ) {
-      console.log('Course position did not change, skipping update');
-      return;
-    }
-
     // Validate if the course can be moved to the target position
     if (!isValidMove(activeCourse, targetSemester, targetPeriod)) {
-      // TODO: Show user feedback about why the move isn't allowed
-      console.warn('Move not allowed:', {
-        course: activeCourse.code,
-        from: currentPosition,
-        to: { semester: targetSemester, period: targetPeriod },
-        availableSemesters: [activeCourse.semester],
-        availablePeriods: activeCourse.period,
-      });
+      console.warn('Move not allowed');
       return;
     }
 
-    console.log('ScheduleContainer: Handling drag end - moving course', {
+    console.log('Moving course:', {
       courseId,
-      fromSemester: currentPosition.semester,
-      fromPeriod: currentPosition.period,
+      fromSemester: activeCourse.enrollment.semester,
       toSemester: targetSemester,
-      toPeriod: targetPeriod,
+      period: targetPeriod,
     });
 
-    // Apply optimistic UI update
-    dispatch({
-      type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
-      payload: {
+    try {
+      await moveCourse(
         courseId,
-        fromSemester: currentPosition.semester,
-        fromPeriod: currentPosition.period,
-        toSemester: targetSemester,
-        toPeriod: targetPeriod,
-      },
-    });
-
-    // Trigger the actual API update via the main handler
-    dispatch({
-      type: ScheduleActions.MOVE_COURSE,
-      payload: {
-        courseId,
-        fromSemester: currentPosition.semester,
-        fromPeriod: currentPosition.period,
-        toSemester: targetSemester,
-        toPeriod: targetPeriod,
-      },
-    });
+        activeCourse.enrollment.semester,
+        targetSemester,
+        targetPeriod
+      );
+    } catch (error) {
+      console.error('Failed to move course:', error);
+    }
   };
 
   /**
    * Find a course by ID in the schedule
+   * Note: This is a simplified version since we don't have access to the full schedule state
    */
   const findCourseById = (courseId: string): CourseWithEnrollment | null => {
-    const { schedule } = state;
-
-    for (const semesterKey of Object.keys(schedule) as Array<
-      keyof typeof schedule
-    >) {
-      const semesterData = schedule[semesterKey];
-      for (const periodKey of Object.keys(semesterData) as Array<
-        keyof typeof semesterData
-      >) {
-        const courses = semesterData[periodKey];
-        const course = courses.find((c) => c.id === courseId);
-        if (course) {
-          return course;
-        }
-      }
-    }
-
-    return null;
+    // For now, we'll just return the activeCourse if it matches
+    // In a more complete implementation, you might want to fetch this from a global store
+    return activeCourse?.id === courseId ? activeCourse : null;
   };
 
   /**
    * Find the position of a course in the schedule
+   * Note: Simplified since we get position from the course enrollment
    */
   const findCoursePosition = (
     courseId: string
   ): { semester: number; period: number } | null => {
-    const { schedule } = state;
-
-    for (const semesterKey of Object.keys(schedule) as Array<
-      keyof typeof schedule
-    >) {
-      const semester = parseInt(semesterKey.replace('semester', ''));
-      const semesterData = schedule[semesterKey];
-
-      for (const periodKey of Object.keys(semesterData) as Array<
-        keyof typeof semesterData
-      >) {
-        const period = parseInt(periodKey.replace('period', ''));
-        const courses = semesterData[periodKey];
-        const course = courses.find((c) => c.id === courseId);
-
-        if (course) {
-          return { semester, period };
-        }
-      }
+    if (activeCourse?.id === courseId) {
+      return {
+        semester: activeCourse.enrollment.semester,
+        period: activeCourse.enrollment.period || 1,
+      };
     }
-
     return null;
   };
 

@@ -6,6 +6,7 @@ import { SemesterBlock } from './SemesterBlock';
 import { SkeletonCard } from '@/components/shared/SkeletonComponent';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useEnrolledCoursesStore } from '@/hooks/useEnrolledCoursesStore';
 
 /**
  * Schedule Grid Component
@@ -21,8 +22,30 @@ import { AlertCircle } from 'lucide-react';
  * - Accessibility support
  */
 export function ScheduleGrid() {
-  const { state } = useSchedule();
-  const { schedule, loading, error } = state;
+  const { loading, error } = useSchedule();
+  const { enrolledCourses } = useEnrolledCoursesStore();
+
+  // Group courses by semester and period
+  const scheduleData = React.useMemo(() => {
+    const schedule = {
+      semester7: { period1: [] as any[], period2: [] as any[] },
+      semester8: { period1: [] as any[], period2: [] as any[] },
+      semester9: { period1: [] as any[], period2: [] as any[] },
+    };
+
+    enrolledCourses.forEach((course) => {
+      const semester = course.enrollment?.semester;
+      const period = course.enrollment?.period || 1;
+
+      if (semester && semester >= 7 && semester <= 9) {
+        const semesterKey = `semester${semester}` as keyof typeof schedule;
+        const periodKey = `period${period}` as keyof typeof schedule.semester7;
+        schedule[semesterKey][periodKey].push(course);
+      }
+    });
+
+    return schedule;
+  }, [enrolledCourses]);
 
   // Show loading state
   if (loading) {
@@ -114,7 +137,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={7}
             period={1}
-            courses={schedule?.semester7?.period1 || []}
+            courses={scheduleData?.semester7?.period1 || []}
             dropZoneId="semester7-period1"
             semesterLabel="Termin 7 - Höst år 4"
           />
@@ -129,7 +152,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={7}
             period={2}
-            courses={schedule?.semester7?.period2 || []}
+            courses={scheduleData?.semester7?.period2 || []}
             dropZoneId="semester7-period2"
             semesterLabel="Termin 7 - Höst år 4"
           />
@@ -144,7 +167,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={8}
             period={1}
-            courses={schedule?.semester8?.period1 || []}
+            courses={scheduleData?.semester8?.period1 || []}
             dropZoneId="semester8-period1"
             semesterLabel="Termin 8 - Vår år 4"
           />
@@ -159,7 +182,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={8}
             period={2}
-            courses={schedule?.semester8?.period2 || []}
+            courses={scheduleData?.semester8?.period2 || []}
             dropZoneId="semester8-period2"
             semesterLabel="Termin 8 - Vår år 4"
           />
@@ -174,7 +197,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={9}
             period={1}
-            courses={schedule?.semester9?.period1 || []}
+            courses={scheduleData?.semester9?.period1 || []}
             dropZoneId="semester9-period1"
             semesterLabel="Termin 9 - Höst år 5"
           />
@@ -189,7 +212,7 @@ export function ScheduleGrid() {
           <SemesterBlock
             semester={9}
             period={2}
-            courses={schedule?.semester9?.period2 || []}
+            courses={scheduleData?.semester9?.period2 || []}
             dropZoneId="semester9-period2"
             semesterLabel="Termin 9 - Höst år 5"
           />
@@ -215,10 +238,11 @@ export function ScheduleGrid() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {semesters.map((semester) => {
                   const semesterKey =
-                    `semester${semester}` as keyof typeof schedule;
+                    `semester${semester}` as keyof typeof scheduleData;
                   const periodKey =
-                    `period${period}` as keyof (typeof schedule)[typeof semesterKey];
-                  const courses = schedule?.[semesterKey]?.[periodKey] || [];
+                    `period${period}` as keyof (typeof scheduleData)[typeof semesterKey];
+                  const courses =
+                    scheduleData?.[semesterKey]?.[periodKey] || [];
 
                   return (
                     <SemesterBlock

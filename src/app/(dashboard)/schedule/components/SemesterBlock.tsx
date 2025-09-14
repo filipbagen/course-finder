@@ -8,7 +8,6 @@ import { useSchedule } from './ScheduleProvider';
 import { cn } from '@/lib/utils';
 import { Plus, BookOpen, Blocks, Smile, SignpostBig } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScheduleActions } from '../types/schedule.types';
 
 interface SemesterBlockProps {
   semester: number;
@@ -39,8 +38,7 @@ export function SemesterBlock({
   readonly = false,
   semesterLabel,
 }: SemesterBlockProps) {
-  const { state, dispatch } = useSchedule();
-  const { isDragging, draggedCourse } = state;
+  const { removeCourse } = useSchedule();
 
   const { isOver, setNodeRef } = useDroppable({
     id: dropZoneId,
@@ -48,22 +46,22 @@ export function SemesterBlock({
   });
 
   // Check if the dragged course can be dropped here
-  const canDrop = isDragging && draggedCourse && !readonly;
-  const isValidDrop =
-    canDrop && isValidDropTarget(draggedCourse, semester, period);
+  const canDrop = !readonly;
+  const isValidDrop = canDrop && isOver;
 
   // Handle course removal
-  const handleCourseRemoval = (enrollmentId: string) => {
+  const handleCourseRemoval = async (enrollmentId: string) => {
     if (readonly) return;
 
-    dispatch({
-      type: ScheduleActions.REMOVE_COURSE,
-      payload: { enrollmentId },
-    });
+    try {
+      await removeCourse(enrollmentId);
+    } catch (error) {
+      console.error('Failed to remove course:', error);
+    }
   };
 
   const style: React.CSSProperties = {};
-  if (isDragging && isOver) {
+  if (isOver) {
     style.borderColor = isValidDrop ? '#22c55e' : '#ef4444'; // green-500 and red-500 hex codes
   }
 
@@ -74,9 +72,8 @@ export function SemesterBlock({
       className={cn(
         'min-h-48 p-4 rounded-lg border-2 transition-all duration-200 relative bg-card',
         {
-          'border-dashed border-border': !isDragging,
-          'border-dashed': isDragging && !isOver,
-          'border-solid': isDragging && isOver,
+          'border-dashed border-border': true,
+          'border-solid': isOver,
           'bg-green-50 dark:bg-green-950/20': isOver && isValidDrop,
           'bg-red-50 dark:bg-red-950/20': isOver && !isValidDrop,
           'cursor-not-allowed opacity-60': readonly,
@@ -130,30 +127,6 @@ export function SemesterBlock({
       {/* Drop feedback is already handled with the background classes */}
     </div>
   );
-}
-
-/**
- * Check if a course can be dropped in a specific semester/period
- * Simplified logic to improve reliability
- */
-function isValidDropTarget(
-  course: CourseWithEnrollment,
-  targetSemester: number,
-  targetPeriod: number
-): boolean {
-  // Rule 1: Courses in semesters 7 and 9 can be moved between each other
-  // Courses in semester 8 can only be moved within semester 8
-  const currentSemester = course.enrollment.semester;
-
-  if (currentSemester === 8) {
-    // Semester 8 courses can only stay in semester 8
-    return targetSemester === 8;
-  } else if (currentSemester === 7 || currentSemester === 9) {
-    // Semester 7 and 9 courses can move between semesters 7 and 9
-    return targetSemester === 7 || targetSemester === 9;
-  }
-
-  return false;
 }
 
 /**

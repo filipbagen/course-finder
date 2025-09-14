@@ -28,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSchedule } from './ScheduleProvider';
-import { ScheduleActions } from '../types/schedule.types';
 import { CourseWithEnrollment } from '@/types/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -62,7 +61,7 @@ export default function ScheduleCourseCard({
   onRemove,
   readonly = false,
 }: ScheduleCourseCardProps) {
-  const { state, dispatch } = useSchedule();
+  const { moveCourse, removeCourse } = useSchedule();
   const isMobile = useMediaQuery('(max-width: 767px)');
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -87,52 +86,31 @@ export default function ScheduleCourseCard({
       : `Block ${course.block[0]}`;
 
   // Handle course removal
-  const handleRemove = (e: React.MouseEvent) => {
+  const handleRemove = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (course.enrollment?.id && onRemove) {
-      onRemove(course.enrollment.id);
+    if (course.enrollment?.id) {
+      try {
+        await removeCourse(course.enrollment.id);
+      } catch (error) {
+        console.error('Failed to remove course:', error);
+      }
     }
   };
 
   // Handle course movement
-  const handleMoveCourse = (toSemester: number) => {
-    if (readonly) return;
+  const handleMoveCourse = async (toSemester: number) => {
+    if (readonly || !course.enrollment) return;
 
-    // Find the course's current location
-    const findCurrentLocation = () => {
-      const semesters = [7, 8, 9] as const;
-      const periods = [1, 2] as const;
-
-      for (const semester of semesters) {
-        for (const period of periods) {
-          const semesterKey =
-            `semester${semester}` as keyof typeof state.schedule;
-          const periodKey = `period${period}` as 'period1' | 'period2';
-          const courses = state.schedule[semesterKey][periodKey];
-
-          const foundCourse = courses.find((c) => c.id === course.id);
-          if (foundCourse) {
-            return { semester, period };
-          }
-        }
-      }
-      return null;
-    };
-
-    const currentLocation = findCurrentLocation();
-    if (!currentLocation) return;
-
-    // Dispatch move action
-    dispatch({
-      type: ScheduleActions.MOVE_COURSE,
-      payload: {
-        courseId: course.id.toString(),
-        fromSemester: currentLocation.semester,
-        fromPeriod: currentLocation.period,
+    try {
+      await moveCourse(
+        course.id.toString(),
+        course.enrollment.semester,
         toSemester,
-        toPeriod: currentLocation.period, // Keep same period
-      },
-    });
+        course.enrollment.period || 1
+      );
+    } catch (error) {
+      console.error('Failed to move course:', error);
+    }
   };
 
   // Get available semesters for moving (only on mobile, only for semester 7/9 courses)

@@ -53,8 +53,7 @@ export function ScheduleHeader({
   viewingUserId,
   viewingUserName,
 }: ScheduleHeaderProps) {
-  const { state } = useSchedule();
-  const { loading } = state;
+  const { loading } = useSchedule();
   const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
 
   // Check for course conflicts

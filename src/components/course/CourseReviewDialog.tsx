@@ -47,7 +47,6 @@ import {
 } from 'lucide-react';
 import { Course, CourseWithEnrollment } from '@/types/types';
 import { useSchedule } from '@/app/(dashboard)/schedule/components/ScheduleProvider';
-import { ScheduleActions } from '@/app/(dashboard)/schedule/types/schedule.types';
 import { StarRating } from './StarRating';
 import CourseReviews from './CourseReviews';
 import { cn } from '@/lib/utils';
@@ -103,7 +102,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const { state, dispatch } = useSchedule();
+  const { moveCourse } = useSchedule();
 
   const [reviewsData, setReviewsData] = useState<{
     averageRating: number;
@@ -132,45 +131,20 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   };
 
   // Handle course movement
-  const handleMoveCourse = (toSemester: number) => {
+  const handleMoveCourse = async (toSemester: number) => {
     if (!isEnrolled || !currentSemester) return;
 
-    // Find the course's current location
-    const findCurrentLocation = () => {
-      const semesters = [7, 8, 9] as const;
-      const periods = [1, 2] as const;
-
-      for (const semester of semesters) {
-        for (const period of periods) {
-          const semesterKey =
-            `semester${semester}` as keyof typeof state.schedule;
-          const periodKey = `period${period}` as 'period1' | 'period2';
-          const courses = state.schedule[semesterKey][periodKey];
-
-          const foundCourse = courses.find((c) => c.id === course.id);
-          if (foundCourse) {
-            return { semester, period };
-          }
-        }
-      }
-      return null;
-    };
-
-    const currentLocation = findCurrentLocation();
-    if (!currentLocation) return;
-
-    // Dispatch move action
-    dispatch({
-      type: ScheduleActions.MOVE_COURSE,
-      payload: {
-        courseId: course.id.toString(),
-        fromSemester: currentLocation.semester,
-        fromPeriod: currentLocation.period,
+    try {
+      await moveCourse(
+        course.id.toString(),
+        currentSemester,
         toSemester,
-        toPeriod: currentLocation.period, // Keep same period
-      },
-    });
-    setOpen(false);
+        (course as any).enrollment?.period || 1
+      );
+      setOpen(false);
+    } catch (error) {
+      console.error('Failed to move course:', error);
+    }
   };
 
   // Get available semesters for moving

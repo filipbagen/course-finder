@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ScheduleService } from '../services/scheduleService';
 import { CourseWithEnrollment } from '@/types/types';
+import { useEnrolledCoursesStore } from '@/hooks/useEnrolledCoursesStore';
 
 /**
  * Schedule Statistics Component
@@ -30,29 +31,103 @@ import { CourseWithEnrollment } from '@/types/types';
  * - Visual progress bars
  */
 export function ScheduleStatistics() {
-  const { state } = useSchedule();
-  const { schedule, loading } = state;
+  const { loading } = useSchedule();
+  const { enrolledCourses } = useEnrolledCoursesStore();
+
+  // Group courses by semester and period for statistics
+  const scheduleData = React.useMemo(() => {
+    const schedule = {
+      semester7: { period1: [] as any[], period2: [] as any[] },
+      semester8: { period1: [] as any[], period2: [] as any[] },
+      semester9: { period1: [] as any[], period2: [] as any[] },
+    };
+
+    enrolledCourses.forEach((course) => {
+      const semester = course.enrollment?.semester;
+      const period = course.enrollment?.period || 1;
+
+      if (semester && semester >= 7 && semester <= 9) {
+        const semesterKey = `semester${semester}` as keyof typeof schedule;
+        const periodKey = `period${period}` as keyof typeof schedule.semester7;
+        schedule[semesterKey][periodKey].push(course);
+      }
+    });
+
+    return schedule;
+  }, [enrolledCourses]);
+
+  // Calculate statistics
+  const stats = React.useMemo(() => {
+    if (loading || !enrolledCourses.length) {
+      return null;
+    }
+
+    let totalCourses = 0;
+    let totalCredits = 0;
+    let coursesPerSemester = { 7: 0, 8: 0, 9: 0 };
+    let creditsPerSemester = { 7: 0, 8: 0, 9: 0 };
+    let allCourses: CourseWithEnrollment[] = [];
+
+    Object.entries(scheduleData).forEach(([semesterKey, semesterData]) => {
+      const semester = parseInt(semesterKey.replace('semester', '')) as
+        | 7
+        | 8
+        | 9;
+
+      Object.values(semesterData).forEach((courses) => {
+        const courseArray = courses as CourseWithEnrollment[];
+        courseArray.forEach((course) => {
+          // Avoid counting the same course multiple times
+          if (!allCourses.some((c) => c.id === course.id)) {
+            totalCourses++;
+            totalCredits += Number(course.credits) || 0;
+            allCourses.push(course);
+          }
+          coursesPerSemester[semester]++;
+          creditsPerSemester[semester] += Number(course.credits) || 0;
+        });
+      });
+    });
+
+    // Calculate main field of study based on credits
+    const creditCount = allCourses.reduce(
+      (acc: { [key: string]: number }, course) => {
+        course.mainFieldOfStudy.forEach((field) => {
+          acc[field] = (acc[field] || 0) + Number(course.credits);
+        });
+        return acc;
+      },
+      {}
+    );
+
+    const maxCredits = Math.max(...Object.values(creditCount));
+    const topFieldsOfStudy = Object.keys(creditCount).filter(
+      (field) => creditCount[field] === maxCredits
+    );
+
+    return {
+      totalCourses,
+      totalCredits,
+      coursesPerSemester,
+      creditsPerSemester,
+      averageCreditsPerSemester: totalCredits / 3,
+      topFieldsOfStudy,
+      creditsByField: creditCount,
+    };
+  }, [scheduleData, loading, enrolledCourses.length]);
 
   // Define expected totals based on user requirements
   const expectedTotalCredits = 90; // Total credits needed for 3 semesters
   const expectedAdvancedCredits = 60; // Advanced credits needed
   const requiredFieldCredits = 30; // Advanced credits needed in same field for main field
 
-  // Calculate statistics
-  const stats = React.useMemo(() => {
-    if (loading || !schedule) {
-      return null;
-    }
-    return ScheduleService.calculateStatistics(schedule);
-  }, [schedule, loading]);
-
   // Calculate advanced credits
   const advancedCredits = React.useMemo(() => {
-    if (!schedule) return 0;
+    if (!enrolledCourses.length) return 0;
     let total = 0;
     let allCourses: CourseWithEnrollment[] = [];
 
-    Object.values(schedule).forEach((semesterData) => {
+    Object.values(scheduleData).forEach((semesterData) => {
       Object.values(semesterData).forEach((courses) => {
         const courseArray = courses as CourseWithEnrollment[];
         courseArray.forEach((course) => {
@@ -68,15 +143,15 @@ export function ScheduleStatistics() {
     });
 
     return total;
-  }, [schedule]);
+  }, [scheduleData, enrolledCourses.length]);
 
   // Calculate advanced credits by field for main field determination
   const advancedCreditsByField = React.useMemo(() => {
-    if (!schedule) return {};
+    if (!enrolledCourses.length) return {};
     let allCourses: CourseWithEnrollment[] = [];
     const creditCount: { [key: string]: number } = {};
 
-    Object.values(schedule).forEach((semesterData) => {
+    Object.values(scheduleData).forEach((semesterData) => {
       Object.values(semesterData).forEach((courses) => {
         const courseArray = courses as CourseWithEnrollment[];
         courseArray.forEach((course) => {
@@ -93,7 +168,7 @@ export function ScheduleStatistics() {
     });
 
     return creditCount;
-  }, [schedule]);
+  }, [scheduleData, enrolledCourses.length]);
 
   // Determine main field of study (requires 30+ advanced credits in same field)
   const mainFieldOfStudy = React.useMemo(() => {
