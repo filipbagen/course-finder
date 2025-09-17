@@ -56,6 +56,23 @@ export function SemesterBlock({
   const handleCourseRemoval = (enrollmentId: string) => {
     if (readonly) return;
 
+    // Find the course to remove for optimistic update
+    const courseToRemove = courses.find(
+      (course) => course.enrollment?.id === enrollmentId
+    );
+
+    if (!courseToRemove) {
+      console.error('Course not found for removal:', enrollmentId);
+      return;
+    }
+
+    // Apply IMMEDIATE optimistic UI update
+    dispatch({
+      type: ScheduleActions.REMOVE_COURSE_OPTIMISTIC,
+      payload: { enrollmentId },
+    });
+
+    // Trigger the async API removal (this will handle success/error cases)
     dispatch({
       type: ScheduleActions.REMOVE_COURSE,
       payload: { enrollmentId },
