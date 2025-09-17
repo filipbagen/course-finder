@@ -34,7 +34,7 @@ export function scheduleReducer(
   state: ScheduleState,
   action: ScheduleAction
 ): ScheduleState {
-  console.log(`Schedule Reducer: Handling action ${action.type}`, action);
+  // console.log(`Schedule Reducer: Handling action ${action.type}`, action);
 
   switch (action.type) {
     case ScheduleActions.FETCH_SCHEDULE_START:
@@ -69,11 +69,21 @@ export function scheduleReducer(
         draggedCourse: action.payload.draggedCourse,
       };
 
-    case ScheduleActions.SET_ERROR:
+    case ScheduleActions.MOVE_COURSE: {
+      // This action triggers the async operation in the useEffect
       return {
         ...state,
-        error: action.payload,
+        lastAction: action,
       };
+    }
+
+    case ScheduleActions.REMOVE_COURSE: {
+      // This action triggers the async operation in the useEffect
+      return {
+        ...state,
+        lastAction: action,
+      };
+    }
 
     case ScheduleActions.MOVE_COURSE_OPTIMISTIC: {
       // Track this operation as pending
@@ -100,10 +110,18 @@ export function scheduleReducer(
         (op) => !(op.type === 'move' && op.id === action.payload.courseId)
       );
 
+      // Update the schedule with the actual course data from the API
+      const updatedSchedule = updateCourseInSchedule(
+        state.schedule,
+        action.payload.course
+      );
+
       return {
         ...state,
+        schedule: updatedSchedule,
         pendingOperations,
         lastAction: null, // Clear the last action
+        lastUpdated: new Date(),
       };
     }
 
@@ -150,6 +168,7 @@ export function scheduleReducer(
         ...state,
         pendingOperations,
         lastAction: null, // Clear the last action
+        lastUpdated: new Date(),
       };
     }
 
@@ -204,7 +223,7 @@ function addCourseBackToSchedule(
   course: CourseWithEnrollment | null
 ): ScheduleData {
   if (!course || !course.enrollment) {
-    console.warn('Cannot add course back: Missing course data');
+    // console.warn('Cannot add course back: Missing course data');
     return schedule;
   }
 
@@ -233,6 +252,32 @@ function addCourseBackToSchedule(
 }
 
 /**
+ * Update a course in the schedule with new data (without moving it)
+ */
+function updateCourseInSchedule(
+  schedule: ScheduleData,
+  updatedCourse: CourseWithEnrollment
+): ScheduleData {
+  // Create a deep copy of the schedule
+  const newSchedule: ScheduleData = JSON.parse(JSON.stringify(schedule));
+
+  const semester = updatedCourse.enrollment.semester;
+  const semesterKey = `semester${semester}` as keyof ScheduleData;
+
+  // Update the course in all periods where it appears
+  ['period1', 'period2'].forEach((periodKey) => {
+    const periodArray =
+      newSchedule[semesterKey][periodKey as 'period1' | 'period2'];
+    const courseIndex = periodArray.findIndex((c) => c.id === updatedCourse.id);
+
+    if (courseIndex !== -1) {
+      periodArray[courseIndex] = updatedCourse;
+    }
+  });
+
+  return newSchedule;
+}
+/**
  * Move a course between semesters/periods
  */
 function moveCourseInSchedule(
@@ -242,8 +287,21 @@ function moveCourseInSchedule(
   const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
     operation;
 
-  // Create a deep copy of the schedule
-  const newSchedule: ScheduleData = JSON.parse(JSON.stringify(schedule));
+  // Create a completely new schedule object to ensure React detects the change
+  const newSchedule: ScheduleData = {
+    semester7: {
+      period1: [...schedule.semester7.period1],
+      period2: [...schedule.semester7.period2],
+    },
+    semester8: {
+      period1: [...schedule.semester8.period1],
+      period2: [...schedule.semester8.period2],
+    },
+    semester9: {
+      period1: [...schedule.semester9.period1],
+      period2: [...schedule.semester9.period2],
+    },
+  };
 
   // Get source and destination keys
   const fromSemesterKey = `semester${fromSemester}` as keyof ScheduleData;
@@ -283,7 +341,7 @@ function moveCourseInSchedule(
 
   if (!course || !fromPeriodKey) {
     console.warn('Course not found in source location:', courseId);
-    return schedule;
+    return newSchedule; // Return the new schedule even if course not found
   }
 
   // Check if this is a multi-period course
@@ -305,7 +363,7 @@ function moveCourseInSchedule(
       to: toSemester,
       rule: 'Courses from semester 7 and 9 can only be moved between 7 and 9, courses from semester 8 can only stay in 8',
     });
-    return schedule;
+    return newSchedule; // Return the new schedule even if move is invalid
   }
 
   if (isMultiPeriod) {

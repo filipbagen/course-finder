@@ -179,6 +179,7 @@ export default function ScheduleCourseCard({
     >
       <Card
         onClick={handleCardClick}
+        data-course-id={course.id}
         className={cn('transition-all duration-200 group', {
           'hover:shadow-md': !isDragging && !readonly,
           'cursor-pointer': !readonly && !isDragging,

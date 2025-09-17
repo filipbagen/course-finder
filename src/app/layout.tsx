@@ -60,6 +60,7 @@ export default async function RootLayout({
 
   return (
     <html suppressHydrationWarning lang="sv">
+      <head></head>
       <body
         className={`${inter.className} ${data?.colorScheme ?? 'theme-blue'}`}
       >

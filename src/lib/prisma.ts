@@ -49,6 +49,31 @@ if (process.env.NODE_ENV !== 'test') {
 const cache = new Map<string, { data: any; timestamp: number }>();
 
 /**
+ * Clear cache entries by pattern (useful for invalidating related data)
+ */
+export function clearCache(pattern?: string) {
+  if (!pattern) {
+    // Clear all cache
+    cache.clear();
+    return;
+  }
+
+  // Clear cache entries that match the pattern
+  for (const [key] of cache) {
+    if (key.includes(pattern)) {
+      cache.delete(key);
+    }
+  }
+}
+
+/**
+ * Clear cache for a specific user (useful after schedule updates)
+ */
+export function clearUserCache(userId: string) {
+  clearCache(`-${userId}`);
+}
+
+/**
  * Execute database operations with proper error handling
  */
 export async function withPrisma<T>(

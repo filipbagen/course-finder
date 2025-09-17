@@ -115,7 +115,7 @@ export function ScheduleContainer({
   };
 
   /**
-   * Handle drag end - update the schedule
+   * Handle drag end - update the schedule with immediate optimistic updates
    */
   const handleDragEnd = (event: DragEndEvent) => {
     if (readonly) return;
@@ -172,26 +172,17 @@ export function ScheduleContainer({
 
     // Validate if the course can be moved to the target position
     if (!isValidMove(activeCourse, targetSemester, targetPeriod)) {
-      // TODO: Show user feedback about why the move isn't allowed
       console.warn('Move not allowed:', {
         course: activeCourse.code,
         from: currentPosition,
         to: { semester: targetSemester, period: targetPeriod },
-        availableSemesters: [activeCourse.semester],
-        availablePeriods: activeCourse.period,
       });
       return;
     }
 
-    console.log('ScheduleContainer: Handling drag end - moving course', {
-      courseId,
-      fromSemester: currentPosition.semester,
-      fromPeriod: currentPosition.period,
-      toSemester: targetSemester,
-      toPeriod: targetPeriod,
-    });
+    console.log('ScheduleContainer: Validation passed, proceeding with move');
 
-    // Apply optimistic UI update
+    // Apply IMMEDIATE optimistic UI update
     dispatch({
       type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
       payload: {
@@ -203,7 +194,7 @@ export function ScheduleContainer({
       },
     });
 
-    // Trigger the actual API update via the main handler
+    // Trigger the async API update (this will handle success/error cases)
     dispatch({
       type: ScheduleActions.MOVE_COURSE,
       payload: {

@@ -59,11 +59,20 @@ export const useEnrolledCoursesStore = create<EnrolledCoursesState>()(
     }),
     {
       name: 'enrolled-courses-storage',
+      // Only persist metadata, not the actual course data to avoid stale data issues
       partialize: (state) => ({
-        enrolledCourses: state.enrolledCourses,
         lastUpdated: state.lastUpdated,
         version: state.version,
+        // Don't persist enrolledCourses to avoid loading stale data on refresh
       }),
+      // Clear persisted data on initialization to ensure fresh data from API
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Clear any persisted course data on rehydration
+          state.enrolledCourses = [];
+          state.lastUpdated = null;
+        }
+      },
     }
   )
 );

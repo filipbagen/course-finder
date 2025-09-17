@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     // Create a cache key based on user ID
     const cacheKey = `schedule-${userId}`;
 
-    // Use enhanced withPrisma wrapper with caching for better performance
+    // Use enhanced withPrisma wrapper WITHOUT caching for schedule operations
+    // to ensure fresh data after drag-and-drop updates
     const result = await withPrisma(
       async (prismaClient) => {
         console.log(`withPrisma callback started (${requestId})`);
@@ -78,13 +79,8 @@ export async function GET(request: NextRequest) {
         console.log(`Found ${courses.length} courses (${requestId})`);
 
         return { enrollments, courses };
-      },
-      {
-        // Enable caching for this operation with a 1 minute TTL
-        useCache: true,
-        cacheKey,
-        cacheTtl: 60,
       }
+      // Removed caching options to ensure fresh data after updates
     );
 
     console.log(`withPrisma operation completed (${requestId})`);
@@ -142,9 +138,16 @@ export async function GET(request: NextRequest) {
       'Schedule fetched successfully'
     );
 
-    // Set caching headers for browsers and CDNs
+    // Set aggressive cache-busting headers to ensure fresh data
     if (response instanceof NextResponse) {
-      response.headers.set('Cache-Control', 'no-cache, private');
+      response.headers.set(
+        'Cache-Control',
+        'no-cache, no-store, must-revalidate, private'
+      );
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      // Add a timestamp header to help with debugging
+      response.headers.set('X-Data-Freshness', new Date().toISOString());
     }
 
     console.log(`Schedule API request completed successfully (${requestId})`);

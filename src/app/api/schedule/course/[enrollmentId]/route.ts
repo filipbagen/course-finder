@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withPrisma } from '@/lib/prisma';
+import { withPrisma, clearUserCache } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
 import {
   createSuccessResponse,
@@ -56,6 +56,9 @@ export async function DELETE(
     if (result.notFound) {
       return notFound(result.message);
     }
+
+    // Clear any cached schedule data for this user to ensure fresh data on next fetch
+    clearUserCache(user.id);
 
     // Add cache control headers
     const response = createSuccessResponse({

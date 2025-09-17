@@ -55,41 +55,43 @@ export function ScheduleProvider({
   const { user, loading: authLoading, isAuthenticated } = useAuth();
 
   /**
-   * Load schedule data from API
+   * Load schedule data from API and sync with Zustand store
    */
   const loadScheduleData = useCallback(async () => {
-    // Set loading state first to show loading indicators
-    dispatch({ type: ScheduleActions.FETCH_SCHEDULE_START });
-    setLoading(true);
-
-    // Clear any previous errors
-    dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
-    setError('');
+    if (!userId) return;
 
     try {
-      // Fetch schedule data
-      const scheduleData = await ScheduleService.fetchSchedule(userId);
+      setLoading(true);
+      setError(null);
 
-      dispatch({
-        type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
-        payload: scheduleData,
-      });
+      // Clear any stale persisted data before loading fresh data
+      // This ensures we don't have conflicts between persisted and fresh data
+      const freshScheduleData = await ScheduleService.fetchSchedule(userId);
 
-      const allCourses = [
-        ...scheduleData.semester7.period1,
-        ...scheduleData.semester7.period2,
-        ...scheduleData.semester8.period1,
-        ...scheduleData.semester8.period2,
-        ...scheduleData.semester9.period1,
-        ...scheduleData.semester9.period2,
+      // Transform schedule data to flat array for Zustand store
+      const allCourses: CourseWithEnrollment[] = [
+        ...freshScheduleData.semester7.period1,
+        ...freshScheduleData.semester7.period2,
+        ...freshScheduleData.semester8.period1,
+        ...freshScheduleData.semester8.period2,
+        ...freshScheduleData.semester9.period1,
+        ...freshScheduleData.semester9.period2,
       ];
 
+      // Update Zustand store with fresh data (this will also persist to localStorage)
       setEnrolledCourses(allCourses);
+
+      // Update reducer state
+      dispatch({
+        type: ScheduleActions.FETCH_SCHEDULE_SUCCESS,
+        payload: freshScheduleData,
+      });
+
       setLoading(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load schedule';
-      console.error('Schedule fetch error:', error);
+      // console.error('Schedule fetch error:', error);
 
       dispatch({
         type: ScheduleActions.FETCH_SCHEDULE_ERROR,
@@ -118,34 +120,23 @@ export function ScheduleProvider({
       if (readonly) return;
 
       try {
-        console.log('ScheduleProvider: Moving course:', {
-          courseId,
-          fromSemester,
-          fromPeriod,
-          toSemester,
-          toPeriod,
-        });
+        // console.log('ScheduleProvider: Moving course:', {
+        //   courseId,
+        //   fromSemester,
+        //   fromPeriod,
+        //   toSemester,
+        //   toPeriod,
+        // });
 
-        // First, optimistically update the UI for smoother UX
-        dispatch({
-          type: ScheduleActions.MOVE_COURSE_OPTIMISTIC,
-          payload: {
-            courseId,
-            fromSemester,
-            fromPeriod,
-            toSemester,
-            toPeriod,
-          },
-        });
-
-        // Then update via API - only pass the semester change, the period should stay the same
+        // The optimistic update has already happened in ScheduleContainer
+        // Now perform the API call asynchronously
         const updatedCourse = await ScheduleService.updateCourseSchedule({
           courseId,
           semester: toSemester,
-          period: fromPeriod, // We'll send the original period, but API will use course's actual period
+          period: fromPeriod, // Keep as array for service interface, service will handle conversion
         });
 
-        console.log('ScheduleProvider: API update successful:', updatedCourse);
+        // console.log('ScheduleProvider: API update successful:', updatedCourse);
 
         // Show success message
         toast.success('Course moved successfully');
@@ -162,7 +153,7 @@ export function ScheduleProvider({
         // Clear the last action to prevent re-triggering
         dispatch({ type: ScheduleActions.SET_ERROR, payload: null });
 
-        // Find the course before updating it
+        // Update the enrolled courses store with the updated course data
         const currentEnrolledCourses =
           useEnrolledCoursesStore.getState().enrolledCourses;
         const courseToUpdate = currentEnrolledCourses.find(
@@ -186,7 +177,7 @@ export function ScheduleProvider({
           setEnrolledCourses(updatedCourses);
         }
       } catch (error) {
-        console.error('ScheduleProvider: Error moving course:', error);
+        // console.error('ScheduleProvider: Error moving course:', error);
 
         // Revert the optimistic update
         dispatch({
@@ -225,11 +216,6 @@ export function ScheduleProvider({
     async (enrollmentId: string) => {
       if (readonly) return;
 
-      console.log(
-        'ScheduleProvider: handleCourseRemoval called with enrollmentId:',
-        enrollmentId
-      );
-
       // Find the course before removing it so we can restore if needed
       const currentEnrolledCourses =
         useEnrolledCoursesStore.getState().enrolledCourses;
@@ -238,20 +224,12 @@ export function ScheduleProvider({
       );
 
       try {
-        // First apply optimistic UI update
-        dispatch({
-          type: ScheduleActions.REMOVE_COURSE_OPTIMISTIC,
-          payload: {
-            enrollmentId,
-            courseToRestore: courseToRemove,
-          },
-        });
-
-        // Then perform the API call
+        // The optimistic update has already happened in SemesterBlock
+        // Now perform the API call asynchronously
         const result = await ScheduleService.removeCourseFromSchedule(
           enrollmentId
         );
-        console.log('ScheduleProvider: Course removal API result:', result);
+        // console.log('ScheduleProvider: Course removal API result:', result);
 
         // If the API reports the course was already removed or was removed successfully
         if (result.success || result.alreadyRemoved) {
@@ -273,7 +251,7 @@ export function ScheduleProvider({
           throw new Error('Failed to remove course: Unknown error');
         }
       } catch (error) {
-        console.error('ScheduleProvider: Error removing course:', error);
+        // console.error('ScheduleProvider: Error removing course:', error);
 
         // Revert the optimistic update
         dispatch({
@@ -304,6 +282,16 @@ export function ScheduleProvider({
    * Refresh schedule data
    */
   const refreshSchedule = useCallback(async () => {
+    // Force clear any cached data in localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('enrolled-courses-storage');
+      } catch (error) {
+        // Ignore localStorage errors
+      }
+    }
+
+    // Force reload data from API
     await loadScheduleData();
   }, [loadScheduleData]);
 
@@ -320,24 +308,39 @@ export function ScheduleProvider({
       if (lastAction.type === ScheduleActions.MOVE_COURSE && payload) {
         const { courseId, fromSemester, fromPeriod, toSemester, toPeriod } =
           payload;
+        // Execute the async operation without blocking the UI
         handleCourseMove(
           courseId,
           fromSemester,
           fromPeriod,
           toSemester,
           toPeriod
-        );
+        ).catch((error) => {
+          console.error('Async course move failed:', error);
+        });
       }
 
       if (lastAction.type === ScheduleActions.REMOVE_COURSE && payload) {
-        handleCourseRemoval(payload.enrollmentId);
+        // Execute the async operation without blocking the UI
+        handleCourseRemoval(payload.enrollmentId).catch((error) => {
+          console.error('Async course removal failed:', error);
+        });
       }
     }
-  }, [state.lastAction]); // Keep only state.lastAction as dependency
+  }, [state.lastAction, handleCourseMove, handleCourseRemoval]);
 
   // Load initial data
   useEffect(() => {
-    console.log('Loading schedule data for userId:', userId);
+    // Clear any stale persisted data on initial load
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('enrolled-courses-storage');
+      } catch (error) {
+        // Ignore localStorage errors in case it's disabled
+      }
+    }
+
+    // console.log('Loading schedule data for userId:', userId);
     loadScheduleData();
   }, [loadScheduleData, userId]);
 
@@ -351,10 +354,10 @@ export function ScheduleProvider({
       // Only refresh if it's been more than 10 seconds since last activity
       // and we haven't refreshed in the last 30 seconds
       if (timeSinceLastActivity > 10000) {
-        console.log(
-          'Found stale pending operations, refreshing schedule...',
-          state.pendingOperations
-        );
+        // console.log(
+        //   'Found stale pending operations, refreshing schedule...',
+        //   state.pendingOperations
+        // );
         loadScheduleData();
       }
     }

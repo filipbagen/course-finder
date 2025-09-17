@@ -71,6 +71,8 @@ export function SemesterBlock({
     <div
       ref={setNodeRef}
       style={style}
+      data-semester={`${semester}`}
+      data-period={`${period}`}
       className={cn(
         'min-h-48 p-4 rounded-lg border-2 transition-all duration-200 relative bg-card',
         {

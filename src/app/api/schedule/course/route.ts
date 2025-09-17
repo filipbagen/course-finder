@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, withPrisma } from '@/lib/prisma';
+import { prisma, withPrisma, clearUserCache } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
 import {
   createSuccessResponse,
@@ -117,10 +117,8 @@ export async function PUT(
             },
           },
         };
-      },
-      {
-        // More aggressive retry pattern for schedule operations
       }
+      // Removed caching options - schedule updates should always be fresh
     );
 
     if (result.notFound) {
@@ -130,6 +128,9 @@ export async function PUT(
     if (result.conflict) {
       return conflict(result.message);
     }
+
+    // Clear any cached schedule data for this user to ensure fresh data on next fetch
+    clearUserCache(user.id);
 
     // Add cache control headers
     const response = createSuccessResponse(result.course);
@@ -235,10 +236,8 @@ export async function POST(
             },
           },
         };
-      },
-      {
-        // More aggressive retry pattern for schedule operations
       }
+      // Removed caching options - schedule updates should always be fresh
     );
 
     if (result.notFound) {
@@ -248,6 +247,9 @@ export async function POST(
     if (result.conflict) {
       return conflict(result.message);
     }
+
+    // Clear any cached schedule data for this user to ensure fresh data on next fetch
+    clearUserCache(user.id);
 
     // Add cache control headers
     const response = createSuccessResponse(result.course);

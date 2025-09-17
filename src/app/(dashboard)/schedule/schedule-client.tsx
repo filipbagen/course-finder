@@ -8,6 +8,9 @@ import { ScheduleStatistics } from './components/ScheduleStatistics';
 import { ScheduleGrid } from './components/ScheduleGrid';
 import { Separator } from '@/components/ui/separator';
 
+// Import test utilities for debugging
+import '@/lib/schedule-test';
+
 // Define a simplified user type
 interface ServerUser {
   id: string;

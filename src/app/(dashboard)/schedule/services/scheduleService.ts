@@ -15,10 +15,12 @@ export class ScheduleService {
    */
   static async fetchSchedule(userId?: string): Promise<ScheduleData> {
     try {
-      const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+      // Add multiple cache-busting parameters
+      const timestamp = new Date().getTime();
+      const randomId = Math.random().toString(36).substring(2, 10);
       const url = userId
-        ? `${this.BASE_URL}?userId=${userId}&t=${timestamp}`
-        : `${this.BASE_URL}?t=${timestamp}`;
+        ? `${this.BASE_URL}?userId=${userId}&t=${timestamp}&r=${randomId}&fresh=1`
+        : `${this.BASE_URL}?t=${timestamp}&r=${randomId}&fresh=1`;
 
       const response = await fetch(url, {
         method: 'GET',
@@ -27,9 +29,14 @@ export class ScheduleService {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
           Expires: '0',
+          // Add custom headers to force fresh data
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-Fresh-Data': 'true',
         },
         credentials: 'include',
         cache: 'no-store',
+        // Add a timeout to prevent hanging requests
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       });
 
       if (!response.ok) {
@@ -53,12 +60,12 @@ export class ScheduleService {
       }
 
       const data = await response.json();
-      console.log('Schedule API response:', data);
+      // console.log('Schedule API response:', data);
 
       // Transform the data to match our ScheduleData interface
       return this.transformApiResponse(data);
     } catch (error) {
-      console.error('Error fetching schedule:', error);
+      // console.error('Error fetching schedule:', error);
 
       if (error instanceof Error) {
         throw error;
@@ -77,11 +84,14 @@ export class ScheduleService {
     update: ScheduleUpdate
   ): Promise<CourseWithEnrollment> {
     try {
-      console.log('ScheduleService: Updating course schedule:', update);
+      // console.log('ScheduleService: Updating course schedule:', update);
 
       // Even though we send the period, the API will ignore it and use the course's actual period
       // We're just keeping the interface consistent for the frontend
       const { courseId, semester, period } = update;
+
+      // Convert period array to single number for API validation
+      const periodValue = Array.isArray(period) ? period[0] : period;
 
       const timestamp = new Date().getTime(); // Add timestamp to prevent caching
       const response = await fetch(`${this.BASE_URL}/course?t=${timestamp}`, {
@@ -93,7 +103,7 @@ export class ScheduleService {
           Expires: '0',
         },
         credentials: 'include',
-        body: JSON.stringify({ courseId, semester, period }),
+        body: JSON.stringify({ courseId, semester, period: periodValue }),
         cache: 'no-store',
       });
 
@@ -111,10 +121,10 @@ export class ScheduleService {
       }
 
       const responseData = await response.json();
-      console.log(`ScheduleService: Update course response:`, responseData);
+      // console.log(`ScheduleService: Update course response:`, responseData);
       return responseData.data || (responseData.course as CourseWithEnrollment);
     } catch (error) {
-      console.error('Error updating course schedule:', error);
+      // console.error('Error updating course schedule:', error);
       throw new Error('Failed to update course placement');
     }
   }
@@ -127,6 +137,9 @@ export class ScheduleService {
     period: number[]
   ): Promise<CourseWithEnrollment> {
     try {
+      // Convert period array to single number for API validation
+      const periodValue = Array.isArray(period) ? period[0] : period;
+
       const timestamp = new Date().getTime(); // Add timestamp to prevent caching
       const response = await fetch(`${this.BASE_URL}/course?t=${timestamp}`, {
         method: 'POST',
@@ -140,7 +153,7 @@ export class ScheduleService {
         body: JSON.stringify({
           courseId,
           semester,
-          period,
+          period: periodValue,
         }),
         cache: 'no-store',
       });
@@ -159,10 +172,10 @@ export class ScheduleService {
       }
 
       const result = await response.json();
-      console.log('Add course response:', result);
+      // console.log('Add course response:', result);
       return result.data || result.course;
     } catch (error) {
-      console.error('Error adding course to schedule:', error);
+      // console.error('Error adding course to schedule:', error);
       throw new Error('Failed to add course to schedule');
     }
   }
@@ -172,9 +185,9 @@ export class ScheduleService {
    */
   static async removeCourseFromSchedule(enrollmentId: string): Promise<any> {
     try {
-      console.log(
-        `ScheduleService: Removing course ${enrollmentId} from schedule`
-      );
+      // console.log(
+      //   `ScheduleService: Removing course ${enrollmentId} from schedule`
+      // );
 
       // URL encode the enrollment ID to handle any special characters
       const encodedEnrollmentId = encodeURIComponent(enrollmentId);
@@ -215,10 +228,10 @@ export class ScheduleService {
       }
 
       const result = await response.json();
-      console.log(`Course ${enrollmentId} removed successfully:`, result);
+      // console.log(`Course ${enrollmentId} removed successfully:`, result);
       return result.data || result;
     } catch (error) {
-      console.error('Error removing course from schedule:', error);
+      // console.error('Error removing course from schedule:', error);
       throw new Error('Failed to remove course from schedule');
     }
   }
@@ -306,7 +319,7 @@ export class ScheduleService {
         }
       });
     } else {
-      console.warn('Invalid API response format:', data);
+      // console.warn('Invalid API response format:', data);
     }
 
     return schedule;
