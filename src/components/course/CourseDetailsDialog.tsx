@@ -764,11 +764,7 @@ export const CourseDetailsDialog = () => {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent
-          className="max-w-4xl h-[90vh] overflow-hidden flex flex-col shadow-2xl"
-          onInteractOutside={(e) => {
-            // Prevent interaction outside when open
-            if (open) e.preventDefault();
-          }}
+          className="max-w-4xl h-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
           onEscapeKeyDown={(e) => {
             // Use escape key to close
             e.preventDefault();
@@ -832,26 +828,28 @@ export const CourseDetailsDialog = () => {
               </div>
             )}
             {!loading && !error && course && (
-              <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid grid-cols-2 mb-6">
-                  <TabsTrigger value="info">Kursinformation</TabsTrigger>
-                  <TabsTrigger value="reviews">
-                    Recensioner{' '}
-                    {reviewsData.count > 0 && `(${reviewsData.count})`}
-                  </TabsTrigger>
-                </TabsList>
+              <div className="space-y-6 p-6">
+                <Tabs defaultValue="info" className="w-full">
+                  <TabsList className="grid grid-cols-2 mb-6">
+                    <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                    <TabsTrigger value="reviews">
+                      Recensioner{' '}
+                      {reviewsData.count > 0 && `(${reviewsData.count})`}
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="info" className="space-y-8">
-                  <CourseDetails course={course} reviewsData={reviewsData} />
-                </TabsContent>
+                  <TabsContent value="info" className="space-y-8">
+                    <CourseDetails course={course} reviewsData={reviewsData} />
+                  </TabsContent>
 
-                <TabsContent value="reviews">
-                  <CourseReviews
-                    courseId={course.id.toString()}
-                    onReviewDataUpdate={updateReviewData}
-                  />
-                </TabsContent>
-              </Tabs>
+                  <TabsContent value="reviews">
+                    <CourseReviews
+                      courseId={course.id.toString()}
+                      onReviewDataUpdate={updateReviewData}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
             )}
           </div>
         </DialogContent>
@@ -865,7 +863,7 @@ export const CourseDetailsDialog = () => {
       onOpenChange={handleClose}
       onClose={() => handleClose()}
     >
-      <DrawerContent className="h-[90vh] shadow-2xl">
+      <DrawerContent className="h-full max-h-[90vh] shadow-2xl">
         <DrawerHeader className="text-left pt-6">
           {course && (
             <>
@@ -923,26 +921,28 @@ export const CourseDetailsDialog = () => {
             </div>
           )}
           {!loading && !error && course && (
-            <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid grid-cols-2 mb-6">
-                <TabsTrigger value="info">Kursinformation</TabsTrigger>
-                <TabsTrigger value="reviews">
-                  Recensioner{' '}
-                  {reviewsData.count > 0 && `(${reviewsData.count})`}
-                </TabsTrigger>
-              </TabsList>
+            <div className="space-y-6">
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="grid grid-cols-2 mb-6">
+                  <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                  <TabsTrigger value="reviews">
+                    Recensioner{' '}
+                    {reviewsData.count > 0 && `(${reviewsData.count})`}
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="info" className="space-y-6">
-                <CourseDetails course={course} reviewsData={reviewsData} />
-              </TabsContent>
+                <TabsContent value="info" className="space-y-6">
+                  <CourseDetails course={course} reviewsData={reviewsData} />
+                </TabsContent>
 
-              <TabsContent value="reviews">
-                <CourseReviews
-                  courseId={course.id.toString()}
-                  onReviewDataUpdate={updateReviewData}
-                />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="reviews">
+                  <CourseReviews
+                    courseId={course.id.toString()}
+                    onReviewDataUpdate={updateReviewData}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
           )}
         </div>
       </DrawerContent>

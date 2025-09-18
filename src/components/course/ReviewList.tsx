@@ -32,7 +32,7 @@ interface ReviewData {
 interface ReviewListProps {
   reviews: ReviewData[];
   currentUserId?: string | null;
-  onReviewDeleted: () => void;
+  onReviewDeleted: (reviewId?: string) => void;
 }
 
 const ReviewList: React.FC<ReviewListProps> = ({
@@ -49,6 +49,9 @@ const ReviewList: React.FC<ReviewListProps> = ({
     userId: string | null | undefined
   ): boolean => {
     if (!userId) return false;
+
+    // Don't allow deletion of temporary reviews (optimistic updates)
+    if (review.id.startsWith('temp-')) return false;
 
     return !!(
       userId === review.userId ||
@@ -72,6 +75,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',
           },
+          credentials: 'include', // Include cookies for authentication
         }
       );
 
@@ -96,7 +100,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
       }
 
       console.log('Review deleted successfully');
-      onReviewDeleted();
+      onReviewDeleted(reviewId);
     } catch (error) {
       console.error('Error deleting review:', error);
 

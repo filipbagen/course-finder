@@ -446,7 +446,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           )}
         </DialogTrigger>
 
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl h-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
           <DialogHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -541,6 +541,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <CourseReviews
                     courseId={course.id.toString()}
                     onReviewDataUpdate={updateReviewData}
+                    isFromSchedule={isFromSchedule}
                   />
                 </TabsContent>
               </Tabs>
@@ -563,7 +564,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           )}
         </DrawerTrigger>
 
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="h-full max-h-[90vh] shadow-2xl">
           <DrawerHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -658,6 +659,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   <CourseReviews
                     courseId={course.id.toString()}
                     onReviewDataUpdate={updateReviewData}
+                    isFromSchedule={isFromSchedule}
                   />
                 </TabsContent>
               </Tabs>
@@ -685,7 +687,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </Button>
         )}
       </DialogTrigger>{' '}
-      <DialogContent className="sm:max-w-[625px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl h-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
           <DialogDescription>
@@ -698,26 +700,32 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="info">Kursinformation</TabsTrigger>
-            <TabsTrigger value="reviews">
-              Recensioner{' '}
-              {currentReviewData.count > 0 && `(${currentReviewData.count})`}
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-6 p-6">
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList className="grid grid-cols-2 mb-6">
+                <TabsTrigger value="info">Kursinformation</TabsTrigger>
+                <TabsTrigger value="reviews">
+                  Recensioner{' '}
+                  {currentReviewData.count > 0 &&
+                    `(${currentReviewData.count})`}
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="info" className="space-y-6">
-            <CourseInfo />
-          </TabsContent>
+              <TabsContent value="info" className="space-y-6">
+                <CourseInfo />
+              </TabsContent>
 
-          <TabsContent value="reviews">
-            <CourseReviews
-              courseId={course.id.toString()}
-              onReviewDataUpdate={updateReviewData}
-            />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="reviews">
+                <CourseReviews
+                  courseId={course.id.toString()}
+                  onReviewDataUpdate={updateReviewData}
+                  isFromSchedule={false}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -6,7 +6,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 
 type ReviewFormProps = {
   courseId: string;
-  onReviewSubmitted: () => void;
+  onReviewSubmitted: (reviewData?: { rating: number; comment: string }) => void;
   existingRating?: number;
   existingComment?: string;
 };
@@ -48,6 +48,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
         },
+        credentials: 'include', // Include cookies for authentication
         body: JSON.stringify({
           rating,
           comment,
@@ -67,8 +68,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         throw new Error(result.error || 'Failed to post review');
       }
 
-      // Notify parent component that a review was submitted
-      onReviewSubmitted();
+      // Notify parent component that a review was submitted with the review data
+      onReviewSubmitted({ rating, comment });
 
       // Only reset form if this is a new review (not editing)
       if (!existingRating && !existingComment) {
