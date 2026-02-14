@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect, notFound } from 'next/navigation';
-import { UserProfileComponent } from '@/components/students/UserProfileComponent';
+import { UserProfileComponent } from '@/features/students/components/UserProfileComponent';
 import { Separator } from '@/components/ui/separator';
 import { User, GraduationCap, Plus } from 'lucide-react';
 import { course as Course, enrollment, review } from '@prisma/client';

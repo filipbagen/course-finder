@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { UserSearchComponent } from '@/components/students/UserSearchComponent';
+import { UserSearchComponent } from '@/features/students/components/UserSearchComponent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Users } from 'lucide-react';

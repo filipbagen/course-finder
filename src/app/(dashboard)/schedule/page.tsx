@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import ScheduleClient from './schedule-client';
+import ScheduleClient from '@/features/schedule/schedule-client';
 import { prisma } from '@/lib/prisma';
 
 export default async function SchedulePage() {

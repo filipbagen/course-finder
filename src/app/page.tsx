@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 // components
-import { CourseCarousel } from '@/components/course/CourseCarousel';
+import { CourseCarousel } from '@/features/courses/components/CourseCarousel';
 
 export default async function Home() {
   const supabase = await createClient();

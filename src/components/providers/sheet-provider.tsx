@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CourseDetailsDialog } from '@/components/course/CourseDetailsDialog';
+import { CourseDetailsDialog } from '@/features/courses/components/CourseDetailsDialog';
 
 export const SheetProvider = () => {
   const [isMounted, setIsMounted] = useState(false);

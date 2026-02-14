@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import { Suspense } from 'react';
 
 // components
-import { CoursesPageClient } from '@/components/course/CoursesPageClient';
+import { CoursesPageClient } from '@/features/courses/components/CoursesPageClient';
 
 // auth
 import { getOptionalUser } from '@/lib/auth';
