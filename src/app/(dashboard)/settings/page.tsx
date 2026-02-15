@@ -197,12 +197,14 @@ async function deleteProfileImage(userId: string) {
         const fileName = urlParts[urlParts.length - 1];
 
         // Delete from Supabase Storage
-        const { error: deleteError } = await supabase.storage
-          .from('avatars')
-          .remove([fileName]);
+        if (fileName) {
+          const { error: deleteError } = await supabase.storage
+            .from('avatars')
+            .remove([fileName]);
 
-        if (deleteError) {
-          console.error('Error deleting file from storage:', deleteError);
+          if (deleteError) {
+            console.error('Error deleting file from storage:', deleteError);
+          }
         }
       }
     }
@@ -263,15 +265,17 @@ async function deleteAccount(formData: FormData) {
         const urlParts = userData.image.split('/');
         const fileName = urlParts[urlParts.length - 1];
 
-        const { error: deleteError } = await supabase.storage
-          .from('avatars')
-          .remove([fileName]);
+        if (fileName) {
+          const { error: deleteError } = await supabase.storage
+            .from('avatars')
+            .remove([fileName]);
 
-        if (deleteError) {
-          console.error(
-            'Error deleting profile image from storage:',
-            deleteError
-          );
+          if (deleteError) {
+            console.error(
+              'Error deleting profile image from storage:',
+              deleteError
+            );
+          }
         }
       }
     }
