@@ -84,18 +84,29 @@ const DetailSection = ({
   </div>
 )
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const JsonContent = ({ data }: { data: any }) => {
-  let parsedData = data
+interface JsonContentData {
+  paragraph?: string | null
+  list_items?: string[]
+}
+
+const JsonContent = ({
+  data,
+}: {
+  data: string | JsonContentData | null | undefined
+}) => {
+  let parsedData: JsonContentData | null = null
+
   if (typeof data === 'string') {
     try {
-      parsedData = JSON.parse(data)
+      parsedData = JSON.parse(data) as JsonContentData
     } catch {
       parsedData = { paragraph: data, list_items: [] }
     }
+  } else if (data && typeof data === 'object') {
+    parsedData = data
   }
 
-  if (!parsedData || typeof parsedData !== 'object') return null
+  if (!parsedData) return null
 
   const { paragraph, list_items } = parsedData
   const hasParagraph =
@@ -111,7 +122,7 @@ const JsonContent = ({ data }: { data: any }) => {
   return (
     <>
       {hasParagraph && <p>{paragraph}</p>}
-      {hasList && (
+      {hasList && list_items && (
         <ul className="ml-6 list-disc">
           {list_items
             .filter(
@@ -535,13 +546,6 @@ export const CourseDetailsDialog = () => {
     setOpen(false)
     onClose()
   }, [onClose])
-
-  // Check if course is enrolled and get current semester
-  const isEnrolled = course && 'enrollment' in course
-  const _currentSemester = isEnrolled
-    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (course as any).enrollment.semester
-    : null
 
   // Function to update review data
   const updateReviewData = useCallback(

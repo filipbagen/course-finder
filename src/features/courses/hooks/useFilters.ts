@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { FilterState, TriState } from '@/types/types'
 
 const initialFilterState: FilterState = {
@@ -74,13 +74,16 @@ export function useFilters() {
     setMobileFilters(initialFilterState)
   }, [])
 
-  const hasActiveFilters =
-    Object.values(filters).some(
-      (filterValue) =>
-        (Array.isArray(filterValue) && filterValue.length > 0) ||
-        (typeof filterValue === 'object' &&
-          Object.keys(filterValue).length > 0),
-    ) || Object.keys(filters.examinations).length > 0
+  const hasActiveFilters = useMemo(
+    () =>
+      Object.values(filters).some(
+        (filterValue) =>
+          (Array.isArray(filterValue) && filterValue.length > 0) ||
+          (typeof filterValue === 'object' &&
+            Object.keys(filterValue).length > 0),
+      ) || Object.keys(filters.examinations).length > 0,
+    [filters],
+  )
 
   return {
     filters,

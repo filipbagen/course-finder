@@ -39,6 +39,15 @@ export const CreateReviewSchema = z.object({
   comment: z.string().optional(),
 })
 
+/** Allowed sortBy column names for course search. */
+export const ALLOWED_SORT_COLUMNS = [
+  'code',
+  'name',
+  'credits',
+  'semester',
+] as const
+export type CourseSortColumn = (typeof ALLOWED_SORT_COLUMNS)[number]
+
 export const CourseSearchSchema = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
@@ -51,7 +60,7 @@ export const CourseSearchSchema = z.object({
   studyPace: z.string().optional(),
   courseLevel: z.string().optional(),
   examinations: z.string().optional(), // Keep as string, parse in route
-  sortBy: z.string().optional(),
+  sortBy: z.enum(ALLOWED_SORT_COLUMNS).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
 })
 

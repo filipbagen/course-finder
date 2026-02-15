@@ -41,25 +41,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 const CourseFilter: React.FC<FilterProps> = ({
   screen,
   onFilterChange,
+  onReset,
   currentFilters,
 }) => {
   const { mainFieldOfStudy, loading: fieldsLoading } = useFields()
-
-  const resetFilters = () => {
-    // Reset array-based filters
-    ;(Object.keys(currentFilters) as Array<keyof FilterState>)
-      .filter((key) => key !== 'examinations')
-      .forEach((filterType) => {
-        ;(currentFilters[filterType] as string[]).forEach((value) => {
-          onFilterChange(filterType, value, false)
-        })
-      })
-
-    // Reset examinations tri-state filter
-    Object.keys(currentFilters.examinations).forEach((value) => {
-      onFilterChange('examinations', value, 'unchecked')
-    })
-  }
 
   // Count total active filters, handling both array and object filter types
   const activeFilterCount = (
@@ -217,10 +202,10 @@ const CourseFilter: React.FC<FilterProps> = ({
         </Accordion>
       </CardContent>
 
-      {activeFilterCount > 0 && (
+      {activeFilterCount > 0 && onReset && (
         <CardFooter className="pt-4">
           <Button
-            onClick={resetFilters}
+            onClick={onReset}
             variant="outline"
             size="sm"
             className="w-full"

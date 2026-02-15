@@ -23,21 +23,21 @@ export const useEnrollment = (
           handleUpdateAfterDeletion(enrollmentId)
         }
       } catch {
-        // Silent error
+        toast.error('Failed to remove course from schedule')
       }
     },
     [courseName, handleUpdateAfterDeletion],
   )
 
   const addToEnrollment = useCallback(
-    async (courseId: string | bigint, semester: number) => {
+    async (courseId: string, semester: number) => {
       try {
         const response = await fetch('/api/enrollment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ courseId: courseId.toString(), semester }),
+          body: JSON.stringify({ courseId, semester }),
         })
 
         if (!response.ok) {

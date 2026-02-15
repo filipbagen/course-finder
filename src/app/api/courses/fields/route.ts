@@ -1,45 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createSuccessResponse } from '@/lib/errors'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Endpoint to get unique field values for filtering courses
- * Returns unique values for mainFieldOfStudy, campus, etc.
+ * GET /api/courses/fields
+ *
+ * Returns unique field-of-study values for the filter UI.
+ * Fetches ALL courses (not a subset) so no fields are missed.
  */
 export async function GET(_request: NextRequest) {
   try {
-    // Get all courses
     const courses = await prisma.course.findMany({
-      select: {
-        mainFieldOfStudy: true,
-      },
-      take: 500, // Limit to 500 courses for performance
+      select: { mainFieldOfStudy: true },
     })
 
-    // Extract and flatten all mainFieldOfStudy values
-    const allFields = courses.flatMap((course) =>
-      // Filter out any null or undefined values
-      (course.mainFieldOfStudy || []).filter((field) => field),
-    )
+    const uniqueFields = [
+      ...new Set(
+        courses.flatMap((c) => (c.mainFieldOfStudy ?? []).filter(Boolean)),
+      ),
+    ].sort()
 
-    // Get unique values and sort alphabetically
-    const uniqueFields = [...new Set(allFields)].sort()
-
-    // Return the unique values
-    return NextResponse.json(
-      createSuccessResponse({
-        mainFieldOfStudy: uniqueFields,
-      }),
-    )
+    return NextResponse.json({
+      success: true,
+      data: { mainFieldOfStudy: uniqueFields },
+    })
   } catch (error) {
     console.error('Error fetching fields:', error)
-    // Return an empty success response instead of an error
-    return NextResponse.json(
-      createSuccessResponse({
-        mainFieldOfStudy: [],
-      }),
-    )
+    return NextResponse.json({
+      success: true,
+      data: { mainFieldOfStudy: [] },
+    })
   }
 }

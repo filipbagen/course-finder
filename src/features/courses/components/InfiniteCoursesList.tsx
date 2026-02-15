@@ -16,6 +16,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { RefreshCw, Loader2, Filter } from 'lucide-react'
+import type { CourseSortColumn } from '@/lib/validation'
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface InfiniteCoursesListProps {
   isAuthenticated: boolean
@@ -26,7 +31,11 @@ interface InfiniteCoursesListProps {
   onMobileFilterOpen?: () => void
 }
 
-type SortOption = 'code' | 'name'
+type SortOption = CourseSortColumn
+
+// ---------------------------------------------------------------------------
+// Small sub-components
+// ---------------------------------------------------------------------------
 
 const CourseCardSkeleton = () => (
   <div className="space-y-3">
@@ -94,6 +103,132 @@ const LoadMoreTrigger = ({
   )
 }
 
+// ---------------------------------------------------------------------------
+// CourseListToolbar -- single source of truth for sorting / filter controls
+// ---------------------------------------------------------------------------
+
+interface CourseListToolbarProps {
+  /** Text shown on the left side (e.g. "Visar 42 kurser" or "Laddar...") */
+  statusText: string
+  sortBy: SortOption
+  sortOrder: 'asc' | 'desc'
+  onSortByChange: (value: SortOption) => void
+  onSortOrderToggle: () => void
+  hasActiveFilters: boolean
+  onMobileFilterOpen?: () => void
+  /** Optional error text shown inline (only on desktop row). */
+  inlineError?: string | null
+}
+
+/**
+ * Responsive toolbar with sort controls + optional filter button.
+ *
+ * Three responsive layouts that all render from the same data:
+ * - xs (< sm):  controls row, then status text below
+ * - sm-lg:      status text left, controls right (filter button visible)
+ * - lg+:        status text left, controls right (filter button hidden,
+ *               desktop sidebar is visible)
+ */
+const CourseListToolbar = ({
+  statusText,
+  sortBy,
+  sortOrder,
+  onSortByChange,
+  onSortOrderToggle,
+  hasActiveFilters,
+  onMobileFilterOpen,
+  inlineError,
+}: CourseListToolbarProps) => {
+  const filterButton = onMobileFilterOpen && (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onMobileFilterOpen}
+      className="h-8 gap-2 px-3 lg:hidden"
+    >
+      <Filter className="h-4 w-4" />
+      Filter
+      {hasActiveFilters && (
+        <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+          •
+        </span>
+      )}
+    </Button>
+  )
+
+  const sortControls = (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-xs text-muted-foreground">Sortera efter:</span>
+      <Select
+        value={sortBy}
+        onValueChange={(v: string) => onSortByChange(v as SortOption)}
+      >
+        <SelectTrigger className="h-8 w-32 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="code">Kurskod</SelectItem>
+          <SelectItem value="name">Namn</SelectItem>
+          <SelectItem value="credits">Poäng</SelectItem>
+          <SelectItem value="semester">Termin</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onSortOrderToggle}
+        className="h-8 px-2 text-xs"
+      >
+        {sortOrder === 'asc' ? '↑' : '↓'}
+      </Button>
+    </div>
+  )
+
+  const statusSpan = (
+    <span className="text-sm text-muted-foreground">{statusText}</span>
+  )
+
+  return (
+    <>
+      {/* xs (< sm): controls row, status text below */}
+      <div className="space-y-4 sm:hidden">
+        <div className="flex items-center justify-between gap-4">
+          {filterButton}
+          {sortControls}
+        </div>
+        {statusSpan}
+      </div>
+
+      {/* sm – lg: status left, controls right */}
+      <div className="hidden items-center justify-between sm:flex lg:hidden">
+        {statusSpan}
+        <div className="flex items-center gap-4">
+          {filterButton}
+          {sortControls}
+        </div>
+      </div>
+
+      {/* lg+: status left, controls right (filter button auto-hidden via lg:hidden) */}
+      <div className="hidden items-center justify-between lg:flex">
+        <div className="flex items-center gap-4">
+          {statusSpan}
+          {inlineError && (
+            <span className="text-sm text-destructive">{inlineError}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          {filterButton}
+          {sortControls}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
 export function InfiniteCoursesList({
   isAuthenticated,
   search,
@@ -102,7 +237,6 @@ export function InfiniteCoursesList({
   filters,
   onMobileFilterOpen,
 }: InfiniteCoursesListProps) {
-  const [totalCoursesInDb, setTotalCoursesInDb] = useState<number | null>(null)
   const [currentSortBy, setCurrentSortBy] = useState<SortOption>(
     (sortBy as SortOption) || 'code',
   )
@@ -127,21 +261,6 @@ export function InfiniteCoursesList({
     limit: 20,
   })
 
-  useEffect(() => {
-    const fetchTotalCount = async () => {
-      try {
-        const response = await fetch('/api/courses/count')
-        const data = await response.json()
-        if (data.success) {
-          setTotalCoursesInDb(data.totalCount)
-        }
-      } catch (error) {
-        console.error('Failed to fetch total course count:', error)
-      }
-    }
-    fetchTotalCount()
-  }, [])
-
   const coursesDisplay = useMemo(() => {
     return courses.map((course) => (
       <CourseCard
@@ -154,252 +273,58 @@ export function InfiniteCoursesList({
     ))
   }, [courses, isAuthenticated])
 
-  // Check if any filters are active (excluding search)
   const hasActiveFilters = useMemo(() => {
-    if (filters) {
-      return (Object.keys(filters) as Array<keyof FilterState>).some((key) => {
-        const filterValue = filters[key]
-        if (key === 'examinations') {
-          return Object.values(filterValue).some(
-            (state) => state !== 'unchecked',
-          )
-        }
-        return Array.isArray(filterValue) && filterValue.length > 0
-      })
-    }
-    return false
+    if (!filters) return false
+    return (Object.keys(filters) as Array<keyof FilterState>).some((key) => {
+      const filterValue = filters[key]
+      if (key === 'examinations') {
+        return Object.values(filterValue).some((state) => state !== 'unchecked')
+      }
+      return Array.isArray(filterValue) && filterValue.length > 0
+    })
   }, [filters])
 
-  // Track if we've received a definitive response (either data or confirmed empty)
+  // Track whether the first response has arrived so we can distinguish
+  // "still loading" from "truly empty results".
   const [hasReceivedResponse, setHasReceivedResponse] = useState(false)
 
-  // Reset response state when search/filters change
   useEffect(() => {
     setHasReceivedResponse(false)
   }, [search, filters])
 
-  // Mark as received response when we get data or finish loading
   useEffect(() => {
     if (!loading && !isLoadingMore) {
       setHasReceivedResponse(true)
     }
   }, [loading, isLoadingMore])
 
-  // Always show skeletons if this is the initial load and we have no courses yet
+  // Shared toolbar props
+  const toolbarBase = {
+    sortBy: currentSortBy,
+    sortOrder: currentSortOrder,
+    onSortByChange: setCurrentSortBy,
+    onSortOrderToggle: () =>
+      setCurrentSortOrder((o) => (o === 'asc' ? 'desc' : 'asc')),
+    hasActiveFilters,
+    onMobileFilterOpen,
+  } satisfies Omit<CourseListToolbarProps, 'statusText'>
+
+  // ---- Loading state (initial, no courses yet) ----
   if (
     ((loading || isLoadingMore) && courses.length === 0) ||
     (!hasReceivedResponse && courses.length === 0)
   ) {
+    const loadingText =
+      loading || isLoadingMore
+        ? search
+          ? `Söker efter "${search}"...`
+          : 'Laddar kurser...'
+        : 'Söker efter kurser...'
+
     return (
       <div className="space-y-6">
-        {/* Mobile Layout - Filter/Sort buttons first, then loading text */}
-        <div className="space-y-4 lg:hidden">
-          {/* Small screens: controls first, then text below */}
-          <div className="space-y-4 sm:hidden">
-            <div className="flex items-center gap-4">
-              {/* Mobile Filter Button - only show on mobile */}
-              {onMobileFilterOpen && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onMobileFilterOpen}
-                  className="h-8 gap-2 px-3"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filter
-                  {hasActiveFilters && (
-                    <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                      •
-                    </span>
-                  )}
-                </Button>
-              )}
+        <CourseListToolbar {...toolbarBase} statusText={loadingText} />
 
-              {/* Sorting Controls */}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-xs text-muted-foreground">
-                  Sortera efter:
-                </span>
-                <Select
-                  value={currentSortBy}
-                  onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-                >
-                  <SelectTrigger className="h-8 w-32 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="code">Kurskod</SelectItem>
-                    <SelectItem value="name">Namn</SelectItem>
-                    <SelectItem value="credits">Poäng</SelectItem>
-                    <SelectItem value="semester">Termin</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentSortOrder(
-                      currentSortOrder === 'asc' ? 'desc' : 'asc',
-                    )
-                  }
-                  className="h-8 px-2 text-xs"
-                >
-                  {currentSortOrder === 'asc' ? '↑' : '↓'}
-                </Button>
-              </div>
-            </div>
-
-            {/* Loading text below buttons on very small screens */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>
-                {loading || isLoadingMore
-                  ? search
-                    ? `Söker efter "${search}"...`
-                    : 'Laddar kurser...'
-                  : 'Söker efter kurser...'}
-              </span>
-            </div>
-          </div>
-
-          {/* Medium screens: text on left, controls on right */}
-          <div className="hidden items-center justify-between sm:flex">
-            {/* Loading text on the left */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>
-                {loading || isLoadingMore
-                  ? search
-                    ? `Söker efter "${search}"...`
-                    : 'Laddar kurser...'
-                  : 'Söker efter kurser...'}
-              </span>
-            </div>
-
-            {/* Filter and Sort controls on the right */}
-            <div className="flex items-center gap-4">
-              {/* Mobile Filter Button - only show on mobile */}
-              {onMobileFilterOpen && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onMobileFilterOpen}
-                  className="h-8 gap-2 px-3"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filter
-                  {hasActiveFilters && (
-                    <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                      •
-                    </span>
-                  )}
-                </Button>
-              )}
-
-              {/* Sorting Controls */}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-xs text-muted-foreground">
-                  Sortera efter:
-                </span>
-                <Select
-                  value={currentSortBy}
-                  onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-                >
-                  <SelectTrigger className="h-8 w-32 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="code">Kurskod</SelectItem>
-                    <SelectItem value="name">Namn</SelectItem>
-                    <SelectItem value="credits">Poäng</SelectItem>
-                    <SelectItem value="semester">Termin</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentSortOrder(
-                      currentSortOrder === 'asc' ? 'desc' : 'asc',
-                    )
-                  }
-                  className="h-8 px-2 text-xs"
-                >
-                  {currentSortOrder === 'asc' ? '↑' : '↓'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Layout - Loading text and controls in one row */}
-        <div className="hidden items-center justify-between lg:flex">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              {loading || isLoadingMore
-                ? search
-                  ? `Söker efter "${search}"...`
-                  : 'Laddar kurser...'
-                : 'Söker efter kurser...'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Mobile Filter Button - only show on mobile */}
-            {onMobileFilterOpen && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onMobileFilterOpen}
-                className="h-8 gap-2 px-3 lg:hidden"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                    •
-                  </span>
-                )}
-              </Button>
-            )}
-
-            {/* Sorting Controls */}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-xs text-muted-foreground">
-                Sortera efter:
-              </span>
-              <Select
-                value={currentSortBy}
-                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-              >
-                <SelectTrigger className="h-8 w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="code">Kurskod</SelectItem>
-                  <SelectItem value="name">Namn</SelectItem>
-                  <SelectItem value="credits">Poäng</SelectItem>
-                  <SelectItem value="semester">Termin</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setCurrentSortOrder(
-                    currentSortOrder === 'asc' ? 'desc' : 'asc',
-                  )
-                }
-                className="h-8 px-2 text-xs"
-              >
-                {currentSortOrder === 'asc' ? '↑' : '↓'}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Skeleton cards with same responsive grid as regular cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <CourseCardSkeleton key={i} />
@@ -407,7 +332,9 @@ export function InfiniteCoursesList({
         </div>
       </div>
     )
-  } // Error state
+  }
+
+  // ---- Error state (no courses loaded at all) ----
   if (error && courses.length === 0) {
     return (
       <div className="space-y-4">
@@ -426,7 +353,7 @@ export function InfiniteCoursesList({
     )
   }
 
-  // Empty state - only show when we've confirmed there are no courses after loading
+  // ---- Empty state ----
   if (
     !loading &&
     !isLoadingMore &&
@@ -436,69 +363,10 @@ export function InfiniteCoursesList({
   ) {
     return (
       <div className="space-y-6">
-        {/* Results summary with sorting and view controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              Visar 0{totalCoursesInDb !== null && ` av ${totalCoursesInDb}`}{' '}
-              kurser
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Mobile Filter Button - only show on mobile */}
-            {onMobileFilterOpen && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onMobileFilterOpen}
-                className="h-8 gap-2 px-3 lg:hidden"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                    •
-                  </span>
-                )}
-              </Button>
-            )}
-
-            {/* Sorting Controls */}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-xs text-muted-foreground">
-                Sortera efter:
-              </span>
-              <Select
-                value={currentSortBy}
-                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-              >
-                <SelectTrigger className="h-8 w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="code">Kurskod</SelectItem>
-                  <SelectItem value="name">Namn</SelectItem>
-                  <SelectItem value="credits">Poäng</SelectItem>
-                  <SelectItem value="semester">Termin</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setCurrentSortOrder(
-                    currentSortOrder === 'asc' ? 'desc' : 'asc',
-                  )
-                }
-                className="h-8 px-2 text-xs"
-              >
-                {currentSortOrder === 'asc' ? '↑' : '↓'}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <CourseListToolbar
+          {...toolbarBase}
+          statusText={`Visar 0${totalCount !== null ? ` av ${totalCount}` : ''} kurser`}
+        />
 
         <div className="py-8 text-center">
           <h3 className="mb-2 text-lg font-medium text-foreground">
@@ -520,209 +388,18 @@ export function InfiniteCoursesList({
     )
   }
 
+  // ---- Normal state (courses loaded) ----
+  const displayCount = totalCount ?? courses.length
+
   return (
     <div className="space-y-6">
-      {/* Mobile Layout - Filter/Sort buttons first, then course count */}
-      <div className="space-y-4 lg:hidden">
-        {/* Small screens: text below controls */}
-        <div className="space-y-4 sm:hidden">
-          <div className="flex items-center justify-between">
-            {/* Mobile Filter Button */}
-            {onMobileFilterOpen && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onMobileFilterOpen}
-                className="h-8 gap-2 px-3"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                    •
-                  </span>
-                )}
-              </Button>
-            )}
+      <CourseListToolbar
+        {...toolbarBase}
+        statusText={`Visar ${displayCount} kurser`}
+        inlineError={error ? 'Fel vid hämtning av fler kurser' : null}
+      />
 
-            {/* Sorting Controls */}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-xs text-muted-foreground">
-                Sortera efter:
-              </span>
-              <Select
-                value={currentSortBy}
-                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-              >
-                <SelectTrigger className="h-8 w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="code">Kurskod</SelectItem>
-                  <SelectItem value="name">Namn</SelectItem>
-                  <SelectItem value="credits">Poäng</SelectItem>
-                  <SelectItem value="semester">Termin</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setCurrentSortOrder(
-                    currentSortOrder === 'asc' ? 'desc' : 'asc',
-                  )
-                }
-                className="h-8 px-2 text-xs"
-              >
-                {currentSortOrder === 'asc' ? '↑' : '↓'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Course count below buttons on very small screens */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              Visar {totalCount ?? courses.length}
-              {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
-            </span>
-          </div>
-        </div>
-
-        {/* Medium screens: text on left, controls on right */}
-        <div className="hidden items-center justify-between sm:flex">
-          {/* Course count on the left */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              Visar {totalCount ?? courses.length}
-              {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
-            </span>
-          </div>
-
-          {/* Filter and Sort controls on the right */}
-          <div className="flex items-center gap-4">
-            {/* Mobile Filter Button */}
-            {onMobileFilterOpen && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onMobileFilterOpen}
-                className="h-8 gap-2 px-3"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                    •
-                  </span>
-                )}
-              </Button>
-            )}
-
-            {/* Sorting Controls */}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-xs text-muted-foreground">
-                Sortera efter:
-              </span>
-              <Select
-                value={currentSortBy}
-                onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-              >
-                <SelectTrigger className="h-8 w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="code">Kurskod</SelectItem>
-                  <SelectItem value="name">Namn</SelectItem>
-                  <SelectItem value="credits">Poäng</SelectItem>
-                  <SelectItem value="semester">Termin</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setCurrentSortOrder(
-                    currentSortOrder === 'asc' ? 'desc' : 'asc',
-                  )
-                }
-                className="h-8 px-2 text-xs"
-              >
-                {currentSortOrder === 'asc' ? '↑' : '↓'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Layout - Course count and controls in one row */}
-      <div className="hidden items-center justify-between lg:flex">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>
-            Visar {totalCount ?? courses.length}
-            {totalCoursesInDb !== null && ` av ${totalCoursesInDb}`} kurser
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Mobile Filter Button - only show on mobile */}
-          {onMobileFilterOpen && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onMobileFilterOpen}
-              className="h-8 gap-2 px-3 lg:hidden"
-            >
-              <Filter className="h-4 w-4" />
-              Filter
-              {hasActiveFilters && (
-                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                  •
-                </span>
-              )}
-            </Button>
-          )}
-
-          {error && (
-            <div className="text-sm text-destructive">
-              Fel vid hämtning av fler kurser
-            </div>
-          )}
-
-          {/* Sorting Controls */}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-xs text-muted-foreground">
-              Sortera efter:
-            </span>
-            <Select
-              value={currentSortBy}
-              onValueChange={(value: SortOption) => setCurrentSortBy(value)}
-            >
-              <SelectTrigger className="h-8 w-32 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="code">Kurskod</SelectItem>
-                <SelectItem value="name">Namn</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                setCurrentSortOrder(currentSortOrder === 'asc' ? 'desc' : 'asc')
-              }
-              className="h-8 px-2 text-xs"
-            >
-              {currentSortOrder === 'asc' ? '↑' : '↓'}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Courses display - responsive grid */}
+      {/* Course grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3">
         {coursesDisplay}
       </div>
@@ -737,9 +414,7 @@ export function InfiniteCoursesList({
         <div className="py-8 text-center text-muted-foreground">
           <p>Du har nått slutet av kurslistan</p>
           {totalCount !== null && (
-            <p className="mt-1 text-sm">
-              Totalt {totalCount} av {totalCoursesInDb} kurser visade
-            </p>
+            <p className="mt-1 text-sm">Totalt {totalCount} kurser visade</p>
           )}
         </div>
       )}

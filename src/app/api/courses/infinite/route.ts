@@ -201,6 +201,7 @@ const COURSE_LIST_SELECT = {
   courseType: true,
   offeredFor: true,
   credits: true,
+  exclusions: true,
   _count: { select: { review: true } },
   review: { select: { rating: true } },
 } satisfies Prisma.courseSelect

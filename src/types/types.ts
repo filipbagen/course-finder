@@ -102,6 +102,7 @@ export interface FilterProps {
     value: string,
     newState: TriState | boolean,
   ) => void
+  onReset?: () => void
   currentFilters: FilterState
   screen: 'desktop' | 'mobile'
 }

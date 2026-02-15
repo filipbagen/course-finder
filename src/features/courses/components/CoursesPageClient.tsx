@@ -43,10 +43,9 @@ export function CoursesPageClient({
     filters,
     mobileFilters,
     handleFilterChange,
-    resetAllFilters: _resetAllFilters,
+    resetAllFilters,
     applyMobileFilters,
     resetMobileFilters,
-    hasActiveFilters: _hasActiveFilters,
     syncMobileFilters,
   } = useFilters()
 
@@ -81,6 +80,7 @@ export function CoursesPageClient({
       <div className="hidden w-80 flex-shrink-0 lg:block">
         <CourseFilter
           onFilterChange={handleFilterChange}
+          onReset={resetAllFilters}
           currentFilters={filters}
           screen="desktop"
         />
