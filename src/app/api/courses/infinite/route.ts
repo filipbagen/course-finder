@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withPrisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { infiniteError } from '@/lib/errors'
 import { CourseSearchSchema, validateQueryParams } from '@/lib/validation'
 import type { InfiniteResponse } from '@/types/api'
@@ -8,77 +9,210 @@ import { transformCourses } from '@/lib/transformers'
 
 export const dynamic = 'force-dynamic'
 
-// Improved in-memory cache with TTL and size management
-interface CacheEntry {
-  data: unknown
-  timestamp: number
-  ttl: number // Time to live in milliseconds
+// ---------------------------------------------------------------------------
+// Examination type code mapping (Swedish UI labels -> database codes)
+// ---------------------------------------------------------------------------
+const EXAMINATION_CODE_MAP: Readonly<Record<string, readonly string[]>> = {
+  Inlämningsuppgift: ['UPG'],
+  'Skriftlig tentamen': ['TEN', 'TENA'],
+  Projektarbete: ['PRA', 'PROJ'],
+  Laborationsarbete: ['LAB', 'LABA'],
+  'Digital tentamen': ['DIT'],
+  'Muntlig examination': ['MUN'],
+  Kontrollskrivning: ['KTR'],
+  Basgruppsarbete: ['BAS'],
+  Hemtentamen: ['HEM'],
+  Övrigt: ['DAK', 'MOM', 'ANN'],
+  Seminarium: ['SEM'],
+  Datorexamination: ['DAT'],
 }
 
-const searchCache = new Map<string, CacheEntry>()
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-const MAX_CACHE_SIZE = 200 // Maximum number of cached queries
+// ---------------------------------------------------------------------------
+// Query building helpers
+// ---------------------------------------------------------------------------
 
-function getCacheKey(params: Record<string, unknown>): string {
-  // Create a cache key from search parameters
-  const keyParts = [
-    params.search || '',
-    params.campus || '',
-    params.mainFieldOfStudy || '',
-    params.semester || '',
-    params.period || '',
-    params.block || '',
-    params.studyPace || '',
-    params.courseLevel || '',
-    params.sortBy || 'code',
-    params.sortOrder || 'asc',
-    params.limit || 20,
-    params.cursor || '',
-    // Include a version number to invalidate cache after schema changes
-    'v1.1',
-  ]
-  return keyParts.join('|')
-}
+/**
+ * Build Prisma `where` conditions from validated search parameters.
+ *
+ * All conditions are collected into an `AND` array so they compose safely --
+ * this prevents the previous bug where `studyPace` silently overwrote the
+ * `OR` condition set by `search`.
+ */
+function buildWhereConditions(params: {
+  search?: string
+  campus?: string
+  mainFieldOfStudy?: string
+  semester?: string
+  period?: string
+  block?: string
+  studyPace?: string
+  courseLevel?: string
+  examinations?: string
+}): Prisma.courseWhereInput {
+  const conditions: Prisma.courseWhereInput[] = []
 
-function getCachedResult<T>(cacheKey: string): T | null {
-  const entry = searchCache.get(cacheKey)
-  if (!entry) return null
-
-  if (Date.now() - entry.timestamp > entry.ttl) {
-    searchCache.delete(cacheKey)
-    return null
-  }
-
-  return entry.data as T
-}
-
-function setCachedResult(
-  cacheKey: string,
-  data: unknown,
-  ttl = CACHE_TTL,
-): void {
-  // Limit cache size to prevent memory issues
-  if (searchCache.size >= MAX_CACHE_SIZE) {
-    // Find and delete the oldest entries
-    const entries = Array.from(searchCache.entries())
-      .sort((a, b) => a[1].timestamp - b[1].timestamp)
-      .slice(0, Math.floor(MAX_CACHE_SIZE * 0.2)) // Remove oldest 20%
-
-    for (const [key] of entries) {
-      searchCache.delete(key)
+  // --- Text search (name or code) ---
+  if (params.search) {
+    const term = params.search.trim()
+    if (term.length > 0) {
+      const usePrefix = term.length <= 3
+      conditions.push({
+        OR: [
+          {
+            name: usePrefix
+              ? { startsWith: term, mode: 'insensitive' as const }
+              : { contains: term, mode: 'insensitive' as const },
+          },
+          {
+            code: usePrefix
+              ? { startsWith: term, mode: 'insensitive' as const }
+              : { contains: term, mode: 'insensitive' as const },
+          },
+        ],
+      })
     }
   }
 
-  searchCache.set(cacheKey, {
-    data,
-    timestamp: Date.now(),
-    ttl,
-  })
+  // --- Campus filter ---
+  if (params.campus) {
+    const values = params.campus.split('|')
+    conditions.push({ campus: { in: values } })
+  }
+
+  // --- Field of study filter ---
+  if (params.mainFieldOfStudy) {
+    const values = params.mainFieldOfStudy.split(',')
+    conditions.push({ mainFieldOfStudy: { hasSome: values } })
+  }
+
+  // --- Semester filter (BigInt[]) ---
+  if (params.semester) {
+    const values = params.semester
+      .split(',')
+      .map((s) => BigInt(parseInt(s, 10)))
+    conditions.push({ semester: { hasSome: values } })
+  }
+
+  // --- Period filter (BigInt[]) ---
+  if (params.period) {
+    const values = params.period.split(',').map((p) => BigInt(parseInt(p, 10)))
+    conditions.push({ period: { hasSome: values } })
+  }
+
+  // --- Block filter (BigInt[]) ---
+  if (params.block) {
+    const values = params.block.split(',').map((b) => BigInt(parseInt(b, 10)))
+    conditions.push({ block: { hasSome: values } })
+  }
+
+  // --- Course level filter ---
+  if (params.courseLevel) {
+    const levels = params.courseLevel.split(',')
+    const hasBasic = levels.includes('Grundnivå')
+    const hasAdvanced = levels.includes('Avancerad nivå')
+    // Only filter when exactly one level is selected; both = no filter
+    if (hasBasic && !hasAdvanced) {
+      conditions.push({ advanced: false })
+    } else if (!hasBasic && hasAdvanced) {
+      conditions.push({ advanced: true })
+    }
+  }
+
+  // --- Study pace filter ---
+  // "Helfart"  = full-pace, single-period course (period is [1] or [2])
+  // "Halvfart" = half-pace, course spans both periods (period contains 1 AND 2)
+  if (params.studyPace) {
+    const paces = params.studyPace.split(',')
+    const wantsFull = paces.includes('Helfart')
+    const wantsHalf = paces.includes('Halvfart')
+    if (wantsFull && !wantsHalf) {
+      conditions.push({
+        OR: [
+          { period: { equals: [BigInt(1)] } },
+          { period: { equals: [BigInt(2)] } },
+        ],
+      })
+    } else if (!wantsFull && wantsHalf) {
+      conditions.push({
+        AND: [{ period: { has: BigInt(1) } }, { period: { has: BigInt(2) } }],
+      })
+    }
+    // Both selected = no filter needed
+  }
+
+  // --- Examination filter (parsed, but NOT applied at query level) ---
+  // The `examination` column is Json[] in PostgreSQL. Prisma cannot filter
+  // inside JSON array elements with its query builder. Applying this filter
+  // requires either raw SQL (jsonb_path_exists / @> operator) or
+  // normalizing the examination data into a separate table.
+  // TODO: Implement examination filtering via $queryRaw or schema change.
+  if (params.examinations) {
+    try {
+      const examinationState = JSON.parse(params.examinations) as Record<
+        string,
+        TriState
+      >
+      const _includeCodes: string[] = []
+      const _excludeCodes: string[] = []
+      for (const [key, value] of Object.entries(examinationState)) {
+        const codes = EXAMINATION_CODE_MAP[key] ?? [key]
+        if (value === 'checked') _includeCodes.push(...codes)
+        else if (value === 'indeterminate') _excludeCodes.push(...codes)
+      }
+      // Codes are parsed above but not yet used in `conditions`.
+      // See the TODO comment above for the reason and path forward.
+    } catch {
+      // Malformed JSON from query param -- skip silently
+    }
+  }
+
+  return conditions.length > 0 ? { AND: conditions } : {}
 }
 
 /**
+ * Build a deterministic `orderBy` array for cursor-based pagination.
+ * Always appends `code` and `id` as tie-breakers so cursor ordering is stable.
+ */
+function buildOrderBy(
+  sortBy: string,
+  sortOrder: 'asc' | 'desc',
+): Prisma.courseOrderByWithRelationInput[] {
+  const orderBy: Prisma.courseOrderByWithRelationInput[] = [
+    { [sortBy]: sortOrder },
+  ]
+  if (sortBy !== 'code') orderBy.push({ code: 'asc' })
+  orderBy.push({ id: 'asc' })
+  return orderBy
+}
+
+// ---------------------------------------------------------------------------
+// Fields selected for list view (excludes heavy JSON blobs)
+// ---------------------------------------------------------------------------
+const COURSE_LIST_SELECT = {
+  id: true,
+  code: true,
+  name: true,
+  campus: true,
+  mainFieldOfStudy: true,
+  period: true,
+  block: true,
+  semester: true,
+  advanced: true,
+  courseType: true,
+  offeredFor: true,
+  credits: true,
+  _count: { select: { review: true } },
+  review: { select: { rating: true } },
+} satisfies Prisma.courseSelect
+
+// ---------------------------------------------------------------------------
+// Route handler
+// ---------------------------------------------------------------------------
+
+/**
  * GET /api/courses/infinite
- * Infinite loading API for course search with enhanced reliability
+ *
+ * Cursor-based infinite-loading endpoint for the course search page.
  */
 export async function GET(
   request: NextRequest,
@@ -90,301 +224,59 @@ export async function GET(
     const {
       cursor,
       limit: rawLimit,
-      search,
-      campus,
-      mainFieldOfStudy,
-      semester,
-      period,
-      block,
-      studyPace,
-      courseLevel,
-      examinations,
       sortBy = 'code',
       sortOrder = 'asc',
     } = params
 
     const limit = Math.min(Math.max(rawLimit || 20, 1), 50)
+    const where = buildWhereConditions(params)
+    const orderBy = buildOrderBy(sortBy, sortOrder)
 
-    // Check cache for non-cursor requests to improve performance
-    if (!cursor) {
-      const cacheKey = getCacheKey(params)
-      const cachedResult = getCachedResult<InfiniteResponse<Course>>(cacheKey)
-      if (cachedResult) {
-        // Add cache hit header for monitoring
-        const response = NextResponse.json(cachedResult)
-        response.headers.set('X-Cache', 'HIT')
-        return response
-      }
-    }
+    // Run the main query and count in parallel (count only on first page)
+    const [courses, totalCount] = await Promise.all([
+      prisma.course.findMany({
+        where,
+        orderBy,
+        take: limit + 1, // fetch one extra to detect next page
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
+        select: COURSE_LIST_SELECT,
+      }),
+      cursor ? Promise.resolve(null) : prisma.course.count({ where }),
+    ])
 
-    // Build where conditions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const whereConditions: any = {}
+    // Transform BigInt fields to plain numbers for JSON serialization
+    const transformed = transformCourses(courses) as unknown as Course[]
 
-    if (search) {
-      // Optimize search by using prefix search for short terms
-      const searchTerm = search.trim()
-      if (searchTerm.length > 0) {
-        const usePrefixSearch = searchTerm.length <= 3
-        whereConditions.OR = [
-          {
-            name: usePrefixSearch
-              ? { startsWith: searchTerm, mode: 'insensitive' }
-              : { contains: searchTerm, mode: 'insensitive' },
-          },
-          {
-            code: usePrefixSearch
-              ? { startsWith: searchTerm, mode: 'insensitive' }
-              : { contains: searchTerm, mode: 'insensitive' },
-          },
-        ]
-      }
-    }
-
-    if (campus) {
-      const campusValues = campus.split('|')
-      whereConditions.campus =
-        campusValues.length > 1 ? { in: campusValues } : campus
-    }
-
-    if (mainFieldOfStudy) {
-      const fieldValues = mainFieldOfStudy.split(',')
-      whereConditions.mainFieldOfStudy =
-        fieldValues.length > 1
-          ? { hasSome: fieldValues }
-          : { has: mainFieldOfStudy }
-    }
-
-    if (semester) {
-      const semesterValues = semester
-        .split(',')
-        .map((s) => BigInt(parseInt(s, 10)))
-      whereConditions.semester =
-        semesterValues.length > 1
-          ? { hasSome: semesterValues }
-          : { has: semesterValues[0] }
-    }
-
-    if (period) {
-      const periodValues = period.split(',').map((p) => BigInt(parseInt(p, 10)))
-      whereConditions.period =
-        periodValues.length > 1
-          ? { hasSome: periodValues }
-          : { has: periodValues[0] }
-    }
-
-    if (block) {
-      const blockValues = block.split(',').map((b) => BigInt(parseInt(b, 10)))
-      whereConditions.block =
-        blockValues.length > 1
-          ? { hasSome: blockValues }
-          : { has: blockValues[0] }
-    }
-
-    if (courseLevel) {
-      const levelValues = courseLevel.split(',')
-      if (
-        levelValues.includes('Grundnivå') &&
-        !levelValues.includes('Avancerad nivå')
-      ) {
-        whereConditions.advanced = false
-      } else if (
-        !levelValues.includes('Grundnivå') &&
-        levelValues.includes('Avancerad nivå')
-      ) {
-        whereConditions.advanced = true
-      }
-    }
-
-    // Examination filter logic
-    const examinationMap: Record<string, string[]> = {
-      Inlämningsuppgift: ['UPG'],
-      'Skriftlig tentamen': ['TEN', 'TENA'],
-      Projektarbete: ['PRA', 'PROJ'],
-      Laborationsarbete: ['LAB', 'LABA'],
-      'Digital tentamen': ['DIT'],
-      'Muntlig examination': ['MUN'],
-      Kontrollskrivning: ['KTR'],
-      Basgruppsarbete: ['BAS'],
-      Hemtentamen: ['HEM'],
-      Övrigt: ['DAK', 'MOM', 'ANN'],
-      Seminarium: ['SEM'],
-      Datorexamination: ['DAT'],
-    }
-
-    const includeExaminationCodes: string[] = []
-    const excludeExaminationCodes: string[] = []
-
-    if (examinations) {
-      try {
-        const examinationState = JSON.parse(examinations) as Record<
-          string,
-          TriState
-        >
-        for (const [key, value] of Object.entries(examinationState)) {
-          const codes = examinationMap[key] || [key]
-          if (value === 'checked') {
-            includeExaminationCodes.push(...codes)
-          } else if (value === 'indeterminate') {
-            excludeExaminationCodes.push(...codes)
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse examinations filter:', e)
-      }
-    }
-
-    if (studyPace) {
-      const paceValues = studyPace.split(',')
-      if (paceValues.includes('Helfart') && !paceValues.includes('Halvfart')) {
-        whereConditions.OR = [
-          { period: { equals: [BigInt(1)] } },
-          { period: { equals: [BigInt(2)] } },
-        ]
-      } else if (
-        !paceValues.includes('Helfart') &&
-        paceValues.includes('Halvfart')
-      ) {
-        whereConditions.AND = [
-          { period: { has: BigInt(1) } },
-          { period: { has: BigInt(2) } },
-        ]
-      }
-    }
-
-    // Build orderBy
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orderBy: any = { [sortBy]: sortOrder }
-    const orderByArray = [orderBy]
-    if (sortBy !== 'code') {
-      orderByArray.push({ code: 'asc' })
-    }
-    orderByArray.push({ id: 'asc' }) // Final tie-breaker
-
-    // Build query options with essential fields only
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const queryOptions: any = {
-      where: whereConditions,
-      orderBy: orderByArray,
-      take: limit + 1, // Take one extra to check if there's a next page
-      skip: cursor ? 1 : 0, // Skip the cursor item if provided
-      cursor: cursor ? { id: cursor } : undefined,
-      select: {
-        // Essential fields for course cards and search
-        id: true,
-        code: true,
-        name: true,
-        campus: true,
-        mainFieldOfStudy: true,
-        period: true,
-        block: true,
-        semester: true,
-        advanced: true,
-        courseType: true,
-        offeredFor: true,
-        credits: true,
-        // Include rating data to avoid N+1 queries
-        _count: {
-          select: {
-            review: true,
-          },
-        },
-        review: {
-          select: {
-            rating: true,
-          },
-        },
-        // EXCLUDE heavy JSON fields that are not needed for list view
-        // - learningOutcomes, content, teachingMethods, prerequisites
-        // - recommendedPrerequisites, examination, programInfo
-        // - examiner, exclusions, scheduledHours, selfStudyHours
-      },
-    }
-
-    // Generate a cache key for this search query
-    const cacheKey = getCacheKey(params)
-
-    // Use enhanced withPrisma wrapper for more reliable database operations
-    const dbResult = await withPrisma(
-      async (prismaClient) => {
-        const courses = await prismaClient.course.findMany(queryOptions)
-
-        // Get total count for this query (only when no cursor for performance)
-        let totalCount = null
-        if (!cursor) {
-          const countQuery = await prismaClient.course.count({
-            where: whereConditions,
-          })
-          totalCount = countQuery
-        }
-
-        return { courses, totalCount }
-      },
-      {
-        // Use caching for better performance
-        useCache: !cursor, // Only cache first page queries
-        cacheKey: !cursor ? `query-${cacheKey}` : undefined,
-        cacheTtl: 60, // 1 minute cache for database results
-        // Configure retry pattern for this endpoint,
-      },
-    )
-
-    const courses = dbResult.courses
-    const totalCount = dbResult.totalCount
-
-    // Transform data
-    const filteredCourses = transformCourses(courses) as unknown as Course[]
-
-    // Check if there's a next page
-    const hasNextPage = filteredCourses.length > limit
-    const items = hasNextPage
-      ? filteredCourses.slice(0, limit)
-      : filteredCourses
+    // Determine pagination
+    const hasNextPage = transformed.length > limit
+    const items = hasNextPage ? transformed.slice(0, limit) : transformed
     const nextCursor = hasNextPage ? items[items.length - 1]?.id : null
 
-    const result = {
+    const result: InfiniteResponse<Course> = {
       success: true,
       data: items,
       nextCursor,
       hasNextPage,
       totalCount,
       count: items.length,
-    } as InfiniteResponse<Course>
-
-    // Cache the result for non-cursor requests
-    if (!cursor) {
-      setCachedResult(cacheKey, result)
     }
 
-    // Create response with cache control headers
     const response = NextResponse.json(result)
     response.headers.set(
       'Cache-Control',
       'public, s-maxage=60, stale-while-revalidate=300',
     )
-    response.headers.set('X-Cache', 'MISS')
-
     return response
   } catch (error) {
-    console.error('Error fetching courses:', error)
-
-    // Generate an error reference for tracking
     const errorRef = Math.random().toString(36).substring(2, 10)
-    console.error(`Courses infinite error (ref: ${errorRef}):`, error)
-
-    const _errorMessage =
-      error instanceof Error
-        ? `Failed to fetch courses: ${error.message}`
-        : 'An unknown error occurred'
+    console.error(`Course search error (ref: ${errorRef}):`, error)
 
     const errorResponse = infiniteError(
       'Failed to load courses. Please try again in a moment.',
       errorRef,
     )
-
-    // No caching for error responses
     errorResponse.headers.set('Cache-Control', 'no-store, max-age=0')
-
     return errorResponse
   }
 }

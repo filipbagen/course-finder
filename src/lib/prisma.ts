@@ -11,27 +11,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-/**
- * Creates and configures a PrismaClient instance
- * Uses proper connection parameters for production environment
- */
 const createPrismaClient = () => {
-  console.log(
-    `Creating new PrismaClient instance (NODE_ENV: ${process.env.NODE_ENV})`,
-  )
-
-  const client = new PrismaClient({
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-    errorFormat: 'pretty',
   })
-
-  // Add connection management for Vercel
-  if (process.env.NODE_ENV === 'production') {
-    // Monitor connection events
-    console.log('Configuring PrismaClient for production environment')
-  }
-
-  return client
 }
 
 // Use singleton pattern for connection reuse
@@ -43,71 +26,37 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 /**
- * Simple memory cache for database operations
- * In a real production app, you'd use Redis or another distributed cache
- */
-const cache = new Map<string, { data: unknown; timestamp: number }>()
-
-/**
- * Clear cache entries by pattern (useful for invalidating related data)
- */
-export function clearCache(pattern?: string) {
-  if (!pattern) {
-    // Clear all cache
-    cache.clear()
-    return
-  }
-
-  // Clear cache entries that match the pattern
-  for (const [key] of cache) {
-    if (key.includes(pattern)) {
-      cache.delete(key)
-    }
-  }
-}
-
-/**
- * Clear cache for a specific user (useful after schedule updates)
- */
-export function clearUserCache(userId: string) {
-  clearCache(`-${userId}`)
-}
-
-/**
- * Execute database operations with proper error handling
+ * Execute a database operation with consistent error logging.
+ *
+ * NOTE: The optional `_options` parameter is kept for backward compatibility
+ * but is ignored. In-memory caching was removed because it is ineffective in
+ * serverless environments (each cold start creates a new instance).
+ * If you need caching, use Next.js fetch-level caching or an external store.
  */
 export async function withPrisma<T>(
   callback: (prisma: PrismaClient) => Promise<T>,
-  options: {
+  _options?: {
     useCache?: boolean
     cacheKey?: string
     cacheTtl?: number
-  } = {},
+  },
 ): Promise<T> {
-  const { useCache = false, cacheKey = '', cacheTtl = 60 } = options
-
-  // Check cache if enabled
-  if (useCache && cacheKey && cache.has(cacheKey)) {
-    const cached = cache.get(cacheKey)!
-    const isExpired = Date.now() - cached.timestamp > cacheTtl * 1000
-
-    if (!isExpired) {
-      return cached.data as T
-    }
-  }
-
   try {
-    // Execute the database operation
-    const result = await callback(prisma)
-
-    // Store in cache if enabled
-    if (useCache && cacheKey) {
-      cache.set(cacheKey, { data: result, timestamp: Date.now() })
-    }
-
-    return result
+    return await callback(prisma)
   } catch (error) {
     console.error('Database operation error:', error)
     throw error
   }
 }
+
+/**
+ * @deprecated No-op. In-memory cache was removed because it is
+ * ineffective in Vercel's serverless environment. Kept for backward
+ * compatibility with callers that haven't been updated yet.
+ */
+export function clearCache(_pattern?: string) {}
+
+/**
+ * @deprecated No-op. See `clearCache`.
+ */
+export function clearUserCache(_userId: string) {}
