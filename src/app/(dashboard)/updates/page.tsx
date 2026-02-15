@@ -102,6 +102,9 @@ export default function UpdatesPage() {
     }
   };
 
+  const latestUpdate = updates[0];
+  if (!latestUpdate) return null;
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -123,21 +126,21 @@ export default function UpdatesPage() {
                 <Sparkles className="h-6 w-6 text-green-500" />
                 <div>
                   <CardTitle className="text-xl">
-                    Version {updates[0].version}
+                    Version {latestUpdate.version}
                   </CardTitle>
                   <CardDescription className="flex items-center gap-2 mt-1">
                     <Calendar className="h-4 w-4" />
-                    {updates[0].date}
+                    {latestUpdate.date}
                   </CardDescription>
                 </div>
               </div>
-              {getStatusBadge(updates[0].status)}
+              {getStatusBadge(latestUpdate.status)}
             </div>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">{updates[0].description}</p>
+            <p className="mb-4">{latestUpdate.description}</p>
             <div className="grid gap-2 md:grid-cols-2">
-              {updates[0].features.map((feature, index) => (
+              {latestUpdate.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
                   <span className="text-sm">{feature}</span>
