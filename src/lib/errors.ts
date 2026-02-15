@@ -70,18 +70,16 @@ export const createError = {
 /**
  * Handle and format errors consistently across all API routes
  */
-export function handleApiError(error: unknown): NextResponse<ApiResponse> {
+export function handleApiError(
+  error: unknown,
+): NextResponse<ApiResponse<never>> {
   console.error('API Error:', error)
 
   if (error instanceof AppError) {
     return NextResponse.json(
-      {
-        success: false,
-        error: error.message,
-        data: null,
-      } as ApiResponse,
+      { success: false, error: error.message },
       { status: error.statusCode },
-    )
+    ) as NextResponse<ApiResponse<never>>
   }
 
   // Handle Prisma errors
@@ -94,28 +92,19 @@ export function handleApiError(error: unknown): NextResponse<ApiResponse> {
           {
             success: false,
             error: 'A record with this information already exists',
-            data: null,
-          } as ApiResponse,
+          },
           { status: HttpStatus.CONFLICT },
-        )
+        ) as NextResponse<ApiResponse<never>>
       case 'P2025':
         return NextResponse.json(
-          {
-            success: false,
-            error: 'Record not found',
-            data: null,
-          } as ApiResponse,
+          { success: false, error: 'Record not found' },
           { status: HttpStatus.NOT_FOUND },
-        )
+        ) as NextResponse<ApiResponse<never>>
       default:
         return NextResponse.json(
-          {
-            success: false,
-            error: 'Database error occurred',
-            data: null,
-          } as ApiResponse,
+          { success: false, error: 'Database error occurred' },
           { status: HttpStatus.INTERNAL_SERVER_ERROR },
-        )
+        ) as NextResponse<ApiResponse<never>>
     }
   }
 
@@ -124,13 +113,9 @@ export function handleApiError(error: unknown): NextResponse<ApiResponse> {
     error instanceof Error ? error.message : 'An unexpected error occurred'
 
   return NextResponse.json(
-    {
-      success: false,
-      error: message,
-      data: null,
-    } as ApiResponse,
+    { success: false, error: message },
     { status: HttpStatus.INTERNAL_SERVER_ERROR },
-  )
+  ) as NextResponse<ApiResponse<never>>
 }
 
 /**
@@ -157,7 +142,7 @@ export function createSuccessResponse<T>(
 export function withErrorHandler<T extends unknown[], R>(
   handler: (...args: T) => Promise<R>,
 ) {
-  return async (...args: T): Promise<R | NextResponse<ApiResponse>> => {
+  return async (...args: T): Promise<R | NextResponse<ApiResponse<never>>> => {
     try {
       return await handler(...args)
     } catch (error) {
@@ -191,59 +176,43 @@ export function validateRequiredFields(
  */
 export const unauthorized = (message?: string) =>
   NextResponse.json(
-    {
-      success: false,
-      error: message || 'Unauthorized',
-      data: null,
-    } as ApiResponse,
+    { success: false, error: message || 'Unauthorized' },
     { status: HttpStatus.UNAUTHORIZED },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 export const forbidden = (message?: string) =>
   NextResponse.json(
-    {
-      success: false,
-      error: message || 'Forbidden',
-      data: null,
-    } as ApiResponse,
+    { success: false, error: message || 'Forbidden' },
     { status: HttpStatus.FORBIDDEN },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 export const notFound = (message?: string) =>
   NextResponse.json(
-    {
-      success: false,
-      error: message || 'Not found',
-      data: null,
-    } as ApiResponse,
+    { success: false, error: message || 'Not found' },
     { status: HttpStatus.NOT_FOUND },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 export const badRequest = (message?: string, details?: unknown) =>
   NextResponse.json(
     {
       success: false,
       error: message || 'Bad request',
-      data: details,
-    } as ApiResponse,
+      ...(details !== undefined && { data: details }),
+    },
     { status: HttpStatus.BAD_REQUEST },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 export const conflict = (message?: string) =>
   NextResponse.json(
-    { success: false, error: message || 'Conflict', data: null } as ApiResponse,
+    { success: false, error: message || 'Conflict' },
     { status: HttpStatus.CONFLICT },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 export const internalServerError = (message?: string) =>
   NextResponse.json(
-    {
-      success: false,
-      error: message || 'Internal server error',
-      data: null,
-    } as ApiResponse,
+    { success: false, error: message || 'Internal server error' },
     { status: HttpStatus.INTERNAL_SERVER_ERROR },
-  )
+  ) as NextResponse<ApiResponse<never>>
 
 /**
  * Create infinite error response

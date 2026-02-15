@@ -32,7 +32,7 @@ interface ScheduleHeaderProps {
  */
 export function ScheduleHeader({
   readonly = false,
-  _viewingUserId,
+  viewingUserId: _viewingUserId,
   viewingUserName,
 }: ScheduleHeaderProps) {
   const { state } = useSchedule()

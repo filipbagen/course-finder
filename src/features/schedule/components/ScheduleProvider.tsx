@@ -46,7 +46,7 @@ export function ScheduleProvider({
     setLoading,
     setError,
     removeCourse,
-    _updateCourse,
+    updateCourse: _updateCourse,
   } = useEnrolledCoursesStore()
   const {
     user: _user,
