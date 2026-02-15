@@ -35,7 +35,6 @@ const colorSchemes = [
 
 export default function OnboardingForm({
   userId,
-  _userEmail,
   initialName = '',
 }: OnboardingFormProps) {
   const [isPublic, setIsPublic] = useState(true)
