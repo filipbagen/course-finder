@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma, withPrisma } from '@/lib/prisma';
-import { handleApiError, createSuccessResponse } from '@/lib/errors';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { transformCourse } from '@/lib/transformers';
+import { NextRequest, NextResponse } from 'next/server'
+import { withPrisma } from '@/lib/prisma'
+import { createSuccessResponse } from '@/lib/errors'
+import { getAuthenticatedUser } from '@/lib/auth'
+import { transformCourse } from '@/lib/transformers'
 
 // Force dynamic rendering to avoid static generation errors with cookies
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // Stale while revalidate caching for schedule
-export const revalidate = 30; // Revalidate cache every 30 seconds
+export const revalidate = 30 // Revalidate cache every 30 seconds
 
 /**
  * GET /api/schedule
@@ -16,34 +16,32 @@ export const revalidate = 30; // Revalidate cache every 30 seconds
  */
 export async function GET(request: NextRequest) {
   // Create a request ID for tracing this specific request in logs
-  const requestId = Math.random().toString(36).substring(2, 10);
-  console.log(`Schedule API request started (${requestId})`);
+  const requestId = Math.random().toString(36).substring(2, 10)
+  console.log(`Schedule API request started (${requestId})`)
 
   try {
-    const authenticatedUser = await getAuthenticatedUser();
-    console.log(`User authenticated: ${authenticatedUser.id} (${requestId})`);
+    const authenticatedUser = await getAuthenticatedUser()
+    console.log(`User authenticated: ${authenticatedUser.id} (${requestId})`)
 
     // Get userId from query params for viewing other users' schedules
-    const { searchParams } = new URL(request.url);
-    const targetUserId = searchParams.get('userId');
+    const { searchParams } = new URL(request.url)
+    const targetUserId = searchParams.get('userId')
 
     // Use target user ID if provided, otherwise use authenticated user
-    const userId = targetUserId || authenticatedUser.id;
-    console.log(`Using userId: ${userId} (${requestId})`);
+    const userId = targetUserId || authenticatedUser.id
+    console.log(`Using userId: ${userId} (${requestId})`)
 
     // Create a cache key based on user ID
-    const cacheKey = `schedule-${userId}`;
+    const _cacheKey = `schedule-${userId}`
 
     // Use enhanced withPrisma wrapper WITHOUT caching for schedule operations
     // to ensure fresh data after drag-and-drop updates
     const result = await withPrisma(
       async (prismaClient) => {
-        console.log(`withPrisma callback started (${requestId})`);
+        console.log(`withPrisma callback started (${requestId})`)
 
         // First, fetch enrollments
-        console.log(
-          `Fetching enrollments for userId: ${userId} (${requestId})`
-        );
+        console.log(`Fetching enrollments for userId: ${userId} (${requestId})`)
         const enrollments = await prismaClient.enrollment.findMany({
           where: {
             userId: userId,
@@ -53,19 +51,19 @@ export async function GET(request: NextRequest) {
             },
           },
           orderBy: [{ semester: 'asc' }],
-        });
+        })
 
-        console.log(`Found ${enrollments.length} enrollments (${requestId})`);
+        console.log(`Found ${enrollments.length} enrollments (${requestId})`)
 
         // If no enrollments, return early to save an unnecessary query
         if (enrollments.length === 0) {
-          console.log(`No enrollments found, returning early (${requestId})`);
-          return { enrollments: [], courses: [] };
+          console.log(`No enrollments found, returning early (${requestId})`)
+          return { enrollments: [], courses: [] }
         }
 
         // Get all course IDs from enrollments
-        const courseIds = enrollments.map((enrollment) => enrollment.courseId);
-        console.log(`Fetching ${courseIds.length} courses (${requestId})`);
+        const courseIds = enrollments.map((enrollment) => enrollment.courseId)
+        console.log(`Fetching ${courseIds.length} courses (${requestId})`)
 
         // Fetch courses separately
         const courses = await prismaClient.course.findMany({
@@ -74,41 +72,41 @@ export async function GET(request: NextRequest) {
               in: courseIds,
             },
           },
-        });
+        })
 
-        console.log(`Found ${courses.length} courses (${requestId})`);
+        console.log(`Found ${courses.length} courses (${requestId})`)
 
-        return { enrollments, courses };
-      }
+        return { enrollments, courses }
+      },
       // Removed caching options to ensure fresh data after updates
-    );
+    )
 
-    console.log(`withPrisma operation completed (${requestId})`);
+    console.log(`withPrisma operation completed (${requestId})`)
 
     // Transform courses
     const transformedCourses = result.courses.map((course) =>
-      transformCourse(course)
-    );
+      transformCourse(course),
+    )
 
     console.log(
-      `Transformed ${transformedCourses.length} courses (${requestId})`
-    );
+      `Transformed ${transformedCourses.length} courses (${requestId})`,
+    )
 
     // Match enrollments with courses
     const enrollmentsWithCourses = result.enrollments
       .map((enrollment) => {
         const course = transformedCourses.find(
-          (c) => c?.id === enrollment.courseId
-        );
+          (c) => c?.id === enrollment.courseId,
+        )
 
         if (!course) {
-          console.warn(`Course not found for enrollment ${enrollment.id}`);
-          return null;
+          console.warn(`Course not found for enrollment ${enrollment.id}`)
+          return null
         }
 
         // Use the course's actual period data instead of hardcoding period 1
         const coursePeriod =
-          course.period && Array.isArray(course.period) ? course.period : [1]; // Default to period 1 if undefined
+          course.period && Array.isArray(course.period) ? course.period : [1] // Default to period 1 if undefined
 
         return {
           id: enrollment.id,
@@ -121,13 +119,13 @@ export async function GET(request: NextRequest) {
           grade: null,
           enrolledAt: new Date(),
           course: course,
-        };
+        }
       })
-      .filter((item) => item !== null);
+      .filter((item) => item !== null)
 
     console.log(
-      `Matched ${enrollmentsWithCourses.length} enrollments with courses (${requestId})`
-    );
+      `Matched ${enrollmentsWithCourses.length} enrollments with courses (${requestId})`,
+    )
 
     // Create a response with proper cache headers
     const response = createSuccessResponse(
@@ -135,34 +133,34 @@ export async function GET(request: NextRequest) {
         enrollments: enrollmentsWithCourses,
         requestId, // Include request ID for client-side debugging
       },
-      'Schedule fetched successfully'
-    );
+      'Schedule fetched successfully',
+    )
 
     // Set aggressive cache-busting headers to ensure fresh data
     if (response instanceof NextResponse) {
       response.headers.set(
         'Cache-Control',
-        'no-cache, no-store, must-revalidate, private'
-      );
-      response.headers.set('Pragma', 'no-cache');
-      response.headers.set('Expires', '0');
+        'no-cache, no-store, must-revalidate, private',
+      )
+      response.headers.set('Pragma', 'no-cache')
+      response.headers.set('Expires', '0')
       // Add a timestamp header to help with debugging
-      response.headers.set('X-Data-Freshness', new Date().toISOString());
+      response.headers.set('X-Data-Freshness', new Date().toISOString())
     }
 
-    console.log(`Schedule API request completed successfully (${requestId})`);
+    console.log(`Schedule API request completed successfully (${requestId})`)
 
-    return response;
+    return response
   } catch (error) {
     // Include a random error reference for tracking
-    console.error(`Schedule error reference: ${requestId}`, error);
+    console.error(`Schedule error reference: ${requestId}`, error)
 
     // Add more detailed error information
-    let errorDetails = '';
+    let errorDetails = ''
     if (error instanceof Error) {
-      errorDetails = error.message;
-      console.error(`Error message: ${error.message}`);
-      console.error(`Error stack: ${error.stack}`);
+      errorDetails = error.message
+      console.error(`Error message: ${error.message}`)
+      console.error(`Error stack: ${error.stack}`)
     }
 
     // Create a detailed error response with debugging information
@@ -180,9 +178,9 @@ export async function GET(request: NextRequest) {
           // No caching for error responses
           'Cache-Control': 'no-store',
         },
-      }
-    );
+      },
+    )
 
-    return errorResponse;
+    return errorResponse
   }
 }

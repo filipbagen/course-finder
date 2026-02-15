@@ -551,27 +551,27 @@
   }
 
   h1 {
-    @apply scroll-m-20 leading-5 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    @apply scroll-m-20 text-4xl font-extrabold leading-5 tracking-tight lg:text-5xl;
   }
 
   h2 {
-    @apply scroll-m-20 leading-5 pb-2 text-3xl font-semibold tracking-tight first:mt-0;
+    @apply scroll-m-20 pb-2 text-3xl font-semibold leading-5 tracking-tight first:mt-0;
   }
 
   h3 {
-    @apply scroll-m-20 leading-5 text-2xl font-semibold tracking-tight;
+    @apply scroll-m-20 text-2xl font-semibold leading-5 tracking-tight;
   }
 
   h4 {
-    @apply scroll-m-20 leading-5 text-xl font-semibold tracking-tight;
+    @apply scroll-m-20 text-xl font-semibold leading-5 tracking-tight;
   }
 
   h5 {
-    @apply scroll-m-20 leading-5 text-lg font-semibold tracking-tight;
+    @apply scroll-m-20 text-lg font-semibold leading-5 tracking-tight;
   }
 
   h6 {
-    @apply scroll-m-20 leading-5 text-base font-semibold tracking-tight;
+    @apply scroll-m-20 text-base font-semibold leading-5 tracking-tight;
   }
 
   p {

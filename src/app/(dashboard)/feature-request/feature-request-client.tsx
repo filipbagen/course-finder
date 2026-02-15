@@ -1,38 +1,38 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Lightbulb } from 'lucide-react';
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Lightbulb } from 'lucide-react'
 
 // This is now a client component that gets wrapped by the server page component
 export default function FeatureRequestClient() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [featureType, setFeatureType] = useState('');
-  const [featureRequest, setFeatureRequest] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [featureType, setFeatureType] = useState('')
+  const [featureRequest, setFeatureRequest] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
       const response = await fetch('/api/feature-request', {
@@ -46,30 +46,30 @@ export default function FeatureRequestClient() {
           featureType,
           featureRequest,
         }),
-      });
+      })
 
       if (response.ok) {
-        setSubmitted(true);
+        setSubmitted(true)
         toast.success('Din förfrågan har skickats', {
           description: 'Tack för ditt bidrag till att förbättra Course Finder!',
-        });
+        })
         // Reset form
-        setName('');
-        setEmail('');
-        setFeatureType('');
-        setFeatureRequest('');
+        setName('')
+        setEmail('')
+        setFeatureType('')
+        setFeatureRequest('')
       } else {
         toast.error('Något gick fel', {
           description: 'Försök igen senare eller kontakta support.',
-        });
+        })
       }
     } catch (error) {
-      console.error('Error submitting feature request:', error);
+      console.error('Error submitting feature request:', error)
       toast.error('Något gick fel', {
         description: 'Försök igen senare eller kontakta support.',
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -178,5 +178,5 @@ export default function FeatureRequestClient() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

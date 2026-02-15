@@ -1,44 +1,35 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useDraggable } from '@dnd-kit/core';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardFooter,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { useDraggable } from '@dnd-kit/core'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   GripVertical,
   Trash2,
-  Calendar,
-  BookOpen,
   Star,
   ArrowRightLeft,
   Blocks,
-  Smile,
   SignpostBig,
-} from 'lucide-react';
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useSchedule } from './ScheduleProvider';
-import { ScheduleActions } from '../types/schedule.types';
-import { CourseWithEnrollment } from '@/types/types';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { cn } from '@/lib/utils';
-import CourseReviewDialog from '@/features/courses/components/CourseReviewDialog';
-import { StarRating } from '@/features/courses/components/StarRating';
+} from '@/components/ui/dropdown-menu'
+import { useSchedule } from './ScheduleProvider'
+import { ScheduleActions, ScheduleCourse } from '../types/schedule.types'
+import { CourseWithEnrollment } from '@/types/types'
+import { useMediaQuery } from '@/hooks/use-media-query'
+import { cn } from '@/lib/utils'
+import CourseReviewDialog from '@/features/courses/components/CourseReviewDialog'
 
 interface ScheduleCourseCardProps {
-  course: CourseWithEnrollment;
-  onRemove?: (enrollmentId: string) => void;
-  readonly?: boolean;
+  course: CourseWithEnrollment
+  onRemove?: (enrollmentId: string) => void
+  readonly?: boolean
 }
 
 /**
@@ -62,8 +53,8 @@ export default function ScheduleCourseCard({
   onRemove,
   readonly = false,
 }: ScheduleCourseCardProps) {
-  const { state, dispatch } = useSchedule();
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  const { state, dispatch } = useSchedule()
+  const isMobile = useMediaQuery('(max-width: 767px)')
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: course.id,
@@ -72,55 +63,55 @@ export default function ScheduleCourseCard({
         course,
         type: 'course',
       },
-    });
+    })
 
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
-    : undefined;
+    : undefined
 
   // Format display text
   const blockText =
     course.block.length > 1
       ? `Block ${course.block.join(', ')}`
-      : `Block ${course.block[0]}`;
+      : `Block ${course.block[0]}`
 
   // Handle course removal
   const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (course.enrollment?.id && onRemove) {
-      onRemove(course.enrollment.id);
+      onRemove(course.enrollment.id)
     }
-  };
+  }
 
   // Handle course movement
   const handleMoveCourse = (toSemester: number) => {
-    if (readonly) return;
+    if (readonly) return
 
     // Find the course's current location
     const findCurrentLocation = () => {
-      const semesters = [7, 8, 9] as const;
-      const periods = [1, 2] as const;
+      const semesters = [7, 8, 9] as const
+      const periods = [1, 2] as const
 
       for (const semester of semesters) {
         for (const period of periods) {
           const semesterKey =
-            `semester${semester}` as keyof typeof state.schedule;
-          const periodKey = `period${period}` as 'period1' | 'period2';
-          const courses = state.schedule[semesterKey][periodKey];
+            `semester${semester}` as keyof typeof state.schedule
+          const periodKey = `period${period}` as 'period1' | 'period2'
+          const courses = state.schedule[semesterKey][periodKey]
 
-          const foundCourse = courses.find((c) => c.id === course.id);
+          const foundCourse = courses.find((c) => c.id === course.id)
           if (foundCourse) {
-            return { semester, period };
+            return { semester, period }
           }
         }
       }
-      return null;
-    };
+      return null
+    }
 
-    const currentLocation = findCurrentLocation();
-    if (!currentLocation) return;
+    const currentLocation = findCurrentLocation()
+    if (!currentLocation) return
 
     // Dispatch move action
     dispatch({
@@ -132,27 +123,27 @@ export default function ScheduleCourseCard({
         toSemester,
         toPeriod: currentLocation.period, // Keep same period
       },
-    });
-  };
+    })
+  }
 
   // Get available semesters for moving (only on mobile, only for semester 7/9 courses)
   const getAvailableSemesters = () => {
-    const currentSemester = course.enrollment?.semester;
-    if (!currentSemester || !isMobile) return [];
+    const currentSemester = course.enrollment?.semester
+    if (!currentSemester || !isMobile) return []
 
     // Only allow moving courses from semester 7 and 9, and only between 7 and 9
     if (currentSemester === 7) {
-      return [9]; // Can move from 7 to 9
+      return [9] // Can move from 7 to 9
     } else if (currentSemester === 9) {
-      return [7]; // Can move from 9 to 7
+      return [7] // Can move from 9 to 7
     }
-    return []; // Semester 8 courses cannot be moved
-  };
+    return [] // Semester 8 courses cannot be moved
+  }
 
-  const availableSemesters = getAvailableSemesters();
+  const availableSemesters = getAvailableSemesters()
 
   // Reference for dialog trigger button
-  const dialogTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const dialogTriggerRef = React.useRef<HTMLButtonElement>(null)
 
   // Handle card click to open review dialog
   const handleCardClick = (e: React.MouseEvent) => {
@@ -161,12 +152,12 @@ export default function ScheduleCourseCard({
       (e.target as HTMLElement).closest('button') ||
       (e.target as HTMLElement).closest('[data-drag-handle="true"]')
     ) {
-      return;
+      return
     }
 
     // Programmatically click the dialog trigger
-    dialogTriggerRef.current?.click();
-  };
+    dialogTriggerRef.current?.click()
+  }
 
   return (
     <div
@@ -180,7 +171,7 @@ export default function ScheduleCourseCard({
       <Card
         onClick={handleCardClick}
         data-course-id={course.id}
-        className={cn('transition-all duration-200 group', {
+        className={cn('group transition-all duration-200', {
           'hover:shadow-md': !isDragging && !readonly,
           'cursor-pointer': !readonly && !isDragging,
           'cursor-grabbing': !readonly && isDragging,
@@ -195,19 +186,26 @@ export default function ScheduleCourseCard({
                 {...attributes}
                 {...listeners}
                 data-drag-handle="true"
-                className="mt-1 cursor-grab hover:text-primary transition-colors"
+                className="mt-1 cursor-grab transition-colors hover:text-primary"
                 aria-label={`Drag ${course.name}`}
+                role="button"
+                tabIndex={0}
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation()
+                  }
+                }}
               >
                 <GripVertical className="h-4 w-4 text-muted-foreground" />
               </div>
             )}
 
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+            <div className="min-w-0 flex-1">
+              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                 {course.name}
               </h3>
-              <p className="text-sm font-mono text-muted-foreground mt-1">
+              <p className="mt-1 font-mono text-sm text-muted-foreground">
                 {course.code}
               </p>
             </div>
@@ -220,7 +218,7 @@ export default function ScheduleCourseCard({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                      className="h-8 w-8 p-0 text-blue-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
                       aria-label={`Move ${course.name} to different semester`}
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -233,8 +231,8 @@ export default function ScheduleCourseCard({
                         key={semester}
                         className="cursor-pointer"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleMoveCourse(semester);
+                          e.stopPropagation()
+                          handleMoveCourse(semester)
                         }}
                       >
                         Flytta till termin {semester}
@@ -250,7 +248,7 @@ export default function ScheduleCourseCard({
                   size="sm"
                   variant="ghost"
                   onClick={handleRemove}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                  className="h-8 w-8 p-0 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"
                   aria-label={`Remove ${course.name} from schedule`}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -260,10 +258,10 @@ export default function ScheduleCourseCard({
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0 space-y-3">
+        <CardContent className="space-y-3 pt-0">
           {/* Main Field of Study */}
           <div className="flex items-start gap-2">
-            <SignpostBig className="h-4 w-4 flex-shrink-0 mt-0.5 text-primary" />
+            <SignpostBig className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
             <div className="flex flex-wrap gap-1">
               {course.mainFieldOfStudy.length === 0 ? (
                 <Badge variant="outline" className="text-xs">
@@ -280,19 +278,21 @@ export default function ScheduleCourseCard({
           </div>
 
           {/* Review Rating */}
-          {(course as any).reviewStats &&
-            (course as any).reviewStats.count > 0 && (
+          {(course as ScheduleCourse).reviewStats &&
+            (course as ScheduleCourse).reviewStats!.count > 0 && (
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-amber-400 flex-shrink-0" />
+                <Star className="h-4 w-4 flex-shrink-0 text-amber-400" />
                 <span className="text-xs text-muted-foreground">
-                  {(course as any).reviewStats.averageRating.toFixed(1)} (
-                  {(course as any).reviewStats.count})
+                  {(
+                    course as ScheduleCourse
+                  ).reviewStats!.averageRating.toFixed(1)}{' '}
+                  ({(course as ScheduleCourse).reviewStats!.count})
                 </span>
               </div>
             )}
 
           {/* Schedule Information */}
-          <div className="flex items-center justify-between pt-2 border-t border-border">
+          <div className="flex items-center justify-between border-t border-border pt-2">
             <div className="flex items-center gap-2">
               <Blocks className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">{blockText}</span>
@@ -312,7 +312,7 @@ export default function ScheduleCourseCard({
           course={course}
           isFromSchedule={true}
           onRemove={onRemove}
-          initialReviewsData={(course as any).reviewStats}
+          initialReviewsData={(course as ScheduleCourse).reviewStats}
           trigger={
             <button
               ref={dialogTriggerRef}
@@ -323,5 +323,5 @@ export default function ScheduleCourseCard({
         />
       </div>
     </div>
-  );
+  )
 }

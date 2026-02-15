@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useSchedule } from './ScheduleProvider';
-import { SemesterBlock } from './SemesterBlock';
-import { SkeletonCard } from '@/components/shared/SkeletonComponent';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import React from 'react'
+import { useSchedule } from './ScheduleProvider'
+import { SemesterBlock } from './SemesterBlock'
+import { SkeletonCard } from '@/components/shared/SkeletonComponent'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react'
 
 /**
  * Schedule Grid Component
@@ -21,15 +21,15 @@ import { AlertCircle } from 'lucide-react';
  * - Accessibility support
  */
 export function ScheduleGrid() {
-  const { state } = useSchedule();
-  const { schedule, loading, error } = state;
+  const { state } = useSchedule()
+  const { schedule, loading, error } = state
 
   // Show loading state
   if (loading) {
     return (
       <div className="w-full space-y-6">
         {/* Mobile Loading Layout */}
-        <div className="md:hidden space-y-6">
+        <div className="space-y-6 md:hidden">
           {/* Semester 7 Header */}
           <SkeletonCard variant="schedule" />
 
@@ -54,7 +54,7 @@ export function ScheduleGrid() {
 
         {/* Desktop Loading Layout */}
         <div className="hidden md:block">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Semester headers */}
             <SkeletonCard variant="schedule" />
             <SkeletonCard variant="schedule" />
@@ -62,53 +62,53 @@ export function ScheduleGrid() {
           </div>
 
           {/* Period 1 row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <SkeletonCard variant="schedule" />
             <SkeletonCard variant="schedule" />
             <SkeletonCard variant="schedule" />
           </div>
 
           {/* Period 2 row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <SkeletonCard variant="schedule" />
             <SkeletonCard variant="schedule" />
             <SkeletonCard variant="schedule" />
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Show error state
   if (error) {
     return (
       <Alert variant="destructive" className="mb-6">
-        <AlertCircle className="h-5 w-5 mr-2" />
+        <AlertCircle className="mr-2 h-5 w-5" />
         <AlertDescription className="text-sm">
-          <div className="font-semibold mb-1">Error loading schedule:</div>
+          <div className="mb-1 font-semibold">Error loading schedule:</div>
           <div>{error}</div>
           <button
             onClick={() => window.location.reload()}
-            className="mt-3 px-4 py-2 bg-destructive/10 hover:bg-destructive/20 rounded text-xs font-medium transition-colors"
+            className="mt-3 rounded bg-destructive/10 px-4 py-2 text-xs font-medium transition-colors hover:bg-destructive/20"
           >
             Refresh Page
           </button>
         </AlertDescription>
       </Alert>
-    );
+    )
   }
 
-  const semesters = [7, 8, 9] as const;
-  const periods = [1, 2] as const;
+  const semesters = [7, 8, 9] as const
+  const periods = [1, 2] as const
 
   return (
     <div className="w-full space-y-6">
       {/* Mobile Layout - Single Column */}
-      <div className="md:hidden space-y-6">
+      <div className="space-y-6 md:hidden">
         {/* Semester 7 - Period 1 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
           </div>
           <SemesterBlock
@@ -123,7 +123,7 @@ export function ScheduleGrid() {
         {/* Semester 7 - Period 2 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
           </div>
           <SemesterBlock
@@ -138,7 +138,7 @@ export function ScheduleGrid() {
         {/* Semester 8 - Period 1 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
           </div>
           <SemesterBlock
@@ -153,7 +153,7 @@ export function ScheduleGrid() {
         {/* Semester 8 - Period 2 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
           </div>
           <SemesterBlock
@@ -168,7 +168,7 @@ export function ScheduleGrid() {
         {/* Semester 9 - Period 1 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 1</h3>
           </div>
           <SemesterBlock
@@ -183,7 +183,7 @@ export function ScheduleGrid() {
         {/* Semester 9 - Period 2 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-8 bg-primary rounded-full" />
+            <div className="h-8 w-2 rounded-full bg-primary" />
             <h3 className="text-xl font-semibold text-foreground">Period 2</h3>
           </div>
           <SemesterBlock
@@ -199,26 +199,26 @@ export function ScheduleGrid() {
       {/* Desktop Layout - Original 2x3 Grid */}
       <div className="hidden md:block">
         {/* Schedule Grid */}
-        <div className="space-y-8 mt-3">
+        <div className="mt-3 space-y-8">
           {periods.map((period) => (
             <div key={period} className="space-y-4">
               {/* Period Header */}
               <div className="flex items-center gap-3">
-                <div className="w-2 h-8 bg-primary rounded-full" />
+                <div className="h-8 w-2 rounded-full bg-primary" />
                 <h3 className="text-xl font-semibold text-foreground">
                   Period {period}
                 </h3>
-                <div className="flex-1 h-px bg-border" />
+                <div className="h-px flex-1 bg-border" />
               </div>
 
               {/* Period Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 {semesters.map((semester) => {
                   const semesterKey =
-                    `semester${semester}` as keyof typeof schedule;
+                    `semester${semester}` as keyof typeof schedule
                   const periodKey =
-                    `period${period}` as keyof (typeof schedule)[typeof semesterKey];
-                  const courses = schedule?.[semesterKey]?.[periodKey] || [];
+                    `period${period}` as keyof (typeof schedule)[typeof semesterKey]
+                  const courses = schedule?.[semesterKey]?.[periodKey] || []
 
                   return (
                     <SemesterBlock
@@ -228,10 +228,10 @@ export function ScheduleGrid() {
                       courses={courses}
                       dropZoneId={`semester${semester}-period${period}`}
                       semesterLabel={`Termin ${semester} - ${getSemesterDescription(
-                        semester
+                        semester,
                       )}`}
                     />
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -239,7 +239,7 @@ export function ScheduleGrid() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /**
@@ -248,12 +248,12 @@ export function ScheduleGrid() {
 function getSemesterDescription(semester: number): string {
   switch (semester) {
     case 7:
-      return 'Höst år 4';
+      return 'Höst år 4'
     case 8:
-      return 'Vår år 4';
+      return 'Vår år 4'
     case 9:
-      return 'Höst år 5';
+      return 'Höst år 5'
     default:
-      return '';
+      return ''
   }
 }

@@ -1,103 +1,101 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 import {
-  BookOpen,
-  Calendar,
   GraduationCap,
-  Plus,
   Star,
   Award,
-  TrendingUp,
   Target,
   SignpostBig,
   Blocks,
-  Smile,
-} from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { useCourseDetailsSheet } from '@/features/courses/hooks/useCourseDetailsSheet';
-import { CourseDetailsDialog } from '@/features/courses/components/CourseDetailsDialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+import { useCourseDetailsSheet } from '@/features/courses/hooks/useCourseDetailsSheet'
+import { CourseDetailsDialog } from '@/features/courses/components/CourseDetailsDialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface UserProfileData {
-  id: string;
-  name: string;
-  email: string;
-  program: string | null;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  colorScheme: string;
-  isPublic: boolean;
-  totalCredits: number;
-  coursesBySemester: Record<number, any[]>;
+  id: string
+  name: string
+  email: string
+  program: string | null
+  image: string | null
+  createdAt: Date
+  updatedAt: Date
+  colorScheme: string
+  isPublic: boolean
+  totalCredits: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  coursesBySemester: Record<number, any[]>
   enrollments: {
-    id: string;
-    semester: number;
-    course: any;
-  }[];
-  reviews: any[];
+    id: string
+    semester: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    course: any
+  }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reviews: any[]
   _count: {
-    enrollment: number;
-    review: number;
-  };
+    enrollment: number
+    review: number
+  }
 }
 
 interface UserProfileComponentProps {
-  userProfile: UserProfileData;
-  isOwnProfile: boolean;
-  currentUserColorScheme?: string;
+  userProfile: UserProfileData
+  isOwnProfile: boolean
+  currentUserColorScheme?: string
 }
 
 export function UserProfileComponent({
   userProfile,
-  isOwnProfile,
-  currentUserColorScheme = 'blue',
+  isOwnProfile: _isOwnProfile,
+  currentUserColorScheme: _currentUserColorScheme = 'blue',
 }: UserProfileComponentProps) {
-  const { onOpen } = useCourseDetailsSheet();
-  const getInitials = (name: string) => {
+  const { onOpen } = useCourseDetailsSheet()
+  const _getInitials = (name: string) => {
     return name
       .split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
   // Define expected totals based on user requirements
-  const expectedTotalCredits = 90; // Total credits needed for 3 semesters
-  const expectedAdvancedCredits = 60; // Advanced credits needed
-  const requiredFieldCredits = 30; // Advanced credits needed in same field for main field
+  const expectedTotalCredits = 90 // Total credits needed for 3 semesters
+  const expectedAdvancedCredits = 60 // Advanced credits needed
+  const requiredFieldCredits = 30 // Advanced credits needed in same field for main field
 
   // Calculate advanced credits
   const advancedCredits = React.useMemo(() => {
-    let total = 0;
-    let allCourses: any[] = [];
+    let total = 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allCourses: any[] = []
 
     Object.values(userProfile.coursesBySemester).forEach((courses) => {
       courses.forEach((course) => {
         // Avoid counting the same course multiple times
         if (!allCourses.some((c) => c.id === course.id)) {
           if (course.advanced) {
-            total += Number(course.credits) || 0;
+            total += Number(course.credits) || 0
           }
-          allCourses.push(course);
+          allCourses.push(course)
         }
-      });
-    });
+      })
+    })
 
-    return total;
-  }, [userProfile.coursesBySemester]);
+    return total
+  }, [userProfile.coursesBySemester])
 
   // Calculate advanced credits by field for main field determination
   const advancedCreditsByField = React.useMemo(() => {
-    let allCourses: any[] = [];
-    const creditCount: { [key: string]: number } = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allCourses: any[] = []
+    const creditCount: { [key: string]: number } = {}
 
     Object.values(userProfile.coursesBySemester).forEach((courses) => {
       courses.forEach((course) => {
@@ -105,45 +103,47 @@ export function UserProfileComponent({
         if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
           course.mainFieldOfStudy.forEach((field: string) => {
             creditCount[field] =
-              (creditCount[field] || 0) + Number(course.credits);
-          });
-          allCourses.push(course);
+              (creditCount[field] || 0) + Number(course.credits)
+          })
+          allCourses.push(course)
         }
-      });
-    });
+      })
+    })
 
-    return creditCount;
-  }, [userProfile.coursesBySemester]);
+    return creditCount
+  }, [userProfile.coursesBySemester])
 
   // Determine main field of study (requires 30+ advanced credits in same field)
   const mainFieldOfStudy = React.useMemo(() => {
     const validFields = Object.entries(advancedCreditsByField).filter(
-      ([_, credits]) => credits >= requiredFieldCredits
-    );
+      ([_, credits]) => credits >= requiredFieldCredits,
+    )
 
-    if (validFields.length === 0) return null;
+    if (validFields.length === 0) return null
 
     // Return the field with most credits
-    const sortedFields = validFields.sort((a, b) => b[1] - a[1]);
+    const sortedFields = validFields.sort((a, b) => b[1] - a[1])
+    const topField = sortedFields[0]
+    if (!topField) return null
     return {
-      field: sortedFields[0][0],
-      credits: sortedFields[0][1],
-    };
-  }, [advancedCreditsByField, requiredFieldCredits]);
+      field: topField[0],
+      credits: topField[1],
+    }
+  }, [advancedCreditsByField, requiredFieldCredits])
 
   const progressPercentage = React.useMemo(() => {
     return Math.min(
       (userProfile.totalCredits / expectedTotalCredits) * 100,
-      100
-    );
-  }, [userProfile.totalCredits, expectedTotalCredits]);
+      100,
+    )
+  }, [userProfile.totalCredits, expectedTotalCredits])
 
   const advancedProgressPercentage = React.useMemo(() => {
-    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100);
-  }, [advancedCredits, expectedAdvancedCredits]);
+    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100)
+  }, [advancedCredits, expectedAdvancedCredits])
 
-  const getColorFromProgram = (program: string | null) => {
-    if (!program) return 'bg-gray-100 text-gray-700';
+  const _getColorFromProgram = (program: string | null) => {
+    if (!program) return 'bg-gray-100 text-gray-700'
 
     const colors = [
       'bg-blue-100 text-blue-700',
@@ -152,86 +152,87 @@ export function UserProfileComponent({
       'bg-orange-100 text-orange-700',
       'bg-pink-100 text-pink-700',
       'bg-indigo-100 text-indigo-700',
-    ];
+    ]
 
     const hash = program.split('').reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0);
-      return a & a;
-    }, 0);
+      a = (a << 5) - a + b.charCodeAt(0)
+      return a & a
+    }, 0)
 
-    return colors[Math.abs(hash) % colors.length];
-  };
+    return colors[Math.abs(hash) % colors.length]
+  }
 
   // Get user's primary color for theming
-  const getUserPrimaryColor = (colorScheme: string) => {
+  const _getUserPrimaryColor = (colorScheme: string) => {
     switch (colorScheme) {
       case 'blue':
-        return 'bg-blue-500';
+        return 'bg-blue-500'
       case 'green':
-        return 'bg-green-500';
+        return 'bg-green-500'
       case 'purple':
-        return 'bg-purple-500';
+        return 'bg-purple-500'
       case 'orange':
-        return 'bg-orange-500';
+        return 'bg-orange-500'
       case 'pink':
-        return 'bg-pink-500';
+        return 'bg-pink-500'
       case 'indigo':
-        return 'bg-indigo-500';
+        return 'bg-indigo-500'
       default:
-        return 'bg-primary';
+        return 'bg-primary'
     }
-  };
+  }
 
   const getSemesterDescription = (semester: number): string => {
     switch (semester) {
       case 7:
-        return 'Höst år 4';
+        return 'Höst år 4'
       case 8:
-        return 'Vår år 4';
+        return 'Vår år 4'
       case 9:
-        return 'Höst år 5';
+        return 'Höst år 5'
       default:
-        return '';
+        return ''
     }
-  };
+  }
 
   // Organize courses by semester and period like in the schedule
   const organizeCoursesForSchedule = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const schedule: Record<string, Record<string, any[]>> = {
       semester7: { period1: [], period2: [] },
       semester8: { period1: [], period2: [] },
       semester9: { period1: [], period2: [] },
-    };
+    }
 
     userProfile.enrollments.forEach((enrollment) => {
-      const { semester, course } = enrollment;
+      const { semester, course } = enrollment
 
       // Only show courses for semesters 7, 8, 9
       if (semester >= 7 && semester <= 9) {
-        const semesterKey = `semester${semester}`;
+        const semesterKey = `semester${semester}`
 
         // Handle multi-period courses: if course.period includes multiple periods,
         // show the course in all those periods
         if (course.period && Array.isArray(course.period)) {
           course.period.forEach((coursePeriod: bigint) => {
-            const period = Number(coursePeriod);
+            const period = Number(coursePeriod)
             if (period === 1 || period === 2) {
-              const periodKey = `period${period}`;
+              const periodKey = `period${period}`
               if (schedule[semesterKey] && schedule[semesterKey][periodKey]) {
-                schedule[semesterKey][periodKey].push(course);
+                schedule[semesterKey][periodKey].push(course)
               }
             }
-          });
+          })
         }
       }
-    });
+    })
 
-    return schedule;
-  };
+    return schedule
+  }
 
-  const schedule = organizeCoursesForSchedule();
-  const semesters = [7, 8, 9] as const;
-  const periods = [1, 2] as const;
+  const schedule = organizeCoursesForSchedule()
+  const semesters = [7, 8, 9] as const
+  const periods = [1, 2] as const
 
   return (
     <div className="space-y-8">
@@ -245,7 +246,7 @@ export function UserProfileComponent({
         </TabsList>
 
         {/* Schedule Tab */}
-        <TabsContent value="schedule" className="space-y-6 mt-6">
+        <TabsContent value="schedule" className="mt-6 space-y-6">
           {/* Statistics Cards - Matching ScheduleStatistics Design */}
           <div className="space-y-6">
             {/* Main Statistics Cards */}
@@ -321,45 +322,45 @@ export function UserProfileComponent({
           {/* Schedule Grid - Same layout as schedule view */}
           <div className="w-full space-y-6">
             {/* Mobile Layout - Single Column */}
-            <div className="md:hidden space-y-6">
+            <div className="space-y-6 md:hidden">
               {/* Semester 7 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 7 - Höst år 4
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester7?.period1?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -377,14 +378,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -407,9 +408,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester7?.period1 ||
                     schedule.semester7.period1.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -426,41 +427,41 @@ export function UserProfileComponent({
               {/* Semester 7 - Period 2 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 7 - Höst år 4
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester7?.period2?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -478,14 +479,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -508,9 +509,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester7?.period2 ||
                     schedule.semester7.period2.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -527,41 +528,41 @@ export function UserProfileComponent({
               {/* Semester 8 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 8 - Vår år 4
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester8?.period1?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -579,14 +580,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -609,9 +610,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester8?.period1 ||
                     schedule.semester8.period1.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -628,41 +629,41 @@ export function UserProfileComponent({
               {/* Semester 8 - Period 2 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 8 - Vår år 4
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester8?.period2?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -680,14 +681,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -710,9 +711,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester8?.period2 ||
                     schedule.semester8.period2.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -729,41 +730,41 @@ export function UserProfileComponent({
               {/* Semester 9 - Period 1 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 1
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 9 - Höst år 5
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester9?.period1?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -781,14 +782,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -811,9 +812,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester9?.period1 ||
                     schedule.semester9.period1.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -830,41 +831,41 @@ export function UserProfileComponent({
               {/* Semester 9 - Period 2 */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-8 bg-primary rounded-full" />
+                  <div className="h-8 w-2 rounded-full bg-primary" />
                   <h3 className="text-xl font-semibold text-foreground">
                     Period 2
                   </h3>
                 </div>
-                <div className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative">
+                <div className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4">
                   {/* Semester Label */}
-                  <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                  <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                     Termin 9 - Höst år 5
                   </div>
                   <div className="space-y-3 pt-8">
                     {schedule?.semester9?.period2?.map((course) => (
                       <Card
                         key={course.id}
-                        className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                        className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                         onClick={() => onOpen(course)}
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                 {course.name}
                               </h3>
-                              <p className="text-sm font-mono text-muted-foreground mt-1">
+                              <p className="mt-1 font-mono text-sm text-muted-foreground">
                                 {course.code}
                               </p>
                             </div>
                           </div>
                         </CardHeader>
 
-                        <CardContent className="pt-0 space-y-3">
+                        <CardContent className="space-y-3 pt-0">
                           {/* Main Field of Study */}
                           <div className="flex items-start gap-2">
                             <SignpostBig
-                              className="h-4 w-4 flex-shrink-0 mt-0.5"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0"
                               style={{ color: 'hsl(var(--primary))' }}
                             />
                             <div className="flex flex-wrap gap-1">
@@ -882,14 +883,14 @@ export function UserProfileComponent({
                                     >
                                       {field}
                                     </Badge>
-                                  )
+                                  ),
                                 )
                               )}
                             </div>
                           </div>
 
                           {/* Schedule Information */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex items-center justify-between border-t border-border pt-2">
                             <div className="flex items-center gap-2">
                               <Blocks className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">
@@ -912,9 +913,9 @@ export function UserProfileComponent({
                   {/* Empty State */}
                   {(!schedule?.semester9?.period2 ||
                     schedule.semester9.period2.length === 0) && (
-                    <div className="flex flex-col items-center justify-center h-32 text-center">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex h-32 flex-col items-center justify-center text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                           <SignpostBig className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -932,35 +933,35 @@ export function UserProfileComponent({
             {/* Desktop Layout - Original 2x3 Grid */}
             <div className="hidden md:block">
               {/* Schedule Grid */}
-              <div className="space-y-8 mt-3">
+              <div className="mt-3 space-y-8">
                 {periods.map((period) => (
                   <div key={period} className="space-y-4">
                     {/* Period Header */}
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-8 bg-primary rounded-full" />
+                      <div className="h-8 w-2 rounded-full bg-primary" />
                       <h3 className="text-xl font-semibold text-foreground">
                         Period {period}
                       </h3>
-                      <div className="flex-1 h-px bg-border" />
+                      <div className="h-px flex-1 bg-border" />
                     </div>
 
                     {/* Period Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                       {semesters.map((semester) => {
                         const semesterKey =
-                          `semester${semester}` as keyof typeof schedule;
+                          `semester${semester}` as keyof typeof schedule
                         const periodKey =
-                          `period${period}` as keyof (typeof schedule)[typeof semesterKey];
+                          `period${period}` as keyof (typeof schedule)[typeof semesterKey]
                         const courses =
-                          schedule?.[semesterKey]?.[periodKey] || [];
+                          schedule?.[semesterKey]?.[periodKey] || []
 
                         return (
                           <div
                             key={`${semester}-${period}`}
-                            className="min-h-48 p-4 rounded-lg border-2 border-dashed border-border bg-card relative"
+                            className="relative min-h-48 rounded-lg border-2 border-dashed border-border bg-card p-4"
                           >
                             {/* Semester Label */}
-                            <div className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                            <div className="absolute left-2 top-2 rounded bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground">
                               Termin {semester} -{' '}
                               {getSemesterDescription(semester)}
                             </div>
@@ -968,27 +969,27 @@ export function UserProfileComponent({
                               {courses.map((course) => (
                                 <Card
                                   key={course.id}
-                                  className="transition-all duration-200 hover:shadow-md cursor-pointer group"
+                                  className="group cursor-pointer transition-all duration-200 hover:shadow-md"
                                   onClick={() => onOpen(course)}
                                 >
                                   <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between gap-3">
-                                      <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                      <div className="min-w-0 flex-1">
+                                        <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
                                           {course.name}
                                         </h3>
-                                        <p className="text-sm font-mono text-muted-foreground mt-1">
+                                        <p className="mt-1 font-mono text-sm text-muted-foreground">
                                           {course.code}
                                         </p>
                                       </div>
                                     </div>
                                   </CardHeader>
 
-                                  <CardContent className="pt-0 space-y-3">
+                                  <CardContent className="space-y-3 pt-0">
                                     {/* Main Field of Study */}
                                     <div className="flex items-start gap-2">
                                       <SignpostBig
-                                        className="h-4 w-4 flex-shrink-0 mt-0.5"
+                                        className="mt-0.5 h-4 w-4 flex-shrink-0"
                                         style={{ color: 'hsl(var(--primary))' }}
                                       />
                                       <div className="flex flex-wrap gap-1">
@@ -1010,14 +1011,14 @@ export function UserProfileComponent({
                                               >
                                                 {field}
                                               </Badge>
-                                            )
+                                            ),
                                           )
                                         )}
                                       </div>
                                     </div>
 
                                     {/* Schedule Information */}
-                                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                                    <div className="flex items-center justify-between border-t border-border pt-2">
                                       <div className="flex items-center gap-2">
                                         <Blocks className="h-3 w-3 text-muted-foreground" />
                                         <span className="text-xs text-muted-foreground">
@@ -1044,9 +1045,9 @@ export function UserProfileComponent({
 
                             {/* Empty State */}
                             {courses.length === 0 && (
-                              <div className="flex flex-col items-center justify-center h-32 text-center">
-                                <div className="space-y-3 flex flex-col items-center">
-                                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                              <div className="flex h-32 flex-col items-center justify-center text-center">
+                                <div className="flex flex-col items-center space-y-3">
+                                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                                     <SignpostBig className="h-6 w-6 text-primary" />
                                   </div>
                                   <div className="space-y-1">
@@ -1058,7 +1059,7 @@ export function UserProfileComponent({
                               </div>
                             )}
                           </div>
-                        );
+                        )
                       })}
                     </div>
                   </div>
@@ -1069,22 +1070,22 @@ export function UserProfileComponent({
         </TabsContent>
 
         {/* Reviews Tab */}
-        <TabsContent value="reviews" className="space-y-6 mt-6">
+        <TabsContent value="reviews" className="mt-6 space-y-6">
           {userProfile.reviews.length > 0 ? (
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <Star className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold pb-0">Recensioner</h2>
+                <h2 className="pb-0 text-2xl font-bold">Recensioner</h2>
                 <Badge variant="secondary" className="text-sm">
                   {userProfile._count.review}
                 </Badge>
               </div>
 
-              <div className="max-h-96 overflow-y-auto space-y-4">
+              <div className="max-h-96 space-y-4 overflow-y-auto">
                 {userProfile.reviews.map((review) => (
                   <Card
                     key={review.id}
-                    className="hover:shadow-md transition-shadow"
+                    className="transition-shadow hover:shadow-md"
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
@@ -1092,17 +1093,17 @@ export function UserProfileComponent({
                           <CardTitle className="text-lg leading-tight">
                             {review.course.name}
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {review.course.code}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1 ml-4">
+                        <div className="ml-4 flex items-center gap-1">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}
                               className={`h-4 w-4 ${
                                 i < review.rating
-                                  ? 'text-yellow-400 fill-current'
+                                  ? 'fill-current text-yellow-400'
                                   : 'text-gray-300'
                               }`}
                             />
@@ -1114,7 +1115,7 @@ export function UserProfileComponent({
                       <p className="text-sm leading-relaxed">
                         {review.comment}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-3">
+                      <p className="mt-3 text-xs text-muted-foreground">
                         {new Date(review.createdAt).toLocaleDateString('sv-SE')}
                       </p>
                     </CardContent>
@@ -1124,8 +1125,8 @@ export function UserProfileComponent({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Star className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+              <Star className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mb-2 text-lg font-semibold text-muted-foreground">
                 Inga recensioner än
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -1139,5 +1140,5 @@ export function UserProfileComponent({
       {/* Course Details Dialog */}
       <CourseDetailsDialog />
     </div>
-  );
+  )
 }

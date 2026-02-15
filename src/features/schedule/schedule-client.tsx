@@ -1,26 +1,26 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { ScheduleProvider } from './components/ScheduleProvider';
-import { ScheduleContainer } from './components/ScheduleContainer';
-import { ScheduleHeader } from './components/ScheduleHeader';
-import { ScheduleStatistics } from './components/ScheduleStatistics';
-import { ScheduleGrid } from './components/ScheduleGrid';
-import { Separator } from '@/components/ui/separator';
+import React from 'react'
+import { ScheduleProvider } from './components/ScheduleProvider'
+import { ScheduleContainer } from './components/ScheduleContainer'
+import { ScheduleHeader } from './components/ScheduleHeader'
+import { ScheduleStatistics } from './components/ScheduleStatistics'
+import { ScheduleGrid } from './components/ScheduleGrid'
+import { Separator } from '@/components/ui/separator'
 
 // Define a simplified user type
 interface ServerUser {
-  id: string;
-  name: string | null;
-  email: string;
-  colorScheme: string;
-  isPublic: boolean;
-  program: string | null;
-  image: string | null;
+  id: string
+  name: string | null
+  email: string
+  colorScheme: string
+  isPublic: boolean
+  program: string | null
+  image: string | null
 }
 
 interface ScheduleClientProps {
-  serverUser: ServerUser;
+  serverUser: ServerUser
 }
 
 /**
@@ -43,5 +43,5 @@ export default function ScheduleClient({ serverUser }: ScheduleClientProps) {
         </ScheduleContainer>
       </div>
     </ScheduleProvider>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import Image from 'next/image';
+import React, { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 
 export default function Avatar({
   uid,
@@ -10,65 +10,68 @@ export default function Avatar({
   size,
   onUpload,
 }: {
-  uid: string | null;
-  url: string | null;
-  size: number;
-  onUpload: (url: string) => void;
+  uid: string | null
+  url: string | null
+  size: number
+  onUpload: (url: string) => void
 }) {
-  const supabase = createClient();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(url);
-  const [uploading, setUploading] = useState(false);
+  const supabase = createClient()
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(url)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     async function downloadImage(path: string) {
       try {
         const { data, error } = await supabase.storage
           .from('avatars')
-          .download(path);
+          .download(path)
         if (error) {
-          throw error;
+          throw error
         }
 
-        const url = URL.createObjectURL(data);
-        setAvatarUrl(url);
-      } catch (error) {
+        const url = URL.createObjectURL(data)
+        setAvatarUrl(url)
+      } catch {
         // Silent error handling for download
       }
     }
 
-    if (url) downloadImage(url);
-  }, [url, supabase]);
+    if (url) downloadImage(url)
+  }, [url, supabase])
 
   const uploadAvatar: React.ChangeEventHandler<HTMLInputElement> = async (
-    event
+    event,
   ) => {
     try {
-      setUploading(true);
+      setUploading(true)
 
       if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.');
+        throw new Error('You must select an image to upload.')
       }
 
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${uid}-${Math.random()}.${fileExt}`;
+      const file = event.target.files[0]
+      if (!file) {
+        throw new Error('You must select an image to upload.')
+      }
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${uid}-${Math.random()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file)
 
       if (uploadError) {
-        throw uploadError;
+        throw uploadError
       }
 
-      onUpload(filePath);
-      setAvatarUrl(null); // Reset to trigger re-download
-    } catch (error) {
-      alert('Error uploading avatar!');
+      onUpload(filePath)
+      setAvatarUrl(null) // Reset to trigger re-download
+    } catch {
+      alert('Error uploading avatar!')
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -79,16 +82,16 @@ export default function Avatar({
             height={size}
             src={avatarUrl}
             alt="Profile picture"
-            className="rounded-full object-cover border-4 border-gray-200"
+            className="rounded-full border-4 border-gray-200 object-cover"
             style={{ height: size, width: size }}
           />
         ) : (
           <div
-            className="rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-200"
+            className="flex items-center justify-center rounded-full border-4 border-gray-200 bg-gray-200"
             style={{ height: size, width: size }}
           >
             <svg
-              className="w-12 h-12 text-gray-400"
+              className="h-12 w-12 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -107,16 +110,16 @@ export default function Avatar({
       <div>
         <label
           htmlFor="avatar-upload"
-          className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium ${
+          className={`inline-flex cursor-pointer items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium shadow-sm ${
             uploading
-              ? 'text-gray-400 bg-gray-100'
-              : 'text-gray-700 bg-white hover:bg-gray-50'
-          } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              ? 'bg-gray-100 text-gray-400'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
         >
           {uploading ? (
             <>
               <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400"
+                className="-ml-1 mr-2 h-4 w-4 animate-spin text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -165,5 +168,5 @@ export default function Avatar({
         />
       </div>
     </div>
-  );
+  )
 }

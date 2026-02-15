@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -12,16 +12,16 @@ import {
   useSensors,
   DragOverlay,
   closestCenter,
-} from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useSchedule } from './ScheduleProvider';
-import ScheduleCourseCard from './ScheduleCourseCard';
-import { ScheduleActions } from '../types/schedule.types';
-import { CourseWithEnrollment } from '@/types/types';
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { useSchedule } from './ScheduleProvider'
+import ScheduleCourseCard from './ScheduleCourseCard'
+import { ScheduleActions } from '../types/schedule.types'
+import { CourseWithEnrollment } from '@/types/types'
 
 interface ScheduleContainerProps {
-  children: React.ReactNode;
-  readonly?: boolean;
+  children: React.ReactNode
+  readonly?: boolean
 }
 
 /**
@@ -40,9 +40,9 @@ export function ScheduleContainer({
   children,
   readonly = false,
 }: ScheduleContainerProps) {
-  const { state, dispatch } = useSchedule();
+  const { state, dispatch } = useSchedule()
   const [activeCourse, setActiveCourse] =
-    React.useState<CourseWithEnrollment | null>(null);
+    React.useState<CourseWithEnrollment | null>(null)
 
   // Configure sensors for different input methods
   const sensors = useSensors(
@@ -53,44 +53,44 @@ export function ScheduleContainer({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+    }),
+  )
 
   /**
    * Handle drag start - store the active course
    */
   const handleDragStart = (event: DragStartEvent) => {
-    if (readonly) return;
+    if (readonly) return
 
-    const { active } = event;
-    const courseId = active.id as string;
+    const { active } = event
+    const courseId = active.id as string
 
     // Find the active course in the schedule
-    const course = findCourseById(courseId);
+    const course = findCourseById(courseId)
     if (course) {
-      setActiveCourse(course);
+      setActiveCourse(course)
       dispatch({
         type: ScheduleActions.SET_DRAG_STATE,
         payload: { isDragging: true, draggedCourse: course },
-      });
+      })
     }
-  };
+  }
 
   /**
    * Handle drag over - provide visual feedback
    */
   const handleDragOver = (event: DragOverEvent) => {
-    if (readonly) return;
+    if (readonly) return
 
-    const { over } = event;
+    const { over } = event
 
     if (over) {
-      const overId = over.id as string;
+      const overId = over.id as string
       if (overId.includes('semester') && overId.includes('period')) {
         // Visual feedback can be handled in the drop zones
       }
     }
-  };
+  }
 
   /**
    * Validate if a course can be moved to a specific semester and period
@@ -99,66 +99,70 @@ export function ScheduleContainer({
   const isValidMove = (
     course: CourseWithEnrollment,
     targetSemester: number,
-    targetPeriod: number
+    _targetPeriod: number,
   ): boolean => {
-    const currentSemester = course.enrollment.semester;
+    const currentSemester = course.enrollment.semester
 
     if (currentSemester === 8) {
       // Semester 8 courses can only stay in semester 8
-      return targetSemester === 8;
+      return targetSemester === 8
     } else if (currentSemester === 7 || currentSemester === 9) {
       // Semester 7 and 9 courses can move between semesters 7 and 9
-      return targetSemester === 7 || targetSemester === 9;
+      return targetSemester === 7 || targetSemester === 9
     }
 
-    return false;
-  };
+    return false
+  }
 
   /**
    * Handle drag end - update the schedule with immediate optimistic updates
    */
   const handleDragEnd = (event: DragEndEvent) => {
-    if (readonly) return;
+    if (readonly) return
 
-    const { active, over } = event;
+    const { active, over } = event
 
-    setActiveCourse(null);
+    setActiveCourse(null)
     dispatch({
       type: ScheduleActions.SET_DRAG_STATE,
       payload: { isDragging: false, draggedCourse: null },
-    });
+    })
 
     if (!over || !activeCourse) {
-      return;
+      return
     }
 
-    const courseId = active.id as string;
-    const dropZoneId = over.id as string;
+    const courseId = active.id as string
+    const dropZoneId = over.id as string
 
     // Parse drop zone ID to get semester and period
-    const dropZoneParts = dropZoneId.split('-');
+    const dropZoneParts = dropZoneId.split('-')
     if (dropZoneParts.length !== 2) {
-      console.error('Invalid drop zone ID:', dropZoneId);
-      return;
+      console.error('Invalid drop zone ID:', dropZoneId)
+      return
     }
 
-    const [semesterPart, periodPart] = dropZoneParts;
-    const targetSemester = parseInt(semesterPart.replace('semester', ''));
-    const targetPeriod = parseInt(periodPart.replace('period', ''));
+    const [semesterPart, periodPart] = dropZoneParts
+    if (!semesterPart || !periodPart) {
+      console.error('Invalid drop zone parts:', dropZoneParts)
+      return
+    }
+    const targetSemester = parseInt(semesterPart.replace('semester', ''))
+    const targetPeriod = parseInt(periodPart.replace('period', ''))
 
     if (isNaN(targetSemester) || isNaN(targetPeriod)) {
       console.error('Invalid semester or period:', {
         targetSemester,
         targetPeriod,
-      });
-      return;
+      })
+      return
     }
 
     // Get current position
-    const currentPosition = findCoursePosition(courseId);
+    const currentPosition = findCoursePosition(courseId)
     if (!currentPosition) {
-      console.error('Could not find current position for course:', courseId);
-      return;
+      console.error('Could not find current position for course:', courseId)
+      return
     }
 
     // Check if position actually changed
@@ -166,8 +170,8 @@ export function ScheduleContainer({
       currentPosition.semester === targetSemester &&
       currentPosition.period.includes(targetPeriod)
     ) {
-      console.log('Course position did not change, skipping update');
-      return;
+      console.log('Course position did not change, skipping update')
+      return
     }
 
     // Validate if the course can be moved to the target position
@@ -176,11 +180,11 @@ export function ScheduleContainer({
         course: activeCourse.code,
         from: currentPosition,
         to: { semester: targetSemester, period: targetPeriod },
-      });
-      return;
+      })
+      return
     }
 
-    console.log('ScheduleContainer: Validation passed, proceeding with move');
+    console.log('ScheduleContainer: Validation passed, proceeding with move')
 
     // Apply IMMEDIATE optimistic UI update
     dispatch({
@@ -192,7 +196,7 @@ export function ScheduleContainer({
         toSemester: targetSemester,
         toPeriod: [targetPeriod], // Convert to array
       },
-    });
+    })
 
     // Trigger the async API update (this will handle success/error cases)
     dispatch({
@@ -204,76 +208,76 @@ export function ScheduleContainer({
         toSemester: targetSemester,
         toPeriod: [targetPeriod], // Convert to array
       },
-    });
-  };
+    })
+  }
 
   /**
    * Find a course by ID in the schedule
    */
   const findCourseById = (courseId: string): CourseWithEnrollment | null => {
-    const { schedule } = state;
+    const { schedule } = state
 
     for (const semesterKey of Object.keys(schedule) as Array<
       keyof typeof schedule
     >) {
-      const semesterData = schedule[semesterKey];
+      const semesterData = schedule[semesterKey]
       for (const periodKey of Object.keys(semesterData) as Array<
         keyof typeof semesterData
       >) {
-        const courses = semesterData[periodKey];
-        const course = courses.find((c) => c.id === courseId);
+        const courses = semesterData[periodKey]
+        const course = courses.find((c) => c.id === courseId)
         if (course) {
-          return course;
+          return course
         }
       }
     }
 
-    return null;
-  };
+    return null
+  }
 
   /**
    * Find the position of a course in the schedule
    */
   const findCoursePosition = (
-    courseId: string
+    courseId: string,
   ): { semester: number; period: number[] } | null => {
-    const { schedule } = state;
+    const { schedule } = state
 
     for (const semesterKey of Object.keys(schedule) as Array<
       keyof typeof schedule
     >) {
-      const semester = parseInt(semesterKey.replace('semester', ''));
-      const semesterData = schedule[semesterKey];
+      const semester = parseInt(semesterKey.replace('semester', ''))
+      const semesterData = schedule[semesterKey]
 
       for (const periodKey of Object.keys(semesterData) as Array<
         keyof typeof semesterData
       >) {
-        const period = parseInt(periodKey.replace('period', ''));
-        const courses = semesterData[periodKey];
-        const course = courses.find((c) => c.id === courseId);
+        const _period = parseInt(periodKey.replace('period', ''))
+        const courses = semesterData[periodKey]
+        const course = courses.find((c) => c.id === courseId)
 
         if (course) {
           // For multi-period courses, return all periods the course appears in
-          const allPeriods: number[] = [];
+          const allPeriods: number[] = []
           if (course.period && Array.isArray(course.period)) {
             course.period.forEach((p) => {
               if (p === 1 || p === 2) {
-                allPeriods.push(p);
+                allPeriods.push(p)
               }
-            });
+            })
           } else if (course.period === 1 || course.period === 2) {
-            allPeriods.push(course.period);
+            allPeriods.push(course.period)
           }
 
-          return { semester, period: allPeriods };
+          return { semester, period: allPeriods }
         }
       }
     }
 
-    return null;
-  };
+    return null
+  }
   if (readonly) {
-    return <div className="w-full">{children}</div>;
+    return <div className="w-full">{children}</div>
   }
 
   return (
@@ -293,11 +297,11 @@ export function ScheduleContainer({
         }}
       >
         {activeCourse ? (
-          <div className="transform-gpu scale-105 opacity-90 pointer-events-none">
+          <div className="pointer-events-none scale-105 transform-gpu opacity-90">
             <ScheduleCourseCard course={activeCourse} readonly={true} />
           </div>
         ) : null}
       </DragOverlay>
     </DndContext>
-  );
+  )
 }

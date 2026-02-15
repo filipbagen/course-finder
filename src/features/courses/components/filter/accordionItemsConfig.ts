@@ -1,4 +1,4 @@
-import { FilterState } from '@/types/types';
+import { FilterState } from '@/types/types'
 import {
   Calendar,
   AlignVerticalJustifyCenter,
@@ -8,15 +8,15 @@ import {
   SignpostBig,
   NotebookPen,
   School,
-} from 'lucide-react';
+} from 'lucide-react'
 
 export interface AccordionItemProps {
-  value: string;
-  title: string;
-  filterType: keyof FilterState;
-  options: string[];
-  displayValue: (value: string) => string;
-  icon: React.ComponentType<{ size?: number }>;
+  value: string
+  title: string
+  filterType: keyof FilterState
+  options: string[]
+  displayValue: (value: string) => string
+  icon: React.ComponentType<{ size?: number }>
 }
 
 export const accordionItems: AccordionItemProps[] = [
@@ -125,4 +125,4 @@ export const accordionItems: AccordionItemProps[] = [
     displayValue: (campus) => campus,
     icon: School,
   },
-];
+]

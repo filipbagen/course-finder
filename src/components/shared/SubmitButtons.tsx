@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { useFormStatus } from 'react-dom';
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
+import { useFormStatus } from 'react-dom'
 
 export function SubmitButton() {
-  const { pending } = useFormStatus();
+  const { pending } = useFormStatus()
 
   return (
     <>
       {pending ? (
         <Button disabled className="w-fit">
-          <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Vänligen vänta...
         </Button>
       ) : (
@@ -20,13 +20,13 @@ export function SubmitButton() {
         </Button>
       )}
     </>
-  );
+  )
 }
 
 type SubmitReviewButtonProps = {
-  loading: boolean;
-  text?: string;
-};
+  loading: boolean
+  text?: string
+}
 
 export function SubmitReviewButton({
   loading,
@@ -36,7 +36,7 @@ export function SubmitReviewButton({
     <>
       {loading ? (
         <Button disabled className="w-fit">
-          <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Vänligen vänta...
         </Button>
       ) : (
@@ -45,5 +45,5 @@ export function SubmitReviewButton({
         </Button>
       )}
     </>
-  );
+  )
 }

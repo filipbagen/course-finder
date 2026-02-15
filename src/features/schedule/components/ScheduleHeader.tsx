@@ -1,40 +1,22 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useSchedule } from './ScheduleProvider';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import React from 'react'
+import { useSchedule } from './ScheduleProvider'
+
+import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-  Calendar,
-  Download,
-  Share2,
-  Settings,
-  MoreHorizontal,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  CircleCheck,
-  CircleAlert,
-} from 'lucide-react';
-import { useUserEnrollments } from '@/hooks/useUserEnrollments';
+} from '@/components/ui/tooltip'
+import { RefreshCw, Eye, CircleCheck, CircleAlert } from 'lucide-react'
+import { useUserEnrollments } from '@/hooks/useUserEnrollments'
 
 interface ScheduleHeaderProps {
-  readonly?: boolean;
-  viewingUserId?: string;
-  viewingUserName?: string;
+  readonly?: boolean
+  viewingUserId?: string
+  viewingUserName?: string
 }
 
 /**
@@ -50,33 +32,34 @@ interface ScheduleHeaderProps {
  */
 export function ScheduleHeader({
   readonly = false,
-  viewingUserId,
+  _viewingUserId,
   viewingUserName,
 }: ScheduleHeaderProps) {
-  const { state } = useSchedule();
-  const { loading } = state;
-  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
+  const { state } = useSchedule()
+  const { loading } = state
+  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments()
 
   // Check for course conflicts
   const conflicts = React.useMemo(() => {
-    if (enrollmentsLoading || !enrolledCourses) return [];
+    if (enrollmentsLoading || !enrolledCourses) return []
 
     const conflictList: Array<{
-      course1: { id: string; code: string; name: string };
-      course2: { id: string; code: string; name: string };
-    }> = [];
+      course1: { id: string; code: string; name: string }
+      course2: { id: string; code: string; name: string }
+    }> = []
 
     for (let i = 0; i < enrolledCourses.length; i++) {
       for (let j = i + 1; j < enrolledCourses.length; j++) {
-        const course1 = enrolledCourses[i];
-        const course2 = enrolledCourses[j];
+        const course1 = enrolledCourses[i]
+        const course2 = enrolledCourses[j]
+        if (!course1 || !course2) continue
 
         // Check for exclusion conflicts
         if (course1.exclusions && course1.exclusions.includes(course2.code)) {
           conflictList.push({
             course1: { id: course1.id, code: course1.code, name: course1.name },
             course2: { id: course2.id, code: course2.code, name: course2.name },
-          });
+          })
         }
         // Check if course2 excludes course1
         else if (
@@ -86,15 +69,15 @@ export function ScheduleHeader({
           conflictList.push({
             course1: { id: course2.id, code: course2.code, name: course2.name },
             course2: { id: course1.id, code: course1.code, name: course1.name },
-          });
+          })
         }
       }
     }
 
-    return conflictList;
-  }, [enrolledCourses, enrollmentsLoading]);
+    return conflictList
+  }, [enrolledCourses, enrollmentsLoading])
 
-  const hasConflicts = conflicts.length > 0;
+  const hasConflicts = conflicts.length > 0
 
   return (
     <div className="space-y-4">
@@ -148,16 +131,16 @@ export function ScheduleHeader({
                   )}
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="backdrop-blur-md bg-popover border border-border rounded-lg shadow-lg text-foreground">
+              <TooltipContent className="rounded-lg border border-border bg-popover text-foreground shadow-lg backdrop-blur-md">
                 {hasConflicts ? (
                   <div className="max-w-xs">
-                    <p className="font-semibold mb-2">
+                    <p className="mb-2 font-semibold">
                       Schema-konflikter upptäckta:
                     </p>
                     <ul className="space-y-1 text-sm">
                       {conflicts.map((conflict, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <CircleAlert className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <CircleAlert className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                           <div>
                             <span className="font-medium">
                               {conflict.course1.name} ({conflict.course1.code})
@@ -180,5 +163,5 @@ export function ScheduleHeader({
         )}
       </div>
     </div>
-  );
+  )
 }

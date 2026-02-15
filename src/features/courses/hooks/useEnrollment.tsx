@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback } from 'react'
+import { toast } from 'sonner'
 
 export const useEnrollment = (
   courseName: string,
-  handleUpdateAfterDeletion?: (enrollmentId: string) => void
+  handleUpdateAfterDeletion?: (enrollmentId: string) => void,
 ) => {
   const deleteEnrollment = useCallback(
     async (enrollmentId: string) => {
@@ -14,20 +14,20 @@ export const useEnrollment = (
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ enrollmentId }),
-        });
+        })
         if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+          throw new Error(`Error: ${response.status}`)
         }
-        toast.success(`Removed ${courseName} from schedule`);
+        toast.success(`Removed ${courseName} from schedule`)
         if (handleUpdateAfterDeletion) {
-          handleUpdateAfterDeletion(enrollmentId);
+          handleUpdateAfterDeletion(enrollmentId)
         }
-      } catch (error) {
+      } catch {
         // Silent error
       }
     },
-    [courseName, handleUpdateAfterDeletion]
-  );
+    [courseName, handleUpdateAfterDeletion],
+  )
 
   const addToEnrollment = useCallback(
     async (courseId: string | bigint, semester: number) => {
@@ -38,26 +38,26 @@ export const useEnrollment = (
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ courseId: courseId.toString(), semester }),
-        });
+        })
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = await response.json()
           if (response.status === 409) {
             if (errorData.error && errorData.error.includes('conflicts with')) {
               // This is an exclusion conflict
               toast.error(errorData.error, {
                 duration: 6000,
-              });
+              })
             } else {
               // Course already added
             }
           } else {
-            throw new Error(`Error: ${response.status}`);
+            throw new Error(`Error: ${response.status}`)
           }
-          return;
+          return
         }
 
-        const result = await response.json();
+        const result = await response.json()
 
         // Check if the response has the expected structure
         if (
@@ -67,25 +67,25 @@ export const useEnrollment = (
           !result.data.enrollment.id
         ) {
           // Fallback for unexpected response format
-          toast.success(`Added ${courseName} to schedule 🎉`);
-          return;
+          toast.success(`Added ${courseName} to schedule 🎉`)
+          return
         }
 
-        const enrollment = result.data;
+        const enrollment = result.data
 
         toast.success(`Added ${courseName} to schedule 🎉`, {
           action: {
             label: 'Ångra',
             onClick: () => deleteEnrollment(enrollment.enrollment.id),
           },
-        });
-      } catch (error) {
+        })
+      } catch {
         // Silent error logging
-        toast.error('Failed to add course to schedule');
+        toast.error('Failed to add course to schedule')
       }
     },
-    [courseName, deleteEnrollment]
-  );
+    [courseName, deleteEnrollment],
+  )
 
-  return { addToEnrollment, deleteEnrollment };
-};
+  return { addToEnrollment, deleteEnrollment }
+}

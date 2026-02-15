@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 interface UseFieldsReturn {
-  mainFieldOfStudy: string[];
-  loading: boolean;
-  error: string | null;
+  mainFieldOfStudy: string[]
+  loading: boolean
+  error: string | null
 }
 
 /**
@@ -11,42 +11,42 @@ interface UseFieldsReturn {
  * This provides dynamic filter options based on actual course data
  */
 export function useFields(): UseFieldsReturn {
-  const [mainFieldOfStudy, setMainFieldOfStudy] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [mainFieldOfStudy, setMainFieldOfStudy] = useState<string[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, _setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        setLoading(true);
-        const response = await fetch('/api/courses/fields');
+        setLoading(true)
+        const response = await fetch('/api/courses/fields')
 
         if (!response.ok) {
-          console.error('Field API response not OK:', response.status);
-          setMainFieldOfStudy([]);
-          return;
+          console.error('Field API response not OK:', response.status)
+          setMainFieldOfStudy([])
+          return
         }
 
-        const data = await response.json();
+        const data = await response.json()
 
         if (data.success && data.data && data.data.mainFieldOfStudy) {
-          setMainFieldOfStudy(data.data.mainFieldOfStudy);
+          setMainFieldOfStudy(data.data.mainFieldOfStudy)
         } else {
-          console.warn('Unexpected API response format:', data);
+          console.warn('Unexpected API response format:', data)
           // Instead of throwing an error, just set empty array and log warning
-          setMainFieldOfStudy([]);
+          setMainFieldOfStudy([])
         }
       } catch (err) {
-        console.error('Error fetching fields:', err);
+        console.error('Error fetching fields:', err)
         // Don't set error state, just log it and continue with empty array
-        setMainFieldOfStudy([]);
+        setMainFieldOfStudy([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchFields();
-  }, []);
+    fetchFields()
+  }, [])
 
-  return { mainFieldOfStudy, loading, error };
+  return { mainFieldOfStudy, loading, error }
 }

@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { useMediaQuery } from '@/hooks/use-media-query';
+import React, { useState } from 'react'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog'
 import {
   Drawer,
   DrawerContent,
@@ -17,52 +17,45 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+} from '@/components/ui/drawer'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 import {
   MessageSquare,
   Star,
   Clock,
-  MapPin,
-  BookOpen,
   NotebookPen,
   Trash2,
   ArrowRightLeft,
-  Users,
   Calendar,
   SignpostBig,
   School,
-  Target,
   Plus,
-  LogIn,
-} from 'lucide-react';
-import { Course, CourseWithEnrollment } from '@/types/types';
-import { useSchedule } from '@/features/schedule/components/ScheduleProvider';
-import { ScheduleActions } from '@/features/schedule/types/schedule.types';
-import { StarRating } from './StarRating';
-import CourseReviews from './CourseReviews';
-import { cn } from '@/lib/utils';
-import { useEnrollment } from '@/features/courses/hooks/useEnrollment';
-import Link from 'next/link';
+} from 'lucide-react'
+import { Course, CourseWithEnrollment } from '@/types/types'
+import { useSchedule } from '@/features/schedule/components/ScheduleProvider'
+import { ScheduleActions } from '@/features/schedule/types/schedule.types'
+import { StarRating } from './StarRating'
+import CourseReviews from './CourseReviews'
+import { cn } from '@/lib/utils'
+import { useEnrollment } from '@/features/courses/hooks/useEnrollment'
 
 interface CourseReviewDialogProps {
-  course: Course | CourseWithEnrollment;
-  trigger?: React.ReactNode;
-  onRemove?: (enrollmentId: string) => void;
-  isFromSchedule?: boolean;
+  course: Course | CourseWithEnrollment
+  trigger?: React.ReactNode
+  onRemove?: (enrollmentId: string) => void
+  isFromSchedule?: boolean
   initialReviewsData?: {
-    averageRating: number;
-    count: number;
-  };
+    averageRating: number
+    count: number
+  }
 }
 
 const DetailSection = ({
@@ -71,28 +64,28 @@ const DetailSection = ({
   children,
   className,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-  className?: string;
+  icon: React.ReactNode
+  title: string
+  children: React.ReactNode
+  className?: string
 }) => (
   <div
     className={cn(
-      'rounded-xl bg-neutral-50 dark:bg-slate-800/50 p-4 transition-all hover:bg-neutral-100 dark:hover:bg-slate-800/80 border border-neutral-200 dark:border-slate-700/50',
-      className
+      'rounded-xl border border-neutral-200 bg-neutral-50 p-4 transition-all hover:bg-neutral-100 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:bg-slate-800/80',
+      className,
     )}
   >
-    <div className="flex items-center gap-3 mb-3">
-      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+    <div className="mb-3 flex items-center gap-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
         {icon}
       </div>
       <h3 className="text-base font-semibold">{title}</h3>
     </div>
-    <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground pl-11">
+    <div className="prose prose-sm dark:prose-invert max-w-none pl-11 text-muted-foreground">
       {children}
     </div>
   </div>
-);
+)
 
 const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   course,
@@ -101,63 +94,66 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
   isFromSchedule = false,
   initialReviewsData,
 }) => {
-  const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
-  const { state, dispatch } = useSchedule();
+  const [open, setOpen] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const { state, dispatch } = useSchedule()
 
   const [reviewsData, setReviewsData] = useState<{
-    averageRating: number;
-    count: number;
+    averageRating: number
+    count: number
   }>({
     averageRating: initialReviewsData?.averageRating || 0,
     count: initialReviewsData?.count || 0,
-  });
+  })
 
   // Check if course is enrolled
-  const isEnrolled = 'enrollment' in course;
+  const isEnrolled = 'enrollment' in course
   const currentSemester = isEnrolled
-    ? (course as any).enrollment.semester
-    : null;
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (course as any).enrollment.semester
+    : null
 
   const updateReviewData = (averageRating: number, count: number) => {
-    setReviewsData({ averageRating, count });
-  };
+    setReviewsData({ averageRating, count })
+  }
 
   // Handle course removal
   const handleRemove = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (isEnrolled && onRemove && (course as any).enrollment?.id) {
-      onRemove((course as any).enrollment.id);
-      setOpen(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onRemove((course as any).enrollment.id)
+      setOpen(false)
     }
-  };
+  }
 
   // Handle course movement
   const handleMoveCourse = (toSemester: number) => {
-    if (!isEnrolled || !currentSemester) return;
+    if (!isEnrolled || !currentSemester) return
 
     // Find the course's current location
     const findCurrentLocation = () => {
-      const semesters = [7, 8, 9] as const;
-      const periods = [1, 2] as const;
+      const semesters = [7, 8, 9] as const
+      const periods = [1, 2] as const
 
       for (const semester of semesters) {
         for (const period of periods) {
           const semesterKey =
-            `semester${semester}` as keyof typeof state.schedule;
-          const periodKey = `period${period}` as 'period1' | 'period2';
-          const courses = state.schedule[semesterKey][periodKey];
+            `semester${semester}` as keyof typeof state.schedule
+          const periodKey = `period${period}` as 'period1' | 'period2'
+          const courses = state.schedule[semesterKey][periodKey]
 
-          const foundCourse = courses.find((c) => c.id === course.id);
+          const foundCourse = courses.find((c) => c.id === course.id)
           if (foundCourse) {
-            return { semester, period };
+            return { semester, period }
           }
         }
       }
-      return null;
-    };
+      return null
+    }
 
-    const currentLocation = findCurrentLocation();
-    if (!currentLocation) return;
+    const currentLocation = findCurrentLocation()
+    if (!currentLocation) return
 
     // Dispatch move action
     dispatch({
@@ -169,63 +165,64 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         toSemester,
         toPeriod: currentLocation.period, // Keep same period
       },
-    });
-    setOpen(false);
-  };
+    })
+    setOpen(false)
+  }
 
   // Get available semesters for moving
   const getAvailableSemesters = () => {
-    if (!isEnrolled || !currentSemester) return [];
+    if (!isEnrolled || !currentSemester) return []
 
     // Only allow moving courses from semester 7 and 9, and only between 7 and 9
     if (currentSemester === 7) {
-      return [9]; // Can move from 7 to 9
+      return [9] // Can move from 7 to 9
     } else if (currentSemester === 9) {
-      return [7]; // Can move from 9 to 7
+      return [7] // Can move from 9 to 7
     }
-    return []; // Semester 8 courses cannot be moved
-  };
+    return [] // Semester 8 courses cannot be moved
+  }
 
-  const availableSemesters = getAvailableSemesters();
+  const availableSemesters = getAvailableSemesters()
 
   // Enrollment Button Component
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const EnrollmentButton = () => {
-    const { addToEnrollment } = useEnrollment(course.name);
+    const { addToEnrollment } = useEnrollment(course.name)
 
     // Handle enrollment for authenticated users
     const handleEnrollment = (semester?: number | number[]) => {
-      if (!addToEnrollment) return;
+      if (!addToEnrollment) return
 
       // Extract a usable semester value
-      let targetSemester: number;
+      let targetSemester: number
 
       if (typeof semester === 'number') {
         // If it's already a number, use it directly
-        targetSemester = semester;
+        targetSemester = semester
       } else if (Array.isArray(semester) && semester.length > 0) {
         // Use the first semester from the array
-        targetSemester = semester[0];
+        targetSemester = semester[0] ?? 1
       } else if (
         course.semester &&
         Array.isArray(course.semester) &&
         course.semester.length > 0
       ) {
         // Fallback to the course's first semester
-        targetSemester = course.semester[0];
+        targetSemester = course.semester[0] ?? 1
       } else {
         // Default fallback
-        targetSemester = 1;
+        targetSemester = 1
       }
 
-      addToEnrollment(course.id, targetSemester);
-    };
+      addToEnrollment(course.id, targetSemester)
+    }
 
     // If course has multiple semesters, show dropdown
     if (course.semester && course.semester.length > 1) {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" className="h-8 w-8 p-0 cursor-pointer">
+            <Button size="sm" className="h-8 w-8 cursor-pointer p-0">
               <Plus className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -235,8 +232,8 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                 key={semester}
                 className="cursor-pointer"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleEnrollment(semester);
+                  e.stopPropagation()
+                  handleEnrollment(semester)
                 }}
               >
                 Lägg till i termin {semester}
@@ -244,7 +241,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      );
+      )
     }
 
     // Single semester or default case
@@ -252,36 +249,36 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
       <Button
         size="sm"
         onClick={(e) => {
-          e.stopPropagation();
-          handleEnrollment(course.semester);
+          e.stopPropagation()
+          handleEnrollment(course.semester)
         }}
         className="h-8 w-8 p-0"
       >
         <Plus className="h-4 w-4" />
       </Button>
-    );
-  };
+    )
+  }
 
   // Simplified course info component
   const CourseInfo = () => (
     <div className="space-y-6">
       {/* Course Header Info */}
-      <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 p-5 border border-neutral-200 dark:border-slate-700/50">
+      <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-primary/5 to-primary/10 p-5 dark:border-slate-700/50 dark:from-primary/10 dark:to-primary/5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+            <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
               Kurskod
             </p>
-            <p className="font-medium text-lg">{course.code}</p>
+            <p className="text-lg font-medium">{course.code}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+            <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
               Poäng
             </p>
-            <p className="font-medium text-lg">{Number(course.credits)} hp</p>
+            <p className="text-lg font-medium">{Number(course.credits)} hp</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+            <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
               Nivå
             </p>
             <p className="font-medium">
@@ -289,7 +286,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+            <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
               Kurstyp
             </p>
             <p className="font-medium">
@@ -299,11 +296,11 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
 
           {/* Rating information if available */}
           {currentReviewData.count > 0 && (
-            <div className="col-span-2 mt-2 pt-3 border-t border-neutral-200 dark:border-slate-700/50">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+            <div className="col-span-2 mt-2 border-t border-neutral-200 pt-3 dark:border-slate-700/50">
+              <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
                 Betyg från studenter
               </p>
-              <div className="flex items-center gap-2 flex-row">
+              <div className="flex flex-row items-center gap-2">
                 <StarRating
                   initialValue={currentReviewData.averageRating}
                   size={20}
@@ -313,7 +310,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                   emptyColor="#e4e5e9"
                   className="flex-shrink-0"
                 />
-                <span className="font-medium ml-2">
+                <span className="ml-2 font-medium">
                   {currentReviewData.averageRating.toFixed(1)} (
                   {currentReviewData.count}{' '}
                   {currentReviewData.count === 1 ? 'recension' : 'recensioner'})
@@ -324,7 +321,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Main Field of Study */}
         <DetailSection
           icon={<SignpostBig className="h-4 w-4 text-primary" />}
@@ -415,9 +412,9 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         {Array.isArray(course.examination) && course.examination.length > 0 ? (
           <ul className="space-y-2">
             {course.examination.map((exam, index) => (
-              <li key={index} className="text-sm p-2 bg-white/5 rounded-lg">
+              <li key={index} className="rounded-lg bg-white/5 p-2 text-sm">
                 <div className="font-medium">{exam.name}</div>
-                <div className="flex justify-between text-xs mt-1">
+                <div className="mt-1 flex justify-between text-xs">
                   <span>{Number(exam.credits)} hp</span>
                   <span>Betygsskala: {exam.gradingScale}</span>
                 </div>
@@ -429,10 +426,10 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         )}
       </DetailSection>
     </div>
-  );
+  )
 
   // Get the current review data (prefer initial data if available)
-  const currentReviewData = initialReviewsData || reviewsData;
+  const currentReviewData = initialReviewsData || reviewsData
 
   // If from schedule and desktop, use Dialog
   if (isFromSchedule && isDesktop) {
@@ -446,7 +443,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           )}
         </DialogTrigger>
 
-        <DialogContent className="max-w-4xl h-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <DialogContent className="flex h-full max-h-[90vh] max-w-4xl flex-col overflow-hidden shadow-2xl">
           <DialogHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -458,7 +455,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                 </DialogDescription>
 
                 {/* Rating */}
-                <div className="flex items-center gap-2 mt-3">
+                <div className="mt-3 flex items-center gap-2">
                   {currentReviewData.count > 0 ? (
                     <>
                       <StarRating
@@ -524,7 +521,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-6 p-6">
               <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid grid-cols-2 mb-6">
+                <TabsList className="mb-6 grid grid-cols-2">
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
@@ -549,7 +546,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-    );
+    )
   }
 
   // If from schedule and mobile, use Drawer
@@ -576,7 +573,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
                 </DrawerDescription>
 
                 {/* Rating */}
-                <div className="flex items-center gap-2 mt-3">
+                <div className="mt-3 flex items-center gap-2">
                   {currentReviewData.count > 0 ? (
                     <>
                       <StarRating
@@ -642,7 +639,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <div className="space-y-6">
               <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid grid-cols-2 mb-6">
+                <TabsList className="mb-6 grid grid-cols-2">
                   <TabsTrigger value="info">Kursinformation</TabsTrigger>
                   <TabsTrigger value="reviews">
                     Recensioner{' '}
@@ -667,7 +664,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </div>
         </DrawerContent>
       </Drawer>
-    );
+    )
   }
 
   // Default behavior for non-schedule contexts
@@ -676,7 +673,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2">
-            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
             <span>
               {currentReviewData.count > 0
                 ? `${currentReviewData.averageRating.toFixed(1)} (${
@@ -687,14 +684,14 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
           </Button>
         )}
       </DialogTrigger>{' '}
-      <DialogContent className="max-w-4xl h-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      <DialogContent className="flex h-full max-h-[90vh] max-w-4xl flex-col overflow-hidden shadow-2xl">
         <DialogHeader>
           <DialogTitle>{course.name}</DialogTitle>
           <DialogDescription>
             Recensioner för {course.name}, kurskod {course.code}.
             {currentReviewData.count > 0
               ? ` Genomsnittligt betyg ${currentReviewData.averageRating.toFixed(
-                  1
+                  1,
                 )} av 5 baserat på ${currentReviewData.count} recensioner.`
               : ' Inga recensioner ännu.'}
           </DialogDescription>
@@ -703,7 +700,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         <div className="flex-1 overflow-y-auto">
           <div className="space-y-6 p-6">
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid grid-cols-2 mb-6">
+              <TabsList className="mb-6 grid grid-cols-2">
                 <TabsTrigger value="info">Kursinformation</TabsTrigger>
                 <TabsTrigger value="reviews">
                   Recensioner{' '}
@@ -728,7 +725,7 @@ const CourseReviewDialog: React.FC<CourseReviewDialogProps> = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CourseReviewDialog;
+export default CourseReviewDialog

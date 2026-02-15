@@ -1,21 +1,12 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useSchedule } from './ScheduleProvider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import {
-  BookOpen,
-  GraduationCap,
-  Clock,
-  Target,
-  TrendingUp,
-  SignpostBig,
-  Smile,
-} from 'lucide-react';
-import { ScheduleService } from '../services/scheduleService';
-import { CourseWithEnrollment } from '@/types/types';
+import React from 'react'
+import { useSchedule } from './ScheduleProvider'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { GraduationCap, Target, SignpostBig } from 'lucide-react'
+import { ScheduleService } from '../services/scheduleService'
+import { CourseWithEnrollment } from '@/types/types'
 
 /**
  * Schedule Statistics Component
@@ -30,115 +21,117 @@ import { CourseWithEnrollment } from '@/types/types';
  * - Visual progress bars
  */
 export function ScheduleStatistics() {
-  const { state } = useSchedule();
-  const { schedule, loading } = state;
+  const { state } = useSchedule()
+  const { schedule, loading } = state
 
   // Define expected totals based on user requirements
-  const expectedTotalCredits = 90; // Total credits needed for 3 semesters
-  const expectedAdvancedCredits = 60; // Advanced credits needed
-  const requiredFieldCredits = 30; // Advanced credits needed in same field for main field
+  const expectedTotalCredits = 90 // Total credits needed for 3 semesters
+  const expectedAdvancedCredits = 60 // Advanced credits needed
+  const requiredFieldCredits = 30 // Advanced credits needed in same field for main field
 
   // Calculate statistics
   const stats = React.useMemo(() => {
     if (loading || !schedule) {
-      return null;
+      return null
     }
-    return ScheduleService.calculateStatistics(schedule);
-  }, [schedule, loading]);
+    return ScheduleService.calculateStatistics(schedule)
+  }, [schedule, loading])
 
   // Calculate advanced credits
   const advancedCredits = React.useMemo(() => {
-    if (!schedule) return 0;
-    let total = 0;
-    let allCourses: CourseWithEnrollment[] = [];
+    if (!schedule) return 0
+    let total = 0
+    const allCourses: CourseWithEnrollment[] = []
 
     Object.values(schedule).forEach((semesterData) => {
       Object.values(semesterData).forEach((courses) => {
-        const courseArray = courses as CourseWithEnrollment[];
+        const courseArray = courses as CourseWithEnrollment[]
         courseArray.forEach((course) => {
           // Avoid counting the same course multiple times
           if (!allCourses.some((c) => c.id === course.id)) {
             if (course.advanced) {
-              total += Number(course.credits) || 0;
+              total += Number(course.credits) || 0
             }
-            allCourses.push(course);
+            allCourses.push(course)
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
-    return total;
-  }, [schedule]);
+    return total
+  }, [schedule])
 
   // Calculate advanced credits by field for main field determination
   const advancedCreditsByField = React.useMemo(() => {
-    if (!schedule) return {};
-    let allCourses: CourseWithEnrollment[] = [];
-    const creditCount: { [key: string]: number } = {};
+    if (!schedule) return {}
+    const allCourses: CourseWithEnrollment[] = []
+    const creditCount: { [key: string]: number } = {}
 
     Object.values(schedule).forEach((semesterData) => {
       Object.values(semesterData).forEach((courses) => {
-        const courseArray = courses as CourseWithEnrollment[];
+        const courseArray = courses as CourseWithEnrollment[]
         courseArray.forEach((course) => {
           // Avoid counting the same course multiple times
           if (!allCourses.some((c) => c.id === course.id) && course.advanced) {
             course.mainFieldOfStudy.forEach((field: string) => {
               creditCount[field] =
-                (creditCount[field] || 0) + Number(course.credits);
-            });
-            allCourses.push(course);
+                (creditCount[field] || 0) + Number(course.credits)
+            })
+            allCourses.push(course)
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
-    return creditCount;
-  }, [schedule]);
+    return creditCount
+  }, [schedule])
 
   // Determine main field of study (requires 30+ advanced credits in same field)
   const mainFieldOfStudy = React.useMemo(() => {
     const validFields = Object.entries(advancedCreditsByField).filter(
-      ([_, credits]) => credits >= requiredFieldCredits
-    );
+      ([_, credits]) => credits >= requiredFieldCredits,
+    )
 
-    if (validFields.length === 0) return null;
+    if (validFields.length === 0) return null
 
     // Return the field with most credits
-    const sortedFields = validFields.sort((a, b) => b[1] - a[1]);
+    const sortedFields = validFields.sort((a, b) => b[1] - a[1])
+    const topField = sortedFields[0]
+    if (!topField) return null
     return {
-      field: sortedFields[0][0],
-      credits: sortedFields[0][1],
-    };
-  }, [advancedCreditsByField, requiredFieldCredits]);
+      field: topField[0],
+      credits: topField[1],
+    }
+  }, [advancedCreditsByField, requiredFieldCredits])
 
   const progressPercentage = React.useMemo(() => {
     return stats
       ? Math.min((stats.totalCredits / expectedTotalCredits) * 100, 100)
-      : 0;
-  }, [stats, expectedTotalCredits]);
+      : 0
+  }, [stats, expectedTotalCredits])
 
   const advancedProgressPercentage = React.useMemo(() => {
-    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100);
-  }, [advancedCredits, expectedAdvancedCredits]);
+    return Math.min((advancedCredits / expectedAdvancedCredits) * 100, 100)
+  }, [advancedCredits, expectedAdvancedCredits])
 
   // Early return after all hooks are declared
   if (loading || !stats) {
     return (
       <div className="flex gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i} className="animate-pulse flex-1">
+          <Card key={i} className="flex-1 animate-pulse">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 bg-muted rounded w-20" />
-              <div className="h-4 w-4 bg-muted rounded" />
+              <div className="h-4 w-20 rounded bg-muted" />
+              <div className="h-4 w-4 rounded bg-muted" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-muted rounded w-16 mb-2" />
-              <div className="h-3 bg-muted rounded w-24" />
+              <div className="mb-2 h-8 w-16 rounded bg-muted" />
+              <div className="h-3 w-24 rounded bg-muted" />
             </CardContent>
           </Card>
         ))}
       </div>
-    );
+    )
   }
 
   return (
@@ -204,5 +197,5 @@ export function ScheduleStatistics() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

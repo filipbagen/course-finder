@@ -1,14 +1,13 @@
-import { createClient } from '@/lib/supabase/server';
-import { createError } from '@/lib/errors';
-import type { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server'
+import { createError } from '@/lib/errors'
 
 /**
  * Authentication utilities for API routes
  */
 
 export interface AuthenticatedUser {
-  id: string;
-  email: string;
+  id: string
+  email: string
 }
 
 /**
@@ -16,24 +15,24 @@ export interface AuthenticatedUser {
  * Throws error if user is not authenticated
  */
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser> {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (error) {
-    throw createError.unauthorized('Authentication failed');
+    throw createError.unauthorized('Authentication failed')
   }
 
   if (!user) {
-    throw createError.unauthorized('Authentication required');
+    throw createError.unauthorized('Authentication required')
   }
 
   return {
     id: user.id,
     email: user.email || '',
-  };
+  }
 }
 
 /**
@@ -41,8 +40,8 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser> {
  */
 export async function getOptionalUser(): Promise<AuthenticatedUser | null> {
   try {
-    return await getAuthenticatedUser();
+    return await getAuthenticatedUser()
   } catch {
-    return null;
+    return null
   }
 }

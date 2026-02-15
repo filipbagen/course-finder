@@ -4,28 +4,28 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Star,
   MessageSquare,
   MapPin,
   SquareArrowOutUpRight,
-} from 'lucide-react';
-import { Course } from '@/types/types';
-import { Button } from '@/components/ui/button';
+} from 'lucide-react'
+import { Course } from '@/types/types'
+import { Button } from '@/components/ui/button'
 
 const CourseDetails = ({
   course,
   averageRating,
   reviewsCount,
 }: {
-  course: Course;
-  averageRating: number;
-  reviewsCount: number;
+  course: Course
+  averageRating: number
+  reviewsCount: number
 }) => {
   return (
-    <Card key={course.id} className="flex-grow h-min dark:bg-secondary">
+    <Card key={course.id} className="h-min flex-grow dark:bg-secondary">
       <CardHeader>
         <div className="flex justify-between">
           <div>
@@ -46,7 +46,7 @@ const CourseDetails = ({
             onClick={() =>
               window.open(
                 `https://studieinfo.liu.se/kurs/${course.code}`,
-                '_blank'
+                '_blank',
               )
             }
           >
@@ -55,7 +55,7 @@ const CourseDetails = ({
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           <MapPin size={16} />
           <p className="[&:not(:first-child)]:mt-0">{course.campus}</p>
         </div>
@@ -80,18 +80,18 @@ const CourseDetails = ({
           )}
         </div>
         <CardFooter className="flex flex-row gap-4">
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <Star size={12} />
             {averageRating}
           </div>
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <MessageSquare size={12} />
             {reviewsCount}
           </div>
         </CardFooter>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default CourseDetails;
+export default CourseDetails

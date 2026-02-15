@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   GripVertical,
   Trash2,
@@ -16,34 +16,35 @@ import {
   LogIn,
   Star,
   AlertTriangle,
-} from 'lucide-react';
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 import {
   Course,
   CourseWithEnrollment,
   isCourseWithEnrollment,
-} from '@/types/types';
-import { useCourseDetailsSheet } from '@/features/courses/hooks/useCourseDetailsSheet';
-import { useEnrollment } from '@/features/courses/hooks/useEnrollment';
-import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import CourseReviewDialog from './CourseReviewDialog';
-import { StarRating } from './StarRating';
-import { useUserEnrollments } from '@/hooks/useUserEnrollments';
+} from '@/types/types'
+import { useCourseDetailsSheet } from '@/features/courses/hooks/useCourseDetailsSheet'
+import { useEnrollment } from '@/features/courses/hooks/useEnrollment'
+import { cn } from '@/lib/utils'
+import Link from 'next/link'
+import CourseReviewDialog from './CourseReviewDialog'
+import { StarRating } from './StarRating'
+import { useUserEnrollments } from '@/hooks/useUserEnrollments'
 
 interface CourseCardProps {
-  course: Course | CourseWithEnrollment;
-  variant?: 'default' | 'schedule' | 'landing';
-  isAuthenticated?: boolean;
-  isDragging?: boolean;
-  dragHandleProps?: any;
-  onRemove?: (enrollmentId: string) => void;
-  className?: string;
+  course: Course | CourseWithEnrollment
+  variant?: 'default' | 'schedule' | 'landing'
+  isAuthenticated?: boolean
+  isDragging?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dragHandleProps?: any
+  onRemove?: (enrollmentId: string) => void
+  className?: string
 }
 
 /**
@@ -62,12 +63,10 @@ const CourseCard = ({
   onRemove,
   className,
 }: CourseCardProps) => {
-  const { onOpen } = useCourseDetailsSheet();
-  const { addToEnrollment, deleteEnrollment } = useEnrollment(
-    course.name,
-    onRemove
-  );
-  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments();
+  const { onOpen } = useCourseDetailsSheet()
+  const { addToEnrollment, deleteEnrollment: _deleteEnrollment } =
+    useEnrollment(course.name, onRemove)
+  const { enrolledCourses, loading: enrollmentsLoading } = useUserEnrollments()
 
   // Client-side conflict detection (fast)
   const conflictingCourse = React.useMemo(() => {
@@ -75,11 +74,11 @@ const CourseCard = ({
       return enrolledCourses.find(
         (enrolled) =>
           (course.exclusions && course.exclusions.includes(enrolled.code)) ||
-          (enrolled.exclusions && enrolled.exclusions.includes(course.code))
-      );
+          (enrolled.exclusions && enrolled.exclusions.includes(course.code)),
+      )
     }
-    return null;
-  }, [enrolledCourses, enrollmentsLoading, course.exclusions, course.code]);
+    return null
+  }, [enrolledCourses, enrollmentsLoading, course.exclusions, course.code])
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent click from triggering when interacting with buttons, links, or dropdown elements
@@ -91,14 +90,14 @@ const CourseCard = ({
       (e.target as HTMLElement).closest('[data-radix-dropdown-menu-content]') ||
       (e.target as HTMLElement).closest('[role="menuitem"]')
     ) {
-      return;
+      return
     }
 
     // Open sheet only for default and landing variants
     if (variant === 'default' || variant === 'landing') {
-      onOpen(course as Course);
+      onOpen(course as Course)
     }
-  };
+  }
 
   // Format display text
   const semesterText =
@@ -106,76 +105,76 @@ const CourseCard = ({
       ? course.semester.length > 1
         ? `T${course.semester.join(', ')}`
         : `T${course.semester[0]}`
-      : 'T?';
+      : 'T?'
 
   const periodText =
     course.period && course.period.length > 1
       ? `P${course.period.join('+')}`
       : course.period && course.period.length === 1
-      ? `P${course.period[0]}`
-      : 'P?';
+        ? `P${course.period[0]}`
+        : 'P?'
 
   const blockText =
     course.block && course.block.length > 0
       ? `Block ${course.block.join(', ')}`
-      : 'Block ?';
+      : 'Block ?'
 
   // Calculate rating from pre-fetched data
   const courseRating = React.useMemo(() => {
     if (course.reviews && Array.isArray(course.reviews)) {
       const ratings = course.reviews
         .map((review: { rating: number }) => review.rating)
-        .filter((r: number) => r != null && !isNaN(r));
+        .filter((r: number) => r != null && !isNaN(r))
       const averageRating =
         ratings.length > 0
           ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
             ratings.length
-          : 0;
+          : 0
       return {
         averageRating,
         count: ratings.length,
-      };
+      }
     }
     return {
       averageRating: 0,
       count: 0,
-    };
-  }, [course.reviews]);
+    }
+  }, [course.reviews])
 
   // Handle enrollment for authenticated users
   const handleEnrollment = (semester?: number | number[]) => {
-    if (!addToEnrollment) return;
+    if (!addToEnrollment) return
 
     // Extract a usable semester value
-    let targetSemester: number;
+    let targetSemester: number
 
     if (typeof semester === 'number') {
       // If it's already a number, use it directly
-      targetSemester = semester;
+      targetSemester = semester
     } else if (Array.isArray(semester) && semester.length > 0) {
       // Use the first semester from the array
-      targetSemester = semester[0];
+      targetSemester = semester[0] ?? 1
     } else if (
       course.semester &&
       Array.isArray(course.semester) &&
       course.semester.length > 0
     ) {
       // Fallback to the course's first semester
-      targetSemester = course.semester[0];
+      targetSemester = course.semester[0] ?? 1
     } else {
       // Default fallback
-      targetSemester = 1;
+      targetSemester = 1
     }
 
-    addToEnrollment(course.id, targetSemester);
-  };
+    addToEnrollment(course.id, targetSemester)
+  }
 
   // Handle course removal (for schedule variant)
   const handleRemoveCourse = () => {
     if (isCourseWithEnrollment(course) && course.enrollment?.id && onRemove) {
-      onRemove(course.enrollment.id);
+      onRemove(course.enrollment.id)
     }
-  };
+  }
 
   // Enrollment Button Component
   const EnrollmentButton = () => {
@@ -186,7 +185,7 @@ const CourseCard = ({
             <LogIn className="h-4 w-4" />
           </Link>
         </Button>
-      );
+      )
     }
 
     // If course has multiple semesters, show dropdown
@@ -196,7 +195,7 @@ const CourseCard = ({
           <DropdownMenuTrigger asChild>
             <Button
               size="sm"
-              className="h-8 w-8 p-0 cursor-pointer"
+              className="h-8 w-8 cursor-pointer p-0"
               onClick={(e) => e.stopPropagation()}
             >
               <Plus className="h-4 w-4" />
@@ -208,8 +207,8 @@ const CourseCard = ({
                 key={semester}
                 className="cursor-pointer"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleEnrollment(semester);
+                  e.stopPropagation()
+                  handleEnrollment(semester)
                 }}
               >
                 Lägg till i termin {semester}
@@ -217,7 +216,7 @@ const CourseCard = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      );
+      )
     }
 
     // Single semester or default case
@@ -225,33 +224,33 @@ const CourseCard = ({
       <Button
         size="sm"
         onClick={(e) => {
-          e.stopPropagation();
-          handleEnrollment(course.semester);
+          e.stopPropagation()
+          handleEnrollment(course.semester)
         }}
         className="h-8 w-8 p-0"
       >
         <Plus className="h-4 w-4" />
       </Button>
-    );
-  };
+    )
+  }
 
   return (
     <Card
       onClick={handleCardClick}
       className={cn(
-        'transition-all duration-200 group',
+        'group transition-all duration-200',
         {
           // Default and Landing variants - for course browsing and carousel
-          'hover:shadow-lg hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white to-gray-50/50 dark:from-card dark:to-card':
+          'cursor-pointer bg-gradient-to-br from-white to-gray-50/50 hover:scale-[1.02] hover:shadow-lg dark:from-card dark:to-card':
             variant === 'default' || variant === 'landing',
 
           // Schedule variant - for schedule management
           'hover:shadow-md': variant === 'schedule' && !isDragging,
-          'opacity-50 scale-95': variant === 'schedule' && isDragging,
+          'scale-95 opacity-50': variant === 'schedule' && isDragging,
           'cursor-grab': variant === 'schedule' && !isDragging,
           'cursor-grabbing': variant === 'schedule' && isDragging,
         },
-        className
+        className,
       )}
     >
       <CardHeader className="pb-3">
@@ -263,11 +262,11 @@ const CourseCard = ({
             </div>
           )}
 
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors group-hover:text-primary">
               {course.name}
             </h3>
-            <p className="text-sm font-mono text-muted-foreground mt-1">
+            <p className="mt-1 font-mono text-sm text-muted-foreground">
               {course.code}
             </p>
           </div>
@@ -282,7 +281,7 @@ const CourseCard = ({
                   size="sm"
                   variant="ghost"
                   onClick={handleRemoveCourse}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -294,7 +293,7 @@ const CourseCard = ({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700 hover:bg-amber-50"
+                      className="h-8 w-8 p-0 text-amber-500 hover:bg-amber-50 hover:text-amber-700"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Star className="h-4 w-4" />
@@ -308,9 +307,9 @@ const CourseCard = ({
 
         {/* Exclusion Warning */}
         {conflictingCourse && (
-          <div className="mt-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+          <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 dark:border-amber-800/50 dark:bg-amber-900/20">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-3 w-3 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-600 dark:text-amber-400" />
               <span className="text-xs text-amber-700 dark:text-amber-300">
                 Konflikt med {conflictingCourse.name} ({conflictingCourse.code})
               </span>
@@ -319,10 +318,10 @@ const CourseCard = ({
         )}
       </CardHeader>
 
-      <CardContent className="pt-0 space-y-3">
+      <CardContent className="space-y-3 pt-0">
         {/* Main Field of Study */}
         <div className="flex items-start gap-2">
-          <SignpostBig className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+          <SignpostBig className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
           <div className="flex flex-wrap gap-1">
             {course.mainFieldOfStudy.length === 0 ? (
               <Badge variant="outline" className="text-xs">
@@ -341,7 +340,7 @@ const CourseCard = ({
         {/* Location - Not shown in schedule variant for space efficiency */}
         {variant !== 'schedule' && course.campus && (
           <div className="flex items-center gap-2">
-            <School className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <School className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {course.campus}
             </span>
@@ -349,7 +348,7 @@ const CourseCard = ({
         )}
 
         {/* Schedule Information */}
-        <div className="flex items-center justify-between pt-4 border-t border-border">
+        <div className="flex items-center justify-between border-t border-border pt-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -366,7 +365,7 @@ const CourseCard = ({
           </div>
           <div className="flex items-center gap-3">
             {courseRating.count > 0 && (
-              <div className="flex items-center gap-1 flex-row">
+              <div className="flex flex-row items-center gap-1">
                 <StarRating
                   initialValue={courseRating.averageRating}
                   size={12}
@@ -390,7 +389,7 @@ const CourseCard = ({
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default React.memo(CourseCard);
+export default React.memo(CourseCard)

@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
-import { create } from 'zustand';
-import { Course } from '@/types/types';
+import { create } from 'zustand'
+import { Course } from '@/types/types'
 
 interface CourseDetailsSheetState {
-  isOpen: boolean;
-  course: Course | null;
-  loading: boolean;
-  error: string | null;
-  courseId: string | null;
-  onOpen: (course: Course) => void;
-  onClose: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  setCourse: (course: Course | null) => void;
-  setCourseId: (courseId: string | null) => void;
+  isOpen: boolean
+  course: Course | null
+  loading: boolean
+  error: string | null
+  courseId: string | null
+  onOpen: (course: Course) => void
+  onClose: () => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+  setCourse: (course: Course | null) => void
+  setCourseId: (courseId: string | null) => void
 }
 
 export const useCourseDetailsSheet = create<CourseDetailsSheetState>((set) => ({
@@ -36,4 +36,4 @@ export const useCourseDetailsSheet = create<CourseDetailsSheetState>((set) => ({
   setError: (error) => set({ error }),
   setCourse: (course) => set({ course }),
   setCourseId: (courseId) => set({ courseId }),
-}));
+}))

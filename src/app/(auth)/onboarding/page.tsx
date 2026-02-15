@@ -1,36 +1,36 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import OnboardingForm from './onboarding-form';
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import OnboardingForm from './onboarding-form'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { GraduationCap } from 'lucide-react';
+} from '@/components/ui/card'
+import { GraduationCap } from 'lucide-react'
 
 interface OnboardingPageProps {
-  searchParams: Promise<{ name?: string }>;
+  searchParams: Promise<{ name?: string }>
 }
 
 export default async function OnboardingPage({
   searchParams,
 }: OnboardingPageProps) {
-  const supabase = await createClient();
-  const params = await searchParams;
-  const { name } = params;
+  const supabase = await createClient()
+  const params = await searchParams
+  const { name } = params
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   // Redirect unauthenticated users
   if (!user || error) {
-    redirect('/login');
+    redirect('/login')
   }
 
   // Check if user has already completed onboarding
@@ -38,18 +38,18 @@ export default async function OnboardingPage({
     .from('User')
     .select('name, program')
     .eq('id', user.id)
-    .single();
+    .single()
 
   // If user already has name and program, redirect to courses
   if (userData?.name && userData?.program) {
-    redirect('/courses');
+    redirect('/courses')
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-2xl border-border bg-card text-card-foreground shadow-lg">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             <GraduationCap className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl">
@@ -69,5 +69,5 @@ export default async function OnboardingPage({
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

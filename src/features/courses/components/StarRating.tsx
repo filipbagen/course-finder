@@ -1,6 +1,6 @@
-import React from 'react';
-import { Rating, RatingProps } from 'react-simple-star-rating';
-import { cn } from '@/lib/utils';
+import React from 'react'
+import { Rating, RatingProps } from 'react-simple-star-rating'
+import { cn } from '@/lib/utils'
 
 export const StarRating: React.FC<RatingProps> = (props) => {
   const containerStyle: React.CSSProperties = {
@@ -8,12 +8,12 @@ export const StarRating: React.FC<RatingProps> = (props) => {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'nowrap',
-  };
+  }
 
   const svgStyle: React.CSSProperties = {
     display: 'inline-block',
     marginRight: '2px',
-  };
+  }
 
   return (
     <div style={containerStyle} className="inline-flex flex-row items-center">
@@ -24,5 +24,5 @@ export const StarRating: React.FC<RatingProps> = (props) => {
         style={{ display: 'flex', flexDirection: 'row' }}
       />
     </div>
-  );
-};
+  )
+}

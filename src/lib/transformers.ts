@@ -2,16 +2,15 @@
  * Utility functions for transforming data from the database to client-safe formats
  */
 
-import { Course } from '@/types/types';
-
 /**
  * Transform BigInt values to numbers for JSON serialization
  * Handles both individual courses and arrays of courses
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformCourse<T extends Record<string, any>>(
-  course: T | null
+  course: T | null,
 ): T | null {
-  if (!course) return null;
+  if (!course) return null
 
   return {
     ...course,
@@ -27,47 +26,50 @@ export function transformCourse<T extends Record<string, any>>(
         : null,
     period:
       course.period && Array.isArray(course.period)
-        ? course.period.map((p: any) => Number(p))
+        ? course.period.map((p: unknown) => Number(p))
         : course.period,
     block:
       course.block && Array.isArray(course.block)
-        ? course.block.map((b: any) => Number(b))
+        ? course.block.map((b: unknown) => Number(b))
         : course.block,
     semester:
       course.semester !== undefined
         ? Array.isArray(course.semester)
-          ? course.semester.map((s: any) => Number(s))
+          ? course.semester.map((s: unknown) => Number(s))
           : typeof course.semester === 'object'
-          ? Number(course.semester)
-          : course.semester
+            ? Number(course.semester)
+            : course.semester
         : undefined,
-  } as T;
+  } as T
 }
 
 /**
  * Transform an array of courses
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformCourses<T extends Record<string, any>>(
-  courses: T[]
+  courses: T[],
 ): T[] {
-  return courses.map((course) => transformCourse(course) as T);
+  return courses.map((course) => transformCourse(course) as T)
 }
 
 /**
  * Transform enrollment data with courses
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformEnrollmentWithCourse(enrollment: any): any {
-  if (!enrollment) return null;
+  if (!enrollment) return null
 
   return {
     ...enrollment,
     course: transformCourse(enrollment.course),
-  };
+  }
 }
 
 /**
  * Transform enrollments with courses
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformEnrollmentsWithCourses(enrollments: any[]): any[] {
-  return enrollments.map(transformEnrollmentWithCourse);
+  return enrollments.map(transformEnrollmentWithCourse)
 }

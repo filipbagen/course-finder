@@ -1,38 +1,36 @@
-import { createClient } from '@/lib/supabase/server';
-import { prisma } from '@/lib/prisma';
-import { redirect, notFound } from 'next/navigation';
-import { UserProfileComponent } from '@/features/students/components/UserProfileComponent';
-import { Separator } from '@/components/ui/separator';
-import { User, GraduationCap, Plus } from 'lucide-react';
-import { course as Course, enrollment, review } from '@prisma/client';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { transformCourse } from '@/lib/transformers';
+import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
+import { redirect, notFound } from 'next/navigation'
+import { UserProfileComponent } from '@/features/students/components/UserProfileComponent'
+import { GraduationCap } from 'lucide-react'
+import { course as Course, enrollment, review } from '@prisma/client'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { transformCourse } from '@/lib/transformers'
 
 // Define an explicit type for the user profile
 interface UserProfileWithDetails {
-  id: string;
-  name: string;
-  email: string;
-  colorScheme: string;
-  isPublic: boolean;
-  program: string | null;
-  image: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  name: string
+  email: string
+  colorScheme: string
+  isPublic: boolean
+  program: string | null
+  image: string | null
+  createdAt: Date
+  updatedAt: Date
   _count: {
-    enrollment: number;
-    review: number;
-  };
-  totalCredits: number;
-  coursesBySemester: Record<number, Course[]>;
-  enrollments: (enrollment & { course: Course })[];
-  reviews: (review & { course: { id: string; name: string; code: string } })[];
+    enrollment: number
+    review: number
+  }
+  totalCredits: number
+  coursesBySemester: Record<number, Course[]>
+  enrollments: (enrollment & { course: Course })[]
+  reviews: (review & { course: { id: string; name: string; code: string } })[]
 }
 
 async function getUserProfile(
-  userId: string
+  userId: string,
 ): Promise<UserProfileWithDetails | null> {
   try {
     // First fetch the user with basic data
@@ -49,9 +47,9 @@ async function getUserProfile(
           },
         },
       },
-    });
+    })
 
-    if (!user) return null;
+    if (!user) return null
 
     // Fetch enrollments with course data
     const enrollments = await prisma.enrollment.findMany({
@@ -61,26 +59,26 @@ async function getUserProfile(
       orderBy: {
         semester: 'asc',
       },
-    });
+    })
 
     // Fetch courses for enrollments
-    const courseIds = enrollments.map((e) => e.courseId);
+    const courseIds = enrollments.map((e) => e.courseId)
     const courses = await prisma.course.findMany({
       where: {
         id: {
           in: courseIds,
         },
       },
-    });
+    })
 
     // Combine enrollments with course data
     const enrollmentsWithCourses = enrollments.map((enrollment) => {
-      const course = courses.find((c) => c.id === enrollment.courseId);
+      const course = courses.find((c) => c.id === enrollment.courseId)
       return {
         ...enrollment,
         course: transformCourse(course || null) as Course,
-      };
-    });
+      }
+    })
 
     // Fetch reviews with course data
     const reviews = await prisma.review.findMany({
@@ -91,10 +89,10 @@ async function getUserProfile(
         createdAt: 'desc',
       },
       take: 10,
-    });
+    })
 
     // Fetch courses for reviews
-    const reviewCourseIds = reviews.map((r) => r.courseId);
+    const reviewCourseIds = reviews.map((r) => r.courseId)
     const reviewCourses = await prisma.course.findMany({
       where: {
         id: {
@@ -106,38 +104,39 @@ async function getUserProfile(
         name: true,
         code: true,
       },
-    });
+    })
 
     // Combine reviews with course data
     const reviewsWithCourses = reviews.map((review) => {
-      const course = reviewCourses.find((c) => c.id === review.courseId);
+      const course = reviewCourses.find((c) => c.id === review.courseId)
       return {
         ...review,
         course: transformCourse(course || null) as {
-          id: string;
-          name: string;
-          code: string;
+          id: string
+          name: string
+          code: string
         },
-      };
-    });
+      }
+    })
 
     // Calculate total credits
     const totalCredits = enrollmentsWithCourses.reduce((sum, enrollment) => {
-      return sum + Number(enrollment.course.credits);
-    }, 0);
+      return sum + Number(enrollment.course.credits)
+    }, 0)
 
     // Group courses by semester
     const coursesBySemester = enrollmentsWithCourses.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (acc: Record<number, any[]>, enrollment) => {
-        const semester = enrollment.semester;
+        const semester = enrollment.semester
         if (!acc[semester]) {
-          acc[semester] = [];
+          acc[semester] = []
         }
-        acc[semester].push(enrollment.course);
-        return acc;
+        acc[semester].push(enrollment.course)
+        return acc
       },
-      {}
-    );
+      {},
+    )
 
     // Since we've updated our schema to make name required, we can safely assert it's non-null
     return {
@@ -151,45 +150,45 @@ async function getUserProfile(
         enrollment: enrollments.length,
         review: reviews.length,
       },
-    };
+    }
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return null;
+    console.error('Error fetching user profile:', error)
+    return null
   }
 }
 
 interface PageProps {
   params: Promise<{
-    id: string;
-  }>;
+    id: string
+  }>
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
-  const { id } = await params;
-  const supabase = await createClient();
+  const { id } = await params
+  const supabase = await createClient()
   const {
     data: { user: currentUser },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!currentUser) {
-    redirect('/login');
+    redirect('/login')
   }
 
   // Check if current user exists in database
   const dbUser = await prisma.user.findUnique({
     where: { id: currentUser.id },
-  });
+  })
 
   if (!dbUser) {
-    console.error('Current user not found in database, signing out');
-    await supabase.auth.signOut();
-    redirect('/');
+    console.error('Current user not found in database, signing out')
+    await supabase.auth.signOut()
+    redirect('/')
   }
 
-  const userProfile = await getUserProfile(id);
+  const userProfile = await getUserProfile(id)
 
   if (!userProfile) {
-    notFound();
+    notFound()
   }
 
   return (
@@ -208,7 +207,7 @@ export default async function UserProfilePage({ params }: PageProps) {
                     alt={userProfile.name || 'Anonymous User'}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xl font-semibold">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xl font-semibold text-white">
                     {userProfile.name
                       ? userProfile.name
                           .split(' ')
@@ -226,8 +225,8 @@ export default async function UserProfilePage({ params }: PageProps) {
                   {userProfile.name}s schema
                 </h1>
                 {userProfile.program && (
-                  <Badge className="bg-primary text-primary-foreground w-fit text-sm px-3 py-1 rounded-full font-medium shadow-sm">
-                    <GraduationCap className="h-4 w-4 mr-2" />
+                  <Badge className="w-fit rounded-full bg-primary px-3 py-1 text-sm font-medium text-primary-foreground shadow-sm">
+                    <GraduationCap className="mr-2 h-4 w-4" />
                     {userProfile.program}
                   </Badge>
                 )}
@@ -244,5 +243,5 @@ export default async function UserProfilePage({ params }: PageProps) {
         currentUserColorScheme={dbUser.colorScheme}
       />
     </div>
-  );
+  )
 }

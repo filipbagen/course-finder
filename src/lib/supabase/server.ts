@@ -1,9 +1,9 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export const createClient = async () => {
   // Need to use async/await pattern for compatibility with your Next.js version
-  const cookieStore = await cookies();
+  const cookieStore = await cookies()
 
   // Create the client with a compatible pattern
   return createServerClient(
@@ -15,19 +15,25 @@ export const createClient = async () => {
           return cookieStore.getAll().map((cookie) => ({
             name: cookie.name,
             value: cookie.value,
-          }));
+          }))
         },
-        setAll: async (cookies: { name: string; value: string; options?: Record<string, unknown> }[]) => {
+        setAll: async (
+          cookies: {
+            name: string
+            value: string
+            options?: Record<string, unknown>
+          }[],
+        ) => {
           try {
             cookies.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch (error) {
+              cookieStore.set(name, value, options)
+            })
+          } catch {
             // This error is expected in Server Components
             // The cookies will still be set client-side
           }
         },
       },
-    }
-  );
-};
+    },
+  )
+}

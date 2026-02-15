@@ -1,4 +1,4 @@
-import { CourseWithEnrollment } from '@/types/types';
+import { CourseWithEnrollment } from '@/types/types'
 
 /**
  * Schedule-specific types for the schedule page components
@@ -7,46 +7,46 @@ import { CourseWithEnrollment } from '@/types/types';
 export interface ScheduleCourse extends CourseWithEnrollment {
   // Extend with schedule-specific properties if needed
   reviewStats?: {
-    averageRating: number;
-    count: number;
-  };
+    averageRating: number
+    count: number
+  }
 }
 
 export interface SemesterData {
-  period1: CourseWithEnrollment[];
-  period2: CourseWithEnrollment[];
+  period1: CourseWithEnrollment[]
+  period2: CourseWithEnrollment[]
 }
 
 export interface ScheduleData {
-  semester7: SemesterData;
-  semester8: SemesterData;
-  semester9: SemesterData;
+  semester7: SemesterData
+  semester8: SemesterData
+  semester9: SemesterData
 }
 
 export interface ScheduleUpdate {
-  courseId: string;
-  semester: number;
-  period: number[];
+  courseId: string
+  semester: number
+  period: number[]
 }
 
 export interface MoveOperation {
-  courseId: string;
-  fromSemester: number;
-  fromPeriod: number[];
-  toSemester: number;
-  toPeriod: number[];
+  courseId: string
+  fromSemester: number
+  fromPeriod: number[]
+  toSemester: number
+  toPeriod: number[]
 }
 
 export interface RemoveOperation {
-  enrollmentId: string;
-  courseToRestore?: CourseWithEnrollment;
+  enrollmentId: string
+  courseToRestore?: CourseWithEnrollment
 }
 
 // Pending operation tracking
 export interface PendingOperation {
-  type: 'move' | 'remove';
-  id: string;
-  data: MoveOperation | RemoveOperation;
+  type: 'move' | 'remove'
+  id: string
+  data: MoveOperation | RemoveOperation
 }
 
 // Action types for the reducer
@@ -68,48 +68,49 @@ export enum ScheduleActions {
 }
 
 export interface ScheduleAction {
-  type: ScheduleActions;
-  payload?: any; // We'll keep this for backward compatibility
+  type: ScheduleActions
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload?: any // We'll keep this for backward compatibility
 }
 
 export interface DragState {
-  isDragging: boolean;
-  draggedCourse: CourseWithEnrollment | null;
+  isDragging: boolean
+  draggedCourse: CourseWithEnrollment | null
 }
 
 export interface ScheduleState {
-  schedule: ScheduleData;
-  loading: boolean;
-  error: string | null;
-  readonly: boolean;
-  isDragging: boolean;
-  draggedCourse: CourseWithEnrollment | null;
-  lastUpdated: Date | null;
-  lastAction: ScheduleAction | null;
-  pendingOperations: PendingOperation[];
+  schedule: ScheduleData
+  loading: boolean
+  error: string | null
+  readonly: boolean
+  isDragging: boolean
+  draggedCourse: CourseWithEnrollment | null
+  lastUpdated: Date | null
+  lastAction: ScheduleAction | null
+  pendingOperations: PendingOperation[]
 }
 
 export interface ScheduleContextType {
-  state: ScheduleState;
-  dispatch: React.Dispatch<ScheduleAction>;
-  refreshSchedule: () => Promise<void>;
+  state: ScheduleState
+  dispatch: React.Dispatch<ScheduleAction>
+  refreshSchedule: () => Promise<void>
 }
 
 export interface ScheduleGridProps {
-  readonly?: boolean;
-  showStatistics?: boolean;
+  readonly?: boolean
+  showStatistics?: boolean
 }
 
 export interface SemesterBlockProps {
-  semester: number;
-  period: number;
-  courses: ScheduleCourse[];
-  readonly?: boolean;
-  loading?: boolean;
+  semester: number
+  period: number
+  courses: ScheduleCourse[]
+  readonly?: boolean
+  loading?: boolean
 }
 
 export interface CourseCardScheduleProps {
-  course: ScheduleCourse;
-  readonly?: boolean;
-  onRemove?: (enrollmentId: string) => void;
+  course: ScheduleCourse
+  readonly?: boolean
+  onRemove?: (enrollmentId: string) => void
 }

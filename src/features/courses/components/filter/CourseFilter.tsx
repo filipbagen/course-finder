@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from 'react'
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { FilterX } from 'lucide-react';
+} from '@/components/ui/accordion'
+import { FilterX } from 'lucide-react'
 
-import CheckboxItem from './CheckboxItem';
-import { accordionItems as staticAccordionItems } from './accordionItemsConfig';
-import { FilterState, FilterProps, TriState } from '@/types/types';
-import { useFields } from '@/features/courses/hooks/useFields';
-import { Skeleton } from '@/components/ui/skeleton';
+import CheckboxItem from './CheckboxItem'
+import { accordionItems as staticAccordionItems } from './accordionItemsConfig'
+import { FilterState, FilterProps, TriState } from '@/types/types'
+import { useFields } from '@/features/courses/hooks/useFields'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Advanced Course Filter Component
@@ -43,39 +43,39 @@ const CourseFilter: React.FC<FilterProps> = ({
   onFilterChange,
   currentFilters,
 }) => {
-  const { mainFieldOfStudy, loading: fieldsLoading } = useFields();
+  const { mainFieldOfStudy, loading: fieldsLoading } = useFields()
 
   const resetFilters = () => {
     // Reset array-based filters
-    (Object.keys(currentFilters) as Array<keyof FilterState>)
+    ;(Object.keys(currentFilters) as Array<keyof FilterState>)
       .filter((key) => key !== 'examinations')
       .forEach((filterType) => {
-        (currentFilters[filterType] as string[]).forEach((value) => {
-          onFilterChange(filterType, value, false);
-        });
-      });
+        ;(currentFilters[filterType] as string[]).forEach((value) => {
+          onFilterChange(filterType, value, false)
+        })
+      })
 
     // Reset examinations tri-state filter
     Object.keys(currentFilters.examinations).forEach((value) => {
-      onFilterChange('examinations', value, 'unchecked');
-    });
-  };
+      onFilterChange('examinations', value, 'unchecked')
+    })
+  }
 
   // Count total active filters, handling both array and object filter types
   const activeFilterCount = (
     Object.keys(currentFilters) as Array<keyof FilterState>
   ).reduce((total, key) => {
-    const filter = currentFilters[key];
+    const filter = currentFilters[key]
     if (key === 'examinations') {
       return (
         total +
         Object.values(filter as Record<string, TriState>).filter(
-          (state) => state !== 'unchecked'
+          (state) => state !== 'unchecked',
         ).length
-      );
+      )
     }
-    return total + (filter as string[]).length;
-  }, 0);
+    return total + (filter as string[]).length
+  }, 0)
 
   // Dynamically update the accordionItems with fetched fields
   const accordionItems = useMemo(() => {
@@ -85,26 +85,26 @@ const CourseFilter: React.FC<FilterProps> = ({
           ...item,
           options:
             mainFieldOfStudy.length > 0 ? mainFieldOfStudy : item.options,
-        };
+        }
       }
-      return item;
-    });
-  }, [mainFieldOfStudy]);
+      return item
+    })
+  }, [mainFieldOfStudy])
 
   return (
     <Card
       className={`${
         screen === 'desktop'
-          ? 'sticky top-6 overflow-y-auto h-fit max-h-[calc(100vh-48px)]'
+          ? 'sticky top-6 h-fit max-h-[calc(100vh-48px)] overflow-y-auto'
           : 'w-full'
-      } border border-border m-0`}
+      } m-0 border border-border`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Filter</CardTitle>
           {activeFilterCount > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
+              <span className="rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">
                 {activeFilterCount}
               </span>
             </div>
@@ -119,16 +119,16 @@ const CourseFilter: React.FC<FilterProps> = ({
           className="w-full"
         >
           {accordionItems.map((item) => {
-            const isTriState = item.filterType === 'examinations';
+            const isTriState = item.filterType === 'examinations'
             const isAnyOptionChecked = isTriState
               ? Object.values(currentFilters.examinations).some(
-                  (state) => state !== 'unchecked'
+                  (state) => state !== 'unchecked',
                 )
               : (
                   currentFilters[
                     item.filterType as keyof FilterState
                   ] as string[]
-                ).length > 0;
+                ).length > 0
 
             return (
               <AccordionItem
@@ -136,7 +136,7 @@ const CourseFilter: React.FC<FilterProps> = ({
                 key={item.value}
                 className="border-b border-border last:border-b-0"
               >
-                <AccordionTrigger className="hover:no-underline py-3">
+                <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-3 text-left">
                     {item.icon && (
                       <span
@@ -157,7 +157,7 @@ const CourseFilter: React.FC<FilterProps> = ({
                       {item.title}
                     </span>
                     {isAnyOptionChecked && (
-                      <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                      <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                     )}
                   </div>
                 </AccordionTrigger>
@@ -174,21 +174,21 @@ const CourseFilter: React.FC<FilterProps> = ({
                         ))
                       : // Render options when available
                         item.options.map((option) => {
-                          const optionString = option.toString();
-                          const displayValue = item.displayValue(optionString);
+                          const optionString = option.toString()
+                          const displayValue = item.displayValue(optionString)
 
-                          let state: TriState = 'unchecked';
+                          let state: TriState = 'unchecked'
                           if (isTriState) {
                             state =
                               currentFilters.examinations[optionString] ||
-                              'unchecked';
+                              'unchecked'
                           } else {
                             const currentValues = currentFilters[
                               item.filterType as keyof FilterState
-                            ] as string[];
+                            ] as string[]
                             state = currentValues.includes(optionString)
                               ? 'checked'
-                              : 'unchecked';
+                              : 'unchecked'
                           }
 
                           return (
@@ -201,18 +201,18 @@ const CourseFilter: React.FC<FilterProps> = ({
                                 onFilterChange(
                                   item.filterType as keyof FilterState,
                                   optionString,
-                                  newState as TriState
+                                  newState as TriState,
                                 )
                               }
                               state={state}
                               isTriState={isTriState}
                             />
-                          );
+                          )
                         })}
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            );
+            )
           })}
         </Accordion>
       </CardContent>
@@ -225,13 +225,13 @@ const CourseFilter: React.FC<FilterProps> = ({
             size="sm"
             className="w-full"
           >
-            <FilterX className="h-4 w-4 mr-2" />
+            <FilterX className="mr-2 h-4 w-4" />
             Rensa filter ({activeFilterCount})
           </Button>
         </CardFooter>
       )}
     </Card>
-  );
-};
+  )
+}
 
-export default CourseFilter;
+export default CourseFilter

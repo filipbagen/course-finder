@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
 /**
  * PrismaClientSingleton - Manages a global instance of PrismaClient
@@ -8,8 +8,8 @@ import { PrismaClient } from '@prisma/client';
  * the database connection limit.
  */
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+  prisma: PrismaClient | undefined
+}
 
 /**
  * Creates and configures a PrismaClient instance
@@ -17,36 +17,36 @@ const globalForPrisma = globalThis as unknown as {
  */
 const createPrismaClient = () => {
   console.log(
-    `Creating new PrismaClient instance (NODE_ENV: ${process.env.NODE_ENV})`
-  );
+    `Creating new PrismaClient instance (NODE_ENV: ${process.env.NODE_ENV})`,
+  )
 
   const client = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
     errorFormat: 'pretty',
-  });
+  })
 
   // Add connection management for Vercel
   if (process.env.NODE_ENV === 'production') {
     // Monitor connection events
-    console.log('Configuring PrismaClient for production environment');
+    console.log('Configuring PrismaClient for production environment')
   }
 
-  return client;
-};
+  return client
+}
 
 // Use singleton pattern for connection reuse
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 // Only set global prisma in non-test environments
 if (process.env.NODE_ENV !== 'test') {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prisma
 }
 
 /**
  * Simple memory cache for database operations
  * In a real production app, you'd use Redis or another distributed cache
  */
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>()
 
 /**
  * Clear cache entries by pattern (useful for invalidating related data)
@@ -54,14 +54,14 @@ const cache = new Map<string, { data: any; timestamp: number }>();
 export function clearCache(pattern?: string) {
   if (!pattern) {
     // Clear all cache
-    cache.clear();
-    return;
+    cache.clear()
+    return
   }
 
   // Clear cache entries that match the pattern
   for (const [key] of cache) {
     if (key.includes(pattern)) {
-      cache.delete(key);
+      cache.delete(key)
     }
   }
 }
@@ -70,7 +70,7 @@ export function clearCache(pattern?: string) {
  * Clear cache for a specific user (useful after schedule updates)
  */
 export function clearUserCache(userId: string) {
-  clearCache(`-${userId}`);
+  clearCache(`-${userId}`)
 }
 
 /**
@@ -79,35 +79,35 @@ export function clearUserCache(userId: string) {
 export async function withPrisma<T>(
   callback: (prisma: PrismaClient) => Promise<T>,
   options: {
-    useCache?: boolean;
-    cacheKey?: string;
-    cacheTtl?: number;
-  } = {}
+    useCache?: boolean
+    cacheKey?: string
+    cacheTtl?: number
+  } = {},
 ): Promise<T> {
-  const { useCache = false, cacheKey = '', cacheTtl = 60 } = options;
+  const { useCache = false, cacheKey = '', cacheTtl = 60 } = options
 
   // Check cache if enabled
   if (useCache && cacheKey && cache.has(cacheKey)) {
-    const cached = cache.get(cacheKey)!;
-    const isExpired = Date.now() - cached.timestamp > cacheTtl * 1000;
+    const cached = cache.get(cacheKey)!
+    const isExpired = Date.now() - cached.timestamp > cacheTtl * 1000
 
     if (!isExpired) {
-      return cached.data as T;
+      return cached.data as T
     }
   }
 
   try {
     // Execute the database operation
-    const result = await callback(prisma);
+    const result = await callback(prisma)
 
     // Store in cache if enabled
     if (useCache && cacheKey) {
-      cache.set(cacheKey, { data: result, timestamp: Date.now() });
+      cache.set(cacheKey, { data: result, timestamp: Date.now() })
     }
 
-    return result;
+    return result
   } catch (error) {
-    console.error('Database operation error:', error);
-    throw error;
+    console.error('Database operation error:', error)
+    throw error
   }
 }

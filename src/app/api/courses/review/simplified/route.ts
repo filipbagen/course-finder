@@ -1,46 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { ApiResponse } from '@/types/api';
-import { CreateReviewRequest } from '@/types/types';
-import { v4 as uuidv4 } from 'uuid';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/auth'
+import { ApiResponse } from '@/types/api'
+import { CreateReviewRequest } from '@/types/types'
+import { v4 as uuidv4 } from 'uuid'
+import { prisma } from '@/lib/prisma'
 
 // Force dynamic rendering to avoid static generation errors with cookies
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // POST /api/courses/review/simplified - Create or update a review with minimal operations
 export async function POST(request: NextRequest) {
   // Generate a request ID for tracking
-  const requestId = Math.random().toString(36).substring(2, 8);
-  console.log(`[${requestId}] Simplified review submission started`);
+  const requestId = Math.random().toString(36).substring(2, 8)
+  console.log(`[${requestId}] Simplified review submission started`)
 
   try {
     // Use a timeout promise to ensure we don't get stuck in auth
-    const authUserPromise = getAuthenticatedUser();
+    const authUserPromise = getAuthenticatedUser()
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Auth timeout')), 2000)
-    );
+      setTimeout(() => reject(new Error('Auth timeout')), 2000),
+    )
 
     const user = (await Promise.race([
       authUserPromise,
       timeoutPromise,
-    ])) as Awaited<typeof authUserPromise>;
-    const userId = user.id;
+    ])) as Awaited<typeof authUserPromise>
+    const userId = user.id
 
     console.log(
-      `[${requestId}] Auth successful, user: ${userId.substring(0, 6)}...`
-    );
+      `[${requestId}] Auth successful, user: ${userId.substring(0, 6)}...`,
+    )
 
     // Parse request with timeout protection
-    const bodyPromise = request.json();
+    const bodyPromise = request.json()
     const body: CreateReviewRequest = (await Promise.race([
       bodyPromise,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request parsing timeout')), 1000)
+        setTimeout(() => reject(new Error('Request parsing timeout')), 1000),
       ),
-    ])) as Awaited<typeof bodyPromise>;
+    ])) as Awaited<typeof bodyPromise>
 
-    const { rating, comment, courseId } = body;
+    const { rating, comment, courseId } = body
 
     if (!rating || !courseId) {
       return NextResponse.json(
@@ -49,12 +49,12 @@ export async function POST(request: NextRequest) {
           error: 'Rating and course ID are required',
           requestId,
         },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
     // Check if the rating is a valid number with up to one decimal place (0.5 increments)
-    const ratingValue = parseFloat(rating.toString());
+    const ratingValue = parseFloat(rating.toString())
     if (
       isNaN(ratingValue) ||
       ratingValue < 1 ||
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
           error: 'Rating must be between 1 and 5 with 0.5 increments',
           requestId,
         },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
     // Simplified direct database access - avoiding extra queries
@@ -80,11 +80,11 @@ export async function POST(request: NextRequest) {
           courseId,
         },
         select: { id: true },
-      });
+      })
 
       // Check enrollment in a separate optional query
       // Making this a "best effort" check to prevent timeouts
-      let isEnrolled = true;
+      let isEnrolled = true
       try {
         const enrollment = await prisma.enrollment.findFirst({
           where: {
@@ -92,13 +92,13 @@ export async function POST(request: NextRequest) {
             courseId,
           },
           select: { id: true },
-        });
-        isEnrolled = !!enrollment;
+        })
+        isEnrolled = !!enrollment
       } catch (err) {
         console.warn(
           `[${requestId}] Enrollment check failed, proceeding anyway:`,
-          err
-        );
+          err,
+        )
       }
 
       if (!isEnrolled) {
@@ -108,14 +108,14 @@ export async function POST(request: NextRequest) {
             error: 'You can only review courses you are enrolled in',
             requestId,
           },
-          { status: 403 }
-        );
+          { status: 403 },
+        )
       }
 
-      let result;
+      let _result
       if (existingReview) {
         // Update existing review - minimal fields
-        result = await prisma.review.update({
+        _result = await prisma.review.update({
           where: {
             id: existingReview.id,
           },
@@ -130,10 +130,10 @@ export async function POST(request: NextRequest) {
             createdAt: true,
             updatedAt: true,
           },
-        });
+        })
       } else {
         // Create new review - minimal fields
-        result = await prisma.review.create({
+        _result = await prisma.review.create({
           data: {
             id: uuidv4(),
             rating,
@@ -149,14 +149,14 @@ export async function POST(request: NextRequest) {
             createdAt: true,
             updatedAt: true,
           },
-        });
+        })
       }
 
       console.log(
         `[${requestId}] Review ${
           existingReview ? 'updated' : 'created'
-        } successfully`
-      );
+        } successfully`,
+      )
 
       // Simplified response - avoiding complex joins that might timeout
       const response: ApiResponse = {
@@ -165,26 +165,26 @@ export async function POST(request: NextRequest) {
           existingReview ? 'updated' : 'created'
         } successfully`,
         requestId,
-      };
+      }
 
       // Create response with caching headers for API consistency
-      const jsonResponse = NextResponse.json(response);
+      const jsonResponse = NextResponse.json(response)
       jsonResponse.headers.set(
         'Cache-Control',
-        'no-cache, no-store, must-revalidate'
-      );
-      jsonResponse.headers.set('Pragma', 'no-cache');
-      jsonResponse.headers.set('Expires', '0');
+        'no-cache, no-store, must-revalidate',
+      )
+      jsonResponse.headers.set('Pragma', 'no-cache')
+      jsonResponse.headers.set('Expires', '0')
 
-      return jsonResponse;
+      return jsonResponse
     } catch (dbError) {
-      console.error(`[${requestId}] Database operation failed:`, dbError);
-      throw new Error('Database operation failed');
+      console.error(`[${requestId}] Database operation failed:`, dbError)
+      throw new Error('Database operation failed')
     }
   } catch (error) {
-    console.error(`[${requestId}] Error creating review:`, error);
+    console.error(`[${requestId}] Error creating review:`, error)
     const errorMessage =
-      error instanceof Error ? error.message : 'Failed to create review';
+      error instanceof Error ? error.message : 'Failed to create review'
 
     return NextResponse.json(
       {
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         error: errorMessage,
         requestId,
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }

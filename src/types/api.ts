@@ -3,37 +3,37 @@
  * and response formatting across all endpoints
  */
 
-export interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-  message?: string;
-  success: boolean;
-  requestId?: string; // Add requestId for tracking
+export interface ApiResponse<T = unknown> {
+  data?: T
+  error?: string
+  message?: string
+  success: boolean
+  requestId?: string // Add requestId for tracking
 }
 
 export interface ApiError {
-  message: string;
-  code: string;
-  statusCode: number;
-  details?: any;
-  requestId?: string; // Add requestId for tracking
+  message: string
+  code: string
+  statusCode: number
+  details?: unknown
+  requestId?: string // Add requestId for tracking
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
+    page: number
+    limit: number
+    total: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
 }
 
 export interface InfiniteResponse<T> extends ApiResponse<T[]> {
-  nextCursor?: string | null;
-  hasNextPage: boolean;
-  totalCount?: number | null;
-  count: number;
+  nextCursor?: string | null
+  hasNextPage: boolean
+  totalCount?: number | null
+  count: number
 }
 
 // Common error codes
@@ -62,11 +62,11 @@ export enum HttpStatus {
 
 // Enrollment types
 export interface EnrollmentWithCourse {
-  id: string;
-  name: string;
-  courseId: string;
-  credits: number;
-  semester: number;
-  enrollmentId: string;
+  id: string
+  name: string
+  courseId: string
+  credits: number
+  semester: number
+  enrollmentId: string
   // Add other course properties as needed
 }
