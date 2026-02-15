@@ -40,7 +40,7 @@ function getCacheKey(params: Record<string, unknown>): string {
   return keyParts.join('|')
 }
 
-function getCachedResult(cacheKey: string): unknown | null {
+function getCachedResult<T>(cacheKey: string): T | null {
   const entry = searchCache.get(cacheKey)
   if (!entry) return null
 
@@ -49,7 +49,7 @@ function getCachedResult(cacheKey: string): unknown | null {
     return null
   }
 
-  return entry.data
+  return entry.data as T
 }
 
 function setCachedResult(
@@ -108,7 +108,7 @@ export async function GET(
     // Check cache for non-cursor requests to improve performance
     if (!cursor) {
       const cacheKey = getCacheKey(params)
-      const cachedResult = getCachedResult(cacheKey)
+      const cachedResult = getCachedResult<InfiniteResponse<Course>>(cacheKey)
       if (cachedResult) {
         // Add cache hit header for monitoring
         const response = NextResponse.json(cachedResult)
