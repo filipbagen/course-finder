@@ -1,21 +1,21 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { Metadata } from 'next';
+import { Metadata } from 'next'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Calendar, CheckCircle } from 'lucide-react';
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Sparkles, Calendar, CheckCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Vad är nytt | Course Finder',
   description:
     'Se de senaste uppdateringarna och förbättringarna i Course Finder',
-};
+}
 
 export default function UpdatesPage() {
   const updates = [
@@ -87,24 +87,27 @@ export default function UpdatesPage() {
         'Firebase-integration för datahantering',
       ],
     },
-  ];
+  ]
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'current':
         return (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/30">
             Aktuell version
           </Badge>
-        );
+        )
       default:
-        return <Badge variant="secondary">Tidigare</Badge>;
+        return <Badge variant="secondary">Tidigare</Badge>
     }
-  };
+  }
+
+  const latestUpdate = updates[0]
+  if (!latestUpdate) return null
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="grid gap-1">
@@ -116,30 +119,30 @@ export default function UpdatesPage() {
         </div>
 
         {/* Current Version Highlight */}
-        <Card className="mb-8 shadow-lg border-0 bg-card backdrop-blur-sm">
+        <Card className="mb-8 border-0 bg-card shadow-lg backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Sparkles className="h-6 w-6 text-green-500" />
                 <div>
                   <CardTitle className="text-xl">
-                    Version {updates[0].version}
+                    Version {latestUpdate.version}
                   </CardTitle>
-                  <CardDescription className="flex items-center gap-2 mt-1">
+                  <CardDescription className="mt-1 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {updates[0].date}
+                    {latestUpdate.date}
                   </CardDescription>
                 </div>
               </div>
-              {getStatusBadge(updates[0].status)}
+              {getStatusBadge(latestUpdate.status)}
             </div>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">{updates[0].description}</p>
+            <p className="mb-4">{latestUpdate.description}</p>
             <div className="grid gap-2 md:grid-cols-2">
-              {updates[0].features.map((feature, index) => (
+              {latestUpdate.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500" />
                   <span className="text-sm">{feature}</span>
                 </div>
               ))}
@@ -149,12 +152,12 @@ export default function UpdatesPage() {
 
         {/* Version History */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold mb-6">Versionshistorik</h2>
+          <h2 className="mb-6 text-2xl font-bold">Versionshistorik</h2>
 
           {updates.slice(1).map((update, index) => (
             <Card
               key={index}
-              className="shadow-lg border-0 bg-card backdrop-blur-sm"
+              className="border-0 bg-card shadow-lg backdrop-blur-sm"
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -164,7 +167,7 @@ export default function UpdatesPage() {
                       <CardTitle className="text-lg">
                         Version {update.version}
                       </CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
+                      <CardDescription className="mt-1 flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         {update.date}
                       </CardDescription>
@@ -178,7 +181,7 @@ export default function UpdatesPage() {
                 <div className="grid gap-2 md:grid-cols-2">
                   {update.features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -189,5 +192,5 @@ export default function UpdatesPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

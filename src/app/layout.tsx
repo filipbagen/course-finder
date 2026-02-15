@@ -1,22 +1,22 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from '@/components/shared/theme-provider';
-import { MaxWidthWrapper } from '@/components/shared/MaxWidthWrapper';
-import { Navbar } from '@/components/shared/Navbar';
-import Footer from '@/components/shared/Footer';
-import { SheetProvider } from '@/components/providers/sheet-provider';
-import { AuthProvider } from '@/components/providers/AuthProvider';
-import { Toaster } from '@/components/ui/sonner';
-import { prisma } from '@/lib/prisma';
-import { createClient } from '@/lib/supabase/server';
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { ThemeProvider } from '@/components/shared/theme-provider'
+import { MaxWidthWrapper } from '@/components/shared/MaxWidthWrapper'
+import { Navbar } from '@/components/shared/Navbar'
+import Footer from '@/components/shared/Footer'
+import { SheetProvider } from '@/components/providers/sheet-provider'
+import { AuthProvider } from '@/components/providers/AuthProvider'
+import { Toaster } from '@/components/ui/sonner'
+import { prisma } from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Course Finder - Hitta dina masterkurser',
   description: 'Hitta och recensera masterkurser vid Linköpings universitet',
-};
+}
 
 async function getData(userId: string) {
   if (userId) {
@@ -28,35 +28,35 @@ async function getData(userId: string) {
         select: {
           colorScheme: true,
         },
-      });
-      return data;
+      })
+      return data
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user data:', error)
       // If user data can't be fetched, return null (user might have been deleted)
-      return null;
+      return null
     }
   }
-  return null;
+  return null
 }
 
 async function getUser() {
   try {
-    const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    return data?.user;
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    return data?.user
   } catch (error) {
-    console.error('Error fetching user:', error);
-    return null;
+    console.error('Error fetching user:', error)
+    return null
   }
 }
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-  const user = await getUser();
-  const data = await getData(user?.id as string);
+  const user = await getUser()
+  const data = await getData(user?.id as string)
 
   return (
     <html suppressHydrationWarning lang="sv">
@@ -70,7 +70,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <MaxWidthWrapper className="min-h-screen flex flex-col">
+          <MaxWidthWrapper className="flex min-h-screen flex-col">
             <SheetProvider />
             <AuthProvider>
               <Navbar />
@@ -82,5 +82,5 @@ export default async function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

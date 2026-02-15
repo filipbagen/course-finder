@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { NextRequest, NextResponse } from 'next/server'
+import nodemailer from 'nodemailer'
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, description } = await request.json();
+    const { title, description } = await request.json()
 
     // Validate input
     if (!title || !description) {
       return NextResponse.json(
         { error: 'Title and description are required' },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
     // Create transporter
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-    });
+    })
 
     // Email content
     const mailOptions = {
@@ -37,17 +37,14 @@ export async function POST(request: NextRequest) {
         <hr>
         <p><small>Sent from Course Finder feature request form</small></p>
       `,
-    };
+    }
 
     // Send email
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions)
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error sending email:', error);
-    return NextResponse.json(
-      { error: 'Failed to send email' },
-      { status: 500 }
-    );
+    console.error('Error sending email:', error)
+    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
   }
 }

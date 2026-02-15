@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react'
 
 interface UseIntersectionObserverOptions {
-  threshold?: number;
-  rootMargin?: string;
-  enabled?: boolean;
+  threshold?: number
+  rootMargin?: string
+  enabled?: boolean
 }
 
 export function useIntersectionObserver({
@@ -11,40 +11,40 @@ export function useIntersectionObserver({
   rootMargin = '100px',
   enabled = true,
 }: UseIntersectionObserverOptions = {}) {
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const [element, setElement] = useState<Element | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const [isIntersecting, setIsIntersecting] = useState(false)
+  const [element, setElement] = useState<Element | null>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
-    if (!element || !enabled) return;
+    if (!element || !enabled) return
 
     // Clean up previous observer
     if (observerRef.current) {
-      observerRef.current.disconnect();
+      observerRef.current.disconnect()
     }
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
+        setIsIntersecting(entry?.isIntersecting ?? false)
       },
       {
         threshold,
         rootMargin,
-      }
-    );
+      },
+    )
 
-    observerRef.current.observe(element);
+    observerRef.current.observe(element)
 
     return () => {
       if (observerRef.current) {
-        observerRef.current.disconnect();
+        observerRef.current.disconnect()
       }
-    };
-  }, [element, threshold, rootMargin, enabled]);
+    }
+  }, [element, threshold, rootMargin, enabled])
 
   const ref = (node: Element | null) => {
-    setElement(node);
-  };
+    setElement(node)
+  }
 
-  return { ref, isIntersecting };
+  return { ref, isIntersecting }
 }

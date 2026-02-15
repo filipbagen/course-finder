@@ -1,14 +1,17 @@
 {
   "name": "course-finder",
+  "packageManager": "pnpm@10.28.0",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
+    "test": "pnpm exec vitest run",
     "lint": "next lint",
     "migrate-dev": "npx prisma migrate dev && npx tsx lib/seedTriggers.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -54,7 +57,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.364.0",
-    "next": "15.3.2",
+    "next": "15.3.8",
     "next-themes": "^0.3.0",
     "nodemailer": "^7.0.6",
     "postgres": "^3.4.6",
@@ -79,17 +82,30 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
+    "@eslint/eslintrc": "^3.3.3",
     "@types/node": "^20.12.4",
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
     "@types/react-stars": "^2.2.4",
     "@types/uuid": "^9.0.8",
+    "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
+    "eslint": "8.57.0",
     "eslint-config-next": "15.3.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "husky": "^9.1.7",
+    "jsdom": "^28.0.0",
     "postcss": "^8.4.38",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "overrides": {

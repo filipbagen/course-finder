@@ -1,12 +1,12 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
 
 // shadcn
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 
 // icons
 import {
@@ -16,44 +16,44 @@ import {
   LineChart,
   ArrowDownWideNarrow,
   Handshake,
-} from 'lucide-react';
+} from 'lucide-react'
 
 // components
-import { CourseCarousel } from '@/components/course/CourseCarousel';
+import { CourseCarousel } from '@/features/courses/components/CourseCarousel'
 
 export default async function Home() {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   // Use getUser() instead of getSession() for server components
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   // Check if authenticated user exists in database
-  let userExists = false;
+  let userExists = false
   if (user && !error) {
     try {
       const { data: userData } = await supabase
         .from('User')
         .select('id')
         .eq('id', user.id)
-        .single();
-      userExists = !!userData;
+        .single()
+      userExists = !!userData
     } catch {
       // If we can't fetch user data, assume user doesn't exist
-      userExists = false;
+      userExists = false
     }
   }
 
   // Redirect authenticated users to the courses page (only if they exist in database)
   if (user && !error && userExists) {
-    redirect('/courses');
+    redirect('/courses')
   }
 
   return (
-    <div className="pt-10 sm:pt-22 pb-10 sm:pb-20 flex flex-col items-center gap-8 justify-center text-center bg-background min-h-screen">
-      <div className="flex flex-col gap-4 items-center">
+    <div className="sm:pt-22 flex min-h-screen flex-col items-center justify-center gap-8 bg-background pb-10 pt-10 text-center sm:pb-20">
+      <div className="flex flex-col items-center gap-4">
         <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-border bg-card px-7 py-2 shadow-md backdrop-blur transition-all hover:border-border/50">
           <p className="text-sm font-semibold text-card-foreground">
             Skapa ett konto idag!
@@ -62,7 +62,7 @@ export default async function Home() {
 
         <h1 className="max-w-3xl text-4xl font-bold md:text-6xl lg:text-6xl">
           Hitta de bästa{' '}
-          <span className="bg-gradient-to-r from-blue-600 to-blue-400 inline-block text-transparent bg-clip-text">
+          <span className="inline-block bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
             masterkurserna
           </span>{' '}
           snabbt och enkelt!
@@ -75,7 +75,7 @@ export default async function Home() {
         </p>
 
         <Link href="/signup">
-          <Button className="bg-blue-600 text-white w-min">Skapa konto</Button>
+          <Button className="w-min bg-blue-600 text-white">Skapa konto</Button>
         </Link>
       </div>
 
@@ -91,10 +91,10 @@ export default async function Home() {
                 clipPath:
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
               }}
-              className="relative left-[calc(50%-11ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm-left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+              className="sm-left-[calc(50%-30rem)] relative left-[calc(50%-11ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[72.1875rem]"
             />
           </div>
-          <div className="mx-auto max-w-6xl px-6 lg:px-8 sm:mt-24">
+          <div className="mx-auto max-w-6xl px-6 sm:mt-24 lg:px-8">
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
@@ -102,14 +102,14 @@ export default async function Home() {
                   alt="product preview"
                   width={3033}
                   height={2031}
-                  className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
+                  className="hidden rounded-md bg-muted-foreground/10 p-2 shadow-2xl ring-1 ring-gray-900/10 dark:block sm:p-8 md:p-2"
                 />
                 <Image
                   src="/assets/dashboard-preview-light.png"
                   alt="product preview"
                   width={3033}
                   height={2031}
-                  className="rounded-md bg-background p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
+                  className="block rounded-md bg-background p-2 shadow-2xl ring-1 ring-gray-900/10 dark:hidden sm:p-8 md:p-2"
                 />
               </div>
             </div>
@@ -124,16 +124,16 @@ export default async function Home() {
                 clipPath:
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
               }}
-              className="relative left-[calc(50%-13ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm-left-[calc(50%-36rem)] sm:w-[72.1875rem]"
+              className="sm-left-[calc(50%-36rem)] relative left-[calc(50%-13ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[72.1875rem]"
             />
           </div>
         </div>
       </div>
 
       {/* Feature section */}
-      <div className="my-6 px-6 lg:my-24 lg:px-8 ">
+      <div className="my-6 px-6 lg:my-24 lg:px-8">
         <div className="mx-auto max-w-4xl sm:text-center">
-          <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
+          <h2 className="mt-10 text-4xl font-bold text-foreground sm:text-5xl">
             Välj masterkurser på några minuter
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -148,7 +148,7 @@ export default async function Home() {
       <CourseCarousel />
 
       {/* Steps */}
-      <ol className="my-6 lg:my-24 space-y-4 md:flex md:space-x-12 md:space-y-0">
+      <ol className="my-6 space-y-4 md:flex md:space-x-12 md:space-y-0 lg:my-24">
         <li className="md:flex-1">
           <div className="flex flex-col space-y-2 py-2 pl-4 md:pb-0 md:pl-0 md:pt-4">
             <span className="text-sm font-medium text-blue-600">Steg 1</span>
@@ -193,10 +193,10 @@ export default async function Home() {
                 clipPath:
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
               }}
-              className="relative left-[calc(50%-11ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm-left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+              className="sm-left-[calc(50%-30rem)] relative left-[calc(50%-11ren)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:w-[72.1875rem]"
             />
           </div>
-          <div className="mx-auto max-w-6xl px-6 lg:px-8 sm:mt-24">
+          <div className="mx-auto max-w-6xl px-6 sm:mt-24 lg:px-8">
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
@@ -204,14 +204,14 @@ export default async function Home() {
                   alt="Schedule view"
                   width={3033}
                   height={2031}
-                  className="rounded-md bg-muted-foreground/10 p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 hidden dark:block"
+                  className="hidden rounded-md bg-muted-foreground/10 p-2 shadow-2xl ring-1 ring-gray-900/10 dark:block sm:p-8 md:p-2"
                 />
                 <Image
                   src="/assets/schedule-light.png"
                   alt="Schedule view"
                   width={3033}
                   height={2031}
-                  className="rounded-md bg-white p-2 sm:p-8 md:p-2 shadow-2xl ring-1 ring-gray-900/10 block dark:hidden"
+                  className="block rounded-md bg-white p-2 shadow-2xl ring-1 ring-gray-900/10 dark:hidden sm:p-8 md:p-2"
                 />
               </div>
             </div>
@@ -232,8 +232,8 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="my-6 lg:my-24 flex flex-col gap-16 px-6 lg:px-8 mx-auto max-w-4xl">
-        <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
+      <div className="mx-auto my-6 flex max-w-4xl flex-col gap-16 px-6 lg:my-24 lg:px-8">
+        <h2 className="mt-10 text-4xl font-bold text-foreground sm:text-5xl">
           Funktioner
         </h2>
 
@@ -296,8 +296,8 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="my-8 lg:my-12 px-6 lg:px-8 mx-auto max-w-4xl">
-        <h2 className="mt-10 font-bold text-4xl text-foreground sm:text-5xl">
+      <div className="mx-auto my-8 max-w-4xl px-6 lg:my-12 lg:px-8">
+        <h2 className="mt-10 text-4xl font-bold text-foreground sm:text-5xl">
           Kom igång
         </h2>
 
@@ -310,5 +310,5 @@ export default async function Home() {
         </Link>
       </div>
     </div>
-  );
+  )
 }

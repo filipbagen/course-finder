@@ -1,46 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { transformCourse } from '@/lib/transformers';
-import { Course } from '@/types/types';
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { transformCourse } from '@/lib/transformers'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ courseId: string }> }
+  context: { params: Promise<{ courseId: string }> },
 ): Promise<NextResponse> {
-  const params = await context.params;
-  const courseId = params.courseId;
+  const params = await context.params
+  const courseId = params.courseId
 
   try {
     // Fetch the course with all its details
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       // No need to use include since examination is a Json[] field, not a relation
-    });
+    })
 
     if (!course) {
       return NextResponse.json(
         { success: false, error: 'Course not found' },
-        { status: 404 }
-      );
+        { status: 404 },
+      )
     }
 
     // Transform the data using the existing transformer function
-    const transformedCourse = transformCourse(course);
+    const transformedCourse = transformCourse(course)
 
     return NextResponse.json({
       success: true,
       data: transformedCourse,
-    });
+    })
   } catch (error) {
-    console.error('Error fetching course details:', error);
+    console.error('Error fetching course details:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to fetch course details',
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }

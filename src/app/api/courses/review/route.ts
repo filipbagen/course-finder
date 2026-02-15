@@ -1,46 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { ApiResponse } from '@/types/api';
-import { CreateReviewRequest } from '@/types/types';
-import { v4 as uuidv4 } from 'uuid';
-import { prisma, withPrisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/auth'
+import { ApiResponse } from '@/types/api'
+import { CreateReviewRequest } from '@/types/types'
+import { v4 as uuidv4 } from 'uuid'
+import { withPrisma } from '@/lib/prisma'
 
 // Force dynamic rendering to avoid static generation errors with cookies
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // POST /api/courses/review - Create or update a review
 export async function POST(request: NextRequest) {
   // Generate a request ID for tracking
-  const requestId = Math.random().toString(36).substring(2, 8);
-  console.log(`[${requestId}] Review submission started`);
+  const requestId = Math.random().toString(36).substring(2, 8)
+  console.log(`[${requestId}] Review submission started`)
 
   try {
     // Use a timeout promise to ensure we don't get stuck in auth
-    const authUserPromise = getAuthenticatedUser();
+    const authUserPromise = getAuthenticatedUser()
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Auth timeout')), 2000)
-    );
+      setTimeout(() => reject(new Error('Auth timeout')), 2000),
+    )
 
     const user = (await Promise.race([
       authUserPromise,
       timeoutPromise,
-    ])) as Awaited<typeof authUserPromise>;
-    const userId = user.id;
+    ])) as Awaited<typeof authUserPromise>
+    const userId = user.id
 
     console.log(
-      `[${requestId}] Auth successful, user: ${userId.substring(0, 6)}...`
-    );
+      `[${requestId}] Auth successful, user: ${userId.substring(0, 6)}...`,
+    )
 
     // Parse request with timeout protection
-    const bodyPromise = request.json();
+    const bodyPromise = request.json()
     const body: CreateReviewRequest = (await Promise.race([
       bodyPromise,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request parsing timeout')), 1000)
+        setTimeout(() => reject(new Error('Request parsing timeout')), 1000),
       ),
-    ])) as Awaited<typeof bodyPromise>;
+    ])) as Awaited<typeof bodyPromise>
 
-    const { rating, comment, courseId } = body;
+    const { rating, comment, courseId } = body
 
     if (!rating || !courseId) {
       return NextResponse.json(
@@ -49,12 +49,12 @@ export async function POST(request: NextRequest) {
           error: 'Rating and course ID are required',
           requestId,
         },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
     // Check if the rating is a valid number with up to one decimal place (0.5 increments)
-    const ratingValue = parseFloat(rating.toString());
+    const ratingValue = parseFloat(rating.toString())
     if (
       isNaN(ratingValue) ||
       ratingValue < 1 ||
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
           error: 'Rating must be between 1 and 5 with 0.5 increments',
           requestId,
         },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
     // Simplified database operations - using a dedicated transaction
@@ -83,13 +83,13 @@ export async function POST(request: NextRequest) {
               courseId,
             },
             select: { id: true }, // Only select what we need
-          });
+          })
 
           if (!enrollment) {
             return {
               error: 'You can only review courses you are enrolled in',
               status: 403,
-            };
+            }
           }
 
           // Check if user has already reviewed this course
@@ -101,9 +101,9 @@ export async function POST(request: NextRequest) {
               },
             },
             select: { id: true }, // Minimize data transfer
-          });
+          })
 
-          let reviewResult;
+          let reviewResult
 
           if (existingReview) {
             // Update existing review
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
                   },
                 },
               },
-            });
+            })
           } else {
             // Create new review
             reviewResult = await tx.review.create({
@@ -165,49 +165,49 @@ export async function POST(request: NextRequest) {
                   },
                 },
               },
-            });
+            })
           }
 
-          return { success: true, review: reviewResult };
+          return { success: true, review: reviewResult }
         },
         {
           // Transaction options - aggressive timeout to prevent function timeout
           timeout: 3000, // 3 seconds max for the entire transaction
-        }
-      );
-    }, {});
+        },
+      )
+    }, {})
 
     // Handle custom error returned from withPrisma
     if (result.error) {
-      console.log(`[${requestId}] Review submission error: ${result.error}`);
+      console.log(`[${requestId}] Review submission error: ${result.error}`)
       return NextResponse.json(
         {
           success: false,
           error: result.error,
           requestId,
         },
-        { status: result.status || 500 }
-      );
+        { status: result.status || 500 },
+      )
     }
 
     // At this point, result.success is true and result.review is guaranteed to exist
     if (!result.review) {
-      console.log(`[${requestId}] Review result missing review data`);
+      console.log(`[${requestId}] Review result missing review data`)
       return NextResponse.json(
         {
           success: false,
           error: 'Failed to create or update review',
           requestId,
         },
-        { status: 500 }
-      );
+        { status: 500 },
+      )
     }
 
     // Format review with User field for frontend compatibility
     const formattedReview = {
       ...result.review,
       User: result.review.user,
-    };
+    }
 
     const response: ApiResponse<{ review: typeof formattedReview }> = {
       success: true,
@@ -215,23 +215,23 @@ export async function POST(request: NextRequest) {
         review: formattedReview,
       },
       requestId,
-    };
+    }
 
     // Create response with caching headers for API consistency
-    const jsonResponse = NextResponse.json(response);
+    const jsonResponse = NextResponse.json(response)
     jsonResponse.headers.set(
       'Cache-Control',
-      'no-cache, no-store, must-revalidate'
-    );
-    jsonResponse.headers.set('Pragma', 'no-cache');
-    jsonResponse.headers.set('Expires', '0');
+      'no-cache, no-store, must-revalidate',
+    )
+    jsonResponse.headers.set('Pragma', 'no-cache')
+    jsonResponse.headers.set('Expires', '0')
 
-    console.log(`[${requestId}] Review submission successful`);
-    return jsonResponse;
+    console.log(`[${requestId}] Review submission successful`)
+    return jsonResponse
   } catch (error) {
-    console.error(`[${requestId}] Error creating review:`, error);
+    console.error(`[${requestId}] Error creating review:`, error)
     const errorMessage =
-      error instanceof Error ? error.message : 'Failed to create review';
+      error instanceof Error ? error.message : 'Failed to create review'
 
     return NextResponse.json(
       {
@@ -239,37 +239,35 @@ export async function POST(request: NextRequest) {
         error: errorMessage,
         requestId,
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }
 
 // DELETE /api/courses/review?reviewId=xxx - Delete a review (only allowed for the review owner)
 export async function DELETE(request: NextRequest) {
-  const requestId = Math.random().toString(36).substring(2, 8);
-  console.log(`[${requestId}] Review deletion request started`);
+  const requestId = Math.random().toString(36).substring(2, 8)
+  console.log(`[${requestId}] Review deletion request started`)
 
   try {
-    const user = await getAuthenticatedUser();
-    const userId = user.id;
+    const user = await getAuthenticatedUser()
+    const userId = user.id
 
-    const searchParams = request.nextUrl.searchParams;
-    const reviewId = searchParams.get('reviewId');
+    const searchParams = request.nextUrl.searchParams
+    const reviewId = searchParams.get('reviewId')
 
     if (!reviewId) {
-      console.log(`[${requestId}] Missing reviewId parameter`);
+      console.log(`[${requestId}] Missing reviewId parameter`)
       return NextResponse.json(
         {
           success: false,
           error: 'Review ID is required',
         },
-        { status: 400 }
-      );
+        { status: 400 },
+      )
     }
 
-    console.log(
-      `[${requestId}] Deleting review ${reviewId} for user ${userId}`
-    );
+    console.log(`[${requestId}] Deleting review ${reviewId} for user ${userId}`)
 
     // Use withPrisma with tighter timeout for review deletion
     const result = await withPrisma(async (prismaClient) => {
@@ -280,11 +278,11 @@ export async function DELETE(request: NextRequest) {
           userId,
         },
         select: { id: true }, // Only get the ID to verify existence
-      });
+      })
 
       if (!existingReview) {
-        console.log(`[${requestId}] Review not found or not owned by user`);
-        return { notFound: true };
+        console.log(`[${requestId}] Review not found or not owned by user`)
+        return { notFound: true }
       }
 
       // Delete the review - optimized query
@@ -292,11 +290,11 @@ export async function DELETE(request: NextRequest) {
         where: {
           id: reviewId,
         },
-      });
+      })
 
-      console.log(`[${requestId}] Review deleted successfully`);
-      return { success: true };
-    }, {});
+      console.log(`[${requestId}] Review deleted successfully`)
+      return { success: true }
+    }, {})
 
     if (result.notFound) {
       return NextResponse.json(
@@ -304,8 +302,8 @@ export async function DELETE(request: NextRequest) {
           success: false,
           error: 'Review not found or not owned by user',
         },
-        { status: 404 }
-      );
+        { status: 404 },
+      )
     }
 
     // Add no-cache headers
@@ -313,22 +311,17 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Review deleted successfully',
       requestId,
-    });
-    response.headers.set(
-      'Cache-Control',
-      'no-cache, no-store, must-revalidate'
-    );
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
+    })
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
 
-    console.log(
-      `[${requestId}] Review deletion request completed successfully`
-    );
-    return response;
+    console.log(`[${requestId}] Review deletion request completed successfully`)
+    return response
   } catch (error) {
-    console.error(`[${requestId}] Error deleting review:`, error);
+    console.error(`[${requestId}] Error deleting review:`, error)
     const errorMessage =
-      error instanceof Error ? error.message : 'Failed to delete review';
+      error instanceof Error ? error.message : 'Failed to delete review'
 
     return NextResponse.json(
       {
@@ -336,7 +329,7 @@ export async function DELETE(request: NextRequest) {
         error: errorMessage,
         requestId,
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }

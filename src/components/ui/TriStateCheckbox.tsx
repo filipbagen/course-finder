@@ -1,20 +1,19 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { Check, Minus } from 'lucide-react';
+import * as React from 'react'
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
+import { Check, Minus } from 'lucide-react'
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'
 
-export type CheckboxState = 'checked' | 'unchecked' | 'indeterminate';
+export type CheckboxState = 'checked' | 'unchecked' | 'indeterminate'
 
-interface TriStateCheckboxProps
-  extends Omit<
-    React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
-    'onCheckedChange' | 'checked'
-  > {
-  state: CheckboxState;
-  onStateChange?: (state: CheckboxState) => void;
+interface TriStateCheckboxProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
+  'onCheckedChange' | 'checked'
+> {
+  state: CheckboxState
+  onStateChange?: (state: CheckboxState) => void
 }
 
 const TriStateCheckbox = React.forwardRef<
@@ -22,20 +21,20 @@ const TriStateCheckbox = React.forwardRef<
   TriStateCheckboxProps
 >(({ className, state, onStateChange, ...props }, ref) => {
   const handleClick = () => {
-    if (!onStateChange) return;
+    if (!onStateChange) return
 
     switch (state) {
       case 'unchecked':
-        onStateChange('checked');
-        break;
+        onStateChange('checked')
+        break
       case 'checked':
-        onStateChange('indeterminate');
-        break;
+        onStateChange('indeterminate')
+        break
       case 'indeterminate':
-        onStateChange('unchecked');
-        break;
+        onStateChange('unchecked')
+        break
     }
-  };
+  }
 
   return (
     <CheckboxPrimitive.Root
@@ -50,7 +49,7 @@ const TriStateCheckbox = React.forwardRef<
           'data-[state=checked]:bg-destructive data-[state=checked]:text-white':
             state === 'indeterminate',
         },
-        className
+        className,
       )}
       {...props}
     >
@@ -61,9 +60,9 @@ const TriStateCheckbox = React.forwardRef<
         {state === 'indeterminate' && <Minus className="h-4 w-4 text-white" />}
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
-  );
-});
+  )
+})
 
-TriStateCheckbox.displayName = 'TriStateCheckbox';
+TriStateCheckbox.displayName = 'TriStateCheckbox'
 
-export { TriStateCheckbox };
+export { TriStateCheckbox }

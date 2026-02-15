@@ -1,20 +1,24 @@
-import React from 'react';
-import { Separator } from '@/components/ui/separator';
+import React from 'react'
+import { Separator } from '@/components/ui/separator'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full flex flex-col justify-center items-center py-8 mt-auto">
+    <footer className="mt-auto flex w-full flex-col items-center justify-center py-8">
       <Separator className="mb-4" />
-      <p className="text-slate-400 text-sm">
+      <p className="text-sm text-slate-400">
         Designad och utvecklad av{' '}
-        <a href="https://filipbagen.com" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://filipbagen.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <u>
             <b>mig</b>
           </u>
         </a>
       </p>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

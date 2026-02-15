@@ -1,27 +1,26 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { updateUserProfile } from './actions';
-import Avatar from '@/components/shared/avatar';
-import { programs } from '@/lib/programs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react'
+import { updateUserProfile } from './actions'
+import Avatar from '@/components/shared/avatar'
+import { programs } from '@/lib/programs'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
-import { Palette, Eye, EyeOff } from 'lucide-react';
+} from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card } from '@/components/ui/card'
+import { Palette, Eye, EyeOff } from 'lucide-react'
 
 interface OnboardingFormProps {
-  userId: string;
-  userEmail: string;
-  initialName?: string;
+  userId: string
+  userEmail: string
+  initialName?: string
 }
 
 const colorSchemes = [
@@ -32,15 +31,14 @@ const colorSchemes = [
   { value: 'theme-orange', label: 'Orange' },
   { value: 'theme-red', label: 'Röd' },
   { value: 'theme-rose', label: 'Rosa' },
-];
+]
 
 export default function OnboardingForm({
   userId,
-  userEmail,
   initialName = '',
 }: OnboardingFormProps) {
-  const [isPublic, setIsPublic] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [isPublic, setIsPublic] = useState(true)
+  const [avatarUrl, setAvatarUrl] = useState<string>('')
 
   return (
     <form action={updateUserProfile} className="space-y-6">
@@ -50,17 +48,17 @@ export default function OnboardingForm({
       {/* Profile Picture */}
       <div className="space-y-2">
         <Label>Profilbild</Label>
-        <Card className="p-4 border-border bg-card text-card-foreground">
+        <Card className="border-border bg-card p-4 text-card-foreground">
           <div className="flex flex-col items-center space-y-4">
             <Avatar
               uid={userId}
               url={avatarUrl}
               size={120}
               onUpload={(url) => {
-                setAvatarUrl(url);
+                setAvatarUrl(url)
               }}
             />
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-center text-sm text-muted-foreground">
               Ladda upp en profilbild så andra kan känna igen dig (valfritt)
             </p>
           </div>
@@ -129,11 +127,11 @@ export default function OnboardingForm({
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+        className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
         size="lg"
       >
         Slutför konfiguration
       </Button>
     </form>
-  );
+  )
 }

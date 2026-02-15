@@ -1,58 +1,58 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { prisma } from '@/lib/prisma';
-import { redirect } from 'next/navigation';
-import { UserSearchComponent } from '@/components/students/UserSearchComponent';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { Users } from 'lucide-react';
+import { Suspense } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
+import { UserSearchComponent } from '@/features/students/components/UserSearchComponent'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Import the type we need
 interface UserSearchResult {
-  id: string;
-  name: string;
-  email: string;
-  program: string | null;
-  image: string | null;
+  id: string
+  name: string
+  email: string
+  program: string | null
+  image: string | null
   _count: {
-    enrollment: number;
-    review: number;
-  };
+    enrollment: number
+    review: number
+  }
 }
 
-import { programs } from '@/lib/programs';
+import { programs } from '@/lib/programs'
 
 async function getUsers(
   searchQuery?: string,
   programFilter?: string,
-  sortBy?: string
+  sortBy?: string,
 ) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const whereConditions: any = {
       isPublic: true,
-    };
+    }
 
     // Add search filter
     if (searchQuery) {
       whereConditions.OR = [
         { name: { contains: searchQuery, mode: 'insensitive' } },
         { program: { contains: searchQuery, mode: 'insensitive' } },
-      ];
+      ]
     }
 
     // Add program filter
     if (programFilter && programFilter !== 'all') {
-      whereConditions.program = programFilter;
+      whereConditions.program = programFilter
     }
 
     // Determine sort order
-    let orderBy: any = { name: 'asc' }; // Default sort
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let orderBy: any = { name: 'asc' } // Default sort
     if (sortBy === 'reviews') {
-      orderBy = { Review: { _count: 'desc' } };
+      orderBy = { Review: { _count: 'desc' } }
     } else if (sortBy === 'enrollments') {
-      orderBy = { Enrollment: { _count: 'desc' } };
+      orderBy = { Enrollment: { _count: 'desc' } }
     }
 
     const users = await prisma.user.findMany({
@@ -72,7 +72,7 @@ async function getUsers(
       },
       orderBy,
       take: 50, // Limit results for performance
-    });
+    })
 
     // The schema has been updated to make name required, so we can safely assert the type
     return users.map((user) => ({
@@ -82,59 +82,59 @@ async function getUsers(
         enrollment: user._count.enrollment,
         review: user._count.review,
       },
-    })) as UserSearchResult[];
+    })) as UserSearchResult[]
   } catch (error) {
-    console.error('Error fetching users:', error);
-    return [];
+    console.error('Error fetching users:', error)
+    return []
   }
 }
 
 async function getAvailablePrograms() {
   // Return the static list of all available programs
-  return Promise.resolve(programs);
+  return Promise.resolve(programs)
 }
 
 export default async function StudentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; program?: string; sort?: string }>;
+  searchParams: Promise<{ search?: string; program?: string; sort?: string }>
 }) {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login');
+    redirect('/login')
   }
 
   // Check if user exists in database
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-  });
+  })
 
   if (!dbUser) {
-    console.error('User not found in database, signing out');
-    await supabase.auth.signOut();
-    redirect('/');
+    console.error('User not found in database, signing out')
+    await supabase.auth.signOut()
+    redirect('/')
   }
 
-  const params = await searchParams;
-  const initialQuery = params.search;
-  const initialProgramFilter = params.program;
-  const initialSortBy = params.sort;
+  const params = await searchParams
+  const initialQuery = params.search
+  const initialProgramFilter = params.program
+  const initialSortBy = params.sort
 
   // Get initial users for SSR (limited set)
   const initialUsers = await getUsers(
     initialQuery,
     initialProgramFilter,
-    initialSortBy
-  );
+    initialSortBy,
+  )
 
-  const availablePrograms = await getAvailablePrograms();
+  const availablePrograms = await getAvailablePrograms()
 
   return (
-    <div className="flex flex-col gap-8 mx-auto">
+    <div className="mx-auto flex flex-col gap-8">
       <div className="grid items-start gap-8">
         {/* Header */}
         <div className="flex items-center justify-between px-2">
@@ -154,7 +154,7 @@ export default async function StudentsPage({
           fallback={
             <div className="space-y-6">
               <Skeleton className="h-10 w-full" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-24 w-full rounded-lg" />
                 ))}
@@ -172,5 +172,5 @@ export default async function StudentsPage({
         </Suspense>
       </div>
     </div>
-  );
+  )
 }

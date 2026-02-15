@@ -1,15 +1,15 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // next
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 // components
-import { SubmitButton } from '../../../components/shared/SubmitButtons';
-import { DeleteImageButton } from '@/components/shared/DeleteImageButton';
-import { SettingsForm } from '@/app/(dashboard)/settings/SettingsForm';
-import { programs } from '@/lib/programs';
+import { SubmitButton } from '../../../components/shared/SubmitButtons'
+import { DeleteImageButton } from '@/components/shared/DeleteImageButton'
+import { SettingsForm } from '@/app/(dashboard)/settings/SettingsForm'
+import { programs } from '@/lib/programs'
 
 // shadcn
 import {
@@ -19,7 +19,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -28,15 +28,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertTriangle, Trash2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -45,25 +45,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog'
 
 // supabase
-import { createClient } from '@/lib/supabase/server';
-import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 
 // prisma
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma'
 
 const createAdminClient = async () => {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
     throw new Error(
-      'SUPABASE_SERVICE_ROLE_KEY is required for account deletion'
-    );
+      'SUPABASE_SERVICE_ROLE_KEY is required for account deletion',
+    )
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -71,23 +71,29 @@ const createAdminClient = async () => {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll();
+          return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: {
+            name: string
+            value: string
+            options?: Record<string, unknown>
+          }[],
+        ) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch (error) {
+              cookieStore.set(name, value, options)
+            })
+          } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
         },
       },
-    }
-  );
-};
+    },
+  )
+}
 
 function DeleteAccountDialog() {
   return (
@@ -114,7 +120,7 @@ function DeleteAccountDialog() {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <strong>Vad kommer att raderas:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1">
+              <ul className="mt-2 list-inside list-disc space-y-1">
                 <li>Din profil och personliga information</li>
                 <li>Alla dina kursregistreringar och schema</li>
                 <li>Alla dina kursrecensioner och betyg</li>
@@ -151,32 +157,32 @@ function DeleteAccountDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 async function deleteProfileImage(userId: string) {
-  'use server';
+  'use server'
 
-  const supabase = await createClient();
+  const supabase = await createClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!user || user.id !== userId) {
-    redirect('/login');
+    redirect('/login')
   }
 
   // Check if user still exists in database
   const userData = await prisma.user.findUnique({
     where: { id: userId },
-  });
+  })
 
   if (!userData) {
     console.error(
-      'User not found in database during profile image deletion, signing out'
-    );
-    await supabase.auth.signOut();
-    redirect('/');
+      'User not found in database during profile image deletion, signing out',
+    )
+    await supabase.auth.signOut()
+    redirect('/')
   }
 
   try {
@@ -184,7 +190,7 @@ async function deleteProfileImage(userId: string) {
     const userData = await prisma.user.findUnique({
       where: { id: userId },
       select: { image: true },
-    });
+    })
 
     if (userData?.image) {
       // Check if the image is from Supabase Storage (contains our storage URL pattern)
@@ -193,16 +199,18 @@ async function deleteProfileImage(userId: string) {
         userData.image.includes('avatars')
       ) {
         // Extract file path from the URL
-        const urlParts = userData.image.split('/');
-        const fileName = urlParts[urlParts.length - 1];
+        const urlParts = userData.image.split('/')
+        const fileName = urlParts[urlParts.length - 1]
 
         // Delete from Supabase Storage
-        const { error: deleteError } = await supabase.storage
-          .from('avatars')
-          .remove([fileName]);
+        if (fileName) {
+          const { error: deleteError } = await supabase.storage
+            .from('avatars')
+            .remove([fileName])
 
-        if (deleteError) {
-          console.error('Error deleting file from storage:', deleteError);
+          if (deleteError) {
+            console.error('Error deleting file from storage:', deleteError)
+          }
         }
       }
     }
@@ -211,67 +219,69 @@ async function deleteProfileImage(userId: string) {
     await prisma.user.update({
       where: { id: userId },
       data: { image: null },
-    });
+    })
 
-    revalidatePath('/settings');
+    revalidatePath('/settings')
   } catch (error) {
-    console.error('Error deleting profile image:', error);
-    throw error;
+    console.error('Error deleting profile image:', error)
+    throw error
   }
 }
 
 async function deleteAccount(formData: FormData) {
-  'use server';
+  'use server'
 
-  const confirmation = formData.get('confirmation') as string;
+  const confirmation = formData.get('confirmation') as string
 
   if (confirmation !== 'RADERA') {
-    throw new Error('Skriv RADERA för att bekräfta radering av konto');
+    throw new Error('Skriv RADERA för att bekräfta radering av konto')
   }
 
-  const supabase = await createClient();
+  const supabase = await createClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login');
+    redirect('/login')
   }
 
   try {
     // Delete user's enrollments
     await prisma.enrollment.deleteMany({
       where: { userId: user.id },
-    });
+    })
 
     // Delete user's reviews
     await prisma.review.deleteMany({
       where: { userId: user.id },
-    });
+    })
 
     // Delete user's profile image from storage if it exists
     const userData = await prisma.user.findUnique({
       where: { id: user.id },
       select: { image: true },
-    });
+    })
 
     if (userData?.image) {
       if (
         userData.image.includes('supabase') &&
         userData.image.includes('avatars')
       ) {
-        const urlParts = userData.image.split('/');
-        const fileName = urlParts[urlParts.length - 1];
+        const urlParts = userData.image.split('/')
+        const fileName = urlParts[urlParts.length - 1]
 
-        const { error: deleteError } = await supabase.storage
-          .from('avatars')
-          .remove([fileName]);
+        if (fileName) {
+          const { error: deleteError } = await supabase.storage
+            .from('avatars')
+            .remove([fileName])
 
-        if (deleteError) {
-          console.error(
-            'Error deleting profile image from storage:',
-            deleteError
-          );
+          if (deleteError) {
+            console.error(
+              'Error deleting profile image from storage:',
+              deleteError,
+            )
+          }
         }
       }
     }
@@ -279,39 +289,39 @@ async function deleteAccount(formData: FormData) {
     // Delete user from database
     await prisma.user.delete({
       where: { id: user.id },
-    });
+    })
 
     // Delete from Supabase Auth using admin client
-    const adminClient = await createAdminClient();
-    console.log('Attempting to delete user from Supabase Auth:', user.id);
+    const adminClient = await createAdminClient()
+    console.log('Attempting to delete user from Supabase Auth:', user.id)
 
     const { data, error: authError } = await adminClient.auth.admin.deleteUser(
       user.id,
-      false // shouldSoftDelete: false for complete deletion
-    );
+      false, // shouldSoftDelete: false for complete deletion
+    )
 
     if (authError) {
       console.error('Supabase Auth deletion failed:', {
         error: authError.message,
         status: authError.status,
         userId: user.id,
-      });
+      })
       throw new Error(
-        'Misslyckades att radera autentiseringskonto. Kontakta support.'
-      );
+        'Misslyckades att radera autentiseringskonto. Kontakta support.',
+      )
     }
 
-    console.log('✅ User completely deleted from Supabase Auth:', user.id);
-    console.log('Response data:', data);
+    console.log('✅ User completely deleted from Supabase Auth:', user.id)
+    console.log('Response data:', data)
 
     // Sign out the user BEFORE redirecting to ensure they're not authenticated
-    await supabase.auth.signOut();
+    await supabase.auth.signOut()
 
-    revalidatePath('/', 'layout');
-    redirect('/');
+    revalidatePath('/', 'layout')
+    redirect('/')
   } catch (error) {
-    console.error('Error deleting account:', error);
-    throw new Error('Misslyckades att radera konto. Försök igen.');
+    console.error('Error deleting account:', error)
+    throw new Error('Misslyckades att radera konto. Försök igen.')
   }
 }
 
@@ -328,135 +338,136 @@ async function getData(userId: string) {
       program: true,
       image: true,
     },
-  });
+  })
 
-  return data;
+  return data
 }
 
 export default async function SettingPage() {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   // Get authenticated user
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   // Redirect if not authenticated
   if (!user || error) {
-    redirect('/login');
+    redirect('/login')
   }
 
   // Get user data from database
-  const data = await getData(user.id);
+  const data = await getData(user.id)
 
   // If user doesn't exist in database (e.g., account was deleted), sign out and redirect to home
   if (!data) {
     console.error(
       'Authenticated user not found in database, signing out:',
-      user.id
-    );
-    await supabase.auth.signOut();
-    redirect('/');
+      user.id,
+    )
+    await supabase.auth.signOut()
+    redirect('/')
   }
 
   // Create a bound function for deleting the profile image
   const handleDeleteImage = async () => {
-    'use server';
-    await deleteProfileImage(user.id);
-  };
+    'use server'
+    await deleteProfileImage(user.id)
+  }
 
   async function postData(formData: FormData) {
-    'use server';
+    'use server'
 
     // Re-verify auth in server action
-    const supabase = await createClient();
+    const supabase = await createClient()
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser()
 
     if (!user || error) {
-      redirect('/login');
+      redirect('/login')
     }
 
     // Check if user still exists in database
     const existingUser = await prisma.user.findUnique({
       where: { id: user.id },
-    });
+    })
 
     if (!existingUser) {
       console.error(
-        'User not found in database during settings update, signing out'
-      );
-      await supabase.auth.signOut();
-      redirect('/');
+        'User not found in database during settings update, signing out',
+      )
+      await supabase.auth.signOut()
+      redirect('/')
     }
 
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const colorScheme = formData.get('color') as string;
-    const isPublic = formData.get('isPublic');
-    const program = formData.get('program') as string;
-    const image = formData.get('image') as string;
-    const pictureFile = formData.get('picture') as File;
-    const currentPassword = formData.get('current_password') as string;
-    const newPassword = formData.get('new_password') as string;
-    const confirmPassword = formData.get('confirm_password') as string;
+    const name = formData.get('name') as string
+    const email = formData.get('email') as string
+    const colorScheme = formData.get('color') as string
+    const isPublic = formData.get('isPublic')
+    const program = formData.get('program') as string
+    const image = formData.get('image') as string
+    const pictureFile = formData.get('picture') as File
+    const currentPassword = formData.get('current_password') as string
+    const newPassword = formData.get('new_password') as string
+    const confirmPassword = formData.get('confirm_password') as string
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
       name: name || undefined,
       email: email || undefined,
       colorScheme: colorScheme || undefined,
       program: program || undefined,
-    };
+    }
 
     // Handle image upload or URL
     if (pictureFile && pictureFile.size > 0) {
       try {
         // Check file size (5MB limit)
         if (pictureFile.size > 5 * 1024 * 1024) {
-          console.error('File too large. Maximum size is 5MB.');
-          throw new Error('Filen är för stor');
+          console.error('File too large. Maximum size is 5MB.')
+          throw new Error('Filen är för stor')
         }
 
-        const fileExt = pictureFile.name.split('.').pop();
-        const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+        const fileExt = pictureFile.name.split('.').pop()
+        const filePath = `${user.id}-${Date.now()}.${fileExt}`
 
-        console.log('Uploading file to Supabase Storage...', filePath);
+        console.log('Uploading file to Supabase Storage...', filePath)
 
         const { error: uploadError } = await supabase.storage
           .from('avatars')
-          .upload(filePath, pictureFile);
+          .upload(filePath, pictureFile)
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+          console.error('Upload error:', uploadError)
           // If bucket doesn't exist, try to create it
           if (uploadError.message.includes('not found')) {
-            console.log('Bucket not found, trying to create...');
+            console.log('Bucket not found, trying to create...')
             const { error: bucketError } = await supabase.storage.createBucket(
               'avatars',
-              { public: true }
-            );
+              { public: true },
+            )
 
             if (bucketError) {
-              console.error('Could not create bucket:', bucketError);
+              console.error('Could not create bucket:', bucketError)
             } else {
               // Retry upload after creating bucket
               const { error: retryError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, pictureFile);
+                .upload(filePath, pictureFile)
 
               if (!retryError) {
                 const { data } = supabase.storage
                   .from('avatars')
-                  .getPublicUrl(filePath);
+                  .getPublicUrl(filePath)
 
-                updateData.image = data.publicUrl;
+                updateData.image = data.publicUrl
                 console.log(
                   'File uploaded successfully after creating bucket:',
-                  data.publicUrl
-                );
+                  data.publicUrl,
+                )
               }
             }
           }
@@ -464,56 +475,56 @@ export default async function SettingPage() {
           // Get the public URL for the uploaded file
           const { data } = supabase.storage
             .from('avatars')
-            .getPublicUrl(filePath);
+            .getPublicUrl(filePath)
 
-          updateData.image = data.publicUrl;
-          console.log('File uploaded successfully:', data.publicUrl);
+          updateData.image = data.publicUrl
+          console.log('File uploaded successfully:', data.publicUrl)
         }
       } catch (error) {
-        console.error('File upload failed:', error);
+        console.error('File upload failed:', error)
       }
     } else if (image) {
-      updateData.image = image;
+      updateData.image = image
     }
 
     // Only update isPublic if the switch was interacted with
     if (isPublic !== null) {
-      updateData.isPublic = isPublic === 'on';
+      updateData.isPublic = isPublic === 'on'
     }
 
     // Handle password change
     if (newPassword && newPassword.trim()) {
       // Validate password fields
       if (!currentPassword || !currentPassword.trim()) {
-        throw new Error('Nuvarande lösenord krävs för att ändra lösenord');
+        throw new Error('Nuvarande lösenord krävs för att ändra lösenord')
       }
 
       if (newPassword !== confirmPassword) {
-        throw new Error('Nya lösenorden matchar inte');
+        throw new Error('Nya lösenorden matchar inte')
       }
 
       if (newPassword.length < 6) {
-        throw new Error('Nytt lösenord måste vara minst 6 tecken långt');
+        throw new Error('Nytt lösenord måste vara minst 6 tecken långt')
       }
 
       // First verify the current password by trying to sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email!,
         password: currentPassword,
-      });
+      })
 
       if (signInError) {
-        throw new Error('Nuvarande lösenord är felaktigt');
+        throw new Error('Nuvarande lösenord är felaktigt')
       }
 
       // Update the password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
-      });
+      })
 
       if (updateError) {
-        console.error('Password update error:', updateError);
-        throw new Error('Kunde inte uppdatera lösenord');
+        console.error('Password update error:', updateError)
+        throw new Error('Kunde inte uppdatera lösenord')
       }
     }
 
@@ -522,10 +533,10 @@ export default async function SettingPage() {
         id: user.id,
       },
       data: updateData,
-    });
+    })
 
-    revalidatePath('/', 'layout');
-    revalidatePath('/settings');
+    revalidatePath('/', 'layout')
+    revalidatePath('/settings')
   }
 
   const getInitials = (name: string) => {
@@ -534,11 +545,11 @@ export default async function SettingPage() {
       .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
   return (
-    <div className="flex flex-col gap-8 mx-auto">
+    <div className="mx-auto flex flex-col gap-8">
       <div className="grid items-start gap-8">
         <div className="flex items-center justify-between px-2">
           <div className="grid gap-1">
@@ -569,7 +580,7 @@ export default async function SettingPage() {
                     {data.name ? getInitials(data.name) : 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="space-y-4 flex-1">
+                <div className="flex-1 space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="picture">Profilbild</Label>
                     <div className="flex items-center gap-3">
@@ -592,7 +603,7 @@ export default async function SettingPage() {
               </div>
               <Separator />
               {/* Name and Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Namn</Label>
                   <Input
@@ -766,5 +777,5 @@ export default async function SettingPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

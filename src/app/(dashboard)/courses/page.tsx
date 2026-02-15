@@ -1,51 +1,50 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 // next
-import { Suspense } from 'react';
 
 // components
-import { CoursesPageClient } from '@/components/course/CoursesPageClient';
+import { CoursesPageClient } from '@/features/courses/components/CoursesPageClient'
 
 // auth
-import { getOptionalUser } from '@/lib/auth';
+import { getOptionalUser } from '@/lib/auth'
 
 export default async function CoursesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = await searchParams
 
   const search =
     typeof resolvedSearchParams.search === 'string'
       ? resolvedSearchParams.search
-      : undefined;
+      : undefined
   const campus =
     typeof resolvedSearchParams.campus === 'string'
       ? resolvedSearchParams.campus
-      : undefined;
+      : undefined
   const field =
     typeof resolvedSearchParams.field === 'string'
       ? resolvedSearchParams.field
-      : undefined;
+      : undefined
   const semester =
     typeof resolvedSearchParams.semester === 'string'
       ? resolvedSearchParams.semester
-      : undefined;
+      : undefined
   const sortBy =
     typeof resolvedSearchParams.sortBy === 'string'
       ? resolvedSearchParams.sortBy
-      : undefined;
+      : undefined
   const sortOrder =
     typeof resolvedSearchParams.sortOrder === 'string'
       ? resolvedSearchParams.sortOrder
-      : undefined;
+      : undefined
 
-  const user = await getOptionalUser();
-  const isAuthenticated = !!user;
+  const user = await getOptionalUser()
+  const isAuthenticated = !!user
 
   return (
-    <div className="flex flex-col gap-8 mx-auto">
+    <div className="mx-auto flex flex-col gap-8">
       <div className="grid items-start gap-8">
         {/* Header */}
         <div className="flex items-center justify-between px-2">
@@ -72,5 +71,5 @@ export default async function CoursesPage({
         />
       </div>
     </div>
-  );
+  )
 }

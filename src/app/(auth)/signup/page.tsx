@@ -1,41 +1,41 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { signUp } from '@/app/actions/auth';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { signUp } from '@/app/actions/auth'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, UserPlus } from 'lucide-react';
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle, CheckCircle, UserPlus } from 'lucide-react'
 
 interface SignupPageProps {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   // Await searchParams before using it
-  const params = await searchParams;
+  const params = await searchParams
 
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   // Check if user is already authenticated
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   // Redirect authenticated users to courses page
   if (user && !error) {
-    redirect('/courses');
+    redirect('/courses')
   }
 
   // Error messages mapping
@@ -48,18 +48,18 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
     unexpected_error: 'Ett oväntat fel inträffade. Försök igen.',
     email_already_exists:
       'Ett konto med denna e-postadress finns redan. Logga in istället.',
-  };
+  }
 
   const successMessages = {
     check_email:
       'Vänligen kontrollera din e-post och klicka på bekräftelselänken för att aktivera ditt konto.',
-  };
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border-border bg-card text-card-foreground shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
+          <CardTitle className="text-center text-2xl">
             Skapa ditt konto
           </CardTitle>
           <CardDescription className="text-center">
@@ -151,9 +151,9 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             <Button
               formAction={signUp}
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+              className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
             >
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus className="mr-2 h-4 w-4" />
               Skapa konto
             </Button>
           </form>
@@ -169,5 +169,5 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

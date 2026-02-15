@@ -19,4 +19,4 @@ export const programs = [
   'Teknisk fysik och elektroteknik',
   'Teknisk fysik och elektroteknik - internationell',
   'Teknisk matematik',
-];
+]

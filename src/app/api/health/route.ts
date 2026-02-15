@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/health
@@ -17,6 +17,6 @@ export async function GET() {
       headers: {
         'Cache-Control': 'no-store, max-age=0',
       },
-    }
-  );
+    },
+  )
 }

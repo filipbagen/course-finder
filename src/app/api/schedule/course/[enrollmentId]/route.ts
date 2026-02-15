@@ -1,28 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withPrisma, clearUserCache } from '@/lib/prisma';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { NextRequest } from 'next/server'
+import { withPrisma, clearUserCache } from '@/lib/prisma'
+import { getAuthenticatedUser } from '@/lib/auth'
 import {
   createSuccessResponse,
   badRequest,
   notFound,
   internalServerError,
-} from '@/lib/errors';
-import type { ApiResponse } from '@/types/api';
+} from '@/lib/errors'
 
 // Force dynamic rendering to avoid static generation errors with cookies
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ enrollmentId: string }> }
+  { params }: { params: Promise<{ enrollmentId: string }> },
 ) {
   try {
     // In Next.js 15, params is now a Promise that needs to be awaited
-    const { enrollmentId } = await params;
-    const user = await getAuthenticatedUser();
+    const { enrollmentId } = await params
+    const user = await getAuthenticatedUser()
 
     if (!enrollmentId) {
-      return badRequest('Enrollment ID is required');
+      return badRequest('Enrollment ID is required')
     }
 
     // Use withPrisma wrapper for better database connection handling
@@ -34,13 +33,13 @@ export async function DELETE(
           userId: user.id,
         },
         select: { id: true },
-      });
+      })
 
       if (!enrollmentExists) {
         return {
           notFound: true,
           message: 'Enrollment not found or access denied',
-        };
+        }
       }
 
       // Delete the enrollment
@@ -48,35 +47,32 @@ export async function DELETE(
         where: {
           id: enrollmentId,
         },
-      });
+      })
 
-      return { success: true };
-    });
+      return { success: true }
+    })
 
     if (result.notFound) {
-      return notFound(result.message);
+      return notFound(result.message)
     }
 
     // Clear any cached schedule data for this user to ensure fresh data on next fetch
-    clearUserCache(user.id);
+    clearUserCache(user.id)
 
     // Add cache control headers
     const response = createSuccessResponse({
       success: true,
-    });
+    })
 
-    response.headers.set(
-      'Cache-Control',
-      'no-cache, no-store, must-revalidate'
-    );
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
 
-    return response;
+    return response
   } catch (error) {
-    console.error('Error removing course from schedule:', error);
+    console.error('Error removing course from schedule:', error)
     return internalServerError(
-      `Failed to remove course from schedule. Please try again.`
-    );
+      `Failed to remove course from schedule. Please try again.`,
+    )
   }
 }
