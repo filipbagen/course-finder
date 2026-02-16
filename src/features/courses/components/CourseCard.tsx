@@ -127,7 +127,7 @@ const CourseCard = ({
       const averageRating =
         ratings.length > 0
           ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
-          ratings.length
+            ratings.length
           : 0
       return {
         averageRating,
