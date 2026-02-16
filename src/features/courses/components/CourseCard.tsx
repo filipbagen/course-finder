@@ -41,8 +41,7 @@ interface CourseCardProps {
   variant?: 'default' | 'schedule' | 'landing'
   isAuthenticated?: boolean
   isDragging?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dragHandleProps?: any
+  dragHandleProps?: Record<string, unknown>
   onRemove?: (enrollmentId: string) => void
   className?: string
 }
