@@ -151,27 +151,34 @@ export function SemesterBlock({
 }
 
 /**
- * Check if a course can be dropped in a specific semester/period
- * Simplified logic to improve reliability
+ * Check if a course can be dropped in a specific semester/period.
+ *
+ * Rules:
+ * - Semester 8 courses cannot be moved at all.
+ * - Semester 7/9 courses can move between 7 and 9 only.
+ * - The target period must be one the course actually runs in
+ *   (e.g. a period-1 course cannot land in a period-2 zone).
  */
 function isValidDropTarget(
   course: CourseWithEnrollment,
   targetSemester: number,
-  _targetPeriod: number,
+  targetPeriod: number,
 ): boolean {
-  // Rule 1: Courses in semesters 7 and 9 can be moved between each other
-  // Courses in semester 8 can only be moved within semester 8
   const currentSemester = course.enrollment.semester
 
-  if (currentSemester === 8) {
-    // Semester 8 courses can only stay in semester 8
-    return targetSemester === 8
-  } else if (currentSemester === 7 || currentSemester === 9) {
-    // Semester 7 and 9 courses can move between semesters 7 and 9
-    return targetSemester === 7 || targetSemester === 9
+  // Semester 8 courses have no valid drop targets
+  if (currentSemester === 8) return false
+
+  // Semester 7/9 courses can only move between 7 and 9
+  if (currentSemester === 7 || currentSemester === 9) {
+    if (targetSemester !== 7 && targetSemester !== 9) return false
   }
 
-  return false
+  // Period must match one of the course's intrinsic periods
+  const coursePeriods = Array.isArray(course.period) ? course.period : []
+  if (!coursePeriods.includes(targetPeriod)) return false
+
+  return true
 }
 
 /**

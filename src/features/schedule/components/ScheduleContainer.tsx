@@ -93,25 +93,33 @@ export function ScheduleContainer({
   }
 
   /**
-   * Validate if a course can be moved to a specific semester and period
-   * Simplified logic to improve reliability
+   * Validate if a course can be moved to a specific semester and period.
+   *
+   * Rules:
+   * - Semester 8 courses cannot be moved at all.
+   * - Semester 7/9 courses can move between 7 and 9 only.
+   * - The target period must be one the course actually runs in.
    */
   const isValidMove = (
     course: CourseWithEnrollment,
     targetSemester: number,
-    _targetPeriod: number,
+    targetPeriod: number,
   ): boolean => {
     const currentSemester = course.enrollment.semester
 
-    if (currentSemester === 8) {
-      // Semester 8 courses can only stay in semester 8
-      return targetSemester === 8
-    } else if (currentSemester === 7 || currentSemester === 9) {
-      // Semester 7 and 9 courses can move between semesters 7 and 9
-      return targetSemester === 7 || targetSemester === 9
+    // Semester 8 courses have no valid drop targets
+    if (currentSemester === 8) return false
+
+    // Semester 7/9 courses can only move between 7 and 9
+    if (currentSemester === 7 || currentSemester === 9) {
+      if (targetSemester !== 7 && targetSemester !== 9) return false
     }
 
-    return false
+    // Period must match one of the course's intrinsic periods
+    const coursePeriods = Array.isArray(course.period) ? course.period : []
+    if (!coursePeriods.includes(targetPeriod)) return false
+
+    return true
   }
 
   /**
